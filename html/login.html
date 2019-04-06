@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  </head>
+  <body>
+    <form action="/login_submit" method="post">
+      <label for="username"><b>Username</b></label>
+      <input type="text" placeholder="Username" name="username" required>
+      <br/>
+      <label for="password"><b>Password</b></label>
+      <input type="password" placeholder="Password" name="password" required>
+      <br/>
+      {% if bad_login %}<b>Bad login.</b><br/>{% end %}
+      <button type="submit">Login</button>
+    </form>
+  </body>
+</html>
+
+
+
+
