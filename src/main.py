@@ -13,7 +13,7 @@ import tornado.web
 import admin
 import event
 import login
-
+import state
 
 
 class TestHandler(tornado.web.RequestHandler):
@@ -22,33 +22,48 @@ class TestHandler(tornado.web.RequestHandler):
     self.write("<html><body>hello, world</body></html>")
 
 
-def make_app(**kwargs):
+def make_app(admin_user_db, **kwargs):
   return tornado.web.Application([
     (r"/", event.Home),
-    (r"/admin", admin.AdminHome),
     (r"/testz", TestHandler),
-  ] + login.HANDLERS, **kwargs)
+  ] + login.GetHandlers(admin_user_db) + admin.GetHandlers(admin_user_db), **kwargs)
 
 
 def main():
   template_path = None
   cookie_secret = "1234"
+  root_password = None
 
   opts, args = getopt.getopt(sys.argv[1:],
-                             "t:c:",
+                             "t:c:r:",
                              ["template_path=",
-                              "cookie_secret="])
+                              "cookie_secret=",
+                              "root_password="])
   for o, a in opts:
     if o in ("-t", "--template_path"):
       template_path = a
     elif o in ("-c", "--cookie_secret"):
       cookie_secret = a
+    elif o in ("-r", "--root_password"):
+      root_password = a
     else:
       assert False, f"unhandled option {o}"
 
   assert template_path is not None, "Must specify --template_path."
 
-  app = make_app(template_path=template_path,
+  admin_user_db = login.AdminUserDB()
+
+  if root_password:
+    print("Enabling root user...")
+    admin_user_db.add_temp_user(
+      "root", admin_user_db.make_hash(root_password),
+      "Root User", [login.AdminRoles.CREATE_USERS])
+
+  admin_user_db.SAVER.open("admin.txt")
+  admin_user_db.SAVER.replay(admin_user_db)
+
+  app = make_app(admin_user_db,
+                 template_path=template_path,
                  cookie_secret=cookie_secret)
 
   server = tornado.httpserver.HTTPServer(app)

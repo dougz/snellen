@@ -1,37 +1,67 @@
 import base64
+import bcrypt
 import functools
 import os
 import time
 
 import tornado.web
 
+import state
+
+class AdminRoles:
+  CREATE_USERS = "create_users"
+
+
 class AdminUser:
-  BY_USERNAME = {}
-
-  def __init__(self, username, password, fullname, roles):
+  def __init__(self, username, password_hash, fullname, roles):
     self.username = username
-    self.password = password
+    self.password_hash = password_hash
     self.fullname = fullname
-    self.roles = set(roles)
+    self.roles = roles
 
-    self.BY_USERNAME[username] = self
+  def CheckPassword(self, password):
+    if bcrypt.checkpw(password.encode("utf-8"), self.password_hash):
+      return True
+    return False
+
+  def HasRole(self, role):
+    return role in self.roles
+
+saver = state.Saver()
+
+class AdminUserDB:
+  BY_USERNAME = {}
+  SAVER = saver
+
+  @saver
+  def add_user(self, now, username, password_hash, fullname, roles):
+    r = set(roles)
+    r.add("admin")
+    user = AdminUser(username, password_hash.encode("ascii"), fullname, r)
+    self.BY_USERNAME[username] = user
+    return user
+
+  def add_temp_user(self, username, password_hash, fullname, roles):
+    r = set(roles)
+    r.add("admin")
+    user = AdminUser(username, password_hash.encode("ascii"), fullname, r)
+    self.BY_USERNAME[username] = user
+    return user
+
+  @staticmethod
+  def make_hash(password):
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("ascii")
 
   @classmethod
   def GetUser(self, username):
     return self.BY_USERNAME.get(username)
 
-  def CheckPassword(self, password):
-    if self.password == password:
-      return True
-    return False
 
-
-AdminUser("root", "joshua", "He<b>ll</b>o", ["create_users"])
 
 
 class Session:
   BY_KEY = {}
-  SESSION_TIMEOUT = 5   # seconds
+  SESSION_TIMEOUT = 3600   # seconds
   COOKIE_NAME = "SESSION"
 
   def __init__(self, user=None, *caps):
@@ -80,7 +110,6 @@ class required:
         req.redirect("/login")
         return
       if self.cap not in session.capabilities:
-        print("bad cap")
         req.redirect("/no_access")
         return
       session.expires = now + session.SESSION_TIMEOUT
@@ -98,6 +127,9 @@ class Login(tornado.web.RequestHandler):
 
 
 class LoginSubmit(tornado.web.RequestHandler):
+  def initialize(self, admin_user_db=None):
+    self.admin_user_db = admin_user_db
+
   def post(self):
     # Find the browser's existing session or create a new one.
     session = Session.from_request(self)
@@ -107,10 +139,10 @@ class LoginSubmit(tornado.web.RequestHandler):
 
     username = self.get_argument("username")
     password = self.get_argument("password")
-    user = AdminUser.GetUser(username)
+    user = self.admin_user_db.GetUser(username)
     if user and user.CheckPassword(password):
       session.user = user
-      session.capabilities = set(["admin"])
+      session.capabilities = user.roles
       session.bad_login = False
       self.redirect("/admin")
     else:
@@ -130,10 +162,12 @@ class NoAccess(tornado.web.RequestHandler):
   def get(self):
     self.render("no_access.html")
 
-HANDLERS = [
-  (r"/login", Login),
-  (r"/login_submit", LoginSubmit),
-  (r"/no_access", NoAccess),
-  (r"/logout", Logout),
+
+def GetHandlers(admin_user_db):
+  return [
+    (r"/login", Login),
+    (r"/login_submit", LoginSubmit, dict(admin_user_db=admin_user_db)),
+    (r"/no_access", NoAccess),
+    (r"/logout", Logout),
   ]
 
