@@ -27,11 +27,19 @@ class CreateUser(tornado.web.RequestHandler):
     self.redirect("/admin_users")
 
 
+class StopServer(tornado.web.RequestHandler):
+  @login.required("admin")
+  def get(self):
+    loop = tornado.ioloop.IOLoop.current()
+    loop.call_later(0.5, loop.stop)
+
+
 def GetHandlers(admin_user_db):
   return [
     (r"/admin", AdminHome),
     (r"/admin_users", AdminUsers),
     (r"/create_user", CreateUser, dict(admin_user_db=admin_user_db)),
+    (r"/stop_server", StopServer),
     ]
 
 
