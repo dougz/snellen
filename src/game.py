@@ -4,7 +4,7 @@ import re
 import login
 from state import save_state
 
-class Team:
+class Team(login.LoginUser):
   BY_USERNAME = {}
 
   @save_state
@@ -18,7 +18,7 @@ class Team:
     self.BY_USERNAME[username] = self
 
     self.username = username
-    self.password_hash = password_hash
+    self.password_hash = password_hash.encode("ascii")
     self.team_name = team_name
     self.location = location
 
@@ -32,6 +32,11 @@ class Team:
     if username not in cls.BY_USERNAME:
       print(f"  Adding team {username} \"{team_name}\"")
       Team(username, login.make_hash(password), team_name, location)
+
+  @classmethod
+  def get_by_username(cls, username):
+    return cls.BY_USERNAME.get(username)
+
 
 
 

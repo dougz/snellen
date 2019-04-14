@@ -18,17 +18,12 @@ import login
 from state import save_state
 
 
-class TestHandler(tornado.web.RequestHandler):
-  def get(self):
-    self.set_header("Content-Type", "text/html")
-    self.write("<html><body>hello, world</body></html>")
-
-
 def make_app(**kwargs):
-  return tornado.web.Application([
-    (r"/", event.Home),
-    (r"/testz", TestHandler),
-  ] + login.GetHandlers() + admin.GetHandlers(), **kwargs)
+  return tornado.web.Application(
+    login.GetHandlers() +
+    admin.GetHandlers() +
+    event.GetHandlers(),
+    **kwargs)
 
 
 def main():

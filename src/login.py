@@ -1,11 +1,13 @@
 import base64
 import bcrypt
 import functools
+import http.client
 import os
 import time
 
 import tornado.web
 
+import game
 from state import save_state
 
 def make_hash(password):
@@ -16,7 +18,14 @@ class AdminRoles:
   CREATE_USERS = "create_users"
 
 
-class AdminUser:
+class LoginUser:
+  def check_password(self, password):
+    if bcrypt.checkpw(password.encode("utf-8"), self.password_hash):
+      return True
+    return False
+
+
+class AdminUser(LoginUser):
   BY_USERNAME = {}
 
   @save_state
@@ -40,11 +49,6 @@ class AdminUser:
     obj.fullname = "Root"
     obj.roles = set((AdminRoles.ADMIN, AdminRoles.CREATE_USERS))
     cls.BY_USERNAME["root"] = obj
-
-  def check_password(self, password):
-    if bcrypt.checkpw(password.encode("utf-8"), self.password_hash):
-      return True
-    return False
 
   def has_role(self, role):
     return role in self.roles
@@ -102,8 +106,12 @@ class required:
         req.redirect("/login")
         return
       if self.cap not in session.capabilities:
-        req.redirect("/no_access")
-        return
+        if AdminRoles.ADMIN in session.capabilities:
+          req.redirect("/no_access")
+          return
+        else:
+          # If teams try to access an admin page, return 404.
+          raise tornado.web.HTTPError(http.client.NOT_FOUND)
       session.expires = now + session.SESSION_TIMEOUT
       req.session = session
       req.user = session.user
@@ -128,6 +136,19 @@ class LoginSubmit(tornado.web.RequestHandler):
 
     username = self.get_argument("username")
     password = self.get_argument("password")
+
+    team = game.Team.get_by_username(username)
+    if team:
+      if team.check_password(password):
+        session.team = team
+        session.capabilities = {"team"}
+        session.bad_login = False
+        self.redirect("/")
+      else:
+        session.bad_login = True
+        self.redirect("/login")
+      return
+
     user = AdminUser.get_by_username(username)
     if user and user.check_password(password):
       session.user = user
