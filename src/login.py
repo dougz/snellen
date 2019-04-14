@@ -6,56 +6,49 @@ import time
 
 import tornado.web
 
-import state
+from state import save_state
 
 class AdminRoles:
+  ADMIN = "admin"
   CREATE_USERS = "create_users"
 
 
 class AdminUser:
-  def __init__(self, username, password_hash, fullname, roles):
-    self.username = username
-    self.password_hash = password_hash
-    self.fullname = fullname
-    self.roles = roles
-
-  def CheckPassword(self, password):
-    if bcrypt.checkpw(password.encode("utf-8"), self.password_hash):
-      return True
-    return False
-
-  def HasRole(self, role):
-    return role in self.roles
-
-saver = state.Saver()
-
-class AdminUserDB:
   BY_USERNAME = {}
-  SAVER = saver
 
-  @saver
-  def add_user(self, now, username, password_hash, fullname, roles):
-    r = set(roles)
-    r.add("admin")
-    user = AdminUser(username, password_hash.encode("ascii"), fullname, r)
-    self.BY_USERNAME[username] = user
-    return user
-
-  def add_temp_user(self, username, password_hash, fullname, roles):
-    r = set(roles)
-    r.add("admin")
-    user = AdminUser(username, password_hash.encode("ascii"), fullname, r)
-    self.BY_USERNAME[username] = user
-    return user
+  @save_state
+  def __init__(self, now, username, password_hash, fullname, roles):
+    self.username = username
+    self.password_hash = password_hash.encode("ascii")
+    self.fullname = fullname
+    self.roles = set(roles)
+    self.roles.add(AdminRoles.ADMIN)
+    self.BY_USERNAME[username] = self
 
   @staticmethod
   def make_hash(password):
     return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("ascii")
 
   @classmethod
-  def GetUser(self, username):
-    return self.BY_USERNAME.get(username)
+  def get_by_username(cls, username):
+    return cls.BY_USERNAME.get(username)
 
+  @classmethod
+  def enable_root(cls, password_hash):
+    obj = AdminUser.__new__(AdminUser)
+    obj.username = "root"
+    obj.password_hash = password_hash.encode("ascii")
+    obj.fullname = "Root"
+    obj.roles = set((AdminRoles.ADMIN, AdminRoles.CREATE_USERS))
+    cls.BY_USERNAME["root"] = obj
+
+  def check_password(self, password):
+    if bcrypt.checkpw(password.encode("utf-8"), self.password_hash):
+      return True
+    return False
+
+  def has_role(self, role):
+    return role in self.roles
 
 
 
@@ -127,9 +120,6 @@ class Login(tornado.web.RequestHandler):
 
 
 class LoginSubmit(tornado.web.RequestHandler):
-  def initialize(self, admin_user_db=None):
-    self.admin_user_db = admin_user_db
-
   def post(self):
     # Find the browser's existing session or create a new one.
     session = Session.from_request(self)
@@ -139,8 +129,8 @@ class LoginSubmit(tornado.web.RequestHandler):
 
     username = self.get_argument("username")
     password = self.get_argument("password")
-    user = self.admin_user_db.GetUser(username)
-    if user and user.CheckPassword(password):
+    user = AdminUser.get_by_username(username)
+    if user and user.check_password(password):
       session.user = user
       session.capabilities = user.roles
       session.bad_login = False
@@ -163,10 +153,10 @@ class NoAccess(tornado.web.RequestHandler):
     self.render("no_access.html")
 
 
-def GetHandlers(admin_user_db):
+def GetHandlers():
   return [
     (r"/login", Login),
-    (r"/login_submit", LoginSubmit, dict(admin_user_db=admin_user_db)),
+    (r"/login_submit", LoginSubmit),
     (r"/no_access", NoAccess),
     (r"/logout", Logout),
   ]

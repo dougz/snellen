@@ -1,3 +1,4 @@
+import http.client
 import tornado.web
 import login
 
@@ -13,17 +14,19 @@ class AdminUsers(tornado.web.RequestHandler):
     self.render("admin_users.html")
 
 class CreateUser(tornado.web.RequestHandler):
-  def initialize(self, admin_user_db=None):
-    self.admin_user_db = admin_user_db
-
   @login.required("create_users")
   def post(self):
     username = self.get_argument("username")
     fullname = self.get_argument("fullname")
     password = self.get_argument("password")
-    self.admin_user_db.add_user(
-      username, self.admin_user_db.make_hash(password), fullname, ())
 
+    if login.AdminUser.get_by_username(username) is not None:
+      # error
+      raise tornado.web.HTTPError(http.client.BAD_REQUEST,
+                                  "User already exists")
+
+
+    login.AdminUser(username, login.AdminUser.make_hash(password), fullname, ())
     self.redirect("/admin_users")
 
 
@@ -34,11 +37,11 @@ class StopServer(tornado.web.RequestHandler):
     loop.call_later(0.5, loop.stop)
 
 
-def GetHandlers(admin_user_db):
+def GetHandlers():
   return [
     (r"/admin", AdminHome),
     (r"/admin_users", AdminUsers),
-    (r"/create_user", CreateUser, dict(admin_user_db=admin_user_db)),
+    (r"/create_user", CreateUser),
     (r"/stop_server", StopServer),
     ]
 

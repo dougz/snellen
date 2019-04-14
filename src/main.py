@@ -13,7 +13,7 @@ import tornado.web
 import admin
 import event
 import login
-import state
+from state import save_state
 
 
 class TestHandler(tornado.web.RequestHandler):
@@ -22,11 +22,11 @@ class TestHandler(tornado.web.RequestHandler):
     self.write("<html><body>hello, world</body></html>")
 
 
-def make_app(admin_user_db, **kwargs):
+def make_app(**kwargs):
   return tornado.web.Application([
     (r"/", event.Home),
     (r"/testz", TestHandler),
-  ] + login.GetHandlers(admin_user_db) + admin.GetHandlers(admin_user_db), **kwargs)
+  ] + login.GetHandlers() + admin.GetHandlers(), **kwargs)
 
 
 def main():
@@ -51,19 +51,15 @@ def main():
 
   assert template_path is not None, "Must specify --template_path."
 
-  admin_user_db = login.AdminUserDB()
+  save_state.set_classes(AdminUser=login.AdminUser)
+  save_state.open("state.log")
+  save_state.replay()
 
   if root_password:
     print("Enabling root user...")
-    admin_user_db.add_temp_user(
-      "root", admin_user_db.make_hash(root_password),
-      "Root User", [login.AdminRoles.CREATE_USERS])
+    login.AdminUser.enable_root(login.AdminUser.make_hash(root_password))
 
-  admin_user_db.SAVER.open("admin.txt")
-  admin_user_db.SAVER.replay(admin_user_db)
-
-  app = make_app(admin_user_db,
-                 template_path=template_path,
+  app = make_app(template_path=template_path,
                  cookie_secret=cookie_secret)
 
   server = tornado.httpserver.HTTPServer(app)
@@ -71,6 +67,8 @@ def main():
   server.add_socket(socket)
   print("Serving...")
   tornado.ioloop.IOLoop.instance().start()
+
+  save_state.close()
 
 if __name__ == "__main__":
   main()
