@@ -8,6 +8,9 @@ import tornado.web
 
 from state import save_state
 
+def make_hash(password):
+  return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("ascii")
+
 class AdminRoles:
   ADMIN = "admin"
   CREATE_USERS = "create_users"
@@ -24,10 +27,6 @@ class AdminUser:
     self.roles = set(roles)
     self.roles.add(AdminRoles.ADMIN)
     self.BY_USERNAME[username] = self
-
-  @staticmethod
-  def make_hash(password):
-    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("ascii")
 
   @classmethod
   def get_by_username(cls, username):

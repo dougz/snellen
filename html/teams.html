@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  </head>
+  <body>
+    <h1>Team list</h1>
+    <ul>
+      {% for t in teams.values() %}
+      <li>{{t.username}}: {{t.team_name}}</li>
+      {% end %}
+    </ul>
+  </body>
+</html>
+
+
+
+

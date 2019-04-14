@@ -1,5 +1,7 @@
 import http.client
 import tornado.web
+
+import game
 import login
 
 class AdminHome(tornado.web.RequestHandler):
@@ -12,6 +14,13 @@ class AdminUsers(tornado.web.RequestHandler):
   @login.required("admin")
   def get(self):
     self.render("admin_users.html")
+
+
+class ShowTeams(tornado.web.RequestHandler):
+  @login.required("admin")
+  def get(self):
+    self.render("teams.html", teams=game.Team.BY_USERNAME)
+
 
 class CreateUser(tornado.web.RequestHandler):
   @login.required("create_users")
@@ -26,7 +35,7 @@ class CreateUser(tornado.web.RequestHandler):
                                   "User already exists")
 
 
-    login.AdminUser(username, login.AdminUser.make_hash(password), fullname, ())
+    login.AdminUser(username, login.make_hash(password), fullname, ())
     self.redirect("/admin_users")
 
 
@@ -43,6 +52,7 @@ def GetHandlers():
     (r"/admin_users", AdminUsers),
     (r"/create_user", CreateUser),
     (r"/stop_server", StopServer),
+    (r"/teams", ShowTeams),
     ]
 
 

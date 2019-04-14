@@ -2,6 +2,10 @@
 
 # Arguments:
 #
+#  -e, --event_dir
+#    Directory for event (contains definitions of teams & puzzles as
+#    well as log files).
+#
 #  -t, --template_path
 #    Path to the directory with HTML templates.
 #
@@ -15,6 +19,7 @@
 
 
 exec python3 src/main.py \
+     --event_dir test_event \
      --template_path html \
      --root_password joshua
 

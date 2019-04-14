@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import getopt
+import os
 import sys
 
 import tornado.ioloop
@@ -12,6 +13,7 @@ import tornado.web
 
 import admin
 import event
+import game
 import login
 from state import save_state
 
@@ -33,10 +35,12 @@ def main():
   template_path = None
   cookie_secret = "1234"
   root_password = None
+  event_dir = None
 
   opts, args = getopt.getopt(sys.argv[1:],
-                             "t:c:r:",
-                             ["template_path=",
+                             "e:t:c:r:",
+                             ["event_dir=",
+                              "template_path=",
                               "cookie_secret=",
                               "root_password="])
   for o, a in opts:
@@ -46,18 +50,26 @@ def main():
       cookie_secret = a
     elif o in ("-r", "--root_password"):
       root_password = a
+    elif o in ("-e", "--event_dir"):
+      event_dir = a
     else:
       assert False, f"unhandled option {o}"
 
   assert template_path is not None, "Must specify --template_path."
+  assert event_dir is not None, "Must specify --event_dir."
 
-  save_state.set_classes(AdminUser=login.AdminUser)
-  save_state.open("state.log")
+  save_state.set_classes(AdminUser=login.AdminUser,
+                         Team=game.Team)
+  save_state.open(os.path.join(event_dir, "state.log"))
   save_state.replay()
+
+  print("Adding teams...")
+  with open(os.path.join(event_dir, "teams.py")) as f:
+    exec(f.read(), {"add_team": game.Team.add_team})
 
   if root_password:
     print("Enabling root user...")
-    login.AdminUser.enable_root(login.AdminUser.make_hash(root_password))
+    login.AdminUser.enable_root(login.make_hash(root_password))
 
   app = make_app(template_path=template_path,
                  cookie_secret=cookie_secret)
