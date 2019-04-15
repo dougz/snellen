@@ -22,6 +22,12 @@ class ShowTeams(tornado.web.RequestHandler):
     self.render("teams.html", teams=game.Team.BY_USERNAME)
 
 
+class ShowPuzzles(tornado.web.RequestHandler):
+  @login.required("admin")
+  def get(self):
+    self.render("puzzles.html", puzzles=game.Puzzle.BY_SHORTNAME)
+
+
 class CreateUser(tornado.web.RequestHandler):
   @login.required("create_users")
   def post(self):
@@ -53,6 +59,7 @@ def GetHandlers():
     (r"/create_user", CreateUser),
     (r"/stop_server", StopServer),
     (r"/teams", ShowTeams),
+    (r"/puzzles", ShowPuzzles),
     ]
 
 

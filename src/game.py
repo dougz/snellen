@@ -41,13 +41,29 @@ class Team(login.LoginUser):
 
 
 class Puzzle:
+  BY_SHORTNAME = {}
+
   def __init__(self,
+               shortname,
                title,
-               anwser,
+               answer,
                matchers):
+    assert shortname not in self.BY_SHORTNAME
+    self.BY_SHORTNAME[shortname] = self
+
+    self.shortname = shortname
     self.title = title
     self.display_answer = answer
     self.canonical_answer = self.canonicalize_answer(answer)
+
+  @classmethod
+  def add_puzzle(cls, shortname, title, answer, matchers=()):
+    print(f"  Adding puzzle {shortname} \"{title}\"")
+    Puzzle(shortname, title, answer, matchers)
+
+  @classmethod
+  def get_by_shortname(cls, shortname):
+    return cls.BY_SHORTNAME.get(shortname)
 
   @staticmethod
   def canonicalize_answer(text):

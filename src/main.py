@@ -62,6 +62,10 @@ def main():
   with open(os.path.join(event_dir, "teams.py")) as f:
     exec(f.read(), {"add_team": game.Team.add_team})
 
+  print("Adding puzzles...")
+  with open(os.path.join(event_dir, "puzzles.py")) as f:
+    exec(f.read(), {"add_puzzle": game.Puzzle.add_puzzle})
+
   if root_password:
     print("Enabling root user...")
     login.AdminUser.enable_root(login.make_hash(root_password))
