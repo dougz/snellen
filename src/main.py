@@ -18,11 +18,11 @@ import login
 from state import save_state
 
 
-def make_app(**kwargs):
+def make_app(event_dir, **kwargs):
   return tornado.web.Application(
     login.GetHandlers() +
     admin.GetHandlers() +
-    event.GetHandlers(),
+    event.GetHandlers(event_dir),
     **kwargs)
 
 
@@ -64,13 +64,16 @@ def main():
 
   print("Adding puzzles...")
   with open(os.path.join(event_dir, "puzzles.py")) as f:
-    exec(f.read(), {"add_puzzle": game.Puzzle.add_puzzle})
+    def add_puzzle(nickname):
+      game.Puzzle(os.path.join(event_dir, "puzzles", nickname))
+    exec(f.read(), {"add_puzzle": add_puzzle})
 
   if root_password:
     print("Enabling root user...")
     login.AdminUser.enable_root(login.make_hash(root_password))
 
-  app = make_app(template_path=template_path,
+  app = make_app(event_dir,
+                 template_path=template_path,
                  cookie_secret=cookie_secret)
 
   server = tornado.httpserver.HTTPServer(app)

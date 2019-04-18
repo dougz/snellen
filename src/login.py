@@ -95,7 +95,7 @@ class required:
     self.cap = cap
   def __call__(self, func):
     @functools.wraps(func)
-    def wrapped_func(req):
+    def wrapped_func(req, *args, **kwargs):
       session = Session.from_request(req)
       if not session:
         req.redirect("/login")
@@ -116,7 +116,7 @@ class required:
       req.session = session
       req.user = session.user
       req.team = session.team
-      return func(req)
+      return func(req, *args, **kwargs)
     return wrapped_func
 
 

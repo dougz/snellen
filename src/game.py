@@ -1,5 +1,9 @@
-import unicodedata
+import configparser
+import os
 import re
+import unicodedata
+
+import bs4
 
 import login
 from state import save_state
@@ -41,37 +45,67 @@ class Team(login.LoginUser):
 
 
 class Puzzle:
-  BY_SHORTNAME = {}
+  BY_NICKNAME = {}
 
-  def __init__(self,
-               shortname,
-               title,
-               answer,
-               matchers):
-    assert shortname not in self.BY_SHORTNAME
-    self.BY_SHORTNAME[shortname] = self
+  def __init__(self, path):
+    nickname = os.path.basename(path)
+    print(f"  Adding puzzle {nickname}")
 
-    self.shortname = shortname
-    self.title = title
-    self.display_answer = answer
-    self.canonical_answer = self.canonicalize_answer(answer)
+    self.BY_NICKNAME[nickname] = self
+
+    c = configparser.ConfigParser()
+    c.read(os.path.join(path, "metadata.cfg"))
+
+    p = c["PUZZLE"]
+    assert nickname == p["nickname"]
+
+    self.nickname = nickname
+    self.title = p["title"]
+    self.oncall = p["oncall"]
+    self.answer = p["answer"]
+    self.puzzletron_id = int(p["puzzletron_id"])
+    self.version = int(p["version"])
+
+    if "INCORRECT_RESPONSES" in c:
+      self.incorrect_responses = dict(
+        (self.canonicalize_answer(k), self.respace_text(v))
+        for (k, v) in c["INCORRECT_RESPONSES"].items())
+    else:
+      self.incorrect_responses = {}
+
+    self.correct_responses = {self.canonicalize_answer(self.answer): None}
+    if "CORRECT_RESPONSES" in c:
+      for k, v in c["CORRECT_RESPONSES"].items():
+        self.correct_responses[self.canonicalize_answer(k)] = self.respace_text(v)
+
+    self.load_html(path)
+
+  def load_html(self, path):
+    with open(os.path.join(path, "puzzle.html")) as f:
+      soup = bs4.BeautifulSoup(f, features="lxml")
+      self.html_body = "".join(str(i) for i in soup.body.contents)
 
   @classmethod
-  def add_puzzle(cls, shortname, title, answer, matchers=()):
-    print(f"  Adding puzzle {shortname} \"{title}\"")
-    Puzzle(shortname, title, answer, matchers)
-
-  @classmethod
-  def get_by_shortname(cls, shortname):
-    return cls.BY_SHORTNAME.get(shortname)
+  def get_by_nickname(cls, nickname):
+    return cls.BY_NICKNAME.get(nickname)
 
   @staticmethod
   def canonicalize_answer(text):
-    text = unicodedata.normalize("NFD", text)
-    text = text.encode("ascii", "ignore")
-    text = text.decode("ascii")
-    text = re.sub("[^a-zA-Z]+", "", text)
-    return text.upper()
+    text = unicodedata.normalize("NFD", text.upper())
+    out = []
+    for k in text:
+      cat = unicodedata.category(k)
+      # Letters and "other symbols".
+      if cat == "So" or cat[0] == "L":
+        out.append(k)
+    return "".join(out)
+
+  @staticmethod
+  def respace_text(text):
+    return " ".join(text.split()).strip()
+
+
+
 
 
 

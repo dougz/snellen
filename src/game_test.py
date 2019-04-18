@@ -20,7 +20,18 @@ class PuzzleTest(unittest.TestCase):
           "MONTREALUBERMEREFRANCOISENOEL")
 
     check("✈✈✈ Galactic Trendsetters ✈✈✈",
-          "GALACTICTRENDSETTERS")
+          "✈✈✈GALACTICTRENDSETTERS✈✈✈")
+
+    check("👠", "👠")
+
+  def test_respace(self):
+    def check(before, after):
+      self.assertEqual(game.Puzzle.respace_text(before), after)
+
+    check("Foo.", "Foo.")
+    check(" Hello, world! ", "Hello, world!")
+    check("Multi-line\nresponse.", "Multi-line response.")
+
 
 if __name__ == "__main__":
   unittest.main()
