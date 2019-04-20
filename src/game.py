@@ -49,8 +49,12 @@ class Puzzle:
 
   def __init__(self, path):
     shortname = os.path.basename(path)
-    print(f"  Adding puzzle {shortname}")
+    if not re.match(r"^[a-z][a-z0-9_]*$", shortname):
+      raise ValueError(f"\"{shortname}\" is not a legal puzzle shortname")
+    if shortname in self.BY_SHORTNAME:
+      raise ValueError(f"duplicate puzzle shortname \"{shortname}\"")
 
+    print(f"  Adding puzzle {shortname}")
     self.BY_SHORTNAME[shortname] = self
 
     c = configparser.ConfigParser()
