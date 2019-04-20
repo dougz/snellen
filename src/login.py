@@ -68,6 +68,7 @@ class Session:
     self.capabilities = set(caps)
     self.bad_login = False
     self.expires = time.time() + self.SESSION_TIMEOUT
+    self.original_target = None
 
   def set_cookie(self, req):
     req.set_secure_cookie(self.COOKIE_NAME, self.key)
@@ -93,18 +94,24 @@ class Session:
 class required:
   def __init__(self, cap=None):
     self.cap = cap
+
+  @staticmethod
+  def bounce(req):
+    session = Session(None)
+    session.set_cookie(req)
+    session.original_target = req.request.uri
+    req.redirect("/login")
+
   def __call__(self, func):
     @functools.wraps(func)
     def wrapped_func(req, *args, **kwargs):
       session = Session.from_request(req)
       if not session:
-        req.redirect("/login")
-        return
+        return self.bounce(req)
       now = time.time()
       if now > session.expires:
         Session.delete_from_request(req)
-        req.redirect("/login")
-        return
+        return self.bounce(req)
       if self.cap not in session.capabilities:
         if AdminRoles.ADMIN in session.capabilities:
           req.redirect("/no_access")
@@ -113,6 +120,7 @@ class required:
           # If teams try to access an admin page, return 404.
           raise tornado.web.HTTPError(http.client.NOT_FOUND)
       session.expires = now + session.SESSION_TIMEOUT
+      session.original_target = None
       req.session = session
       req.user = session.user
       req.team = session.team
@@ -123,7 +131,11 @@ class required:
 class Login(tornado.web.RequestHandler):
   def get(self):
     session = Session.from_request(self)
-    self.render("login.html", bad_login=session and session.bad_login)
+    self.render("login.html",
+                bad_login=session and session.bad_login,
+                default_username=self.application.settings["default_username"],
+                default_password=self.application.settings["default_password"],
+                )
 
 
 class LoginSubmit(tornado.web.RequestHandler):
@@ -143,7 +155,7 @@ class LoginSubmit(tornado.web.RequestHandler):
         session.team = team
         session.capabilities = {"team"}
         session.bad_login = False
-        self.redirect("/")
+        self.redirect(session.original_target or "/")
       else:
         session.bad_login = True
         self.redirect("/login")

@@ -5,10 +5,14 @@
   <body>
     <form action="/login_submit" method="post">
       <label for="username"><b>Username</b></label>
-      <input type="text" placeholder="Username" name="username" required>
+      <input type="text" placeholder="Username" name="username"
+	     {% if default_username %}value="{{default_username}}"{% end %}
+	     required>
       <br/>
       <label for="password"><b>Password</b></label>
-      <input type="password" placeholder="Password" name="password" required>
+      <input type="password" placeholder="Password" name="password"
+	     {% if default_password %}value="{{default_password}}"{% end %}
+	     required>
       <br/>
       {% if bad_login %}<b>Bad login.</b><br/>{% end %}
       <button type="submit">Login</button>

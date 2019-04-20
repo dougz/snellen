@@ -22,6 +22,11 @@
 #      * client.js is used directly rather than serving the compiled
 #        version.
 #      * html templates are re-read from disk on page reload
+#
+#  --default_credentials
+#      "username:password" to fill in by default on the login page.
+#      Useful when developing and you have to restart the server and
+#      log in a lot.
 
 
 exec python3 src/main.py \
