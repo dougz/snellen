@@ -19,10 +19,14 @@ from state import save_state
 
 
 def make_app(event_dir, **kwargs):
+
+  with open("bin/client-compiled.js", "rb") as f:
+    compiled_js = f.read()
+
   return tornado.web.Application(
     login.GetHandlers() +
     admin.GetHandlers() +
-    event.GetHandlers(event_dir),
+    event.GetHandlers(event_dir, kwargs.get("debug"), compiled_js),
     **kwargs)
 
 
@@ -31,10 +35,12 @@ def main():
   cookie_secret = "1234"
   root_password = None
   event_dir = None
+  debug = False
 
   opts, args = getopt.getopt(sys.argv[1:],
                              "e:t:c:r:",
-                             ["event_dir=",
+                             ["debug",
+                              "event_dir=",
                               "template_path=",
                               "cookie_secret=",
                               "root_password="])
@@ -47,6 +53,8 @@ def main():
       root_password = a
     elif o in ("-e", "--event_dir"):
       event_dir = a
+    elif o == "--debug":
+      debug = True
     else:
       assert False, f"unhandled option {o}"
 
@@ -74,7 +82,8 @@ def main():
 
   app = make_app(event_dir,
                  template_path=template_path,
-                 cookie_secret=cookie_secret)
+                 cookie_secret=cookie_secret,
+                 debug=debug)
 
   server = tornado.httpserver.HTTPServer(app)
   socket = tornado.netutil.bind_unix_socket("/tmp/snellen", mode=0o666)

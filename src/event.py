@@ -16,7 +16,31 @@ class PuzzlePage(tornado.web.RequestHandler):
     puzzle = game.Puzzle.get_by_nickname(nickname)
     if not puzzle:
       raise tornado.web.HTTPError(http.client.NOT_FOUND)
-    self.render("puzzle_frame.html", title=puzzle.title, body=puzzle.html_body)
+
+    if self.application.settings.get("debug"):
+      script = ("""<script src="/closure/goog/base.js"></script>"""
+                """<script src="/client-debug.js"></script>""")
+    else:
+      script = """<script src="/client.js"></script>"""
+
+    self.render("puzzle_frame.html", title=puzzle.title, body=puzzle.html_body,
+                script=script)
+
+
+class ClientDebugJS(tornado.web.RequestHandler):
+  @login.required("team")
+  def get(self):
+    self.set_header("Content-Type", "text/javascript")
+    with open("src/client.js", "rb") as f:
+      self.write(f.read())
+
+class ClientJS(tornado.web.RequestHandler):
+  def initialize(self, compiled_js):
+    self.compiled_js = compiled_js
+  @login.required("team")
+  def get(self):
+    self.set_header("Content-Type", "text/javascript")
+    self.write(self.compiled_js)
 
 class PuzzleAsset(tornado.web.RequestHandler):
   MIME_TYPES = {".jpg": "image/jpeg"}
@@ -37,9 +61,14 @@ class PuzzleAsset(tornado.web.RequestHandler):
       self.write(f.read())
 
 
-def GetHandlers(event_dir):
-  return [
+def GetHandlers(event_dir, debug, compiled_js):
+  handlers = [
     (r"/", EventHome),
     (r"/puzzle/([^/]+)/", PuzzlePage),
     (r"/puzzle/([^/]+)/(.*)", PuzzleAsset, {"event_dir": event_dir}),
+    (r"/client.js", ClientJS, {"compiled_js": compiled_js}),
     ]
+  if debug:
+    handlers.append((r"/client-debug.js", ClientDebugJS))
+  return handlers
+

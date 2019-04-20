@@ -16,10 +16,17 @@
 #  -r, --root_password
 #    Creates an admin user named "root" with the given password.  Use
 #    only when initializing the admin user database.
+#
+#  --debug
+#    Enables debug mode:
+#      * client.js is used directly rather than serving the compiled
+#        version.
+#      * html templates are re-read from disk on page reload
 
 
 exec python3 src/main.py \
      --event_dir test_event \
      --template_path html \
-     --root_password joshua
+     --root_password joshua \
+     "$@"
 
