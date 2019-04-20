@@ -13,12 +13,12 @@ class EventHome(tornado.web.RequestHandler):
 
 class PuzzlePage(tornado.web.RequestHandler):
   @login.required("team")
-  def get(self, nickname):
-    puzzle = game.Puzzle.get_by_nickname(nickname)
+  def get(self, shortname):
+    puzzle = game.Puzzle.get_by_shortname(shortname)
     if not puzzle:
       raise tornado.web.HTTPError(http.client.NOT_FOUND)
 
-    script = f"""<script>\nvar puzzle_id = "{puzzle.nickname}";\n</script>\n"""
+    script = f"""<script>\nvar puzzle_id = "{puzzle.shortname}";\n</script>\n"""
 
     if self.application.settings.get("debug"):
       script += ("""<script src="/closure/goog/base.js"></script>\n"""
@@ -36,8 +36,8 @@ class SubmitHandler(tornado.web.RequestHandler):
   @login.required("team")
   def post(self):
     answer = self.args["answer"]
-    nickname = self.args["puzzle_id"]
-    print(f"submitted {answer} for {nickname}")
+    shortname = self.args["puzzle_id"]
+    print(f"submitted {answer} for {shortname}")
     self.set_status(http.client.NO_CONTENT.value)
 
 
@@ -71,15 +71,15 @@ class PuzzleAsset(tornado.web.RequestHandler):
     self.event_dir = event_dir
 
   @login.required("team")
-  def get(self, nickname, path):
-    puzzle = game.Puzzle.get_by_nickname(nickname)
+  def get(self, shortname, path):
+    puzzle = game.Puzzle.get_by_shortname(shortname)
     if not puzzle:
       raise tornado.web.HTTPError(http.client.NOT_FOUND)
     _, ext = os.path.splitext(path)
     mime_type = self.MIME_TYPES.get(ext, "application/octet-stream")
 
     self.set_header("Content-Type", mime_type)
-    with open(os.path.join(self.event_dir, "puzzles", nickname, path), "rb") as f:
+    with open(os.path.join(self.event_dir, "puzzles", shortname, path), "rb") as f:
       self.write(f.read())
 
 

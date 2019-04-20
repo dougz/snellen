@@ -6,6 +6,7 @@ goog.require("goog.ui.ModalPopup");
 goog.require("goog.ui.Dialog");
 goog.require("goog.json.Serializer");
 
+var TagName = goog.dom.TagName;
 
 /** @constructor */
 function Waiter() {
@@ -49,10 +50,14 @@ var waiter = null;
 
 class SubmitDialog {
     constructor() {
-	/** @type{boolean} */ this.built = false;
-	/** @type{Object|undefined} */ this.serializer = null;
-	/** @type{Object|undefined} */ this.dialog = null;
-	/** @type{Element|undefined} */ this.input = null;
+	/** @type{boolean} */
+	this.built = false;
+	/** @type{Object|undefined} */
+	this.serializer = null;
+	/** @type{Object|undefined} */
+	this.dialog = null;
+	/** @type{Element|undefined} */
+	this.input = null;
     }
 
     build() {
@@ -63,17 +68,17 @@ class SubmitDialog {
 
 	var content =  this.dialog.getContentElement();
 
-	var title = goog.dom.createDom(goog.dom.TagName.DIV, {"class": "submit"}, "hello, world");
+	var title = goog.dom.createDom(TagName.DIV, {"class": "submit"}, "hello, world");
 	content.appendChild(title);
 
-	this.input = goog.dom.createDom(goog.dom.TagName.INPUT, {"name": "answer"}, "");
+	this.input = goog.dom.createDom(TagName.INPUT, {"name": "answer"}, "");
 	content.appendChild(this.input);
 
-	var b = goog.dom.createDom(goog.dom.TagName.BUTTON, null, "Submit");
+	var b = goog.dom.createDom(TagName.BUTTON, null, "Submit");
 	goog.events.listen(b, goog.events.EventType.CLICK, goog.bind(this.submit, this));
 	content.appendChild(b);
 
-	b = goog.dom.createDom(goog.dom.TagName.BUTTON, null, "Close");
+	b = goog.dom.createDom(TagName.BUTTON, null, "Close");
 	content.appendChild(b);
 	goog.events.listen(b, goog.events.EventType.CLICK, goog.bind(this.close, this));
 

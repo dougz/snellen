@@ -45,21 +45,21 @@ class Team(login.LoginUser):
 
 
 class Puzzle:
-  BY_NICKNAME = {}
+  BY_SHORTNAME = {}
 
   def __init__(self, path):
-    nickname = os.path.basename(path)
-    print(f"  Adding puzzle {nickname}")
+    shortname = os.path.basename(path)
+    print(f"  Adding puzzle {shortname}")
 
-    self.BY_NICKNAME[nickname] = self
+    self.BY_SHORTNAME[shortname] = self
 
     c = configparser.ConfigParser()
     c.read(os.path.join(path, "metadata.cfg"))
 
     p = c["PUZZLE"]
-    assert nickname == p["nickname"]
+    assert shortname == p["shortname"]
 
-    self.nickname = nickname
+    self.shortname = shortname
     self.title = p["title"]
     self.oncall = p["oncall"]
     self.answer = p["answer"]
@@ -86,8 +86,8 @@ class Puzzle:
       self.html_body = "".join(str(i) for i in soup.body.contents)
 
   @classmethod
-  def get_by_nickname(cls, nickname):
-    return cls.BY_NICKNAME.get(nickname)
+  def get_by_shortname(cls, shortname):
+    return cls.BY_SHORTNAME.get(shortname)
 
   @staticmethod
   def canonicalize_answer(text):

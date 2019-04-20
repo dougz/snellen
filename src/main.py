@@ -79,8 +79,8 @@ def main():
 
   print("Adding puzzles...")
   with open(os.path.join(event_dir, "puzzles.py")) as f:
-    def add_puzzle(nickname):
-      game.Puzzle(os.path.join(event_dir, "puzzles", nickname))
+    def add_puzzle(shortname):
+      game.Puzzle(os.path.join(event_dir, "puzzles", shortname))
     exec(f.read(), {"add_puzzle": add_puzzle})
 
   if root_password:
