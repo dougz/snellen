@@ -21,11 +21,13 @@ from state import save_state
 def make_app(event_dir, **kwargs):
   with open("bin/client-compiled.js", "rb") as f:
     compiled_js = f.read()
+  with open("static/event.css", "rb") as f:
+    event_css = f.read()
 
   return tornado.web.Application(
     login.GetHandlers() +
     admin.GetHandlers() +
-    event.GetHandlers(event_dir, kwargs.get("debug"), compiled_js),
+    event.GetHandlers(event_dir, kwargs.get("debug"), compiled_js, event_css),
     **kwargs)
 
 

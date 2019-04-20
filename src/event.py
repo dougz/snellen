@@ -1,4 +1,5 @@
 import http.client
+import json
 import os
 import tornado.web
 
@@ -17,14 +18,27 @@ class PuzzlePage(tornado.web.RequestHandler):
     if not puzzle:
       raise tornado.web.HTTPError(http.client.NOT_FOUND)
 
+    script = f"""<script>\nvar puzzle_id = "{puzzle.nickname}";\n</script>\n"""
+
     if self.application.settings.get("debug"):
-      script = ("""<script src="/closure/goog/base.js"></script>"""
-                """<script src="/client-debug.js"></script>""")
+      script += ("""<script src="/closure/goog/base.js"></script>\n"""
+                 """<script src="/client-debug.js"></script>""")
     else:
-      script = """<script src="/client.js"></script>"""
+      script += """<script src="/client.js"></script>"""
 
     self.render("puzzle_frame.html", title=puzzle.title, body=puzzle.html_body,
                 script=script)
+
+class SubmitHandler(tornado.web.RequestHandler):
+  def prepare(self):
+    self.args = json.loads(self.request.body)
+
+  @login.required("team")
+  def post(self):
+    answer = self.args["answer"]
+    nickname = self.args["puzzle_id"]
+    print(f"submitted {answer} for {nickname}")
+    self.set_status(http.client.NO_CONTENT.value)
 
 
 class ClientDebugJS(tornado.web.RequestHandler):
@@ -41,6 +55,14 @@ class ClientJS(tornado.web.RequestHandler):
   def get(self):
     self.set_header("Content-Type", "text/javascript")
     self.write(self.compiled_js)
+
+class EventCSS(tornado.web.RequestHandler):
+  def initialize(self, event_css):
+    self.event_css = event_css
+  @login.required("team")
+  def get(self):
+    self.set_header("Content-Type", "text/css")
+    self.write(self.event_css)
 
 class PuzzleAsset(tornado.web.RequestHandler):
   MIME_TYPES = {".jpg": "image/jpeg"}
@@ -61,12 +83,14 @@ class PuzzleAsset(tornado.web.RequestHandler):
       self.write(f.read())
 
 
-def GetHandlers(event_dir, debug, compiled_js):
+def GetHandlers(event_dir, debug, compiled_js, event_css):
   handlers = [
     (r"/", EventHome),
     (r"/puzzle/([^/]+)/", PuzzlePage),
     (r"/puzzle/([^/]+)/(.*)", PuzzleAsset, {"event_dir": event_dir}),
     (r"/client.js", ClientJS, {"compiled_js": compiled_js}),
+    (r"/event.css", EventCSS, {"event_css": event_css}),
+    (r"/submit", SubmitHandler),
     ]
   if debug:
     handlers.append((r"/client-debug.js", ClientDebugJS))

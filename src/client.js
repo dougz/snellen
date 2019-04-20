@@ -1,7 +1,10 @@
-goog.require('goog.dom');
-goog.require('goog.dom.TagName');
-goog.require('goog.events');
-goog.require('goog.net.XhrIo');
+goog.require("goog.dom");
+goog.require("goog.dom.TagName");
+goog.require("goog.events");
+goog.require("goog.net.XhrIo");
+goog.require("goog.ui.ModalPopup");
+goog.require("goog.ui.Dialog");
+goog.require("goog.json.Serializer");
 
 
 /** @constructor */
@@ -44,18 +47,71 @@ function Waiter() {
 
 var waiter = null;
 
+class SubmitDialog {
+    constructor() {
+	/** @type{boolean} */ this.built = false;
+	/** @type{Object|undefined} */ this.serializer = null;
+	/** @type{Object|undefined} */ this.dialog = null;
+	/** @type{Element|undefined} */ this.input = null;
+    }
+
+    build() {
+	this.serializer = new goog.json.Serializer();
+
+	this.dialog = new goog.ui.ModalPopup();
+	this.dialog.render();
+
+	var content =  this.dialog.getContentElement();
+
+	var title = goog.dom.createDom(goog.dom.TagName.DIV, {"class": "submit"}, "hello, world");
+	content.appendChild(title);
+
+	this.input = goog.dom.createDom(goog.dom.TagName.INPUT, {"name": "answer"}, "");
+	content.appendChild(this.input);
+
+	var b = goog.dom.createDom(goog.dom.TagName.BUTTON, null, "Submit");
+	goog.events.listen(b, goog.events.EventType.CLICK, goog.bind(this.submit, this));
+	content.appendChild(b);
+
+	b = goog.dom.createDom(goog.dom.TagName.BUTTON, null, "Close");
+	content.appendChild(b);
+	goog.events.listen(b, goog.events.EventType.CLICK, goog.bind(this.close, this));
+
+	this.built = true;
+    }
+
+    submit() {
+	var answer = this.input.value;
+	console.log("submitting [" + answer + "] for [" + puzzle_id + "]");
+	goog.net.XhrIo.send("/submit", function(e) {
+	    var code = e.target.getStatus();
+	    if (code != 204) {
+		alert(e.target.getResponseText());
+	    }
+	}, "POST", this.serializer.serialize({"puzzle_id": puzzle_id, "answer": answer}));
+    }
+
+    show() {
+	if (!this.built) this.build();
+	this.dialog.setVisible(true);
+	return false;
+    }
+
+    close() {
+	this.dialog.setVisible(false);
+    }
+}
+
+var submit_dialog = new SubmitDialog();
+
 function initPage() {
     //waiter = new Waiter();
 
     var a = goog.dom.getElement("submit");
     if (a) {
-	a.onclick = showSubmit;
+	a.onclick = function() { submit_dialog.show(); return false; };
     }
 }
 
 window.onload = initPage;
 
-function showSubmit() {
-    alert("submit!");
-    return false;
-}
