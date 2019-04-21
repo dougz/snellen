@@ -82,8 +82,9 @@ class SubmitHistoryHandler(tornado.web.RequestHandler):
     if not state:
       raise tornado.web.HTTPError(http.client.NOT_FOUND)
     self.set_header("Content-Type", "application/json")
-    self.write(json.dumps(state.submit_history))
-
+    self.write("[" +
+               ",".join(sub.to_json() for sub in state.submissions) +
+               "]")
 
 class ClientDebugJS(tornado.web.RequestHandler):
   @login.required("team")

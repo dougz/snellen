@@ -1,4 +1,5 @@
 import configparser
+import heapq
 import json
 import os
 import re
@@ -18,7 +19,62 @@ class PuzzleState:
     self.team = team
     self.puzzle = puzzle
     self.state = self.CLOSED
-    self.submit_history = []
+    self.submissions = []
+
+
+class Submission:
+  PENDING = "pending"
+  PARTIAL = "partial"
+  INCORRECT = "incorrect"
+  CORRECT = "correct"
+
+  GLOBAL_SUBMIT_QUEUE = []
+
+  def __init__(self, now, team, puzzle, answer):
+    self.state = self.PENDING
+    self.team = team
+    self.puzzle = puzzle
+    self.puzzle_state = team.get_puzzle_state(puzzle)
+    self.answer = answer
+    self.submit_time = now
+    self.extra_response = None
+
+    delay = self.check_delay()
+    if delay is None:
+      self.check_time = now
+      self.check_answer(now)
+    else:
+      self.check_time = now + delay
+      heapq.heappush(self.GLOBAL_SUBMIT_QUEUE, (self.check_time, self))
+      self.team.send_message({"method": "history_change", "puzzle_id": self.puzzle.shortname})
+
+  def check_delay(self):
+    previous = len(self.puzzle_state.submissions)
+    if previous < 3:
+      return None
+    else:
+      return (previous-2) * 10
+
+  def check_answer(self, now):
+    answer = Puzzle.canonicalize_answer(self.answer)
+    if answer in self.puzzle.correct_responses:
+      self.state = self.CORRECT
+      self.extra_response = self.puzzle.correct_responses[answer]
+    elif answer in self.puzzle.incorrect_responses:
+      self.state = self.PARTIAL
+      self.extra_response = (
+        self.puzzle.incorrect_responses[answer] or "Keep going\u2026")
+    else:
+      self.state = self.INCORRECT
+    self.team.send_message({"method": "history_change", "puzzle_id": self.puzzle.shortname})
+
+  def to_json(self):
+    return json.dumps({"submit_time": self.submit_time,
+                       "answer": self.answer,
+                       "check_time": self.check_time,
+                       "state": self.state,
+                       "response": self.extra_response})
+
 
 
 class Team(login.LoginUser):
@@ -81,9 +137,7 @@ class Team(login.LoginUser):
       print(f"puzzle {shortname} {state.state} for {self.username}")
       return False
 
-    state.submit_history.append((now, answer))
-    self.send_message({"method": "history_change",
-                       "puzzle_id": shortname})
+    state.submissions.append(Submission(now, self, puzzle, answer))
     return True
 
   @save_state
@@ -95,9 +149,10 @@ class Team(login.LoginUser):
     state = self.puzzle_state[puzzle]
     state.state = new_state
 
-  def get_puzzle_state(self, shortname):
-    puzzle = Puzzle.get_by_shortname(shortname)
-    if not puzzle: return None
+  def get_puzzle_state(self, puzzle):
+    if isinstance(puzzle, str):
+      puzzle = Puzzle.get_by_shortname(puzzle)
+      if not puzzle: return None
     return self.puzzle_state[puzzle]
 
 

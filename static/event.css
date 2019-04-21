@@ -18,7 +18,68 @@ body {
     top: 0;
 }
 
-table.submit-history {
+table.submissions {
     padding: 20px;
-    width: 600px;
 }
+table.submissions td { vertical-align: middle; }
+
+.submit-time {
+    width: 140px;
+}
+.submit-state {
+    width: 100px;
+}
+.submit-answer {
+    font-weight: bold;
+    font-family: Consolas, monospace;
+    width: 400px;
+}
+
+.submit-correct {
+    padding: 0px 4px;
+    font-weight: bold;
+    font-size: 70%;
+    border: 1px solid #009900;
+    border-radius: 4px;
+    color: #009900;
+    background-color: #ddffdd;
+    text-transform: uppercase;
+}
+
+.submit-partial {
+    padding: 0px 4px;
+    font-weight: bold;
+    font-size: 70%;
+    border: 1px solid #999900;
+    border-radius: 4px;
+    color: #999900;
+    background-color: #ffffdd;
+    text-transform: uppercase;
+}
+
+.submit-incorrect {
+    padding: 0px 4px;
+    font-weight: bold;
+    font-size: 70%;
+    border: 1px solid #990000;
+    border-radius: 4px;
+    color: #990000;
+    background-color: #ffdddd;
+    text-transform: uppercase;
+}
+
+.submit-pending {
+    padding: 0px 4px;
+    font-weight: bold;
+    font-size: 70%;
+    border: 1px solid #666666;
+    border-radius: 4px;
+    color: #666666;
+    background-color: #dddddd;
+    text-transform: uppercase;
+}
+
+.submit-extra {
+    padding-left: 16px;
+}
+

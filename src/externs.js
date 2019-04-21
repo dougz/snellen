@@ -9,3 +9,22 @@ class Message {
 	this.puzzle_id;
     }
 }
+
+class Submission {
+    constructor() {
+	/** @type{number} */
+	this.submit_time;
+	/** @type{number} */
+	this.check_time;
+	/** @type{string} */
+	this.answer;
+	/** @type{string} */
+	this.state;
+	/** @type{string} */
+	this.response;
+    }
+}
+
+
+
+

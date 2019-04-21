@@ -83,6 +83,17 @@ class Dispatcher {
     }
 }
 
+class TimeFormatter {
+    constructor() {
+	this.formatter = new goog.i18n.DateTimeFormat("EEE h:mm:ss aa");
+    }
+    format(t) {
+	var d = new Date(t * 1000);
+	var txt = this.formatter.format(d);
+	var l = txt.length;
+	return txt.substr(0, l-2) + txt.substr(l-2, 2).toLowerCase();
+    }
+}
 
 class SubmitDialog {
     constructor() {
@@ -98,8 +109,7 @@ class SubmitDialog {
 	/** @type{Element|undefined} */
 	this.history = null;
 
-	this.timestamp_fmt = new goog.i18n.DateTimeFormat(
-	    goog.i18n.DateTimeFormat.Format.SHORT_DATETIME);
+	this.timestamp_fmt = new goog.i18n.DateTimeFormat("EEE hh:mm:ss aa");
     }
 
     build() {
@@ -110,7 +120,7 @@ class SubmitDialog {
 
 	var content =  this.dialog.getContentElement();
 
-	this.history = goog.dom.createDom("TABLE", {"class": "submit-history"});
+	this.history = goog.dom.createDom("TABLE", {"class": "submissions"});
 	content.appendChild(this.history);
 
 	this.input = goog.dom.createDom("INPUT", {"name": "answer"}, "");
@@ -138,13 +148,26 @@ class SubmitDialog {
 		this.history.innerHTML = "";
 		var entries = e.target.getResponseJson();
 		for (var i = 0; i < entries.length; ++i) {
-		    var timestamp = new Date(entries[i][0]*1000);
+		    var sub = /** @type{Submission} */ (entries[i]);
+
 		    var answer = entries[i][1];
 		    var tr = goog.dom.createDom(
 			"TR", null,
-			goog.dom.createDom("TD", null, this.timestamp_fmt.format(timestamp)),
-			goog.dom.createDom("TD", null, answer));
+			goog.dom.createDom("TD", {className: "submit-time"},
+					   time_formatter.format(sub.submit_time)),
+			goog.dom.createDom("TD", {className: "submit-state"},
+					   goog.dom.createDom("SPAN", {className: "submit-" + sub.state},
+							      sub.state)),
+			goog.dom.createDom("TD", {className: "submit-answer"},
+					   sub.answer));
 		    this.history.appendChild(tr);
+
+		    if (sub.response) {
+			var td = goog.dom.createDom("TD", {className: "submit-extra",
+							   colSpan: 3});
+			td.innerHTML = sub.response;
+			this.history.appendChild(goog.dom.createDom("TR", null, td));
+		    }
 		}
 		this.dialog.reposition();
 	    }
@@ -174,6 +197,7 @@ class SubmitDialog {
 	if (!this.built) this.build();
 	this.dialog.setVisible(true);
 	this.update_history();
+	this.input.focus();
 	return false;
     }
 
@@ -184,8 +208,11 @@ class SubmitDialog {
 
 var waiter = null;
 var submit_dialog = null;
+var time_formatter = null;
 
 function initPage() {
+    time_formatter = new TimeFormatter();
+
     submit_dialog = new SubmitDialog();
 
     waiter = new Waiter(new Dispatcher());
