@@ -68,20 +68,20 @@ def main():
   assert template_path is not None, "Must specify --template_path."
   assert event_dir is not None, "Must specify --event_dir."
 
-  save_state.set_classes(AdminUser=login.AdminUser,
-                         Team=game.Team)
-  save_state.open(os.path.join(event_dir, "state.log"))
-  save_state.replay()
-
-  print("Adding teams...")
-  with open(os.path.join(event_dir, "teams.py")) as f:
-    exec(f.read(), {"add_team": game.Team.add_team})
-
   print("Adding puzzles...")
   with open(os.path.join(event_dir, "puzzles.py")) as f:
     def add_puzzle(shortname):
       game.Puzzle(os.path.join(event_dir, "puzzles", shortname))
     exec(f.read(), {"add_puzzle": add_puzzle})
+
+  save_state.set_classes(AdminUser=login.AdminUser,
+                         Team=game.Team)
+  save_state.open(os.path.join(event_dir, "state.log"))
+  save_state.replay()
+
+  print("Adding new teams...")
+  with open(os.path.join(event_dir, "teams.py")) as f:
+    exec(f.read(), {"add_team": game.Team.add_team})
 
   if root_password:
     print("Enabling root user...")
@@ -91,6 +91,7 @@ def main():
                  template_path=template_path,
                  cookie_secret=cookie_secret,
                  debug=debug,
+                 autoreload=False,
                  default_username=default_username,
                  default_password=default_password)
 

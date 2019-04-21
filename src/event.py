@@ -16,6 +16,7 @@ class PuzzlePage(tornado.web.RequestHandler):
   def get(self, shortname):
     puzzle = game.Puzzle.get_by_shortname(shortname)
     if not puzzle:
+      print(f"no puzzle called {shortname}")
       raise tornado.web.HTTPError(http.client.NOT_FOUND)
 
     script = f"""<script>\nvar puzzle_id = "{puzzle.shortname}";\n</script>\n"""
@@ -29,16 +30,51 @@ class PuzzlePage(tornado.web.RequestHandler):
     self.render("puzzle_frame.html", title=puzzle.title, body=puzzle.html_body,
                 script=script)
 
+class WaitHandler(tornado.web.RequestHandler):
+  @login.required("team", on_fail=http.client.UNAUTHORIZED)
+  async def get(self, received_serial):
+    received_serial = int(received_serial)
+    q = self.session.wait_queue
+    # Client acks all messages up through received_serial; these can
+    # be discarded.
+    while q and q[0][0] <= received_serial:
+      q.popleft()
+
+    while True:
+      if q:
+        self.set_header("Content-Type", "application/json")
+        self.write(b"[")
+        for ser, obj in q:
+          self.write(f"[{ser},{obj}]".encode("utf-8"))
+        self.write(b"]")
+        return
+      await self.session.wait_event.wait()
+      self.session.wait_event.clear()
+
+
 class SubmitHandler(tornado.web.RequestHandler):
   def prepare(self):
     self.args = json.loads(self.request.body)
 
-  @login.required("team")
+  @login.required("team", on_fail=http.client.UNAUTHORIZED)
   def post(self):
     answer = self.args["answer"]
     shortname = self.args["puzzle_id"]
-    print(f"submitted {answer} for {shortname}")
-    self.set_status(http.client.NO_CONTENT.value)
+    success = self.team.submit_answer(shortname, answer)
+    if success:
+      self.set_status(http.client.NO_CONTENT.value)
+    else:
+      print(f"FAILED to submit {answer} for {shortname}")
+      self.set_status(http.client.BAD_REQUEST.value)
+
+class SubmitHistoryHandler(tornado.web.RequestHandler):
+  @login.required("team", on_fail=http.client.UNAUTHORIZED)
+  def get(self, shortname):
+    state = self.team.get_puzzle_state(shortname)
+    if not state:
+      raise tornado.web.HTTPError(http.client.NOT_FOUND)
+    self.set_header("Content-Type", "application/json")
+    self.write(json.dumps(state.submit_history))
 
 
 class ClientDebugJS(tornado.web.RequestHandler):
@@ -91,6 +127,8 @@ def GetHandlers(event_dir, debug, compiled_js, event_css):
     (r"/client.js", ClientJS, {"compiled_js": compiled_js}),
     (r"/event.css", EventCSS, {"event_css": event_css}),
     (r"/submit", SubmitHandler),
+    (r"/submit_history/(.*)", SubmitHistoryHandler),
+    (r"/wait/(\d+)", WaitHandler),
     ]
   if debug:
     handlers.append((r"/client-debug.js", ClientDebugJS))

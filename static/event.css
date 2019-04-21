@@ -18,7 +18,7 @@ body {
     top: 0;
 }
 
-div.submit {
+table.submit-history {
     padding: 20px;
     width: 600px;
 }

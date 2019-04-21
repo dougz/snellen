@@ -1,9 +1,12 @@
+import asyncio
 import base64
 import bcrypt
 import functools
 import http.client
+import json
 import os
 import time
+from collections import deque
 
 import tornado.web
 
@@ -61,7 +64,7 @@ class Session:
   COOKIE_NAME = "SESSION"
 
   def __init__(self, user=None, *caps):
-    self.key = base64.urlsafe_b64encode(os.urandom(16))
+    self.key = base64.urlsafe_b64encode(os.urandom(18))
     self.BY_KEY[self.key] = self
     self.user = user
     self.team = None
@@ -70,8 +73,19 @@ class Session:
     self.expires = time.time() + self.SESSION_TIMEOUT
     self.original_target = None
 
+    self.wait_queue = deque()
+    self.wait_serial = 1
+    self.wait_event = asyncio.Event()
+
   def set_cookie(self, req):
     req.set_secure_cookie(self.COOKIE_NAME, self.key)
+
+  def send_message(self, obj):
+    if not isinstance(obj, str):
+      obj = json.dumps(obj)
+    self.wait_queue.append((self.wait_serial, obj))
+    self.wait_serial += 1
+    self.wait_event.set()
 
   @classmethod
   def from_request(cls, req):
@@ -84,7 +98,9 @@ class Session:
     key = req.get_secure_cookie(cls.COOKIE_NAME)
     if key:
       req.clear_cookie(cls.COOKIE_NAME)
-      cls.BY_KEY.pop(key, None)
+      session = cls.BY_KEY.pop(key, None)
+      if session:
+        if session.team: session.team.detach_session(session)
 
 
 # A decorator that can be applied to a request handler's get() or
@@ -92,11 +108,13 @@ class Session:
 # account with a given capability.  The browser is redirected to the
 # login or access-denied page as appropriate.
 class required:
-  def __init__(self, cap=None):
+  def __init__(self, cap=None, on_fail=None):
     self.cap = cap
+    self.on_fail = on_fail
 
-  @staticmethod
-  def bounce(req):
+  def bounce(self, req):
+    if self.on_fail is not None:
+      raise tornado.web.HTTPError(self.on_fail)
     session = Session(None)
     session.set_cookie(req)
     session.original_target = req.request.uri
@@ -155,6 +173,7 @@ class LoginSubmit(tornado.web.RequestHandler):
         session.team = team
         session.capabilities = {"team"}
         session.bad_login = False
+        team.attach_session(session)
         self.redirect(session.original_target or "/")
       else:
         session.bad_login = True

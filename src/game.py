@@ -1,4 +1,5 @@
 import configparser
+import json
 import os
 import re
 import unicodedata
@@ -7,6 +8,18 @@ import bs4
 
 import login
 from state import save_state
+
+class PuzzleState:
+  CLOSED = "closed"
+  OPEN = "open"
+  SOLVED = "solved"
+
+  def __init__(self, team, puzzle):
+    self.team = team
+    self.puzzle = puzzle
+    self.state = self.CLOSED
+    self.submit_history = []
+
 
 class Team(login.LoginUser):
   BY_USERNAME = {}
@@ -26,8 +39,22 @@ class Team(login.LoginUser):
     self.team_name = team_name
     self.location = location
 
-    self.puzzles_open = set()
+    # Create a PuzzleState object for all puzzles that exist.
+    self.puzzle_state = {}
+    for puzzle in Puzzle.all_puzzles():
+      self.puzzle_state[puzzle] = PuzzleState(self, puzzle)
 
+    self.active_sessions = set()
+
+  def attach_session(self, session):
+    self.active_sessions.add(session)
+  def detach_session(self, session):
+    self.active_sessions.remove(session)
+
+  def send_message(self, msg):
+    msg = json.dumps(msg)
+    for s in self.active_sessions:
+      s.send_message(msg)
 
   # This method is exported into the file that's used to create all
   # the teams.
@@ -35,13 +62,43 @@ class Team(login.LoginUser):
   def add_team(cls, username, password, team_name, location):
     if username not in cls.BY_USERNAME:
       print(f"  Adding team {username} \"{team_name}\"")
-      Team(username, login.make_hash(password), team_name, location)
+      t = Team(username, login.make_hash(password), team_name, location)
+      t.set_puzzle_state("sample", PuzzleState.OPEN)
 
   @classmethod
   def get_by_username(cls, username):
     return cls.BY_USERNAME.get(username)
 
+  @save_state
+  def submit_answer(self, now, shortname, answer):
+    puzzle = Puzzle.get_by_shortname(shortname)
+    if not puzzle:
+      print(f"no puzzle {shortname}")
+      return False
 
+    state = self.puzzle_state[puzzle]
+    if state.state != state.OPEN:
+      print(f"puzzle {shortname} {state.state} for {self.username}")
+      return False
+
+    state.submit_history.append((now, answer))
+    self.send_message({"method": "history_change",
+                       "puzzle_id": shortname})
+    return True
+
+  @save_state
+  def set_puzzle_state(self, now, shortname, new_state):
+    puzzle = Puzzle.get_by_shortname(shortname)
+    if not puzzle:
+      print(f"can't set state for {shortname}")
+      return
+    state = self.puzzle_state[puzzle]
+    state.state = new_state
+
+  def get_puzzle_state(self, shortname):
+    puzzle = Puzzle.get_by_shortname(shortname)
+    if not puzzle: return None
+    return self.puzzle_state[puzzle]
 
 
 class Puzzle:
@@ -92,6 +149,10 @@ class Puzzle:
   @classmethod
   def get_by_shortname(cls, shortname):
     return cls.BY_SHORTNAME.get(shortname)
+
+  @classmethod
+  def all_puzzles(cls):
+    return cls.BY_SHORTNAME.values()
 
   @staticmethod
   def canonicalize_answer(text):
