@@ -1,6 +1,7 @@
 import http.client
 import json
 import os
+import re
 import tornado.web
 
 import game
@@ -59,6 +60,13 @@ class SubmitHandler(tornado.web.RequestHandler):
   @login.required("team", on_fail=http.client.UNAUTHORIZED)
   def post(self):
     answer = self.args["answer"]
+
+    # Worst-case option for entering a single-emoji answer: enter the
+    # code point preceded by "U+" (eg, "U+1F460").
+    m = re.match(r"^U\+([0-9a-fA-F]{4,5})$", answer)
+    if m:
+      answer = chr(int(m.group(1), 16))
+
     shortname = self.args["puzzle_id"]
     success = self.team.submit_answer(shortname, answer)
     if success:
