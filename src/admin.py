@@ -53,7 +53,8 @@ class StopServer(tornado.web.RequestHandler):
   def get(self):
     self.answer_checking.stop()
     loop = tornado.ioloop.IOLoop.current()
-    loop.call_later(0.5, loop.stop)
+    loop.call_later(1.5, loop.stop)
+    self.write("Stopping server\u2026")
 
 
 def GetHandlers(answer_checking):
