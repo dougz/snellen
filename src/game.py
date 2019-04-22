@@ -3,6 +3,7 @@ import heapq
 import json
 import os
 import re
+import time
 import unicodedata
 
 import bs4
@@ -39,7 +40,8 @@ class Submission:
     self.submit_time = now
     self.extra_response = None
 
-    delay = self.check_delay()
+    delay = self.check_delay(now)
+
     if delay is None:
       self.check_time = now
       self.check_answer(now)
@@ -48,12 +50,18 @@ class Submission:
       heapq.heappush(self.GLOBAL_SUBMIT_QUEUE, (self.check_time, self))
       self.team.send_message({"method": "history_change", "puzzle_id": self.puzzle.shortname})
 
-  def check_delay(self):
+  def check_delay(self, now):
     previous = len(self.puzzle_state.submissions)
     if previous < 3:
       return None
     else:
-      return (previous-2) * 10
+      last_check = now
+      for sub in self.puzzle_state.submissions:
+        if sub.check_time > last_check:
+          last_check = sub.check_time
+      delay = last_check - now + ((previous-2) * 10)
+      if delay < 0: return None
+      return delay
 
   def check_answer(self, now):
     answer = Puzzle.canonicalize_answer(self.answer)
@@ -75,6 +83,16 @@ class Submission:
                        "state": self.state,
                        "response": self.extra_response})
 
+  @classmethod
+  def process_pending_submits(cls):
+    now = time.time()
+    q = cls.GLOBAL_SUBMIT_QUEUE
+    while q and q[0][0] <= now:
+      _, sub = heapq.heappop(q)
+      # It's possible for sub's check_time to have changed.  If it's
+      # been moved further into the future, just drop this event.
+      if sub.check_time <= now:
+        sub.check_answer(now)
 
 
 class Team(login.LoginUser):

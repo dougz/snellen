@@ -18,7 +18,7 @@ import login
 from state import save_state
 
 
-def make_app(event_dir, **kwargs):
+def make_app(event_dir, answer_checking, **kwargs):
   with open("bin/client-compiled.js", "rb") as f:
     compiled_js = f.read()
   with open("static/event.css", "rb") as f:
@@ -26,7 +26,7 @@ def make_app(event_dir, **kwargs):
 
   return tornado.web.Application(
     login.GetHandlers() +
-    admin.GetHandlers() +
+    admin.GetHandlers(answer_checking) +
     event.GetHandlers(event_dir, kwargs.get("debug"), compiled_js, event_css),
     **kwargs)
 
@@ -87,7 +87,11 @@ def main():
     print("Enabling root user...")
     login.AdminUser.enable_root(login.make_hash(root_password))
 
+  answer_checking = tornado.ioloop.PeriodicCallback(
+    game.Submission.process_pending_submits, 1000)
+
   app = make_app(event_dir,
+                 answer_checking,
                  template_path=template_path,
                  cookie_secret=cookie_secret,
                  debug=debug,
@@ -98,6 +102,9 @@ def main():
   server = tornado.httpserver.HTTPServer(app)
   socket = tornado.netutil.bind_unix_socket("/tmp/snellen", mode=0o666)
   server.add_socket(socket)
+
+  answer_checking.start()
+
   print("Serving...")
   tornado.ioloop.IOLoop.instance().start()
 

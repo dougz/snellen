@@ -46,18 +46,22 @@ class CreateUser(tornado.web.RequestHandler):
 
 
 class StopServer(tornado.web.RequestHandler):
+  def initialize(self, answer_checking):
+    self.answer_checking = answer_checking
+
   @login.required("admin")
   def get(self):
+    self.answer_checking.stop()
     loop = tornado.ioloop.IOLoop.current()
     loop.call_later(0.5, loop.stop)
 
 
-def GetHandlers():
+def GetHandlers(answer_checking):
   return [
     (r"/admin", AdminHome),
     (r"/admin_users", AdminUsers),
     (r"/create_user", CreateUser),
-    (r"/stop_server", StopServer),
+    (r"/stop_server", StopServer, {"answer_checking": answer_checking}),
     (r"/teams", ShowTeams),
     (r"/puzzles", ShowPuzzles),
     ]

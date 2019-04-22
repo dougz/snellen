@@ -93,6 +93,11 @@ class TimeFormatter {
 	var l = txt.length;
 	return txt.substr(0, l-2) + txt.substr(l-2, 2).toLowerCase();
     }
+    duration(s) {
+	var min = Math.trunc(s/60);
+	var sec = Math.trunc(s%60);
+	return "" + min + ":" + (""+sec).padStart(2, "0");
+    }
 }
 
 class SubmitDialog {
@@ -109,6 +114,11 @@ class SubmitDialog {
 	/** @type{Element|undefined} */
 	this.history = null;
 
+	/** @type{number|null} */
+	this.timer = null;
+	/** @type{Array} */
+	this.counters = null;
+
 	this.timestamp_fmt = new goog.i18n.DateTimeFormat("EEE hh:mm:ss aa");
     }
 
@@ -123,7 +133,7 @@ class SubmitDialog {
 	this.history = goog.dom.createDom("TABLE", {"class": "submissions"});
 	content.appendChild(this.history);
 
-	this.input = goog.dom.createDom("INPUT", {"name": "answer"}, "");
+	this.input = goog.dom.createDom("INPUT", {id: "answer", "name": "answer"}, "");
 	content.appendChild(this.input);
 	goog.events.listen(this.input, goog.events.EventType.KEYDOWN, goog.bind(this.onkeydown, this));
 
@@ -145,34 +155,70 @@ class SubmitDialog {
 	goog.net.XhrIo.send("/submit_history/" + puzzle_id, goog.bind(function(e) {
 	    var code = e.target.getStatus();
 	    if (code == 200) {
-		this.history.innerHTML = "";
-		var entries = e.target.getResponseJson();
-		for (var i = 0; i < entries.length; ++i) {
-		    var sub = /** @type{Submission} */ (entries[i]);
-
-		    var answer = entries[i][1];
-		    var tr = goog.dom.createDom(
-			"TR", null,
-			goog.dom.createDom("TD", {className: "submit-time"},
-					   time_formatter.format(sub.submit_time)),
-			goog.dom.createDom("TD", {className: "submit-state"},
-					   goog.dom.createDom("SPAN", {className: "submit-" + sub.state},
-							      sub.state)),
-			goog.dom.createDom("TD", {className: "submit-answer"},
-					   sub.answer));
-		    this.history.appendChild(tr);
-
-		    if (sub.response) {
-			var td = goog.dom.createDom("TD", {className: "submit-extra",
-							   colSpan: 3});
-			td.innerHTML = sub.response;
-			this.history.appendChild(goog.dom.createDom("TR", null, td));
-		    }
-		}
-		this.dialog.reposition();
+		this.render_entries(e.target.getResponseJson());
 	    }
 	}, this));
     }
+
+    /** @param{Array<Submission>} entries */
+    render_entries(entries) {
+	if (this.timer) {
+	    clearInterval(this.timer);
+	    this.timer = null;
+	}
+	this.counters = [];
+
+	this.history.innerHTML = "";
+	for (var i = 0; i < entries.length; ++i) {
+	    var sub = /** @type{Submission} */ (entries[i]);
+	    var el = null;
+	    if (sub.state == "pending") {
+		el = goog.dom.createDom("SPAN", {className: "submit-timer"});
+		this.counters.push([sub.check_time, el])
+	    }
+
+	    var tr = goog.dom.createDom(
+		"TR", null,
+		goog.dom.createDom("TD", {className: "submit-time"},
+				   time_formatter.format(sub.submit_time)),
+		goog.dom.createDom("TD", {className: "submit-state"},
+				   el,
+				   goog.dom.createDom("SPAN", {className: "submit-" + sub.state},
+						      sub.state)),
+		goog.dom.createDom("TD", {className: "submit-answer"},
+				   sub.answer));
+	    this.history.appendChild(tr);
+
+	    if (sub.response) {
+		var td = goog.dom.createDom("TD", {className: "submit-extra",
+						   colSpan: 3});
+		td.innerHTML = sub.response;
+		this.history.appendChild(goog.dom.createDom("TR", null, td));
+	    }
+	}
+	this.dialog.reposition();
+
+	if (this.counters.length > 0) {
+	    this.update_counters();
+	    this.timer = setInterval(goog.bind(this.update_counters, this), 1000);
+	}
+    }
+
+    update_counters() {
+	var now = (new Date()).getTime() / 1000.0;
+	for (var i = 0; i < this.counters.length; ++i) {
+	    var check_time = this.counters[i][0] + 1.0;
+	    var el = this.counters[i][1];
+	    var remain = null;
+	    if (check_time > now) {
+		remain = time_formatter.duration(check_time - now);
+	    } else {
+		remain = "0:00";
+	    }
+	    el.innerText = remain;
+	}
+    }
+
 
     submit() {
 	var answer = this.input.value;
@@ -203,6 +249,10 @@ class SubmitDialog {
 
     close() {
 	this.dialog.setVisible(false);
+	if (this.timer) {
+	    clearInterval(this.timer);
+	    this.timer = null;
+	}
     }
 }
 

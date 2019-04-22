@@ -63,9 +63,8 @@ class SubmitHandler(tornado.web.RequestHandler):
 
     # Worst-case option for entering a single-emoji answer: enter the
     # code point preceded by "U+" (eg, "U+1F460").
-    m = re.match(r"^U\+([0-9a-fA-F]{4,5})$", answer)
-    if m:
-      answer = chr(int(m.group(1), 16))
+    answer = re.sub(r"[Uu]\+([0-9a-fA-F]{4,5})",
+                    lambda m: chr(int(m.group(1), 16)), answer)
 
     shortname = self.args["puzzle_id"]
     success = self.team.submit_answer(shortname, answer)
