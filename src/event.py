@@ -10,7 +10,14 @@ import login
 class EventHome(tornado.web.RequestHandler):
   @login.required("team")
   def get(self):
-    self.render("home.html", team=self.team)
+    script = """<script>\nvar puzzle_id = null;\n</script>\n"""
+    if self.application.settings.get("debug"):
+      script += ("""<script src="/closure/goog/base.js"></script>\n"""
+                 """<script src="/client-debug.js"></script>""")
+    else:
+      script += """<script src="/client.js"></script>"""
+
+    self.render("home.html", team=self.team, script=script)
 
 class PuzzlePage(tornado.web.RequestHandler):
   @login.required("team")
@@ -45,7 +52,8 @@ class WaitHandler(tornado.web.RequestHandler):
       if q:
         self.set_header("Content-Type", "application/json")
         self.write(b"[")
-        for ser, obj in q:
+        for i, (ser, obj) in enumerate(q):
+          if i > 0: self.write(b",")
           self.write(f"[{ser},{obj}]".encode("utf-8"))
         self.write(b"]")
         return
@@ -81,9 +89,11 @@ class SubmitHistoryHandler(tornado.web.RequestHandler):
     if not state:
       raise tornado.web.HTTPError(http.client.NOT_FOUND)
     self.set_header("Content-Type", "application/json")
+    self.write("[" + json.dumps(state.state == state.OPEN) + ",")
     self.write("[" +
                ",".join(sub.to_json() for sub in state.submissions) +
                "]")
+    self.write("]")
 
 class ClientDebugJS(tornado.web.RequestHandler):
   @login.required("team")

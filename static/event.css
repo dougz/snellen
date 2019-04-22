@@ -22,29 +22,41 @@ table.submissions {
     padding: 20px;
 }
 table.submissions td { vertical-align: middle; }
+table.submissions th { text-align: left; }
+
+.submit-empty {
+    padding-top: 8px;
+    font-style: italic;
+    text-align: center;
+}
 
 .submit-time {
-    padding-top: 8px;
     width: 140px;
+}
+td.submit-time {
+    padding-top: 8px;
 }
 .submit-state {
     width: 120px;
-    text-align: right;
+}
+td.submit-state {
     padding-right: 8px;
 }
 .submit-answer {
+    width: 400px;
+}
+td.submit-answer {
     font-weight: bold;
     font-family: Consolas, monospace;
-    width: 400px;
 }
 
 .submit-correct {
     padding: 0px 4px;
     font-weight: bold;
     font-size: 70%;
-    border: 1px solid #009900;
+    border: 1px solid #006600;
     border-radius: 4px;
-    color: #009900;
+    color: #003300;
     background-color: #ddffdd;
     text-transform: uppercase;
 }
@@ -53,9 +65,9 @@ table.submissions td { vertical-align: middle; }
     padding: 0px 4px;
     font-weight: bold;
     font-size: 70%;
-    border: 1px solid #999900;
+    border: 1px solid #666600;
     border-radius: 4px;
-    color: #999900;
+    color: #333300;
     background-color: #ffffdd;
     text-transform: uppercase;
 }
@@ -66,7 +78,7 @@ table.submissions td { vertical-align: middle; }
     font-size: 70%;
     border: 1px solid #990000;
     border-radius: 4px;
-    color: #990000;
+    color: #660000;
     background-color: #ffdddd;
     text-transform: uppercase;
 }
@@ -93,7 +105,6 @@ table.submissions td { vertical-align: middle; }
 }
 
 input#answer {
-    z-index: 10000;
     font-family: monospace;
 }
 

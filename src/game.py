@@ -22,12 +22,18 @@ class PuzzleState:
     self.state = self.CLOSED
     self.submissions = []
 
+  def advance(self):
+    if self.state == self.OPEN:
+      self.state = self.SOLVED
+      self.team.send_message({"method": "solve", "title": self.puzzle.title})
+
 
 class Submission:
   PENDING = "pending"
   PARTIAL = "partial"
   INCORRECT = "incorrect"
   CORRECT = "correct"
+  MOOT = "moot"
 
   GLOBAL_SUBMIT_QUEUE = []
 
@@ -75,6 +81,8 @@ class Submission:
     else:
       self.state = self.INCORRECT
     self.team.send_message({"method": "history_change", "puzzle_id": self.puzzle.shortname})
+    if self.state == self.CORRECT:
+      self.puzzle_state.advance()
 
   def to_json(self):
     return json.dumps({"submit_time": self.submit_time,
@@ -89,6 +97,7 @@ class Submission:
     q = cls.GLOBAL_SUBMIT_QUEUE
     while q and q[0][0] <= now:
       _, sub = heapq.heappop(q)
+      if sub.state != cls.PENDING: continue
       # It's possible for sub's check_time to have changed.  If it's
       # been moved further into the future, just drop this event.
       if sub.check_time <= now:
@@ -241,6 +250,8 @@ class Puzzle:
   @staticmethod
   def respace_text(text):
     return " ".join(text.split()).strip()
+
+
 
 
 

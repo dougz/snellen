@@ -24,7 +24,6 @@ class Waiter {
 
     waitcomplete() {
         if (this.xhr.getStatus() == 401) {
-            alert("Login expired; reload page.");
             return;
         }
 
@@ -66,7 +65,10 @@ class Waiter {
 
 class Dispatcher {
     constructor() {
-	this.methods = {"history_change": this.history_change};
+	this.methods = {
+	    "history_change": this.history_change,
+	    "solve": this.solve,
+	}
     }
 
     /** @param{Message} msg */
@@ -76,10 +78,15 @@ class Dispatcher {
 
     /** @param{Message} msg */
     history_change(msg) {
-	console.log("update history for puzzle " + msg.puzzle_id);
 	if (msg.puzzle_id == puzzle_id) {
 	    submit_dialog.update_history();
 	}
+    }
+
+    /** @param{Message} msg */
+    solve(msg) {
+	// TODO(dougz): popup instead of alert
+	setTimeout(function() {alert("\"" + msg.title + "\" was solved!");}, 50);
     }
 }
 
@@ -110,6 +117,8 @@ class SubmitDialog {
 	this.dialog = null;
 	/** @type{Element|undefined} */
 	this.input = null;
+	/** @type{Element|undefined} */
+	this.submit_div = null;
 
 	/** @type{Element|undefined} */
 	this.history = null;
@@ -133,13 +142,17 @@ class SubmitDialog {
 	this.history = goog.dom.createDom("TABLE", {"class": "submissions"});
 	content.appendChild(this.history);
 
+	this.submit_div = goog.dom.createDom("DIV");
+
 	this.input = goog.dom.createDom("INPUT", {id: "answer", "name": "answer"}, "");
-	content.appendChild(this.input);
+	this.submit_div.appendChild(this.input);
 	goog.events.listen(this.input, goog.events.EventType.KEYDOWN, goog.bind(this.onkeydown, this));
 
 	var b = goog.dom.createDom("BUTTON", null, "Submit");
 	goog.events.listen(b, goog.events.EventType.CLICK, goog.bind(this.submit, this));
-	content.appendChild(b);
+	this.submit_div.appendChild(b);
+
+	content.appendChild(this.submit_div);
 
 	b = goog.dom.createDom("BUTTON", null, "Close");
 	content.appendChild(b);
@@ -155,7 +168,13 @@ class SubmitDialog {
 	goog.net.XhrIo.send("/submit_history/" + puzzle_id, goog.bind(function(e) {
 	    var code = e.target.getStatus();
 	    if (code == 200) {
-		this.render_entries(e.target.getResponseJson());
+		var response = e.target.getResponseJson();
+		this.render_entries(response[1]);
+		if (response[0]) {
+		    this.submit_div.style.display = "block";
+		} else {
+		    this.submit_div.style.display = "none";
+		}
 	    }
 	}, this));
     }
@@ -169,6 +188,23 @@ class SubmitDialog {
 	this.counters = [];
 
 	this.history.innerHTML = "";
+
+	this.history.appendChild(
+	    goog.dom.createDom("TR", null,
+			       goog.dom.createDom("TH", {className: "submit-time"}, "time"),
+			       goog.dom.createDom("TH", {className: "submit-state"}, "result"),
+			       goog.dom.createDom("TH", {className: "submit-answer"}, "submission")));
+
+
+	if (entries.length == 0) {
+	    this.history.appendChild(
+		goog.dom.createDom("TR", null,
+				   goog.dom.createDom("TD", {className: "submit-empty", colSpan: 3},
+						      "No submissions for this puzzle.")));
+	}
+
+
+
 	for (var i = 0; i < entries.length; ++i) {
 	    var sub = /** @type{Submission} */ (entries[i]);
 	    var el = null;
@@ -248,6 +284,7 @@ class SubmitDialog {
     }
 
     close() {
+	console.log("closing submit window");
 	this.dialog.setVisible(false);
 	if (this.timer) {
 	    clearInterval(this.timer);

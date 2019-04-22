@@ -7,6 +7,8 @@ class Message {
 	this.method;
 	/** @type{string} */
 	this.puzzle_id;
+	/** @type{string} */
+	this.title;
     }
 }
 
