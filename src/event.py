@@ -75,7 +75,8 @@ class SubmitHandler(tornado.web.RequestHandler):
                     lambda m: chr(int(m.group(1), 16)), answer)
 
     shortname = self.args["puzzle_id"]
-    success = self.team.submit_answer(shortname, answer)
+    submit_id = self.team.next_submit_id()
+    success = self.team.submit_answer(submit_id, shortname, answer)
     if success:
       self.set_status(http.client.NO_CONTENT.value)
     else:
@@ -94,6 +95,13 @@ class SubmitHistoryHandler(tornado.web.RequestHandler):
                ",".join(sub.to_json() for sub in state.submissions) +
                "]")
     self.write("]")
+
+class SubmitCancelHandler(tornado.web.RequestHandler):
+  @login.required("team", on_fail=http.client.UNAUTHORIZED)
+  def get(self, shortname, submit_id):
+    submit_id = int(submit_id)
+    self.team.cancel_submission(submit_id, shortname)
+
 
 class ClientDebugJS(tornado.web.RequestHandler):
   @login.required("team")
@@ -145,7 +153,8 @@ def GetHandlers(event_dir, debug, compiled_js, event_css):
     (r"/client.js", ClientJS, {"compiled_js": compiled_js}),
     (r"/event.css", EventCSS, {"event_css": event_css}),
     (r"/submit", SubmitHandler),
-    (r"/submit_history/(.*)", SubmitHistoryHandler),
+    (r"/submit_history/([a-z][a-z0-9_]*)", SubmitHistoryHandler),
+    (r"/submit_cancel/([a-z][a-z0-9_]*)/(\d+)", SubmitCancelHandler),
     (r"/wait/(\d+)", WaitHandler),
     ]
   if debug:

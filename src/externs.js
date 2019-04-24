@@ -24,6 +24,8 @@ class Submission {
 	this.state;
 	/** @type{string} */
 	this.response;
+	/** @type{number} */
+	this.submit_id;
     }
 }
 

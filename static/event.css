@@ -50,6 +50,11 @@ td.submit-answer {
     font-family: Consolas, monospace;
 }
 
+.submit-cancel {
+    color: #999999;
+    padding-right: 8px;
+}
+
 .submit-correct {
     padding: 0px 4px;
     font-weight: bold;

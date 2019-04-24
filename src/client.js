@@ -2,10 +2,8 @@ goog.require("goog.dom");
 goog.require("goog.events");
 goog.require("goog.net.XhrIo");
 goog.require("goog.ui.ModalPopup");
-goog.require("goog.ui.Dialog");
 goog.require("goog.json.Serializer");
 goog.require("goog.i18n.DateTimeFormat");
-goog.require("goog.i18n.DateTimePatterns");
 
 class Waiter {
     constructor(dispatcher) {
@@ -30,7 +28,7 @@ class Waiter {
         if (this.xhr.getStatus() != 200) {
             this.backoff = Math.min(10000, Math.floor(this.backoff*1.5));
 
-	    // XXX
+	    // XXX cancel early for development
 	    if (this.backoff > 1000) {
 		console.log("aborting retries");
 		return;
@@ -203,7 +201,11 @@ class SubmitDialog {
 						      "No submissions for this puzzle.")));
 	}
 
-
+	var cancelsub = function(sub) {
+	    return function() {
+		goog.net.XhrIo.send("/submit_cancel/" + puzzle_id + "/" + sub.submit_id);
+	    };
+	};
 
 	for (var i = 0; i < entries.length; ++i) {
 	    var sub = /** @type{Submission} */ (entries[i]);
@@ -211,6 +213,15 @@ class SubmitDialog {
 	    if (sub.state == "pending") {
 		el = goog.dom.createDom("SPAN", {className: "submit-timer"});
 		this.counters.push([sub.check_time, el])
+	    }
+
+	    var answer = null;
+	    if (sub.state == "pending") {
+		var link = goog.dom.createDom("A", {className: "submit-cancel"}, "\u00d7");
+		goog.events.listen(link, goog.events.EventType.CLICK, cancelsub(sub));
+		answer = [link, sub.answer];
+	    } else {
+		answer = sub.answer;
 	    }
 
 	    var tr = goog.dom.createDom(
@@ -222,7 +233,7 @@ class SubmitDialog {
 				   goog.dom.createDom("SPAN", {className: "submit-" + sub.state},
 						      sub.state)),
 		goog.dom.createDom("TD", {className: "submit-answer"},
-				   sub.answer));
+				   answer));
 	    this.history.appendChild(tr);
 
 	    if (sub.response) {
@@ -284,7 +295,6 @@ class SubmitDialog {
     }
 
     close() {
-	console.log("closing submit window");
 	this.dialog.setVisible(false);
 	if (this.timer) {
 	    clearInterval(this.timer);

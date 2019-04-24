@@ -34,11 +34,13 @@ class Submission:
   INCORRECT = "incorrect"
   CORRECT = "correct"
   MOOT = "moot"
+  CANCELLED = "cancelled"
 
   GLOBAL_SUBMIT_QUEUE = []
 
-  def __init__(self, now, team, puzzle, answer):
+  def __init__(self, now, submit_id, team, puzzle, answer):
     self.state = self.PENDING
+    self.submit_id = submit_id
     self.team = team
     self.puzzle = puzzle
     self.puzzle_state = team.get_puzzle_state(puzzle)
@@ -46,26 +48,31 @@ class Submission:
     self.submit_time = now
     self.extra_response = None
 
-    delay = self.check_delay(now)
+    self.schedule_check()
+
+  def __lt__(self, other):
+    return self.submit_id < other.submit_id
+
+  def schedule_check(self):
+    delay = self.check_delay()
 
     if delay is None:
-      self.check_time = now
-      self.check_answer(now)
+      self.check_time = self.submit_time
+      self.check_answer(self.submit_time)
     else:
-      self.check_time = now + delay
+      self.check_time = self.submit_time + delay
       heapq.heappush(self.GLOBAL_SUBMIT_QUEUE, (self.check_time, self))
-      self.team.send_message({"method": "history_change", "puzzle_id": self.puzzle.shortname})
 
-  def check_delay(self, now):
+  def check_delay(self):
     previous = len(self.puzzle_state.submissions)
     if previous < 3:
       return None
     else:
-      last_check = now
+      last_check = self.submit_time
       for sub in self.puzzle_state.submissions:
         if sub.check_time > last_check:
           last_check = sub.check_time
-      delay = last_check - now + ((previous-2) * 10)
+      delay = last_check - self.submit_time + ((previous-2) * 10)
       if delay < 0: return None
       return delay
 
@@ -89,7 +96,8 @@ class Submission:
                        "answer": self.answer,
                        "check_time": self.check_time,
                        "state": self.state,
-                       "response": self.extra_response})
+                       "response": self.extra_response,
+                       "submit_id": self.submit_id})
 
   @classmethod
   def process_pending_submits(cls):
@@ -106,6 +114,8 @@ class Submission:
 
 class Team(login.LoginUser):
   BY_USERNAME = {}
+
+  NEXT_SUBMIT_ID = 1
 
   @save_state
   def __init__(self,
@@ -152,8 +162,15 @@ class Team(login.LoginUser):
   def get_by_username(cls, username):
     return cls.BY_USERNAME.get(username)
 
+  @classmethod
+  def next_submit_id(cls):
+    cls.NEXT_SUBMIT_ID += 1
+    return cls.NEXT_SUBMIT_ID - 1
+
   @save_state
-  def submit_answer(self, now, shortname, answer):
+  def submit_answer(self, now, submit_id, shortname, answer):
+    self.NEXT_SUBMIT_ID = max(self.NEXT_SUBMIT_ID, submit_id+1)
+
     puzzle = Puzzle.get_by_shortname(shortname)
     if not puzzle:
       print(f"no puzzle {shortname}")
@@ -164,8 +181,38 @@ class Team(login.LoginUser):
       print(f"puzzle {shortname} {state.state} for {self.username}")
       return False
 
-    state.submissions.append(Submission(now, self, puzzle, answer))
+    state.submissions.append(Submission(now, submit_id, self, puzzle, answer))
+    self.send_message({"method": "history_change", "puzzle_id": shortname})
     return True
+
+  @save_state
+  def cancel_submission(self, now, submit_id, shortname):
+    puzzle = Puzzle.get_by_shortname(shortname)
+    if not puzzle:
+      print(f"no puzzle {shortname}")
+      return False
+
+    state = self.puzzle_state[puzzle]
+    if state.state != state.OPEN:
+      print(f"puzzle {shortname} {state.state} for {self.username}")
+      return False
+
+    for i, sub in enumerate(state.submissions):
+      if sub.submit_id == submit_id and sub.state == sub.PENDING:
+        after = state.submissions[i+1:]
+        sub.state = sub.CANCELLED
+        del state.submissions[i:]
+
+        for sub in after:
+          if sub.state == sub.PENDING:
+            sub.schedule_check()
+          state.submissions.append(sub)
+        break
+    else:
+      print(f"failed to cancel submit {submit_id} puzzle {shortname} for {self.username}")
+      return
+
+    self.send_message({"method": "history_change", "puzzle_id": shortname})
 
   @save_state
   def set_puzzle_state(self, now, shortname, new_state):
