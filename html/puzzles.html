@@ -1,17 +1,13 @@
-<!DOCTYPE html>
-<html>
-  <head>
-  </head>
-  <body>
-    <h1>Puzzle list</h1>
-    <ul>
-      {% for p in puzzles.values() %}
-      <li>{{p.shortname}}: {{p.title}}</li>
-      {% end %}
-    </ul>
-  </body>
-</html>
+{% extends "admin_base.html" %}
 
+{% block title %}Puzzles{% end %}
 
+{% block content %}
 
+<ul>
+  {% for p in puzzles.values() %}
+  <li>{{p.shortname}}: {{p.title}}</li>
+  {% end %}
+</ul>
 
+{% end %}

@@ -1,0 +1,14 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Admin Home{% end %}
+
+{% block content %}
+<ul>
+  <li><a href="/teams">Team list</a></li>
+  <li><a href="/puzzles">Puzzle list</a></li>
+  <li><a href="/admin_users">Admin users</a></li>
+  {% if user.has_role("control_event") %}
+  <li><a href="/stop_server">Stop server</a></li>
+  {% end %}
+</ul>
+{% end %}

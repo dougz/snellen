@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{% block title %}{% end %}</title>
+    <link rel=stylesheet href="/admin.css">
+    {% if script %}{% raw script %}{% end %}
+  </head>
+  <body>
+    <span class=username>
+      {{user.fullname}} &bull; <a href="/logout">logout</a>
+    </span>
+    <h1>{% block title %}{% end %}</h1>
+    &bull;
+    <a href="/admin">home</a>
+    <hr>
+    {% block content %}{% end %}
+  </body>
+</html>
+
+

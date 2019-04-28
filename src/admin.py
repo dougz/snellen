@@ -7,7 +7,7 @@ import login
 class AdminHome(tornado.web.RequestHandler):
   @login.required("admin")
   def get(self):
-    self.render("admin.html", user=self.user)
+    self.render("admin_home.html", user=self.user, script=None)
 
 
 class AdminUsers(tornado.web.RequestHandler):
@@ -41,13 +41,15 @@ class UpdateAdminRole(tornado.web.RequestHandler):
 class ShowTeams(tornado.web.RequestHandler):
   @login.required("admin")
   def get(self):
-    self.render("teams.html", teams=game.Team.BY_USERNAME)
+    self.render("teams.html", user=self.user,
+                teams=game.Team.BY_USERNAME, script=None)
 
 
 class ShowPuzzles(tornado.web.RequestHandler):
   @login.required("admin")
   def get(self):
-    self.render("puzzles.html", puzzles=game.Puzzle.BY_SHORTNAME)
+    self.render("puzzles.html", user=self.user,
+                puzzles=game.Puzzle.BY_SHORTNAME, script=None)
 
 
 class CreateUser(tornado.web.RequestHandler):

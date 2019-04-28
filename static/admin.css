@@ -5,3 +5,41 @@ body {
 .admin-role {
     text-align: center;
 }
+
+span.username {
+    float: right;
+    font-size: 84%;
+}
+
+hr {
+    color: #999;
+}
+
+h1 {
+    font-size: 120%;
+    font-weight: bold;
+    display: inline;
+}
+
+div.box {
+    display: inline-block;
+    background-color: #eee;
+    border: 1px solid black;
+    padding: 16px;
+    margin: 16px;
+}
+
+div.box h2 {
+    font-size: 1em;
+    margin: 0 0 8px 0;
+}
+
+div.box label {
+    width: 12em;
+    font-size: 84%;
+    font-weight: normal;
+}
+
+div.box button {
+    margin-top: 8px;
+}

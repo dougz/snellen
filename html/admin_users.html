@@ -1,56 +1,57 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>Admin users</title>
-    <link rel=stylesheet href="/admin.css">
-    {% raw script %}
-  </head>
-  <body>
-    <table id="user-roles">
-      <tr>
-	<th>username</th>
-	<th>full name</th>
-	{% for role in roles %}
-	<th>{{role}}</th>
-	{% end %}
-      </tr>
-      {% for u in users %}
-      <tr>
-	<td>{{u.username}}</td>
-	<td>{{u.fullname}}</td>
-	{% for role in roles %}
-	<td class="admin-role">
-	  {% if user.has_role("create_users") and (u is not user or role != "create_users") %}
-	  <input type="checkbox" id="{{u.username}}::{{role}}"{% if u.has_role(role) %} checked{% end %}>
-	  {% else %}
-	  {% if u.has_role(role) %}&#x2713;{% end %}
-	  {% end %}
-	</td>
-	{% end %}
-      </tr>
-      {% end %}
-    </table>
+{% extends "admin_base.html" %}
 
-    {% if user.has_role("create_users") %}
-    <hr>
-    <h2>Create new admin user</h2>
-    <form action="/create_user" method="post">
-      <label for="username"><b>Username</b></label>
-      <input type="text" placeholder="Username" name="username" required>
-      <br/>
-      <label for="fullname"><b>Full Name</b></label>
-      <input type="text" placeholder="Fullname" name="fullname" required>
-      <br/>
-      <label for="password"><b>Password</b></label>
-      <input type="password" placeholder="Password" name="password" required>
-      <br/>
-      <button type="submit">Create</button>
-    </form>
+{% block title %}Admin Users{% end %}
+
+{% block content %}
+<table id="user-roles">
+  <tr>
+    <th>username</th>
+    <th>full name</th>
+    {% for role in roles %}
+    <th>{{role}}</th>
     {% end %}
+  </tr>
+  {% for u in users %}
+  <tr>
+    <td>{{u.username}}</td>
+    <td>{{u.fullname}}</td>
+    {% for role in roles %}
+    <td class="admin-role">
+      {% if user.has_role("create_users") and (u is not user or role != "create_users") %}
+      <input type="checkbox" id="{{u.username}}::{{role}}"{% if u.has_role(role) %} checked{% end %}>
+      {% else %}
+      {% if u.has_role(role) %}&#x2713;{% end %}
+      {% end %}
+    </td>
+    {% end %}
+  </tr>
+  {% end %}
+</table>
 
-  </body>
-</html>
+{% if user.has_role("create_users") %}
+<div class=box>
+<h2>Create new admin user</h2>
+<form action="/create_user" method="post">
+  <table>
+    <tr>
+      <td><label for="username"><b>Username</b></label></td>
+      <td><input type="text" placeholder="Username" name="username" required></td>
+    </tr>
+    <tr>
+      <td><label for="fullname"><b>Full Name</b></label></td>
+      <td><input type="text" placeholder="Fullname" name="fullname" required></td>
+    </tr>
+    <tr>
+      <td><label for="password"><b>Password</b></label></td>
+      <td><input type="password" placeholder="Password" name="password" required></td>
+    </tr>
+    <tr>
+      <td colspan=2><button type="submit">Create</button></td>
+    </tr>
+  </table>
+</form>
+</div>
 
+{% end %}
 
-
-
+{% end %}
