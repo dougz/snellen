@@ -18,6 +18,10 @@ import login
 from state import save_state
 
 
+assert sys.hexversion >= 0x03060700, "Need Python 3.6.7 or newer!"
+assert tornado.version_info >= (5, 0, 2, 0), "Need Tornado 5.0.2 or newer!"
+
+
 def make_app(event_dir, answer_checking, **kwargs):
   with open("bin/client-compiled.js", "rb") as f:
     compiled_js = f.read()
