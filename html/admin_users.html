@@ -1,9 +1,39 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <title>Admin users</title>
+    <link rel=stylesheet href="/admin.css">
+    {% raw script %}
   </head>
   <body>
-    <h1>Create new admin user</h1>
+    <table id="user-roles">
+      <tr>
+	<th>username</th>
+	<th>full name</th>
+	{% for role in roles %}
+	<th>{{role}}</th>
+	{% end %}
+      </tr>
+      {% for u in users %}
+      <tr>
+	<td>{{u.username}}</td>
+	<td>{{u.fullname}}</td>
+	{% for role in roles %}
+	<td class="admin-role">
+	  {% if user.has_role("create_users") and (u is not user or role != "create_users") %}
+	  <input type="checkbox" id="{{u.username}}::{{role}}"{% if u.has_role(role) %} checked{% end %}>
+	  {% else %}
+	  {% if u.has_role(role) %}&#x2713;{% end %}
+	  {% end %}
+	</td>
+	{% end %}
+      </tr>
+      {% end %}
+    </table>
+
+    {% if user.has_role("create_users") %}
+    <hr>
+    <h2>Create new admin user</h2>
     <form action="/create_user" method="post">
       <label for="username"><b>Username</b></label>
       <input type="text" placeholder="Username" name="username" required>
@@ -16,6 +46,8 @@
       <br/>
       <button type="submit">Create</button>
     </form>
+    {% end %}
+
   </body>
 </html>
 

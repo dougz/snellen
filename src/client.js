@@ -84,7 +84,7 @@ class Dispatcher {
     /** @param{Message} msg */
     solve(msg) {
 	// TODO(dougz): popup instead of alert
-	setTimeout(function() {alert("\"" + msg.title + "\" was solved!");}, 50);
+	setTimeout(function() {alert("\"" + msg.title + "\" was solved!");}, 250);
     }
 }
 
@@ -162,6 +162,7 @@ class SubmitDialog {
     }
 
     update_history() {
+	if (!this.built) return;
 	if (!this.dialog.isVisible()) return;
 	goog.net.XhrIo.send("/submit_history/" + puzzle_id, goog.bind(function(e) {
 	    var code = e.target.getStatus();

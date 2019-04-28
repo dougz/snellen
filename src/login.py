@@ -19,6 +19,9 @@ def make_hash(password):
 class AdminRoles:
   ADMIN = "admin"
   CREATE_USERS = "create_users"
+  CONTROL_EVENT = "control_event"
+
+  ROLES = [CREATE_USERS, CONTROL_EVENT]
 
 
 class LoginUser:
@@ -56,6 +59,16 @@ class AdminUser(LoginUser):
   def has_role(self, role):
     return role in self.roles
 
+  @save_state
+  def update_role(self, now, role, wanted):
+    if wanted:
+      self.roles.add(role)
+    else:
+      self.roles.discard(role)
+
+  @classmethod
+  def all_users(cls):
+    return cls.BY_USERNAME.values()
 
 
 class Session:

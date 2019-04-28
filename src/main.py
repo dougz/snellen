@@ -21,12 +21,17 @@ from state import save_state
 def make_app(event_dir, answer_checking, **kwargs):
   with open("bin/client-compiled.js", "rb") as f:
     compiled_js = f.read()
+  with open("bin/admin-compiled.js", "rb") as f:
+    compiled_admin_js = f.read()
   with open("static/event.css", "rb") as f:
     event_css = f.read()
+  with open("static/admin.css", "rb") as f:
+    admin_css = f.read()
 
+  debug = kwargs.get("debug")
   return tornado.web.Application(
     login.GetHandlers() +
-    admin.GetHandlers(answer_checking) +
+    admin.GetHandlers(debug, answer_checking, admin_css, compiled_admin_js) +
     event.GetHandlers(event_dir, kwargs.get("debug"), compiled_js, event_css),
     **kwargs)
 
