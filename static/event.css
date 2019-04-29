@@ -116,3 +116,53 @@ input#answer {
 .flavor {
     font-style: italic;
 }
+
+
+div.toasts {
+    width: 300px;
+    position: fixed;
+    right: 20px;
+    top: 8px;
+}
+
+div.toast {
+    margin: 12px 0px;
+    padding: 16px;
+    background-color: #2f98b4;
+    color: white;
+    box-shadow: #999999 0 0 12px 0;
+    box-sizing: border-box;
+    border-radius: 4px;
+    animation: fadeIn 0.5s ease-out forwards;
+}
+
+div.toasthidden {
+    margin: 12px 0px;
+    padding: 16px;
+    background-color: #2f98b4;
+    color: white;
+    box-shadow: #999999 0 0 12px 0;
+    box-sizing: border-box;
+    border-radius: 4px;
+    animation: fadeOut 0.5s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    0% {
+	opacity: 1;
+    }
+    100% {
+	opacity: 0;
+    }
+}
+
+

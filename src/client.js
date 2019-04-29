@@ -1,4 +1,5 @@
 goog.require("goog.dom");
+goog.require("goog.dom.classlist");
 goog.require("goog.events");
 goog.require("goog.net.XhrIo");
 goog.require("goog.ui.ModalPopup");
@@ -83,8 +84,7 @@ class Dispatcher {
 
     /** @param{Message} msg */
     solve(msg) {
-	// TODO(dougz): popup instead of alert
-	setTimeout(function() {alert("\"" + msg.title + "\" was solved!");}, 250);
+	toast_manager.add_toast("<b>" + msg.title + "</b> was solved!", 5000);
     }
 }
 
@@ -304,12 +304,53 @@ class SubmitDialog {
     }
 }
 
+class ToastManager {
+    constructor() {
+	/** @type{Element} */
+	this.toasts_div = goog.dom.createDom("DIV", {className: "toasts"});
+	document.body.appendChild(this.toasts_div);
+
+	/** @type{number} */
+	this.toasts = 0;
+	/** @type{Array<Element>} */
+	this.dead_toasts = [];
+    }
+
+    add_toast(message, timeout) {
+	var t = goog.dom.createDom("DIV", {className: "toast"});
+	t.innerHTML = message;
+	this.toasts += 1;
+	this.toasts_div.appendChild(t);
+	setTimeout(goog.bind(this.expire_toast, this, t), timeout);
+    }
+
+    expire_toast(t) {
+	goog.dom.classlist.addRemove(t, "toast", "toasthidden");
+	setTimeout(goog.bind(this.delete_toast, this, t), 600);
+    }
+
+    delete_toast(t) {
+	this.toasts -= 1;
+	this.dead_toasts.push(t);
+	// We only actually delete the toast elements once no toasts
+	// are visible, to prevent toasts from visibly moving around.
+	if (this.toasts == 0) {
+	    for (var i = 0; i < this.dead_toasts.length; ++i) {
+		goog.dom.removeNode(this.dead_toasts[i]);
+	    }
+	    this.dead_toasts = [];
+	}
+    }
+}
+
 var waiter = null;
 var submit_dialog = null;
 var time_formatter = null;
+var toast_manager = null;
 
 function initPage() {
     time_formatter = new TimeFormatter();
+    toast_manager = new ToastManager();
 
     submit_dialog = new SubmitDialog();
 
