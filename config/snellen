@@ -1,0 +1,22 @@
+server {
+  listen 80 default_server;
+  listen [::]:80 default_server;
+  #server_name snellen;
+
+  location ~ ^/closure/ {
+    root /path/to/closure-library-20190301/;
+  }
+
+  location ~ /wait {
+    proxy_pass http://unix:/tmp/snellen;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_read_timeout 3h;
+  }
+
+  location ~ / {
+    proxy_pass http://unix:/tmp/snellen;
+    proxy_set_header X-Real-IP $remote_addr;
+  }
+
+  error_page 502 /static/error.html;
+}
