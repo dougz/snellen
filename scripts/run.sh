@@ -27,11 +27,6 @@
 #      "username:password" to fill in by default on the login page.
 #      Useful when developing and you have to restart the server and
 #      log in a lot.
-#
-#  --port
-#      Use this to specify a port for the server to listen.  Use only
-#      for localhost testing, as in production serving uses UNIX
-#      sockets instead.
 
 
 exec python3 src/main.py \

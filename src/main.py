@@ -46,7 +46,6 @@ def main():
   root_password = None
   event_dir = None
   debug = False
-  port = None
   default_username = None
   default_password = None
 
@@ -56,7 +55,6 @@ def main():
                               "debug",
                               "default_credentials=",
                               "event_dir=",
-                              "port=",
                               "root_password=",
                               "template_path=",
                              ])
@@ -71,8 +69,6 @@ def main():
       event_dir = a
     elif o == "--debug":
       debug = True
-    elif o == "--port":
-      port = a
     elif o == "--default_credentials":
       default_username, default_password = a.split(":", 1)
     else:
@@ -113,11 +109,8 @@ def main():
                  default_password=default_password)
 
   server = tornado.httpserver.HTTPServer(app)
-  if port:
-    server.listen(port)
-  else:
-    socket = tornado.netutil.bind_unix_socket("/tmp/snellen", mode=0o666)
-    server.add_socket(socket)
+  socket = tornado.netutil.bind_unix_socket("/tmp/snellen", mode=0o666)
+  server.add_socket(socket)
 
   answer_checking.start()
 

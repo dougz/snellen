@@ -4,35 +4,58 @@
 
     `export SNELLEN_BASE=<the directory>`
 
-- Install the Python dependencies
+ - Install Python 3
 
-    `apt-get install python3-bs4 python3-bcrypt python3-lxml python3-tornado`
+    Linux: `apt-get install python3.7`
 
-    (-or- `pip3 install bs4 bcrypt lxml tornado`)
+    Mac: `brew install python3`
 
-- Install and symlink closure and closure-compiler in tools
+- Install the Python 3 libraries
+
+    Linux: `apt-get install python3-bs4 python3-bcrypt python3-lxml python3-tornado`
+
+    Mac: `pip3 install bs4 bcrypt lxml tornado`
+
+- Download and symlink closure and closure-compiler in tools
 
     Here is one such procedure:
 
-    1. Download the closure library:
+    1. Download (and unzip) the 20190301 closure library
+    [here](https://github.com/google/closure-library/archive/v20190301.zip).
 
-    `git clone https://github.com/google/closure-library`.
-
-    2. Download the closure compiler as described [here](https://github.com/google/closure-compiler).
+    2. Download (and unzip) the 20190301 closure compiler
+    [here](https://dl.google.com/closure-compiler/compiler-20190301.zip).
 
     3. Symlink them with something like:
 
     `cd $SNELLEN_BASE`
 
-    `mkdir tools`
+    `mkdir -p tools`
 
-    `ln -sf /path/to/closure-compiler-v20XXXX.jar tools/closure-compiler.jar`
+    `ln -sf /path/to/closure-compiler-v20190301.jar tools/closure-compiler.jar`
 
-    `ln -sf /path/to/closure-library/closure tools/closure`
+    `ln -sf /path/to/closure-library-20190301/closure tools/`
 
 - Run the recompile script
 
     `scripts/recompile.sh`
+
+- Install nginx
+
+    Linux: `apt-get install nginx`
+
+    Mac: `brew install nginx`
+
+- Install the nginx config file
+
+    Linux: Copy the `config/snellen` file to `/etc/nginx/sites-available`, and then create a symlink
+    to it from `/etc/nginx/sites-enabled`.
+
+    Mac: Copy the `config/snellen` file into `/usr/local/etc/nginx/servers/`.
+
+    In both cases, be sure that any of the static paths in the config file have been updated to
+    match your environment.  Also, if you already have nginx installed for other purposes, remove
+    the "default server" from the "listen" lines and uncomment the server_name directive.
 
 
 # Running the tests
@@ -42,8 +65,8 @@
 
 # Running the server
 
-To run locally:
+`sudo nginx`
 
-`scripts/run.sh --port=8888`
+`scripts/run.sh`
 
-Otherwise read the file header for more options!
+
