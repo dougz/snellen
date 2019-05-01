@@ -65,7 +65,7 @@
 
 # Running the server
 
-`sudo nginx`
+`sudo nginx`  (sudo needed to listen on port 80)
 
 `scripts/run.sh`
 
