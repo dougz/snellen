@@ -21,6 +21,7 @@ class PuzzleState:
     self.puzzle = puzzle
     self.state = self.CLOSED
     self.submissions = []
+    self.open_time = None
 
   def advance(self):
     if self.state == self.OPEN:
@@ -54,27 +55,16 @@ class Submission:
     return self.submit_id < other.submit_id
 
   def schedule_check(self):
-    delay = self.check_delay()
-
-    if delay is None:
-      self.check_time = self.submit_time
+    self.check_time = self.compute_check_time()
+    if self.check_time <= self.submit_time:
       self.check_answer(self.submit_time)
     else:
-      self.check_time = self.submit_time + delay
       heapq.heappush(self.GLOBAL_SUBMIT_QUEUE, (self.check_time, self))
 
-  def check_delay(self):
-    previous = len(self.puzzle_state.submissions)
-    if previous < 3:
-      return None
-    else:
-      last_check = self.submit_time
-      for sub in self.puzzle_state.submissions:
-        if sub.check_time > last_check:
-          last_check = sub.check_time
-      delay = last_check - self.submit_time + ((previous-2) * 10)
-      if delay < 0: return None
-      return delay
+  def compute_check_time(self):
+    count = sum(1 for i in self.puzzle_state.submissions
+                if i.state in (self.PENDING, self.INCORRECT))
+    return self.puzzle_state.open_time + count * 60
 
   def check_answer(self, now):
     answer = Puzzle.canonicalize_answer(self.answer)
@@ -132,6 +122,8 @@ class Team(login.LoginUser):
     self.team_name = team_name
     self.location = location
 
+    self.event_start = None
+
     # Create a PuzzleState object for all puzzles that exist.
     self.puzzle_state = {}
     for puzzle in Puzzle.all_puzzles():
@@ -156,7 +148,12 @@ class Team(login.LoginUser):
     if username not in cls.BY_USERNAME:
       print(f"  Adding team {username} \"{team_name}\"")
       t = Team(username, login.make_hash(password), team_name, location)
-      t.set_puzzle_state("sample", PuzzleState.OPEN)
+
+  @save_state
+  def start_event(self, now):
+    self.event_start = now
+    self.set_puzzle_state("sample", PuzzleState.OPEN)
+
 
   @classmethod
   def get_by_username(cls, username):
@@ -222,6 +219,8 @@ class Team(login.LoginUser):
       return
     state = self.puzzle_state[puzzle]
     state.state = new_state
+    if new_state == state.OPEN and not state.open_time:
+      state.open_time = now
 
   def get_puzzle_state(self, puzzle):
     if isinstance(puzzle, str):

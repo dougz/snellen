@@ -19,6 +19,13 @@ class EventHome(tornado.web.RequestHandler):
 
     self.render("home.html", team=self.team, script=script)
 
+class DebugStartEvent(tornado.web.RequestHandler):
+  @login.required("team")
+  def get(self):
+    if self.team.event_start is None:
+      self.team.start_event()
+    self.redirect("/")
+
 class PuzzlePage(tornado.web.RequestHandler):
   @login.required("team")
   def get(self, shortname):
@@ -148,6 +155,7 @@ class PuzzleAsset(tornado.web.RequestHandler):
 def GetHandlers(event_dir, debug, compiled_js, event_css):
   handlers = [
     (r"/", EventHome),
+    (r"/DEBUGstartevent", DebugStartEvent),
     (r"/puzzle/([^/]+)/", PuzzlePage),
     (r"/puzzle/([^/]+)/(.*)", PuzzleAsset, {"event_dir": event_dir}),
     (r"/client.js", ClientJS, {"compiled_js": compiled_js}),
