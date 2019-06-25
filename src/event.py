@@ -29,6 +29,10 @@ class DebugStartEvent(tornado.web.RequestHandler):
 class PuzzlePage(tornado.web.RequestHandler):
   @login.required("team")
   def get(self, shortname):
+    state = self.team.get_puzzle_state(shortname)
+    if not state or state.state == state.CLOSED:
+      raise tornado.web.HTTPError(http.client.NOT_FOUND)
+
     puzzle = game.Puzzle.get_by_shortname(shortname)
     if not puzzle:
       print(f"no puzzle called {shortname}")
@@ -96,8 +100,17 @@ class SubmitHistoryHandler(tornado.web.RequestHandler):
     state = self.team.get_puzzle_state(shortname)
     if not state:
       raise tornado.web.HTTPError(http.client.NOT_FOUND)
+
+    # Allow submit if the puzzle is open, and if there are fewer than
+    # the max allowed pending submissions.
+    submit_allowed = False
+    if state.state == state.OPEN:
+      pending = sum(1 for s in state.submissions if s.state == s.PENDING)
+      if pending < state.puzzle.max_queued:
+        submit_allowed = True
+
     self.set_header("Content-Type", "application/json")
-    self.write("[" + json.dumps(state.state == state.OPEN) + ",")
+    self.write(f"[{json.dumps(submit_allowed)},")
     self.write("[" +
                ",".join(sub.to_json() for sub in state.submissions) +
                "]")

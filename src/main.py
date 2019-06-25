@@ -79,8 +79,8 @@ def main():
 
   print("Adding puzzles...")
   with open(os.path.join(event_dir, "puzzles.py")) as f:
-    def add_puzzle(shortname):
-      game.Puzzle(os.path.join(event_dir, "puzzles", shortname))
+    def add_puzzle(shortname, initial_open=False):
+      game.Puzzle(os.path.join(event_dir, "puzzles", shortname), initial_open)
     exec(f.read(), {"add_puzzle": add_puzzle})
 
   save_state.set_classes(AdminUser=login.AdminUser,

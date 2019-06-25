@@ -22,6 +22,7 @@ class PuzzleState:
     self.state = self.CLOSED
     self.submissions = []
     self.open_time = None
+    self.answers_found = set()
 
   def advance(self):
     if self.state == self.OPEN:
@@ -68,9 +69,9 @@ class Submission:
 
   def check_answer(self, now):
     answer = Puzzle.canonicalize_answer(self.answer)
-    if answer in self.puzzle.correct_responses:
+    if answer in self.puzzle.answers:
       self.state = self.CORRECT
-      self.extra_response = self.puzzle.correct_responses[answer]
+      self.extra_response = None
     elif answer in self.puzzle.incorrect_responses:
       self.state = self.PARTIAL
       self.extra_response = (
@@ -79,7 +80,9 @@ class Submission:
       self.state = self.INCORRECT
     self.team.send_message({"method": "history_change", "puzzle_id": self.puzzle.shortname})
     if self.state == self.CORRECT:
-      self.puzzle_state.advance()
+      self.puzzle_state.answers_found.add(answer)
+      if self.puzzle_state.answers_found == self.puzzle.answers:
+        self.puzzle_state.advance()
 
   def to_json(self):
     return json.dumps({"submit_time": self.submit_time,
@@ -152,8 +155,9 @@ class Team(login.LoginUser):
   @save_state
   def start_event(self, now):
     self.event_start = now
-    self.set_puzzle_state("sample", PuzzleState.OPEN)
-
+    for p in Puzzle.all_puzzles():
+      if p.initial_open:
+        self.set_puzzle_state(p.shortname, PuzzleState.OPEN)
 
   @classmethod
   def get_by_username(cls, username):
@@ -176,6 +180,11 @@ class Team(login.LoginUser):
     state = self.puzzle_state[puzzle]
     if state.state != state.OPEN:
       print(f"puzzle {shortname} {state.state} for {self.username}")
+      return False
+
+    pending = sum(1 for s in state.submissions if s.state == s.PENDING)
+    if pending >= state.puzzle.max_queued:
+      print(f"puzzle {shortname} max pending for {self.username}")
       return False
 
     state.submissions.append(Submission(now, submit_id, self, puzzle, answer))
@@ -232,7 +241,9 @@ class Team(login.LoginUser):
 class Puzzle:
   BY_SHORTNAME = {}
 
-  def __init__(self, path):
+  DEFAULT_MAX_QUEUED = 3
+
+  def __init__(self, path, initial_open):
     shortname = os.path.basename(path)
     if not re.match(r"^[a-z][a-z0-9_]*$", shortname):
       raise ValueError(f"\"{shortname}\" is not a legal puzzle shortname")
@@ -248,12 +259,16 @@ class Puzzle:
     p = c["PUZZLE"]
     assert shortname == p["shortname"]
 
+    self.initial_open = initial_open
     self.shortname = shortname
     self.title = p["title"]
     self.oncall = p["oncall"]
-    self.answer = p["answer"]
     self.puzzletron_id = int(p["puzzletron_id"])
     self.version = int(p["version"])
+
+    self.max_queued = p.get("max_queued", self.DEFAULT_MAX_QUEUED)
+
+    self.answers = set(self.canonicalize_answer(a) for a in c["ANSWER"].values())
 
     if "INCORRECT_RESPONSES" in c:
       self.incorrect_responses = dict(
@@ -261,11 +276,6 @@ class Puzzle:
         for (k, v) in c["INCORRECT_RESPONSES"].items())
     else:
       self.incorrect_responses = {}
-
-    self.correct_responses = {self.canonicalize_answer(self.answer): None}
-    if "CORRECT_RESPONSES" in c:
-      for k, v in c["CORRECT_RESPONSES"].items():
-        self.correct_responses[self.canonicalize_answer(k)] = self.respace_text(v)
 
     self.load_html(path)
 

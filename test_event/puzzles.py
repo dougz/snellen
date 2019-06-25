@@ -1,1 +1,2 @@
-add_puzzle("sample")
+add_puzzle("sample", True)
+add_puzzle("sample_multi", True)
