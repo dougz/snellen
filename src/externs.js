@@ -29,6 +29,18 @@ class Submission {
     }
 }
 
+class SubmissionHistory {
+    constructor() {
+	/** @type{boolean} */
+	this.allowed;
+	/** @type{Array<Submission>} */
+	this.history;
+	/** @type{?number} */
+	this.correct;
+	/** @type{?number} */
+	this.total;
+    }
+}
 
 
 

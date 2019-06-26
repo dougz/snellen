@@ -117,8 +117,10 @@ class SubmitDialog {
 	this.input = null;
 	/** @type{Element|undefined} */
 	this.submit_div = null;
+	/** @type{?Element} */
+	this.top_note = null;
 
-	/** @type{Element|undefined} */
+	/** @type{?Element} */
 	this.history = null;
 
 	/** @type{number|null} */
@@ -136,6 +138,10 @@ class SubmitDialog {
 	this.dialog.render();
 
 	var content =  this.dialog.getContentElement();
+
+	this.top_note = goog.dom.createDom("SPAN");
+	this.top_note.style.display = "none";
+	content.appendChild(this.top_note);
 
 	this.history = goog.dom.createDom("TABLE", {"class": "submissions"});
 	content.appendChild(this.history);
@@ -167,9 +173,9 @@ class SubmitDialog {
 	goog.net.XhrIo.send("/submit_history/" + puzzle_id, goog.bind(function(e) {
 	    var code = e.target.getStatus();
 	    if (code == 200) {
-		var response = e.target.getResponseJson();
-		this.render_entries(response[1]);
-		if (response[0]) {
+		var response = /** type{SubmissionHistory} */ (e.target.getResponseJson());
+		this.render_history(response);
+		if (response.allowed) {
 		    this.submit_div.style.display = "block";
 		} else {
 		    this.submit_div.style.display = "none";
@@ -178,13 +184,20 @@ class SubmitDialog {
 	}, this));
     }
 
-    /** @param{Array<Submission>} entries */
-    render_entries(entries) {
+    /** @param{SubmissionHistory} response */
+    render_history(response) {
 	if (this.timer) {
 	    clearInterval(this.timer);
 	    this.timer = null;
 	}
 	this.counters = [];
+
+	if (response.total) {
+	    this.top_note.innerHTML = response.correct + "/" + response.total + " correct answer(s) found";
+	    this.top_note.style.display = "inline";
+	} else {
+	    this.top_note.style.display = "none";
+	}
 
 	this.history.innerHTML = "";
 
@@ -195,7 +208,7 @@ class SubmitDialog {
 			       goog.dom.createDom("TH", {className: "submit-answer"}, "submission")));
 
 
-	if (entries.length == 0) {
+	if (response.history.length == 0) {
 	    this.history.appendChild(
 		goog.dom.createDom("TR", null,
 				   goog.dom.createDom("TD", {className: "submit-empty", colSpan: 3},
@@ -208,8 +221,8 @@ class SubmitDialog {
 	    };
 	};
 
-	for (var i = 0; i < entries.length; ++i) {
-	    var sub = /** @type{Submission} */ (entries[i]);
+	for (var i = 0; i < response.history.length; ++i) {
+	    var sub = response.history[i];
 	    var el = null;
 	    if (sub.state == "pending") {
 		el = goog.dom.createDom("SPAN", {className: "submit-timer"});

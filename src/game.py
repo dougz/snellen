@@ -84,13 +84,13 @@ class Submission:
       if self.puzzle_state.answers_found == self.puzzle.answers:
         self.puzzle_state.advance()
 
-  def to_json(self):
-    return json.dumps({"submit_time": self.submit_time,
-                       "answer": self.answer,
-                       "check_time": self.check_time,
-                       "state": self.state,
-                       "response": self.extra_response,
-                       "submit_id": self.submit_id})
+  def json_dict(self):
+    return {"submit_time": self.submit_time,
+            "answer": self.answer,
+            "check_time": self.check_time,
+            "state": self.state,
+            "response": self.extra_response,
+            "submit_id": self.submit_id}
 
   @classmethod
   def process_pending_submits(cls):

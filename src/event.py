@@ -110,18 +110,19 @@ class SubmitHistoryHandler(tornado.web.RequestHandler):
         submit_allowed = True
 
     self.set_header("Content-Type", "application/json")
-    self.write(f"[{json.dumps(submit_allowed)},")
-    self.write("[" +
-               ",".join(sub.to_json() for sub in state.submissions) +
-               "]")
-    self.write("]")
+    d = {"allowed": submit_allowed,
+         "history": [sub.json_dict() for sub in state.submissions],
+         }
+    if len(state.puzzle.answers) > 1:
+      d["correct"] = len(state.answers_found)
+      d["total"] = len(state.puzzle.answers)
+    self.write(json.dumps(d))
 
 class SubmitCancelHandler(tornado.web.RequestHandler):
   @login.required("team", on_fail=http.client.UNAUTHORIZED)
   def get(self, shortname, submit_id):
     submit_id = int(submit_id)
     self.team.cancel_submission(submit_id, shortname)
-
 
 class ClientDebugJS(tornado.web.RequestHandler):
   @login.required("team")
