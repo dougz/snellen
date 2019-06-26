@@ -1,3 +1,7 @@
 *.log
+*.pyc
 bin
 tools
+
+.project
+.pydevproject

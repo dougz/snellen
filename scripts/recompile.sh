@@ -1,5 +1,7 @@
 #!/bin/bash
 
+mkdir -p "$SNELLEN_BASE/bin"
+
 "$SNELLEN_BASE/tools/closure/bin/calcdeps.py" \
     -i "$SNELLEN_BASE/src/client.js" \
     -p "$SNELLEN_BASE/tools/closure/" \
