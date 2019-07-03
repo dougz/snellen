@@ -22,12 +22,8 @@ class PuzzleState:
     self.state = self.CLOSED
     self.submissions = []
     self.open_time = None
+    self.solve_time = None
     self.answers_found = set()
-
-  def advance(self):
-    if self.state == self.OPEN:
-      self.state = self.SOLVED
-      self.team.send_message({"method": "solve", "title": self.puzzle.title})
 
 
 class Submission:
@@ -68,6 +64,7 @@ class Submission:
     return self.puzzle_state.open_time + count * 60
 
   def check_answer(self, now):
+    print(f"{self.team.username} checking {self.answer} at {now}")
     answer = Puzzle.canonicalize_answer(self.answer)
     if answer in self.puzzle.answers:
       self.state = self.CORRECT
@@ -82,7 +79,7 @@ class Submission:
     if self.state == self.CORRECT:
       self.puzzle_state.answers_found.add(answer)
       if self.puzzle_state.answers_found == self.puzzle.answers:
-        self.puzzle_state.advance()
+        self.team.solve_puzzle(self.puzzle, now)
 
   def json_dict(self):
     return {"submit_time": self.submit_time,
@@ -97,12 +94,12 @@ class Submission:
     now = time.time()
     q = cls.GLOBAL_SUBMIT_QUEUE
     while q and q[0][0] <= now:
-      _, sub = heapq.heappop(q)
+      ct, sub = heapq.heappop(q)
       if sub.state != cls.PENDING: continue
       # It's possible for sub's check_time to have changed.  If it's
-      # been moved further into the future, just drop this event.
-      if sub.check_time <= now:
-        sub.check_answer(now)
+      # doesn't match the queue time, just drop this event.
+      if sub.check_time == ct:
+        sub.check_answer(ct)
 
 
 class Team(login.LoginUser):
@@ -160,7 +157,7 @@ class Team(login.LoginUser):
     self.event_start = now
     for p in Puzzle.all_puzzles():
       if p.initial_open:
-        self.set_puzzle_state(p.shortname, PuzzleState.OPEN)
+        self.open_puzzle(p, now)
 
   @classmethod
   def get_by_username(cls, username):
@@ -223,16 +220,18 @@ class Team(login.LoginUser):
 
     self.send_message({"method": "history_change", "puzzle_id": shortname})
 
-  @save_state
-  def set_puzzle_state(self, now, shortname, new_state):
-    puzzle = Puzzle.get_by_shortname(shortname)
-    if not puzzle:
-      print(f"can't set state for {shortname}")
-      return
+  def open_puzzle(self, puzzle, now):
     state = self.puzzle_state[puzzle]
-    state.state = new_state
-    if new_state == state.OPEN and not state.open_time:
+    if state.state == state.CLOSED:
+      state.state = state.OPEN
       state.open_time = now
+
+  def solve_puzzle(self, puzzle, now):
+    state = self.puzzle_state[puzzle]
+    if state.state != state.SOLVED:
+      state.state = state.SOLVED
+      state.solve_time = now
+      self.send_message({"method": "solve", "title": puzzle.title})
 
   def get_puzzle_state(self, puzzle):
     if isinstance(puzzle, str):

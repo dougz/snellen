@@ -1,3 +1,4 @@
+{% import time %}
 <!DOCTYPE html>
 <html>
   <head>
@@ -11,6 +12,10 @@
       <span>&bull; <a href="/">Penny Park</a> &bull; <a href="{{puzzle.land.url}}">{{puzzle.land.name}}</a></span>
       <span class=right><button id="submit">submit</button> <a href="/logout">Logout</a></span>
     </div>
+
+    <p><span class=debug>debug: <b>opened</b> {{"none" if state.open_time is None else time.ctime(state.open_time)}}
+      <b>solved</b> {{"none" if state.solve_time is None else time.ctime(state.solve_time)}}</span></p>
+
 
     <h1>{{puzzle.title}}</h1>
     {% raw puzzle.html_body %}

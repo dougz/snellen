@@ -90,7 +90,7 @@ class PuzzlePage(tornado.web.RequestHandler):
     else:
       script += """<script src="/client.js"></script>"""
 
-    self.render("puzzle_frame.html", team=self.team, puzzle=puzzle, script=script)
+    self.render("puzzle_frame.html", team=self.team, puzzle=puzzle, state=self.team.puzzle_state[puzzle], script=script)
 
 class WaitHandler(tornado.web.RequestHandler):
   @login.required("team", on_fail=http.client.UNAUTHORIZED)

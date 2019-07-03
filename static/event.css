@@ -202,3 +202,10 @@ h1 {
     text-align: center;
 }
 
+.debug {
+    margin: 4px;
+    padding: 4px;
+    font-size: 84%;
+    border: 1px solid #666;
+    background-color: #ffd;
+}
