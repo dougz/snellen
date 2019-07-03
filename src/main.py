@@ -48,15 +48,17 @@ def main():
   debug = False
   default_username = None
   default_password = None
+  socket_path = "/tmp/snellen"
 
   opts, args = getopt.getopt(sys.argv[1:],
-                             "c:e:r:t:",
+                             "c:e:r:t:s:",
                              ["cookie_secret=",
                               "debug",
                               "default_credentials=",
                               "event_dir=",
                               "root_password=",
                               "template_path=",
+                              "socket_path="
                              ])
   for o, a in opts:
     if o in ("-t", "--template_path"):
@@ -67,6 +69,8 @@ def main():
       root_password = a
     elif o in ("-e", "--event_dir"):
       event_dir = a
+    elif o in ("-s", "--socket_path"):
+      socket_path = a
     elif o == "--debug":
       debug = True
     elif o == "--default_credentials":
@@ -112,7 +116,7 @@ def main():
                  default_password=default_password)
 
   server = tornado.httpserver.HTTPServer(app)
-  socket = tornado.netutil.bind_unix_socket("/tmp/snellen", mode=0o666)
+  socket = tornado.netutil.bind_unix_socket(socket_path, mode=0o666)
   server.add_socket(socket)
 
   answer_checking.start()
