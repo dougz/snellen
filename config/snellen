@@ -7,6 +7,11 @@ server {
     root /path/to/closure-library-20190301/;
   }
 
+  location ~ ^/assets/ {
+    # event directory
+    root /home/dougz/hunt/snellen/test_event/;
+  }
+
   location ~ /wait {
     proxy_pass http://unix:/tmp/snellen;
     proxy_set_header X-Real-IP $remote_addr;
