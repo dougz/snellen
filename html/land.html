@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel=stylesheet href="/event.css">
+    {% raw script %}
+  </head>
+  <body>
+    <div id="topnav">
+      <span class=teamname>{{team.team_name}}</span>
+      <span>&bull; <a href="/">Penny Park</a></span>
+      <span class=right><a href="/logout">Logout</a></span>
+    </div>
+
+    <h1>{{land.name}}</h1>
+
+    <div id="map">
+      <img src="{{land.base_image}}">
+    </div>
+
+    <ul class=itemlist>
+      {% for puzzle in land.puzzles %}
+      {% if team.puzzle_state[puzzle].state == "open" %}
+      <li><a href="/puzzle/{{puzzle.shortname}}/">{{puzzle.title}}</a></li>
+      {% elif team.puzzle_state[puzzle].state == "solved" %}
+      <li><a href="/puzzle/{{puzzle.shortname}}/">{{puzzle.title}}</a> &mdash; SOLVED</li>
+      {% end %}
+      {% end %}
+    </ul>
+  </body>
+</html>

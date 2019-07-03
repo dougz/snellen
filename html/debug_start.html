@@ -1,0 +1,16 @@
+{% import time %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel=stylesheet href="/event.css">
+  </head>
+  <body>
+    {% if team.event_start %}
+    Event started at {{time.ctime(team.event_start)}} (for this team).
+    {% else %}
+    <a href="/DEBUGdostartevent">Start event (for this team)</a>
+    {% end %}
+
+    <p><a href="/logout">Logout</a></p>
+  </body>
+</html>

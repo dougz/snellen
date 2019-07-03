@@ -132,6 +132,9 @@ class Team(login.LoginUser):
     for puzzle in Puzzle.all_puzzles():
       self.puzzle_state[puzzle] = PuzzleState(self, puzzle)
 
+    self.open_lands = set()
+    self.open_lands.update(Land.DEFAULT_OPEN)
+
     self.active_sessions = set()
 
   def attach_session(self, session):
@@ -237,6 +240,27 @@ class Team(login.LoginUser):
       if not puzzle: return None
     return self.puzzle_state[puzzle]
 
+class Land:
+  BY_SHORTNAME = {}
+  DEFAULT_OPEN = set()
+
+  def __init__(self, shortname, name, pos, initial_open):
+    self.shortname = shortname
+    self.name = name
+    self.pos = pos
+    self.initial_open = initial_open
+    if initial_open:
+      self.DEFAULT_OPEN.add(self)
+
+    self.locked_image = f"/assets/map/{shortname}_locked.png"
+    self.unlocked_image = f"/assets/map/{shortname}_unlocked.png"
+
+    self.url = "/land/" + shortname
+    self.base_image = "/assets/land/" + shortname + "/land_base.png"
+
+    self.BY_SHORTNAME[shortname] = self
+
+    self.puzzles = []
 
 class Puzzle:
   BY_SHORTNAME = {}
@@ -265,6 +289,12 @@ class Puzzle:
     self.oncall = p["oncall"]
     self.puzzletron_id = int(p["puzzletron_id"])
     self.version = int(p["version"])
+
+    self.land = Land.BY_SHORTNAME[p["land"]]
+    self.land.puzzles.append(self)
+    self.icon = f"/assets/land/{self.land.shortname}/{p['icon']}"
+    self.pos_x = int(p["pos_x"])
+    self.pos_y = int(p["pos_y"])
 
     self.max_queued = p.get("max_queued", self.DEFAULT_MAX_QUEUED)
 

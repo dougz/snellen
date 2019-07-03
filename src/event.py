@@ -17,10 +17,54 @@ class EventHome(tornado.web.RequestHandler):
     else:
       script += """<script src="/client.js"></script>"""
 
-    self.render("home.html", team=self.team, script=script)
+    lands = []
+    for land in game.Land.BY_SHORTNAME.values():
+      if land in self.team.open_lands:
+        lands.append((land.unlocked_image, land.pos[0], land.pos[1]))
+      else:
+        lands.append((land.locked_image, land.pos[0], land.pos[1]))
+    script += """<script>var icons = """ + json.dumps(lands) + ";</script>"
 
-class DebugStartEvent(tornado.web.RequestHandler):
+    self.render("map.html", team=self.team, script=script)
+
+
+class LandMapPage(tornado.web.RequestHandler):
   @login.required("team")
+  def get(self, shortname):
+    land = game.Land.BY_SHORTNAME.get(shortname, None)
+    if not land:
+      raise tornado.web.HTTPError(http.client.NOT_FOUND)
+    if land not in self.team.open_lands:
+      raise tornado.web.HTTPError(http.client.NOT_FOUND)
+
+    script = ""
+    if self.application.settings.get("debug"):
+      script += ("""<script src="/closure/goog/base.js"></script>\n"""
+                 """<script src="/client-debug.js"></script>""")
+    else:
+      script += """<script src="/client.js"></script>"""
+
+    icons = []
+    for p in land.puzzles:
+      s = self.team.puzzle_state[p].state
+      if s == game.PuzzleState.OPEN:
+        icons.append((p.icon + "_unlocked.png", p.pos_x, p.pos_y))
+      elif s == game.PuzzleState.SOLVED:
+        icons.append((p.icon + "_solved.png", p.pos_x, p.pos_y))
+    script += "<script>var icons = """ + json.dumps(icons) + ";</script>"
+
+    self.render("land.html", team=self.team, land=land, script=script)
+
+
+
+
+class DebugStartPage(tornado.web.RequestHandler):
+  @login.required("team", require_start=False)
+  def get(self):
+    self.render("debug_start.html", team=self.team)
+
+class DebugDoStartEvent(tornado.web.RequestHandler):
+  @login.required("team", require_start=False)
   def get(self):
     if self.team.event_start is None:
       self.team.start_event()
@@ -46,8 +90,7 @@ class PuzzlePage(tornado.web.RequestHandler):
     else:
       script += """<script src="/client.js"></script>"""
 
-    self.render("puzzle_frame.html", title=puzzle.title, body=puzzle.html_body,
-                script=script)
+    self.render("puzzle_frame.html", team=self.team, puzzle=puzzle, script=script)
 
 class WaitHandler(tornado.web.RequestHandler):
   @login.required("team", on_fail=http.client.UNAUTHORIZED)
@@ -169,7 +212,9 @@ class PuzzleAsset(tornado.web.RequestHandler):
 def GetHandlers(event_dir, debug, compiled_js, event_css):
   handlers = [
     (r"/", EventHome),
-    (r"/DEBUGstartevent", DebugStartEvent),
+    (r"/land/([a-z0-9_]+)", LandMapPage),
+    (r"/DEBUGstartevent", DebugStartPage),
+    (r"/DEBUGdostartevent", DebugDoStartEvent),
     (r"/puzzle/([^/]+)/", PuzzlePage),
     (r"/puzzle/([^/]+)/(.*)", PuzzleAsset, {"event_dir": event_dir}),
     (r"/client.js", ClientJS, {"compiled_js": compiled_js}),

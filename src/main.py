@@ -81,7 +81,10 @@ def main():
   with open(os.path.join(event_dir, "puzzles.py")) as f:
     def add_puzzle(shortname, initial_open=False):
       game.Puzzle(os.path.join(event_dir, "puzzles", shortname), initial_open)
-    exec(f.read(), {"add_puzzle": add_puzzle})
+    def add_land(shortname, name, pos, initial_open=False):
+      game.Land(shortname, name, pos, initial_open)
+    exec(f.read(), {"add_puzzle": add_puzzle,
+                    "add_land": add_land})
 
   save_state.set_classes(AdminUser=login.AdminUser,
                          Team=game.Team)

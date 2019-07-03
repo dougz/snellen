@@ -121,9 +121,10 @@ class Session:
 # account with a given capability.  The browser is redirected to the
 # login or access-denied page as appropriate.
 class required:
-  def __init__(self, cap=None, on_fail=None):
+  def __init__(self, cap=None, on_fail=None, require_start=True):
     self.cap = cap
     self.on_fail = on_fail
+    self.require_start = require_start
 
   def bounce(self, req):
     if self.on_fail is not None:
@@ -150,6 +151,11 @@ class required:
         else:
           # If teams try to access an admin page, return 404.
           raise tornado.web.HTTPError(http.client.NOT_FOUND)
+
+      if self.cap == "team" and self.require_start and not session.team.event_start:
+        req.redirect("/DEBUGstartevent")
+        return
+
       session.expires = now + session.SESSION_TIMEOUT
       session.original_target = None
       req.session = session

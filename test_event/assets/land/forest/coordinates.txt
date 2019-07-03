@@ -1,0 +1,59 @@
+food:
+x: 39px
+y: 65px
+
+coaster:
+x: 226px
+y: 36px
+
+ship:
+x: 483px
+y: 30px
+
+cars:
+x: 746px
+y: 164px
+
+show:
+x: 819px
+y: 41px
+
+track:
+x: 48px
+y: 179px
+
+pavilion:
+x: 398px
+y: 214px
+
+dolphin:
+x: 568px
+y: 251px
+
+balloon:
+x: 712px
+y: 283px
+
+tent:
+x: 845px
+y: 250px
+
+carousel:
+x: 27px
+y: 314px
+
+building:
+x: 82px
+y: 410px
+
+fountain:
+x: 200px
+y: 291px
+
+ferris:
+x: 490px
+y: 338px
+
+shed:
+x: 757px
+y: 456px

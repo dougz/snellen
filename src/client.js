@@ -365,14 +365,29 @@ function initPage() {
     time_formatter = new TimeFormatter();
     toast_manager = new ToastManager();
 
-    submit_dialog = new SubmitDialog();
-
     waiter = new Waiter(new Dispatcher());
     waiter.start();
 
     var a = goog.dom.getElement("submit");
     if (a) {
+	submit_dialog = new SubmitDialog();
 	a.onclick = function() { submit_dialog.show(); return false; };
+    }
+
+    var m = goog.dom.getElement("map");
+    if (m) {
+	for (var i = 0; i < icons.length; ++i) {
+	    var url = icons[i][0];
+	    var x = icons[i][1];
+	    var y = icons[i][2];
+
+	    console.log(url + " " + x + " " + y);
+
+	    var el = goog.dom.createDom("IMG", {"src": url});
+	    el.style.left = "" + x + "px";
+	    el.style.top = "" + y + "px";
+	    m.appendChild(el);
+	}
     }
 }
 
