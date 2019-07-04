@@ -64,7 +64,6 @@ class Submission:
     return self.puzzle_state.open_time + count * 60
 
   def check_answer(self, now):
-    print(f"{self.team.username} checking {self.answer} at {now}")
     answer = Puzzle.canonicalize_answer(self.answer)
     if answer in self.puzzle.answers:
       self.state = self.CORRECT
