@@ -4,6 +4,9 @@ var puzzle_id;
 /** @type{Array<Object>} */
 var icons;
 
+/** @type{Array<Object>} */
+var log_entries;
+
 class Message {
     constructor() {
 	/** @type{string} */

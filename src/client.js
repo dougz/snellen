@@ -133,8 +133,6 @@ class SubmitDialog {
 	this.timer = null;
 	/** @type{Array} */
 	this.counters = null;
-
-	this.timestamp_fmt = new goog.i18n.DateTimeFormat("EEE hh:mm:ss aa");
     }
 
     build() {
@@ -374,12 +372,14 @@ function initPage() {
     waiter = new Waiter(new Dispatcher());
     waiter.start();
 
+    // Only present on the puzzle pages.
     var a = goog.dom.getElement("submit");
     if (a) {
 	submit_dialog = new SubmitDialog();
 	a.onclick = function() { submit_dialog.show(); return false; };
     }
 
+    // Only present on the map pages.
     var m = goog.dom.getElement("map");
     if (m) {
 	for (var i = 0; i < icons.length; ++i) {
@@ -391,6 +391,20 @@ function initPage() {
 	    el.style.left = "" + x + "px";
 	    el.style.top = "" + y + "px";
 	    m.appendChild(el);
+	}
+    }
+
+    // Only present on the activity log page.
+    var log = goog.dom.getElement("log");
+    if (log) {
+	for (var i = 0; i < log_entries.length; ++i) {
+	    var t = log_entries[i][0];
+	    var html = log_entries[i][1];
+
+	    var span = goog.dom.createDom("SPAN");
+	    span.innerHTML = time_formatter.format(t) + " &mdash; " + html;
+	    var li = goog.dom.createDom("LI", null, span);
+	    log.appendChild(li);
 	}
     }
 }

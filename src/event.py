@@ -6,6 +6,7 @@ import tornado.web
 
 import game
 import login
+import util
 
 class EventHome(tornado.web.RequestHandler):
   @login.required("team")
@@ -91,6 +92,19 @@ class PuzzlePage(tornado.web.RequestHandler):
       script += """<script src="/client.js"></script>"""
 
     self.render("puzzle_frame.html", team=self.team, puzzle=puzzle, state=self.team.puzzle_state[puzzle], script=script)
+
+class ActivityLogPage(util.RequestHandler):
+  @login.required("team")
+  def get(self):
+    if self.application.settings.get("debug"):
+      script = ("""<script src="/closure/goog/base.js"></script>\n"""
+                 """<script src="/client-debug.js"></script>""")
+    else:
+      script = """<script src="/client.js"></script>"""
+
+    script += """<script>var log_entries = """ + json.dumps(self.team.activity_log) + ";</script>"
+
+    self.render("activity_log.html", team=self.team, script=script)
 
 class WaitHandler(tornado.web.RequestHandler):
   @login.required("team", on_fail=http.client.UNAUTHORIZED)
@@ -212,11 +226,12 @@ class PuzzleAsset(tornado.web.RequestHandler):
 def GetHandlers(event_dir, debug, compiled_js, event_css):
   handlers = [
     (r"/", EventHome),
+    (r"/log", ActivityLogPage),
     (r"/land/([a-z0-9_]+)", LandMapPage),
     (r"/DEBUGstartevent", DebugStartPage),
     (r"/DEBUGdostartevent", DebugDoStartEvent),
-    (r"/puzzle/([^/]+)/", PuzzlePage),
-    (r"/puzzle/([^/]+)/(.*)", PuzzleAsset, {"event_dir": event_dir}),
+    (r"/puzzle/([^/]+)/?", PuzzlePage),
+    (r"/puzzle/([^/]+)/(.+)", PuzzleAsset, {"event_dir": event_dir}),
     (r"/client.js", ClientJS, {"compiled_js": compiled_js}),
     (r"/event.css", EventCSS, {"event_css": event_css}),
     (r"/submit", SubmitHandler),

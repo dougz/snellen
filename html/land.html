@@ -8,7 +8,7 @@
     <div id="topnav">
       <span class=teamname>{{team.team_name}}</span>
       <span>&bull; <a href="/">Penny Park</a></span>
-      <span class=right><a href="/logout">Logout</a></span>
+      <span class=right><a href="/log">Activity Log</a> &bull; <a href="/logout">Logout</a></span>
     </div>
 
     <h1>{{land.name}}</h1>
@@ -20,9 +20,9 @@
     <ul class=itemlist>
       {% for puzzle in land.puzzles %}
       {% if team.puzzle_state[puzzle].state == "open" %}
-      <li><a href="/puzzle/{{puzzle.shortname}}/">{{puzzle.title}}</a></li>
+      <li><a href="{{puzzle.url}}">{{puzzle.title}}</a></li>
       {% elif team.puzzle_state[puzzle].state == "solved" %}
-      <li><a href="/puzzle/{{puzzle.shortname}}/">{{puzzle.title}}</a> &mdash; SOLVED</li>
+      <li><a href="{{puzzle.url}}">{{puzzle.title}}</a> &mdash; SOLVED</li>
       {% end %}
       {% end %}
     </ul>

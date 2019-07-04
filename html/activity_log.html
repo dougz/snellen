@@ -7,19 +7,13 @@
   <body>
     <div id="topnav">
       <span class=teamname>{{team.team_name}}</span>
+      <span>&bull; <a href="/">Penny Park</a></span>
       <span class=right><a href="/log">Activity Log</a> &bull; <a href="/logout">Logout</a></span>
     </div>
 
-    <h1>Penny Park</h1>
+    <h1>Activity Log</h1>
 
-    <div id="map">
-    </div>
-
-    <ul class=itemlist>
-      {% for land in team.open_lands %}
-      <li><a href="/land/{{land.shortname}}">{{land.name}}</a></li>
-      {% end %}
+    <ul id=log>
     </ul>
-
   </body>
 </html>

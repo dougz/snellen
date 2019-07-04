@@ -116,6 +116,8 @@ class Team(login.LoginUser):
     assert username not in self.BY_USERNAME
     self.BY_USERNAME[username] = self
 
+    self.active_sessions = set()
+
     self.username = username
     self.password_hash = password_hash.encode("ascii")
     self.team_name = team_name
@@ -129,8 +131,7 @@ class Team(login.LoginUser):
       self.puzzle_state[puzzle] = PuzzleState(self, puzzle)
 
     self.open_lands = set()
-
-    self.active_sessions = set()
+    self.activity_log = []
 
     self.compute_puzzle_beam(now)
 
@@ -225,6 +226,7 @@ class Team(login.LoginUser):
     if state.state == state.CLOSED:
       state.state = state.OPEN
       state.open_time = now
+      self.activity_log.append((now, f'<a href="{puzzle.url}">{puzzle.title}</a> opened.'))
 
   def solve_puzzle(self, puzzle, now):
     state = self.puzzle_state[puzzle]
@@ -232,6 +234,7 @@ class Team(login.LoginUser):
       state.state = state.SOLVED
       state.solve_time = now
       self.send_message({"method": "solve", "title": puzzle.title})
+      self.activity_log.append((now, f'<a href="{puzzle.url}">{puzzle.title}</a> solved.'))
       self.compute_puzzle_beam(now)
 
   def get_puzzle_state(self, puzzle):
@@ -299,6 +302,7 @@ class Puzzle:
     self.oncall = p["oncall"]
     self.puzzletron_id = int(p["puzzletron_id"])
     self.version = int(p["version"])
+    self.url = "/puzzle/" + shortname + "/"
 
     self.land = Land.BY_SHORTNAME[p["land"]]
     self.land.puzzles.append(self)
