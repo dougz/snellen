@@ -130,9 +130,10 @@ class Team(login.LoginUser):
       self.puzzle_state[puzzle] = PuzzleState(self, puzzle)
 
     self.open_lands = set()
-    self.open_lands.update(Land.DEFAULT_OPEN)
 
     self.active_sessions = set()
+
+    self.compute_puzzle_beam(now)
 
   def attach_session(self, session):
     self.active_sessions.add(session)
@@ -232,6 +233,7 @@ class Team(login.LoginUser):
       state.state = state.SOLVED
       state.solve_time = now
       self.send_message({"method": "solve", "title": puzzle.title})
+      self.compute_puzzle_beam(now)
 
   def get_puzzle_state(self, puzzle):
     if isinstance(puzzle, str):
@@ -239,17 +241,27 @@ class Team(login.LoginUser):
       if not puzzle: return None
     return self.puzzle_state[puzzle]
 
+  def compute_puzzle_beam(self, now):
+    p = Puzzle.get_by_shortname("sample")
+    self.open_puzzle(p, now)
+    if self.puzzle_state[p].state == PuzzleState.SOLVED:
+      p = Puzzle.get_by_shortname("sample_multi")
+      self.open_puzzle(p, now)
+
+    for st in self.puzzle_state.values():
+      if st.state != PuzzleState.CLOSED:
+        if st.puzzle.land not in self.open_lands:
+          self.send_message({"method": "open", "title": st.puzzle.land.name})
+          self.open_lands.add(st.puzzle.land)
+
+
 class Land:
   BY_SHORTNAME = {}
-  DEFAULT_OPEN = set()
 
-  def __init__(self, shortname, name, pos, initial_open):
+  def __init__(self, shortname, name, pos):
     self.shortname = shortname
     self.name = name
     self.pos = pos
-    self.initial_open = initial_open
-    if initial_open:
-      self.DEFAULT_OPEN.add(self)
 
     self.locked_image = f"/assets/map/{shortname}_locked.png"
     self.unlocked_image = f"/assets/map/{shortname}_unlocked.png"

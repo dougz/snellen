@@ -1,4 +1,4 @@
-add_land("mainstreet", "Main Street", (206, 187), True)
+add_land("mainstreet", "Main Street", (206, 187))
 add_land("bigtop", "Big Top", (558, 270))
 add_land("forest", "Enchanted Forest", (0, 251))
 add_land("space", "Spaceopolis", (27, 54))

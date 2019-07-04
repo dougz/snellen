@@ -67,6 +67,7 @@ class Dispatcher {
 	this.methods = {
 	    "history_change": this.history_change,
 	    "solve": this.solve,
+	    "open": this.open,
 	}
     }
 
@@ -85,6 +86,11 @@ class Dispatcher {
     /** @param{Message} msg */
     solve(msg) {
 	toast_manager.add_toast("<b>" + msg.title + "</b> was solved!", 5000);
+    }
+
+    /** @param{Message} msg */
+    open(msg) {
+	toast_manager.add_toast("<b>" + msg.title + "</b> is now open!", 5000);
     }
 }
 
@@ -380,8 +386,6 @@ function initPage() {
 	    var url = icons[i][0];
 	    var x = icons[i][1];
 	    var y = icons[i][2];
-
-	    console.log(url + " " + x + " " + y);
 
 	    var el = goog.dom.createDom("IMG", {"src": url});
 	    el.style.left = "" + x + "px";
