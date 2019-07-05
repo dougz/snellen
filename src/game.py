@@ -133,8 +133,6 @@ class Team(login.LoginUser):
     self.open_lands = set()
     self.activity_log = []
 
-    self.compute_puzzle_beam(now)
-
   def attach_session(self, session):
     self.active_sessions.add(session)
   def detach_session(self, session):
@@ -156,9 +154,7 @@ class Team(login.LoginUser):
   @save_state
   def start_event(self, now):
     self.event_start = now
-    for p in Puzzle.all_puzzles():
-      if p.initial_open:
-        self.open_puzzle(p, now)
+    self.compute_puzzle_beam(now)
 
   @classmethod
   def get_by_username(cls, username):
