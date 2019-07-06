@@ -123,7 +123,7 @@ div.toasts {
     width: 300px;
     position: fixed;
     right: 20px;
-    top: 8px;
+    top: 28px;
 }
 
 div.toast {
@@ -210,3 +210,13 @@ h1 {
     border: 1px solid #666;
     background-color: #ffd;
 }
+
+.unsolved {
+    color: #999;
+    font-style: italic;
+}
+
+.solved {
+    font-weight: bold;
+}
+

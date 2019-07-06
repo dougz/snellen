@@ -14,17 +14,9 @@
     <h1>{{land.name}}</h1>
 
     <div id="map">
-      <img src="{{land.base_image}}">
     </div>
 
-    <ul class=itemlist>
-      {% for puzzle in land.puzzles %}
-      {% if team.puzzle_state[puzzle].state == "open" %}
-      <li><a href="{{puzzle.url}}">{{puzzle.title}}</a></li>
-      {% elif team.puzzle_state[puzzle].state == "solved" %}
-      <li><a href="{{puzzle.url}}">{{puzzle.title}}</a> &mdash; SOLVED</li>
-      {% end %}
-      {% end %}
+    <ul id="list" class=itemlist>
     </ul>
   </body>
 </html>

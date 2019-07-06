@@ -10,9 +10,65 @@ forest:
   name: Enchanted Forest
   pos: [0, 251]
   icons:
+    food:
+      pos: [39, 65]
+      size: [178, 118]
+
+    coaster:
+      pos: [226, 36]
+      size: [227, 204]
+
     ship:
       pos: [483, 30]
       size: [293, 198]
+
+    cars:
+      pos: [746, 164]
+      size: [110, 120]
+
+    show:
+      pos: [819, 41]
+      size: [128, 105]
+
+    track:
+      pos: [48, 179]
+      size: [323, 134]
+
+    pavilion:
+      pos: [398, 214]
+      size: [200, 132]
+
+    dolphin:
+      pos: [568, 251]
+      size: [134, 114]
+
+    balloon:
+      pos: [712, 283]
+      size: [92, 163]
+
+    tent:
+      pos: [845, 250]
+      size: [115, 129]
+
+    carousel:
+      pos: [27, 314]
+      size: [99, 105]
+
+    building:
+      pos: [82, 410]
+      size: [143, 92]
+
+    fountain:
+      pos: [200, 291]
+      size: [143, 113]
+
+    ferris:
+      pos: [490, 338]
+      size: [167, 170]
+
+    shed:
+      pos: [757, 456]
+      size: [89, 74]
 
 space:
   name: Spaceopolis

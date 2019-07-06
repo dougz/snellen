@@ -11,7 +11,9 @@
     <div id="topnav">
       <span class=teamname>{{team.team_name}}</span>
       <span>&bull; <a href="/">Penny Park</a> &bull; <a href="{{puzzle.land.url}}">{{puzzle.land.name}}</a></span>
-      <span class=right><button id="submit">submit</button> <a href="/logout">Logout</a></span>
+      <span class=right><a href="/log">Activity Log</a> &bull;
+	<button id="submit">submit</button> &bull;
+	<a href="/logout">Logout</a></span>
     </div>
 
     <p><span class=debug>debug: <b>opened</b> {{"none" if state.open_time is None else time.ctime(state.open_time)}}

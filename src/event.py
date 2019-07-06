@@ -18,13 +18,23 @@ class EventHome(tornado.web.RequestHandler):
     else:
       script += """<script src="/client.js"></script>"""
 
-    lands = []
+    items = []
+    mapdata = {"items": items}
+
     for land in game.Land.BY_SHORTNAME.values():
+      d = {}
+      items.append(d)
+
       if land in self.team.open_lands:
-        lands.append((land.unlocked_image, land.pos[0], land.pos[1]))
+        d["name"] = land.name
+        d["url"] = land.url
+        d["icon_url"] = land.unlocked_image
+        d["pos_x"], d["pos_y"] = land.pos
       else:
-        lands.append((land.locked_image, land.pos[0], land.pos[1]))
-    script += """<script>var icons = """ + json.dumps(lands) + ";</script>"
+        d["icon_url"] = land.locked_image
+        d["pos_x"], d["pos_y"] = land.pos
+
+    script += """<script>var mapdata = """ + json.dumps(mapdata) + ";</script>"
 
     self.render("map.html", team=self.team, script=script)
 
@@ -45,19 +55,35 @@ class LandMapPage(tornado.web.RequestHandler):
     else:
       script += """<script src="/client.js"></script>"""
 
-    icons = []
+    items = []
+    mapdata = {"base_url": land.base_image,
+               "items": items}
     for p in land.puzzles:
-      if not p.icon: continue
-      s = self.team.puzzle_state[p].state
-      if s == game.PuzzleState.OPEN:
-        icons.append((p.icon.images["unlocked"], p.icon.pos[0], p.icon.pos[1]))
-      elif s == game.PuzzleState.SOLVED:
-        icons.append((p.icon.images["solved"], p.icon.pos[0], p.icon.pos[1]))
-    script += "<script>var icons = """ + json.dumps(icons) + ";</script>"
+      st = self.team.puzzle_state[p]
+      d = { "name": p.title,
+            "url": p.url,
+            "solved": False,
+            }
+      items.append(d)
+
+      if st.answers_found:
+        d["answer"] = ", ".join(sorted(st.answers_found))
+
+      if st.state == game.PuzzleState.OPEN:
+        if p.icon:
+          d["icon_url"] = p.icon.images["unlocked"]
+          d["pos_x"], d["pos_y"] = p.icon.pos
+          d["width"], d["height"] = p.icon.size
+      elif st.state == game.PuzzleState.SOLVED:
+        if p.icon:
+          d["icon_url"] = p.icon.images["solved"]
+          d["pos_x"], d["pos_y"] = p.icon.pos
+          d["width"], d["height"] = p.icon.size
+        d["solved"] = True
+
+    script += "<script>var mapdata = """ + json.dumps(mapdata) + ";</script>"
 
     self.render("land.html", team=self.team, land=land, script=script)
-
-
 
 
 class DebugStartPage(tornado.web.RequestHandler):

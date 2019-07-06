@@ -360,10 +360,53 @@ class ToastManager {
     }
 }
 
+class MapDraw {
+    constructor() {
+	/** @type{Element} */
+	this.map_el = goog.dom.getElement("map");
+	/** @type{Element} */
+	this.list_el = goog.dom.getElement("list");
+    }
+
+    draw_map(mapdata) {
+	this.map_el.innerHTML = "";
+	this.list_el.innerHTML = "";
+	if (mapdata.base_url) {
+	    var el = goog.dom.createDom("IMG", {"src": mapdata.base_url});
+	    this.map_el.appendChild(el);
+	}
+
+	for (var i = 0; i < mapdata.items.length; ++i) {
+	    this.draw_item(mapdata.items[i]);
+	}
+    }
+
+    draw_item(it) {
+	if (it.icon_url) {
+	    var el = goog.dom.createDom("IMG", {"src": it.icon_url});
+	    el.style.left = "" + it.pos_x + "px";
+	    el.style.top = "" + it.pos_y + "px";
+	    this.map_el.appendChild(el);
+	}
+
+	if (it.name) {
+	    var a = goog.dom.createDom("A", {"href": it.url}, it.name)
+	    el = goog.dom.createDom("LI", null, a);
+	    if (it.answer) {
+		el.append(" \u2014 ");
+		el.append(goog.dom.createDom("SPAN", {className: it.solved ? "solved" : "unsolved"},
+					     it.answer));
+	    }
+	    this.list_el.appendChild(el);
+	}
+    }
+}
+
 var waiter = null;
 var submit_dialog = null;
 var time_formatter = null;
 var toast_manager = null;
+var map_draw = null;
 
 function initPage() {
     time_formatter = new TimeFormatter();
@@ -377,21 +420,14 @@ function initPage() {
     if (a) {
 	submit_dialog = new SubmitDialog();
 	a.onclick = function() { submit_dialog.show(); return false; };
+	if (puzzle_id && puzzle_init) puzzle_init();
     }
 
     // Only present on the map pages.
     var m = goog.dom.getElement("map");
     if (m) {
-	for (var i = 0; i < icons.length; ++i) {
-	    var url = icons[i][0];
-	    var x = icons[i][1];
-	    var y = icons[i][2];
-
-	    var el = goog.dom.createDom("IMG", {"src": url});
-	    el.style.left = "" + x + "px";
-	    el.style.top = "" + y + "px";
-	    m.appendChild(el);
-	}
+	map_draw = new MapDraw();
+	map_draw.draw_map(mapdata);
     }
 
     // Only present on the activity log page.
@@ -408,7 +444,6 @@ function initPage() {
 	}
     }
 
-    if (puzzle_id && puzzle_init) puzzle_init();
 }
 
 window.onload = initPage;

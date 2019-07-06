@@ -230,7 +230,7 @@ class Team(login.LoginUser):
     if state.state != state.SOLVED:
       state.state = state.SOLVED
       state.solve_time = now
-      self.send_message({"method": "solve", "title": puzzle.title})
+      self.send_message({"method": "solve", "title": html.escape(puzzle.title)})
       self.activity_log.append((now, f'<a href="{puzzle.url}">{html.escape(puzzle.title)}</a> solved.'))
       self.compute_puzzle_beam(now)
 
@@ -250,7 +250,8 @@ class Team(login.LoginUser):
     for st in self.puzzle_state.values():
       if st.state != PuzzleState.CLOSED:
         if st.puzzle.land not in self.open_lands:
-          self.send_message({"method": "open", "title": st.puzzle.land.name})
+          if st.puzzle.land.shortname != "mainstreet":
+            self.send_message({"method": "open", "title": html.escape(st.puzzle.land.name)})
           self.open_lands.add(st.puzzle.land)
 
 class Icon:
@@ -261,9 +262,9 @@ class Icon:
     self.size = tuple(d["size"])
 
     self.images = {
-      "locked": f"/assets/map/land/{land.shortname}/{name}_locked.png",
-      "unlocked": f"/assets/map/land/{land.shortname}/{name}_unlocked.png",
-      "solved": f"/assets/map/land/{land.shortname}/{name}_solved.png",
+      "locked": f"/assets/land/{land.shortname}/{name}_locked.png",
+      "unlocked": f"/assets/land/{land.shortname}/{name}_unlocked.png",
+      "solved": f"/assets/land/{land.shortname}/{name}_solved.png",
       }
 
 class Land:

@@ -1,8 +1,8 @@
 /** @type{string} */
 var puzzle_id;
 
-/** @type{Array<Object>} */
-var icons;
+/** @type{MapData} */
+var mapdata;
 
 /** @type{Array<Object>} */
 var log_entries;
@@ -51,5 +51,34 @@ class SubmissionHistory {
     }
 }
 
+class MapItem {
+    constructor() {
+	/** @type{string} */
+	this.name;
+	/** @type{string} */
+	this.url;
+	/** @type{boolean} */
+	this.solved;
+	/** @type{?string} */
+	this.answer;
+	/** @type{?string} */
+	this.icon_url;
+	/** @type{?number} */
+	this.pos_x;
+	/** @type{?number} */
+	this.pos_y;
+	/** @type{?number} */
+	this.width;
+	/** @type{?number} */
+	this.height;
+    }
+}
 
-
+class MapData {
+    constructor() {
+	/** @type{?string} */
+	this.base_url;
+	/** @type{Array<MapItem>} */
+	this.items;
+    }
+}

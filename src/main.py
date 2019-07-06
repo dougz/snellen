@@ -85,9 +85,6 @@ def main():
   print("Load map config...")
   with open(os.path.join(event_dir, "map_config.yaml")) as f:
     cfg = yaml.load(f)
-    import pprint
-    pprint.pprint(cfg)
-    print("----")
     for shortname, d in cfg.items():
       game.Land(shortname, d)
 
