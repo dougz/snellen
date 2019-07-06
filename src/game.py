@@ -1,5 +1,6 @@
 import configparser
 import heapq
+import html
 import json
 import os
 import re
@@ -222,7 +223,7 @@ class Team(login.LoginUser):
     if state.state == state.CLOSED:
       state.state = state.OPEN
       state.open_time = now
-      self.activity_log.append((now, f'<a href="{puzzle.url}">{puzzle.title}</a> opened.'))
+      self.activity_log.append((now, f'<a href="{puzzle.url}">{html.escape(puzzle.title)}</a> opened.'))
 
   def solve_puzzle(self, puzzle, now):
     state = self.puzzle_state[puzzle]
@@ -230,7 +231,7 @@ class Team(login.LoginUser):
       state.state = state.SOLVED
       state.solve_time = now
       self.send_message({"method": "solve", "title": puzzle.title})
-      self.activity_log.append((now, f'<a href="{puzzle.url}">{puzzle.title}</a> solved.'))
+      self.activity_log.append((now, f'<a href="{puzzle.url}">{html.escape(puzzle.title)}</a> solved.'))
       self.compute_puzzle_beam(now)
 
   def get_puzzle_state(self, puzzle):
@@ -240,11 +241,11 @@ class Team(login.LoginUser):
     return self.puzzle_state[puzzle]
 
   def compute_puzzle_beam(self, now):
-    p = Puzzle.get_by_shortname("sample")
-    self.open_puzzle(p, now)
-    if self.puzzle_state[p].state == PuzzleState.SOLVED:
-      p = Puzzle.get_by_shortname("sample_multi")
-      self.open_puzzle(p, now)
+    self.open_puzzle(Puzzle.get_by_shortname("sample"), now)
+    if self.puzzle_state[Puzzle.get_by_shortname("sample")].state == PuzzleState.SOLVED:
+      for n in ("sample_multi", "seven_dials", "capital_letters"):
+        p = Puzzle.get_by_shortname(n)
+        self.open_puzzle(p, now)
 
     for st in self.puzzle_state.values():
       if st.state != PuzzleState.CLOSED:
@@ -252,22 +253,36 @@ class Team(login.LoginUser):
           self.send_message({"method": "open", "title": st.puzzle.land.name})
           self.open_lands.add(st.puzzle.land)
 
+class Icon:
+  def __init__(self, name, land, d):
+    self.name = name
+    self.land = land
+    self.pos = tuple(d["pos"])
+    self.size = tuple(d["size"])
+
+    self.images = {
+      "locked": f"/assets/map/land/{land.shortname}/{name}_locked.png",
+      "unlocked": f"/assets/map/land/{land.shortname}/{name}_unlocked.png",
+      "solved": f"/assets/map/land/{land.shortname}/{name}_solved.png",
+      }
 
 class Land:
   BY_SHORTNAME = {}
 
-  def __init__(self, shortname, name, pos):
+  def __init__(self, shortname, cfg):
+    self.BY_SHORTNAME[shortname] = self
     self.shortname = shortname
-    self.name = name
-    self.pos = pos
+    self.name = cfg["name"]
+    self.pos = tuple(cfg["pos"])
 
     self.locked_image = f"/assets/map/{shortname}_locked.png"
     self.unlocked_image = f"/assets/map/{shortname}_unlocked.png"
-
     self.url = "/land/" + shortname
     self.base_image = "/assets/land/" + shortname + "/land_base.png"
 
-    self.BY_SHORTNAME[shortname] = self
+    self.icons = {}
+    for n, d in cfg.get("icons", {}).items():
+      self.icons[n] = Icon(n, self, d)
 
     self.puzzles = []
 
@@ -302,9 +317,11 @@ class Puzzle:
 
     self.land = Land.BY_SHORTNAME[p["land"]]
     self.land.puzzles.append(self)
-    self.icon = f"/assets/land/{self.land.shortname}/{p['icon']}"
-    self.pos_x = int(p["pos_x"])
-    self.pos_y = int(p["pos_y"])
+
+    if "icon" in p:
+      self.icon = self.land.icons[p["icon"]]
+    else:
+      self.icon = None
 
     self.max_queued = p.get("max_queued", self.DEFAULT_MAX_QUEUED)
 
@@ -322,6 +339,10 @@ class Puzzle:
   def load_html(self, path):
     with open(os.path.join(path, "puzzle.html")) as f:
       soup = bs4.BeautifulSoup(f, features="lxml")
+      if soup.head:
+        self.html_head = "".join(str(i) for i in soup.head.contents)
+      else:
+        self.html_head = None
       self.html_body = "".join(str(i) for i in soup.body.contents)
 
   @classmethod

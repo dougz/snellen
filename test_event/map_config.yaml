@@ -1,0 +1,28 @@
+mainstreet:
+  name: Main Street
+  pos: [206, 187]
+
+bigtop:
+  name: Big Top
+  pos: [558, 270]
+
+forest:
+  name: Enchanted Forest
+  pos: [0, 251]
+  icons:
+    ship:
+      pos: [483, 30]
+      size: [293, 198]
+
+space:
+  name: Spaceopolis
+  pos: [27, 54]
+
+wizard:
+  name: Wizardy World
+  pos: [540, 22]
+
+yesterday:
+  name: Yesterdayland
+  pos: [270, 0]
+

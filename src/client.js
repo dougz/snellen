@@ -407,6 +407,8 @@ function initPage() {
 	    log.appendChild(li);
 	}
     }
+
+    if (puzzle_id && puzzle_init) puzzle_init();
 }
 
 window.onload = initPage;

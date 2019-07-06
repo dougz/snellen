@@ -47,11 +47,12 @@ class LandMapPage(tornado.web.RequestHandler):
 
     icons = []
     for p in land.puzzles:
+      if not p.icon: continue
       s = self.team.puzzle_state[p].state
       if s == game.PuzzleState.OPEN:
-        icons.append((p.icon + "_unlocked.png", p.pos_x, p.pos_y))
+        icons.append((p.icon.images["unlocked"], p.icon.pos[0], p.icon.pos[1]))
       elif s == game.PuzzleState.SOLVED:
-        icons.append((p.icon + "_solved.png", p.pos_x, p.pos_y))
+        icons.append((p.icon.images["solved"], p.icon.pos[0], p.icon.pos[1]))
     script += "<script>var icons = """ + json.dumps(icons) + ";</script>"
 
     self.render("land.html", team=self.team, land=land, script=script)
@@ -83,7 +84,11 @@ class PuzzlePage(tornado.web.RequestHandler):
       print(f"no puzzle called {shortname}")
       raise tornado.web.HTTPError(http.client.NOT_FOUND)
 
-    script = f"""<script>\nvar puzzle_id = "{puzzle.shortname}";\n</script>\n"""
+    script = f"""
+    <script>
+    var puzzle_id = "{puzzle.shortname}";
+    var puzzle_init = null;
+    </script>"""
 
     if self.application.settings.get("debug"):
       script += ("""<script src="/closure/goog/base.js"></script>\n"""
@@ -91,7 +96,8 @@ class PuzzlePage(tornado.web.RequestHandler):
     else:
       script += """<script src="/client.js"></script>"""
 
-    self.render("puzzle_frame.html", team=self.team, puzzle=puzzle, state=self.team.puzzle_state[puzzle], script=script)
+    self.render("puzzle_frame.html", team=self.team, puzzle=puzzle,
+                state=self.team.puzzle_state[puzzle], script=script)
 
 class ActivityLogPage(util.RequestHandler):
   @login.required("team")
@@ -205,7 +211,9 @@ class EventCSS(tornado.web.RequestHandler):
     self.write(self.event_css)
 
 class PuzzleAsset(tornado.web.RequestHandler):
-  MIME_TYPES = {".jpg": "image/jpeg"}
+  MIME_TYPES = {".jpg": "image/jpeg",
+                ".js": "text/javascript",
+                }
 
   def initialize(self, event_dir=None):
     self.event_dir = event_dir

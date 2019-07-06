@@ -7,6 +7,9 @@ var icons;
 /** @type{Array<Object>} */
 var log_entries;
 
+/** @type{?function()} */
+var puzzle_init;
+
 class Message {
     constructor() {
 	/** @type{string} */

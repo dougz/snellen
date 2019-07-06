@@ -3,6 +3,7 @@
 import getopt
 import os
 import sys
+import yaml
 
 import tornado.ioloop
 import tornado.httpserver
@@ -81,14 +82,20 @@ def main():
   assert template_path is not None, "Must specify --template_path."
   assert event_dir is not None, "Must specify --event_dir."
 
+  print("Load map config...")
+  with open(os.path.join(event_dir, "map_config.yaml")) as f:
+    cfg = yaml.load(f)
+    import pprint
+    pprint.pprint(cfg)
+    print("----")
+    for shortname, d in cfg.items():
+      game.Land(shortname, d)
+
   print("Adding puzzles...")
   with open(os.path.join(event_dir, "puzzles.py")) as f:
     def add_puzzle(shortname, initial_open=False):
       game.Puzzle(os.path.join(event_dir, "puzzles", shortname), initial_open)
-    def add_land(shortname, name, pos):
-      game.Land(shortname, name, pos)
-    exec(f.read(), {"add_puzzle": add_puzzle,
-                    "add_land": add_land})
+    exec(f.read(), {"add_puzzle": add_puzzle})
 
   save_state.set_classes(AdminUser=login.AdminUser,
                          Team=game.Team)

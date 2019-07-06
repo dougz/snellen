@@ -1,0 +1,497 @@
+<html>
+  <head>
+    <style>
+      body { font-family: sans-serif; }
+      div.sample { border: 1px solid #bb6;
+		   background-color: #ffe;
+		   padding: 0px 16px;
+		   margin-left: 40px;
+		   width: 500px;
+		 }
+      .flavor { font-style: italic; }
+      .h { color: #9900ff; }
+      .hh { font-weight: bold; }
+      pre {
+	  width: 500px;
+      }
+      .pair {
+	  display: flex;
+	  align-items: flex-start;
+	  vertical-align: top; }
+
+      .cryptex th {
+          width: 24px; height: 24px;
+          border: 2px solid black;
+      }
+      .cryptex td { width: 24px; height: 24px;
+		 border-left: 1px solid #666;
+		 border-right: 1px solid #666;
+	       }
+      table.cryptex { border: 2px solid black;
+		    border-collapse: collapse;
+		    font-size: 120%;
+		    font-weight: bold;
+		    text-align: center;
+		    margin-left: auto;
+                    margin-right: auto;
+                    margin-bottom: 16px;
+		  }
+      .t { color: #666; font-style: italic;}
+      hr { margin: 40px; }
+
+      dt { font-weight: bold; font-family: monospace; margin-left: 20px;
+      margin-top: 20px; }
+
+      table#canon { border-collapse: collapse; margin-left: auto; margin-right: auto; }
+      table#canon th { background-color: #ddd; border: 1px solid black; padding: 8px; }
+      table#canon td { border: 1px solid #999; padding: 8px; }
+      td.i { color: #999; font-style: italic; }
+    </style>
+    <script src="cryptex.js"></script>
+    <script>
+      window.onload = puzzle_init;
+    </script>
+  </head>
+  <body>
+    <h1>Puzzle productionization</h1>
+
+    Your puzzle zip file requires two files: <tt>metadata.cfg</tt>
+    and <tt>puzzle.html</tt>.
+
+    <h2>puzzle.html</h2>
+
+    <p>The <tt>puzzle.html</tt> contains the main body of your puzzle.
+    It will get parsed and included into a frame HTML file with all
+    the material common to all puzzle pages (nav bar, answer
+    submission, etc.).</p>
+
+    <p>Sample minimal <tt>puzzle.html</tt>:</p>
+
+    <div class=pair>
+      <pre>
+&lt;html&gt;
+  &lt;body&gt;
+    &lt;p class=flavor&gt;Flavortext here.&lt;/p&gt;
+    &lt;p&gt;What do you get if you multiply six by seven?&lt;/p&gt;
+  &lt;/body&gt;
+&lt;/html&gt; </pre>
+
+      <div class=sample>
+	<h3>Puzzle title</h3>
+	<p class=flavor>Flavortext here.</p>
+	<p>What do you get if you multiply six by seven?</p>
+      </div>
+    </div>
+
+    <p>Notes:
+      <ul>
+	<li>Do *not* include the puzzle title in the html (in either the
+	  body or the head).  This will be added as part of the framing.</li>
+      </ul>
+    </p>
+
+    <h3>Images</h3>
+
+    <p>You can include .jpg or .png images in your zip file, and refer
+    to them from your HTML via relative paths.</p>
+
+    <div class=pair>
+      <pre>
+&lt;html&gt;
+  &lt;body&gt;
+    &lt;p class=flavor&gt;Number 28.&lt;/p&gt;
+    &lt;p&gt;Who is this?&lt;/p&gt;
+    &lt;p&gt;<span class=h>&lt;img src="28.jpg"&gt;</span>&lt;/p&gt;
+  &lt;/body&gt;
+&lt;/html&gt; </pre>
+
+      <div class=sample>
+	<h3>Puzzle title</h3>
+	<p class=flavor>Number 28.</p>
+	<p>Who is this?</p>
+	<p><img src="28.jpg"></p>
+      </div>
+    </div>
+
+    <p>You may wish to make small images link to larger versions.</p>
+
+    <div class=pair>
+      <pre>
+&lt;html&gt;
+  &lt;body&gt;
+    &lt;p class=flavor&gt;Number 28.&lt;/p&gt;
+    &lt;p&gt;Who is this?&lt;/p&gt;
+    &lt;p&gt;<span class=h>&lt;a href="28_big.jpg"&gt;</span>&lt;img src="28.jpg"&gt;<span class=h>&lt;/a&gt;</span>&lt;br/&gt;
+       &lt;small&gt;click to enlarge&lt;/small&gt;&lt;/p&gt;
+  &lt;/body&gt;
+&lt;/html&gt; </pre>
+
+
+      <div class=sample>
+	<h3>Puzzle title</h3>
+	<p class=flavor>Number 28.</p>
+	<p>Who is this?</p>
+	<p><a href="28_big.jpg"><img src="28.jpg"></a><br/>
+	  <small>click to enlarge</small>
+	</p>
+      </div>
+    </div>
+
+
+    <h3>Audio</h3>
+
+    <div class=pair>
+      <pre>
+&lt;html&gt;
+  &lt;body&gt;
+    &lt;p class=flavor&gt;Turn your sound up!&lt;/p&gt;
+    &lt;p&gt;Beep beep.&lt;/p&gt;
+    &lt;p&gt;
+       <span class=h>&lt;audio controls&gt;
+         &lt;source src="beep.wav" type="audio/wav"&gt;
+       &lt;/audio&gt;</span>
+    &lt;/p&gt;
+  &lt;/body&gt;
+&lt;/html&gt; </pre>
+
+      <div class=sample>
+	<h3>Puzzle title</h3>
+	<p class=flavor>Turn your sound up!</p>
+	<p>Beep beep.</p>
+	<p>
+	  <audio controls>
+	    <source src="beep.wav" type="audio/wav">
+	  </audio>
+	</p>
+      </div>
+    </div>
+
+    <h3>Applying styles</h3>
+
+    <p>You can use inline styles:</p>
+
+    <div class=pair>
+      <pre>
+&lt;html&gt;
+  &lt;body&gt;
+    &lt;p class=flavor&gt;Flavortext here.&lt;/p&gt;
+    &lt;p&gt;What do you get if you multiply
+      &lt;span <span class=h>style="color: orange; font-weight: bold;"</span>&gt;six&lt;/span&gt;
+      by seven?&lt;/p&gt;
+  &lt;/body&gt;
+&lt;/html&gt; </pre>
+
+      <div class=sample>
+	<h3>Puzzle title</h3>
+	<p class=flavor>Flavortext here.</p>
+	<p>What do you get if you multiply <span style="color: orange; font-weight: bold;">six</span> by seven?</p>
+      </div>
+    </div>
+
+    <p>You can also include a style sheet in the
+    optional <tt>&lt;head&gt;</tt> element of your puzzle.  Any style
+    sheet you include must only have rules that apply within an
+    element of id "<tt>puzz</tt>", to avoid affecting any of the frame
+    content.</p>
+
+    <div class=pair>
+      <pre>
+&lt;html&gt;
+  <span class=h>&lt;head&gt;
+    &lt;style&gt;
+      <span class=hh>#puzz</span> .foo {
+        color: orange;
+	font-weight: bold;
+      }
+    &lt;/style&gt;
+  &lt;/head&gt;</span>
+  &lt;body&gt;
+    &lt;p class=flavor&gt;Flavortext here.&lt;/p&gt;
+    &lt;p&gt;What do you get if you multiply
+      &lt;span <span class=h>class=foo</span>&gt;six&lt;/span&gt; by seven?&lt;/p&gt;
+  &lt;/body&gt;
+&lt;/html&gt; </pre>
+
+      <div class=sample>
+	<h3>Puzzle title</h3>
+	<p class=flavor>Flavortext here.</p>
+	<p>What do you get if you multiply <span style="color: orange; font-weight: bold;">six</span> by seven?</p>
+      </div>
+    </div>
+
+    <h3>Using javascript</h3>
+
+    <p>If your puzzle requires custom javascript, put that in a separate file within your zip file.</p>
+
+    <p>To do initialization when the page is loaded, assign a function
+    to the <tt>puzzle_init</tt> variable, and it will be called by the
+      frame initialization code.</p>
+
+    <div class=pair>
+      <pre>
+&lt;html&gt;
+  <span class=h>&lt;head&gt;
+    &lt;script src="cryptex.js"&gt;&lt;/script&gt;
+  &lt;/head&gt;</span>
+  &lt;body&gt;
+    &lt;p class=flavor&gt;Flavortext here.&lt;/p&gt;
+    &lt;table&gt;
+      ...
+    &lt;/table&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+
+
+<span class=t>cryptex.js:</span>
+
+class Cryptex {
+  constructor() {
+    ...
+  }
+}
+
+var cryptex = null;
+
+puzzle_init = function() {
+  cryptex = new Cryptex();
+}</pre>
+
+      <div class=sample>
+	<h3>Puzzle title</h3>
+	<p class=flavor>Flavortext here.</p>
+	<table class=cryptex>
+	  <tr>
+	    <th id="up_0">&#x25b2;</th>
+	    <th id="up_1">&#x25b2;</th>
+	    <th id="up_2">&#x25b2;</th>
+	    <th id="up_3">&#x25b2;</th>
+	    <th id="up_4">&#x25b2;</th>
+	    <th id="up_5">&#x25b2;</th>
+	    <th id="up_6">&#x25b2;</th>
+	  </tr>
+	  <tr>
+	    <td id="c_0_0"></td>
+	    <td id="c_0_1"></td>
+	    <td id="c_0_2"></td>
+	    <td id="c_0_3"></td>
+	    <td id="c_0_4"></td>
+	    <td id="c_0_5"></td>
+	    <td id="c_0_6"></td>
+	  </tr>
+	  <tr>
+	    <td id="c_1_0"></td>
+	    <td id="c_1_1"></td>
+	    <td id="c_1_2"></td>
+	    <td id="c_1_3"></td>
+	    <td id="c_1_4"></td>
+	    <td id="c_1_5"></td>
+	    <td id="c_1_6"></td>
+	  </tr>
+	  <tr>
+	    <td id="c_2_0"></td>
+	    <td id="c_2_1"></td>
+	    <td id="c_2_2"></td>
+	    <td id="c_2_3"></td>
+	    <td id="c_2_4"></td>
+	    <td id="c_2_5"></td>
+	    <td id="c_2_6"></td>
+	  </tr>
+	  <tr>
+	    <td id="c_3_0"></td>
+	    <td id="c_3_1"></td>
+	    <td id="c_3_2"></td>
+	    <td id="c_3_3"></td>
+	    <td id="c_3_4"></td>
+	    <td id="c_3_5"></td>
+	    <td id="c_3_6"></td>
+	  </tr>
+	  <tr>
+	    <td id="c_4_0"></td>
+	    <td id="c_4_1"></td>
+	    <td id="c_4_2"></td>
+	    <td id="c_4_3"></td>
+	    <td id="c_4_4"></td>
+	    <td id="c_4_5"></td>
+	    <td id="c_4_6"></td>
+	  </tr>
+	  <tr>
+	    <td id="c_5_0"></td>
+	    <td id="c_5_1"></td>
+	    <td id="c_5_2"></td>
+	    <td id="c_5_3"></td>
+	    <td id="c_5_4"></td>
+	    <td id="c_5_5"></td>
+	    <td id="c_5_6"></td>
+	  </tr>
+	  <tr>
+	    <td id="c_6_0"></td>
+	    <td id="c_6_1"></td>
+	    <td id="c_6_2"></td>
+	    <td id="c_6_3"></td>
+	    <td id="c_6_4"></td>
+	    <td id="c_6_5"></td>
+	    <td id="c_6_6"></td>
+	  </tr>
+	  <tr>
+	    <td id="c_7_0"></td>
+	    <td id="c_7_1"></td>
+	    <td id="c_7_2"></td>
+	    <td id="c_7_3"></td>
+	    <td id="c_7_4"></td>
+	    <td id="c_7_5"></td>
+	    <td id="c_7_6"></td>
+	  </tr>
+	  <tr>
+	    <td id="c_8_0"></td>
+	    <td id="c_8_1"></td>
+	    <td id="c_8_2"></td>
+	    <td id="c_8_3"></td>
+	    <td id="c_8_4"></td>
+	    <td id="c_8_5"></td>
+	    <td id="c_8_6"></td>
+	  </tr>
+	  <tr>
+	    <td id="c_9_0"></td>
+	    <td id="c_9_1"></td>
+	    <td id="c_9_2"></td>
+	    <td id="c_9_3"></td>
+	    <td id="c_9_4"></td>
+	    <td id="c_9_5"></td>
+	    <td id="c_9_6"></td>
+	  </tr>
+	  <tr>
+	    <th id="down_0">&#x25bc;</th>
+	    <th id="down_1">&#x25bc;</th>
+	    <th id="down_2">&#x25bc;</th>
+	    <th id="down_3">&#x25bc;</th>
+	    <th id="down_4">&#x25bc;</th>
+	    <th id="down_5">&#x25bc;</th>
+	    <th id="down_6">&#x25bc;</th>
+	  </tr>
+	</table>
+      </div>
+    </div>
+
+    <hr/>
+
+    <h2>metadata.cfg</h2>
+
+    <p>The <tt>metadata.cfg</tt> contains information about your
+      puzzle that is used by the server to show it and check answers.
+      It has the format of a number of sections (denoted by a section
+      name in square brackets), and within each section a number of
+      key-value pairs.</p>
+
+    <h3>PUZZLE section</h3>
+
+    <p>A typical <tt>PUZZLE</tt> section might look like this:</p>
+
+    <pre>
+      [PUZZLE]
+      shortname = sample_puzzle
+      title = Sample Puzzle
+      oncall = yourname@example.org
+      puzzletron_id = 2
+      version = 1
+    </pre>
+
+    <dl>
+      <dt>shortname</dt>
+      <dd>The puzzle's shortname is used internally by the server.  It
+	will be visible to players as part of the puzzle page URL, and
+	also if players go poking around in the javascript running on
+	the browser.  It must consist of only lowercase letters, digits,
+	and underscores, and must begin with a letter.</dd>
+
+      <dt>title</dt>
+      <dd>The puzzle's title, presented to the players on any number
+      of pages.  May contain arbitrary text (including non-ASCII
+      characters; the <tt>metadata.cfg</tt> file as a whole is
+      interpreted as UTF-8).  May not contain HTML tags (ie,
+      "<tt>&lt;b&gt;</tt>" will get you "&lt;b&gt;" in
+	your title, rather than bold text).</dd>
+
+      <dt>oncall</dt>
+      <dd>Email address of the person who should be contacted if any
+      problems are discovered with this puzzle during the actual
+	event.  Not displayed to players.</dd>
+
+      <dt>puzzletron_id</dt>
+      <dd>The ID number of this puzzle in puzzletron, for generating
+      links from the server's admin pages.  Not displayed to
+	players.</dd>
+
+      <dt>version</dt>
+      <dd>A numeric version of this puzzle.  Currently unused.</dd>
+
+
+      <dt>land</dt>
+      <dd>The shortname of the theme park land in which this puzzle
+      appears (eg, mainstreet, forest, bigtop, etc.).  Contact the
+	productionization team for the value to use here.</dd>
+
+      <dt>icon</dt>
+      <dd>The base filename of this puzzle's icon on its land's map.
+      Contact the productionization team.</dd>
+
+      <dt>max_queued</dt>
+      <dd><i>Optional.</i>  The maximum number of submissions that a
+      team may enqueue for this puzzle.  Default is 3.</dd>
+
+    </dl>
+
+    <h3>ANSWER section</h3>
+
+    <p>The <tt>ANSWER</tt> section contains one or more key-value pairs.
+      The values are the correct answers for this puzzle, and <i>the
+	keys are unused</i>.  Most puzzles have only a single answer and
+      so will only have a single entry in this section.  Some puzzles
+      solve to multiple answers and will have multiple entries.  Again,
+      the keys don't matter, but they do have to be different if there
+      is more than one answer.  (You could, for instance, use them to
+      remember which answer came from which part of the multi-answer
+      puzzle.)</p>
+
+    <p>For multi-answer puzzles, the player UI will show how many of the
+      answers they have submitted (eg, "0/3 answers so far", or
+      something).  Correct answers will show as "correct" in the submit
+      window, but the puzzle will not be considered solved
+      until <i>all</i> of the correct answers have been submitted.</p>
+
+    <p>Both the answers in this file and the player's submissions are
+      canonicalized before comparison.  Informally, this consist of
+      uppercasing the string and removing all diacriticals and
+      non-letter, non-emoji characters.</p>
+
+    <table id=canon>
+      <tr><th>input</th><th>canonical form</th></tr>
+      <tr><td>foo</td><td>FOO</td></tr>
+      <tr><td>Al Kaline</td><td>ALKALINE</td></tr>
+      <tr><td>123</td><td class=i>(empty string)</td></tr>
+      <tr><td>CAR 54</td><td>CAR</td></tr>
+      <tr><td>Montréal, über, 12.89, Mère, Françoise, noël, 889</td><td>MONTREALUBERMEREFRANCOISENOEL</td></tr>
+      <tr><td>👠</td><td>👠</td></tr>
+      <tr><td>✈✈✈ Galactic Trendsetters ✈✈✈</td><td>✈✈✈GALACTICTRENDSETTERS✈✈✈</td></tr>
+    </table>
+
+    <h3>INCORRECT_RESPONSES</h3>
+
+    <p>The <tt>INCORRECT_RESPONSES</tt> section lists "partial
+      answers": player submissions that aren't correct, but should
+      produce some sort of response other than just "incorrect".  In
+      this section, the keys are the answers (and are canonicalized,
+      as above), and the values are the text that should be shown to
+      the player.  Simple HTML tags (bold, italic, etc.) work, and
+      characters like &lt; and &amp; should be written as HTML
+      entities (ie, "<tt>&amp;lt;</tt>" and "<tt>&amp;amp;</tt>").</p>
+
+    <p>TODO(dougz): expand this section if we keep the partial answer
+      mechanism.</p>
+
+
+
+
+  </body>
+</html>
+
+

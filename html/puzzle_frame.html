@@ -5,6 +5,7 @@
     <title>{{puzzle.title}}</title>
     <link rel=stylesheet href="/event.css">
     {% raw script %}
+    {% if puzzle.html_head %}{% raw puzzle.html_head %}{% end %}
   </head>
   <body>
     <div id="topnav">
@@ -16,9 +17,10 @@
     <p><span class=debug>debug: <b>opened</b> {{"none" if state.open_time is None else time.ctime(state.open_time)}}
       <b>solved</b> {{"none" if state.solve_time is None else time.ctime(state.solve_time)}}</span></p>
 
-
     <h1>{{puzzle.title}}</h1>
-    {% raw puzzle.html_body %}
+    <div id="puzz">
+      {% raw puzzle.html_body %}
+    </div>
   </body>
 </html>
 
