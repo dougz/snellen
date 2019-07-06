@@ -174,9 +174,30 @@ div#map {
     margin-right: auto;
 }
 
-div#map img {
+div#map img.base {
     position: absolute;
 }
+
+div#map img.icon {
+    position: absolute;
+    pointer-events: none;
+}
+
+div#map div.p {
+    position: absolute;
+    pointer-events: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-weight: bold;
+    font-size: 144%;
+    color: white;
+    pointer-events: none;
+    text-align: center;
+    text-shadow: 2px 2px 5px black;
+}
+
 
 canvas {
     display: block;
@@ -219,4 +240,6 @@ h1 {
 .solved {
     font-weight: bold;
 }
+
+
 

@@ -260,6 +260,7 @@ class Icon:
     self.land = land
     self.pos = tuple(d["pos"])
     self.size = tuple(d["size"])
+    self.poly = d.get("poly", None)
 
     self.images = {
       "locked": f"/assets/land/{land.shortname}/{name}_locked.png",

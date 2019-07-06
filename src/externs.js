@@ -71,6 +71,8 @@ class MapItem {
 	this.width;
 	/** @type{?number} */
 	this.height;
+	/** @type{?string} */
+	this.poly;
     }
 }
 

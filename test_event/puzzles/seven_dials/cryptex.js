@@ -4,20 +4,13 @@ goog.require("goog.events");
 class Cryptex {
     constructor() {
 	this.setting = [0,0,0,0,0,0,0];
-	// this.text = ["CSBPEDSIPT",
-	// 	     "ERXRENUROT",
-	// 	     "OAECDRAURA",
-	// 	     "INERDMSTEP",
-	// 	     "IUISIXONTE",
-	// 	     "ERTNCNEOES",
-	// 	     "NDERYSGTER"];
-	this.text = ["LSCABKMBGN",
-		     "IIARRREIAI",
-		     "TLLSOYRSLO",
-		     "HICEMPCMLB",
-		     "ICINITUUII",
-		     "UOUINORTUU",
-		     "MNMCENYHMM"];
+	this.text = ["CSBPEDSIPT",
+	 	     "ERXRENUROT",
+	 	     "OAECDRAURA",
+	 	     "INERDMSTEP",
+	 	     "IUISIXONTE",
+	 	     "ERTNCNEOES",
+	 	     "NDERYSGTER"];
 
 	for (var c = 0; c < 7; ++c) {
 	    this.setting[c] = Math.floor(Math.random() * 10);

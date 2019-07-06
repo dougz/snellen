@@ -74,11 +74,13 @@ class LandMapPage(tornado.web.RequestHandler):
           d["icon_url"] = p.icon.images["unlocked"]
           d["pos_x"], d["pos_y"] = p.icon.pos
           d["width"], d["height"] = p.icon.size
+          if p.icon.poly: d["poly"] = p.icon.poly
       elif st.state == game.PuzzleState.SOLVED:
         if p.icon:
           d["icon_url"] = p.icon.images["solved"]
           d["pos_x"], d["pos_y"] = p.icon.pos
           d["width"], d["height"] = p.icon.size
+          if p.icon.poly: d["poly"] = p.icon.poly
         d["solved"] = True
 
     script += "<script>var mapdata = """ + json.dumps(mapdata) + ";</script>"

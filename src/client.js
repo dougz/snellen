@@ -365,14 +365,23 @@ class MapDraw {
 	/** @type{Element} */
 	this.map_el = goog.dom.getElement("map");
 	/** @type{Element} */
+	this.mapmap_el = goog.dom.getElement("mapmap");
+	/** @type{Element} */
 	this.list_el = goog.dom.getElement("list");
+
+	/** @type{Element} */
+	this.highlight_el = null;
     }
 
     draw_map(mapdata) {
 	this.map_el.innerHTML = "";
+	this.mapmap_el.innerHTML = "";
 	this.list_el.innerHTML = "";
+
 	if (mapdata.base_url) {
-	    var el = goog.dom.createDom("IMG", {"src": mapdata.base_url});
+	    var el = goog.dom.createDom("IMG", {src: mapdata.base_url,
+						className: "base",
+						useMap: "#mapmap"});
 	    this.map_el.appendChild(el);
 	}
 
@@ -383,14 +392,25 @@ class MapDraw {
 
     draw_item(it) {
 	if (it.icon_url) {
-	    var el = goog.dom.createDom("IMG", {"src": it.icon_url});
+	    var el = goog.dom.createDom("IMG", {src: it.icon_url, className: "icon"});
 	    el.style.left = "" + it.pos_x + "px";
 	    el.style.top = "" + it.pos_y + "px";
 	    this.map_el.appendChild(el);
+
+	    if (it.poly) {
+		var area = goog.dom.createDom("AREA", {shape: "poly",
+						       coords: it.poly,
+						       href: it.url});
+		console.log(area);
+		this.mapmap_el.appendChild(area);
+
+		goog.events.listen(area, goog.events.EventType.MOUSEENTER, goog.bind(this.item_enter, this, it));
+		goog.events.listen(area, goog.events.EventType.MOUSELEAVE, goog.bind(this.item_leave, this, it));
+	    }
 	}
 
 	if (it.name) {
-	    var a = goog.dom.createDom("A", {"href": it.url}, it.name)
+	    var a = goog.dom.createDom("A", {href: it.url}, it.name)
 	    el = goog.dom.createDom("LI", null, a);
 	    if (it.answer) {
 		el.append(" \u2014 ");
@@ -398,6 +418,26 @@ class MapDraw {
 					     it.answer));
 	    }
 	    this.list_el.appendChild(el);
+	}
+    }
+
+    item_enter(it) {
+	this.item_leave(null);
+
+	var h = goog.dom.createDom("DIV", {className: "p"}, it.name);
+	h.style.left = "" + it.pos_x + "px";
+	h.style.top = "" + it.pos_y + "px";
+	h.style.width = "" + it.width + "px";
+	h.style.height = "" + it.height + "px";
+
+	this.map_el.appendChild(h);
+	this.highlight_el = h;
+    }
+
+    item_leave(it) {
+	if (this.highlight_el) {
+	    goog.dom.removeNode(this.highlight_el);
+	    this.highlight_el = null;
 	}
     }
 }
