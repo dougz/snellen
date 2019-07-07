@@ -72,7 +72,7 @@ class LandMapPage(tornado.web.RequestHandler):
       items.append(d)
 
       if st.answers_found:
-        d["answer"] = ", ".join(sorted(st.answers_found))
+        d["answer"] = ", ".join(sorted(p.display_answers[a] for a in st.answers_found))
 
       if st.state == game.PuzzleState.OPEN:
         if p.icon:
@@ -80,6 +80,7 @@ class LandMapPage(tornado.web.RequestHandler):
           d["pos_x"], d["pos_y"] = p.icon.pos
           d["width"], d["height"] = p.icon.size
           if p.icon.poly: d["poly"] = p.icon.poly
+          if "answer" in d: d["answer"] += ", \u2026"
       elif st.state == game.PuzzleState.SOLVED:
         if p.icon:
           d["icon_url"] = p.icon.images["solved"]

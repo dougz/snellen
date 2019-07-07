@@ -152,7 +152,7 @@ class SubmitDialog {
 
 	this.submit_div = goog.dom.createDom("DIV");
 
-	this.input = goog.dom.createDom("INPUT", {id: "answer", "name": "answer"}, "");
+	this.input = goog.dom.createDom("INPUT", {id: "answer", name: "answer", maxLength: 40}, "");
 	this.submit_div.appendChild(this.input);
 	goog.events.listen(this.input, goog.events.EventType.KEYDOWN, goog.bind(this.onkeydown, this));
 

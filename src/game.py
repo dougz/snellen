@@ -253,17 +253,17 @@ class Team(login.LoginUser):
         self.open_puzzle(p, now)
 
     if self.puzzle_state[Puzzle.get_by_shortname("fab_four")].state == PuzzleState.SOLVED:
-      for n in ("flags",):
-        p = Puzzle.get_by_shortname(n)
-        self.open_puzzle(p, now)
-
-    if self.puzzle_state[Puzzle.get_by_shortname("flags")].state == PuzzleState.SOLVED:
       for n in ("lazy",):
         p = Puzzle.get_by_shortname(n)
         self.open_puzzle(p, now)
 
-    if self.puzzle_state[Puzzle.get_by_shortname("lazy")].state == PuzzleState.SOLVED:
+    if self.puzzle_state[Puzzle.get_by_shortname("flags")].state == PuzzleState.SOLVED:
       for n in ("bobby_tables",):
+        p = Puzzle.get_by_shortname(n)
+        self.open_puzzle(p, now)
+
+    if self.puzzle_state[Puzzle.get_by_shortname("lazy")].state == PuzzleState.SOLVED:
+      for n in ("flags",):
         p = Puzzle.get_by_shortname(n)
         self.open_puzzle(p, now)
 
@@ -349,7 +349,13 @@ class Puzzle:
 
     self.max_queued = p.get("max_queued", self.DEFAULT_MAX_QUEUED)
 
-    self.answers = set(self.canonicalize_answer(a) for a in c["ANSWER"].values())
+    self.answers = set()
+    self.display_answers = {}
+    for a in c["ANSWER"].values():
+      disp = a.upper().strip()
+      a = self.canonicalize_answer(a)
+      self.display_answers[a] = disp
+      self.answers.add(a)
 
     if "INCORRECT_RESPONSES" in c:
       self.incorrect_responses = dict(
