@@ -247,6 +247,26 @@ class Team(login.LoginUser):
         p = Puzzle.get_by_shortname(n)
         self.open_puzzle(p, now)
 
+    if self.puzzle_state[Puzzle.get_by_shortname("sample_multi")].state == PuzzleState.SOLVED:
+      for n in ("fab_four",):
+        p = Puzzle.get_by_shortname(n)
+        self.open_puzzle(p, now)
+
+    if self.puzzle_state[Puzzle.get_by_shortname("fab_four")].state == PuzzleState.SOLVED:
+      for n in ("flags",):
+        p = Puzzle.get_by_shortname(n)
+        self.open_puzzle(p, now)
+
+    if self.puzzle_state[Puzzle.get_by_shortname("flags")].state == PuzzleState.SOLVED:
+      for n in ("lazy",):
+        p = Puzzle.get_by_shortname(n)
+        self.open_puzzle(p, now)
+
+    if self.puzzle_state[Puzzle.get_by_shortname("lazy")].state == PuzzleState.SOLVED:
+      for n in ("bobby_tables",):
+        p = Puzzle.get_by_shortname(n)
+        self.open_puzzle(p, now)
+
     for st in self.puzzle_state.values():
       if st.state != PuzzleState.CLOSED:
         if st.puzzle.land not in self.open_lands:
@@ -276,6 +296,8 @@ class Land:
     self.shortname = shortname
     self.name = cfg["name"]
     self.pos = tuple(cfg["pos"])
+    self.size = tuple(cfg["size"])
+    self.poly = cfg["poly"]
 
     self.locked_image = f"/assets/map/{shortname}_locked.png"
     self.unlocked_image = f"/assets/map/{shortname}_unlocked.png"

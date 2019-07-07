@@ -19,7 +19,8 @@ class EventHome(tornado.web.RequestHandler):
       script += """<script src="/client.js"></script>"""
 
     items = []
-    mapdata = {"items": items}
+    mapdata = {"base_url": "/assets/map/map_base.png",
+               "items": items}
 
     for land in game.Land.BY_SHORTNAME.values():
       d = {}
@@ -30,9 +31,13 @@ class EventHome(tornado.web.RequestHandler):
         d["url"] = land.url
         d["icon_url"] = land.unlocked_image
         d["pos_x"], d["pos_y"] = land.pos
+        d["width"], d["height"] = land.size
+        d["poly"] = land.poly
       else:
         d["icon_url"] = land.locked_image
         d["pos_x"], d["pos_y"] = land.pos
+        d["width"], d["height"] = land.size
+        d["poly"] = land.poly
 
     script += """<script>var mapdata = """ + json.dumps(mapdata) + ";</script>"
 

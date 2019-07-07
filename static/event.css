@@ -225,6 +225,7 @@ h1 {
 }
 
 .debug {
+    display: none;
     margin: 4px;
     padding: 4px;
     font-size: 84%;
