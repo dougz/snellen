@@ -18,6 +18,8 @@ class Message {
 	this.puzzle_id;
 	/** @type{string} */
 	this.title;
+	/** @type{?string} */
+	this.audio;
     }
 }
 

@@ -230,7 +230,11 @@ class Team(login.LoginUser):
     if state.state != state.SOLVED:
       state.state = state.SOLVED
       state.solve_time = now
-      self.send_message({"method": "solve", "title": html.escape(puzzle.title)})
+      self.send_message(
+        {"method": "solve",
+         "title": html.escape(puzzle.title),
+         "audio": "https://snellen.storage.googleapis.com/applause.mp3",
+         })
       self.activity_log.append((now, f'<a href="{puzzle.url}">{html.escape(puzzle.title)}</a> solved.'))
       self.compute_puzzle_beam(now)
 

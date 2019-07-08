@@ -86,6 +86,10 @@ class Dispatcher {
     /** @param{Message} msg */
     solve(msg) {
 	toast_manager.add_toast("<b>" + msg.title + "</b> was solved!", 5000);
+	if (msg.audio) {
+	    var audio = new Audio(msg.audio);
+	    audio.play();
+	}
     }
 
     /** @param{Message} msg */
@@ -401,7 +405,6 @@ class MapDraw {
 		var area = goog.dom.createDom("AREA", {shape: "poly",
 						       coords: it.poly,
 						       href: it.url});
-		console.log(area);
 		this.mapmap_el.appendChild(area);
 
 		goog.events.listen(area, goog.events.EventType.MOUSEENTER, goog.bind(this.item_enter, this, it));
