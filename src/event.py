@@ -50,7 +50,7 @@ class LandMapPage(tornado.web.RequestHandler):
     if land not in self.team.open_lands:
       raise tornado.web.HTTPError(http.client.NOT_FOUND)
 
-    script = ""
+    script = """<script>\nvar puzzle_id = null;\n</script>\n"""
     if self.application.settings.get("debug"):
       script += ("""<script src="/closure/goog/base.js"></script>\n"""
                  """<script src="/client-debug.js"></script>""")
@@ -133,11 +133,12 @@ class PuzzlePage(tornado.web.RequestHandler):
 class ActivityLogPage(util.RequestHandler):
   @login.required("team")
   def get(self):
+    script = """<script>\nvar puzzle_id = null;\n</script>\n"""
     if self.application.settings.get("debug"):
-      script = ("""<script src="/closure/goog/base.js"></script>\n"""
+      script += ("""<script src="/closure/goog/base.js"></script>\n"""
                  """<script src="/client-debug.js"></script>""")
     else:
-      script = """<script src="/client.js"></script>"""
+      script += """<script src="/client.js"></script>"""
 
     script += """<script>var log_entries = """ + json.dumps(self.team.activity_log) + ";</script>"
 
