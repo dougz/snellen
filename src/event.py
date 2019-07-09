@@ -1,6 +1,8 @@
+import asyncio
 import http.client
 import json
 import os
+import random
 import re
 import tornado.web
 
@@ -147,8 +149,13 @@ class ActivityLogPage(util.RequestHandler):
     self.render("activity_log.html", team=self.team, script=script)
 
 class WaitHandler(tornado.web.RequestHandler):
+  WAIT_TIMEOUT = 300
+  WAIT_SMEAR = 20
+
   @login.required("team", on_fail=http.client.UNAUTHORIZED)
   async def get(self, received_serial):
+    self.session.wait_delta(+1)
+
     received_serial = int(received_serial)
     q = self.session.wait_queue
     # Client acks all messages up through received_serial; these can
@@ -156,17 +163,25 @@ class WaitHandler(tornado.web.RequestHandler):
     while q and q[0][0] <= received_serial:
       q.popleft()
 
+    allow_empty = False
     while True:
-      if q:
+      if q or allow_empty:
         self.set_header("Content-Type", "application/json")
+        self.set_header("Cache-Control", "no-store")
         self.write(b"[")
         for i, (ser, obj) in enumerate(q):
           if i > 0: self.write(b",")
           self.write(f"[{ser},{obj}]".encode("utf-8"))
         self.write(b"]")
+        self.session.wait_delta(-1)
         return
-      await self.session.wait_event.wait()
-      self.session.wait_event.clear()
+      allow_empty = True
+      try:
+        await asyncio.wait_for(self.session.wait_event.wait(),
+                               self.WAIT_TIMEOUT + random.random() * self.WAIT_SMEAR)
+        self.session.wait_event.clear()
+      except asyncio.TimeoutError:
+        pass
 
 
 class SubmitHandler(tornado.web.RequestHandler):

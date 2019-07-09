@@ -10,8 +10,6 @@ class Waiter {
     constructor(dispatcher) {
 	/** @type{goog.net.XhrIo} */
 	this.xhr = new goog.net.XhrIo();
-	/** @type{goog.net.XhrIo} */
-	this.other_xhr = new goog.net.XhrIo();
 	/** @type{number} */
 	this.serial = 0;
 	/** @type{number} */
@@ -49,15 +47,11 @@ class Waiter {
 	    this.dispatcher.dispatch(msg);
 	}
 
-        var temp = this.xhr;
-        this.xhr = this.other_xhr;
-        this.other_xhr = temp;
         this.xhr.send("/wait/" + this.serial);
     }
 
     start() {
 	goog.events.listen(this.xhr, goog.net.EventType.COMPLETE, this.waitcomplete, false, this);
-	goog.events.listen(this.other_xhr, goog.net.EventType.COMPLETE, this.waitcomplete, false, this);
 	this.xhr.send("/wait/" + this.serial);
     }
 }

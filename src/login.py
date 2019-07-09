@@ -76,6 +76,9 @@ class Session:
   SESSION_TIMEOUT = 3600   # seconds
   COOKIE_NAME = "SESSION"
 
+  WAIT_CLEAN_THRESHOLD = 10
+  WAIT_CLEAN_INTERVAL = 20  # seconds
+
   def __init__(self, user=None, *caps):
     self.key = base64.urlsafe_b64encode(os.urandom(18))
     self.BY_KEY[self.key] = self
@@ -89,6 +92,9 @@ class Session:
     self.wait_queue = deque()
     self.wait_serial = 1
     self.wait_event = asyncio.Event()
+
+    self.waits = 0
+    self.last_wait_clean = 0
 
   def set_cookie(self, req):
     req.set_secure_cookie(self.COOKIE_NAME, self.key)
@@ -114,6 +120,14 @@ class Session:
       session = cls.BY_KEY.pop(key, None)
       if session:
         if session.team: session.team.detach_session(session)
+
+  def wait_delta(self, delta):
+    self.waits += delta
+    if self.waits >= self.WAIT_CLEAN_THRESHOLD:
+      now = time.time()
+      if now > self.last_wait_clean + self.WAIT_CLEAN_INTERVAL:
+        self.wait_event.set()
+        self.last_wait_clean = now
 
 
 # A decorator that can be applied to a request handler's get() or
