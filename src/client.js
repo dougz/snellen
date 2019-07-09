@@ -47,11 +47,11 @@ class Waiter {
 	    this.dispatcher.dispatch(msg);
 	}
 
-        this.xhr.send("/wait/" + this.serial);
+        setTimeout(goog.bind(this.xhr.send, this.xhr, "/wait/" + this.serial), 0);
     }
 
     start() {
-	goog.events.listen(this.xhr, goog.net.EventType.COMPLETE, this.waitcomplete, false, this);
+	goog.events.listen(this.xhr, goog.net.EventType.COMPLETE, goog.bind(this.waitcomplete, this));
 	this.xhr.send("/wait/" + this.serial);
     }
 }
@@ -395,7 +395,7 @@ class MapDraw {
 	    el.style.top = "" + it.pos_y + "px";
 	    this.map_el.appendChild(el);
 
-	    if (it.poly) {
+	    if (it.poly && it.name) {
 		var area = goog.dom.createDom("AREA", {shape: "poly",
 						       coords: it.poly,
 						       href: it.url});

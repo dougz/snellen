@@ -35,11 +35,6 @@ class EventHome(tornado.web.RequestHandler):
         d["pos_x"], d["pos_y"] = land.pos
         d["width"], d["height"] = land.size
         d["poly"] = land.poly
-      else:
-        d["icon_url"] = land.locked_image
-        d["pos_x"], d["pos_y"] = land.pos
-        d["width"], d["height"] = land.size
-        d["poly"] = land.poly
 
     script += """<script>var mapdata = """ + json.dumps(mapdata) + ";</script>"
 
