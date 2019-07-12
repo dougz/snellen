@@ -15,6 +15,9 @@
 	     required>
       <br/>
       {% if bad_login %}<b>Bad login.</b><br/>{% end %}
+      {% if target %}
+      <input type="hidden" name="target" value="{{target}}"/>
+      {% end %}
       <button type="submit">Login</button>
     </form>
   </body>

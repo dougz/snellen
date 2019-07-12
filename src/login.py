@@ -6,6 +6,7 @@ import http.client
 import json
 import os
 import time
+import urllib.parse
 from collections import deque
 
 import tornado.web
@@ -85,9 +86,7 @@ class Session:
     self.user = user
     self.team = None
     self.capabilities = set(caps)
-    self.bad_login = False
     self.expires = time.time() + self.SESSION_TIMEOUT
-    self.original_target = None
 
     self.wait_queue = deque()
     self.wait_serial = 1
@@ -145,8 +144,7 @@ class required:
       raise tornado.web.HTTPError(self.on_fail)
     session = Session(None)
     session.set_cookie(req)
-    session.original_target = req.request.uri
-    req.redirect("/login")
+    req.redirect("/login?" + urllib.parse.urlencode({"redirect_to": req.request.uri}))
 
   def __call__(self, func):
     @functools.wraps(func)
@@ -171,7 +169,6 @@ class required:
         return
 
       session.expires = now + session.SESSION_TIMEOUT
-      session.original_target = None
       req.session = session
       req.user = session.user
       req.team = session.team
@@ -182,11 +179,13 @@ class required:
 class Login(tornado.web.RequestHandler):
   def get(self):
     session = Session.from_request(self)
+    target = self.get_argument("redirect_to", None)
+    bad_login = self.get_argument("bad_login", None)
     self.render("login.html",
-                bad_login=session and session.bad_login,
+                bad_login=bad_login,
                 default_username=self.application.settings["default_username"],
                 default_password=self.application.settings["default_password"],
-                )
+                target=target)
 
 
 class LoginSubmit(tornado.web.RequestHandler):
@@ -197,31 +196,32 @@ class LoginSubmit(tornado.web.RequestHandler):
       session = Session(None)
       session.set_cookie(self)
 
-    username = self.get_argument("username")
-    password = self.get_argument("password")
+    username = self.get_argument("username", None)
+    password = self.get_argument("password", None)
+    target = self.get_argument("target", None)
+
+    err_d = {"bad_login": 1}
+    if target:
+      err_d["redirect_to"] = target
 
     team = game.Team.get_by_username(username)
     if team:
       if team.check_password(password):
         session.team = team
         session.capabilities = {"team"}
-        session.bad_login = False
         team.attach_session(session)
-        self.redirect(session.original_target or "/")
+        self.redirect(target or "/")
       else:
-        session.bad_login = True
-        self.redirect("/login")
+        self.redirect("/login?" + urllib.parse.urlencode(err_d))
       return
 
     user = AdminUser.get_by_username(username)
     if user and user.check_password(password):
       session.user = user
       session.capabilities = user.roles
-      session.bad_login = False
       self.redirect("/admin")
     else:
-      session.bad_login = True
-      self.redirect("/login")
+      self.redirect("/login?" + urllib.parse.urlencode(err_d))
 
 
 class Logout(tornado.web.RequestHandler):
