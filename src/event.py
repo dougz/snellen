@@ -10,16 +10,9 @@ import game
 import login
 import util
 
-class EventHome(tornado.web.RequestHandler):
+class EventHomePage(util.TeamPageHandler):
   @login.required("team")
   def get(self):
-    script = """<script>\nvar puzzle_id = null;\n</script>\n"""
-    if self.application.settings.get("debug"):
-      script += ("""<script src="/closure/goog/base.js"></script>\n"""
-                 """<script src="/client-debug.js"></script>""")
-    else:
-      script += """<script src="/client.js"></script>"""
-
     items = []
     mapdata = {"base_url": "/assets/map/map_base.png",
                "items": items}
@@ -36,12 +29,12 @@ class EventHome(tornado.web.RequestHandler):
         d["width"], d["height"] = land.size
         d["poly"] = land.poly
 
-    script += """<script>var mapdata = """ + json.dumps(mapdata) + ";</script>"
+    json_data = """<script>var mapdata = """ + json.dumps(mapdata) + ";</script>"
 
-    self.render("map.html", team=self.team, script=script)
+    self.render("map.html", json_data=json_data)
 
 
-class LandMapPage(tornado.web.RequestHandler):
+class LandMapPage(util.TeamPageHandler):
   @login.required("team")
   def get(self, shortname):
     land = game.Land.BY_SHORTNAME.get(shortname, None)
@@ -49,13 +42,6 @@ class LandMapPage(tornado.web.RequestHandler):
       raise tornado.web.HTTPError(http.client.NOT_FOUND)
     if land not in self.team.open_lands:
       raise tornado.web.HTTPError(http.client.NOT_FOUND)
-
-    script = """<script>\nvar puzzle_id = null;\n</script>\n"""
-    if self.application.settings.get("debug"):
-      script += ("""<script src="/closure/goog/base.js"></script>\n"""
-                 """<script src="/client-debug.js"></script>""")
-    else:
-      script += """<script src="/client.js"></script>"""
 
     items = []
     mapdata = {"base_url": land.base_image,
@@ -86,15 +72,15 @@ class LandMapPage(tornado.web.RequestHandler):
           if p.icon.poly: d["poly"] = p.icon.poly
         d["solved"] = True
 
-    script += "<script>var mapdata = """ + json.dumps(mapdata) + ";</script>"
+    json_data = "<script>var mapdata = """ + json.dumps(mapdata) + ";</script>"
 
-    self.render("land.html", team=self.team, land=land, script=script)
+    self.render("land.html", land=land, json_data=json_data)
 
 
-class DebugStartPage(tornado.web.RequestHandler):
+class DebugStartPage(util.TeamPageHandler):
   @login.required("team", require_start=False)
   def get(self):
-    self.render("debug_start.html", team=self.team)
+    self.render("debug_start.html")
 
 class DebugDoStartEvent(tornado.web.RequestHandler):
   @login.required("team", require_start=False)
@@ -103,7 +89,7 @@ class DebugDoStartEvent(tornado.web.RequestHandler):
       self.team.start_event()
     self.redirect("/")
 
-class PuzzlePage(tornado.web.RequestHandler):
+class PuzzlePage(util.TeamPageHandler):
   @login.required("team")
   def get(self, shortname):
     state = self.team.get_puzzle_state(shortname)
@@ -115,34 +101,14 @@ class PuzzlePage(tornado.web.RequestHandler):
       print(f"no puzzle called {shortname}")
       raise tornado.web.HTTPError(http.client.NOT_FOUND)
 
-    script = f"""
-    <script>
-    var puzzle_id = "{puzzle.shortname}";
-    var puzzle_init = null;
-    </script>"""
+    self.puzzle = puzzle
+    self.render("puzzle_frame.html")
 
-    if self.application.settings.get("debug"):
-      script += ("""<script src="/closure/goog/base.js"></script>\n"""
-                 """<script src="/client-debug.js"></script>""")
-    else:
-      script += """<script src="/client.js"></script>"""
-
-    self.render("puzzle_frame.html", team=self.team, puzzle=puzzle,
-                state=self.team.puzzle_state[puzzle], script=script)
-
-class ActivityLogPage(util.RequestHandler):
+class ActivityLogPage(util.TeamPageHandler):
   @login.required("team")
   def get(self):
-    script = """<script>\nvar puzzle_id = null;\n</script>\n"""
-    if self.application.settings.get("debug"):
-      script += ("""<script src="/closure/goog/base.js"></script>\n"""
-                 """<script src="/client-debug.js"></script>""")
-    else:
-      script += """<script src="/client.js"></script>"""
-
-    script += """<script>var log_entries = """ + json.dumps(self.team.activity_log) + ";</script>"
-
-    self.render("activity_log.html", team=self.team, script=script)
+    json_data = """<script>var log_entries = """ + json.dumps(self.team.activity_log) + ";</script>"
+    self.render("activity_log.html", json_data=json_data)
 
 class WaitHandler(tornado.web.RequestHandler):
   WAIT_TIMEOUT = 300
@@ -278,7 +244,7 @@ class PuzzleAsset(tornado.web.RequestHandler):
 
 def GetHandlers(event_dir, debug, compiled_js, event_css):
   handlers = [
-    (r"/", EventHome),
+    (r"/", EventHomePage),
     (r"/log", ActivityLogPage),
     (r"/land/([a-z0-9_]+)", LandMapPage),
     (r"/DEBUGstartevent", DebugStartPage),

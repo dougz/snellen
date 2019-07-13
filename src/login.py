@@ -6,6 +6,7 @@ import http.client
 import json
 import os
 import time
+import threading
 import urllib.parse
 from collections import deque
 
@@ -26,10 +27,13 @@ class AdminRoles:
 
 
 class LoginUser:
-  def check_password(self, password):
-    if bcrypt.checkpw(password.encode("utf-8"), self.password_hash):
-      return True
-    return False
+  async def check_password(self, password):
+    def check():
+      print(f"checking on {threading.get_ident()} (of {threading.active_count()})")
+      if bcrypt.checkpw(password.encode("utf-8"), self.password_hash):
+        return True
+      return False
+    return await asyncio.get_running_loop().run_in_executor(None, check)
 
 
 class AdminUser(LoginUser):
@@ -77,8 +81,10 @@ class Session:
   SESSION_TIMEOUT = 3600   # seconds
   COOKIE_NAME = "SESSION"
 
-  WAIT_CLEAN_THRESHOLD = 10
+  WAIT_CLEAN_THRESHOLD = 15
   WAIT_CLEAN_INTERVAL = 20  # seconds
+
+  GLOBAL_WAITS = 0
 
   def __init__(self, user=None, *caps):
     self.key = base64.urlsafe_b64encode(os.urandom(18))
@@ -122,6 +128,8 @@ class Session:
 
   def wait_delta(self, delta):
     self.waits += delta
+    Session.GLOBAL_WAITS += delta
+    print(f"global waits {self.GLOBAL_WAITS}")
     if self.waits >= self.WAIT_CLEAN_THRESHOLD:
       now = time.time()
       if now > self.last_wait_clean + self.WAIT_CLEAN_INTERVAL:
@@ -189,7 +197,7 @@ class Login(tornado.web.RequestHandler):
 
 
 class LoginSubmit(tornado.web.RequestHandler):
-  def post(self):
+  async def post(self):
     # Find the browser's existing session or create a new one.
     session = Session.from_request(self)
     if not session:
@@ -206,7 +214,8 @@ class LoginSubmit(tornado.web.RequestHandler):
 
     team = game.Team.get_by_username(username)
     if team:
-      if team.check_password(password):
+      allowed = await team.check_password(password)
+      if allowed:
         session.team = team
         session.capabilities = {"team"}
         team.attach_session(session)
@@ -216,12 +225,14 @@ class LoginSubmit(tornado.web.RequestHandler):
       return
 
     user = AdminUser.get_by_username(username)
-    if user and user.check_password(password):
-      session.user = user
-      session.capabilities = user.roles
-      self.redirect("/admin")
-    else:
-      self.redirect("/login?" + urllib.parse.urlencode(err_d))
+    if user:
+      allowed = await user.check_password(password)
+      if allowed:
+        session.user = user
+        session.capabilities = user.roles
+        self.redirect("/admin")
+        return
+    self.redirect("/login?" + urllib.parse.urlencode(err_d))
 
 
 class Logout(tornado.web.RequestHandler):

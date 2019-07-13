@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 
+import asyncio
+import concurrent
 import getopt
 import os
 import sys
@@ -133,6 +135,10 @@ def main():
   server.add_socket(socket)
 
   answer_checking.start()
+
+  loop = asyncio.get_event_loop()
+  print(loop)
+  loop.set_default_executor(concurrent.futures.ThreadPoolExecutor(max_workers=4))
 
   print("Serving...")
   tornado.ioloop.IOLoop.instance().start()

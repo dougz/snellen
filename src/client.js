@@ -13,7 +13,7 @@ class Waiter {
 	/** @type{number} */
 	this.serial = 0;
 	/** @type{number} */
-	this.backoff = 100;
+	this.backoff = 250;
 
 	/** @type(Dispatcher) */
 	this.dispatcher = dispatcher;
@@ -38,7 +38,7 @@ class Waiter {
             return;
         }
 
-        this.backoff = 100;
+        this.backoff = 250;
 
 	var msgs = /** @type{Array<Object>} */ (this.xhr.getResponseJson());
 	for (var i = 0; i < msgs.length; ++i) {
@@ -47,7 +47,7 @@ class Waiter {
 	    this.dispatcher.dispatch(msg);
 	}
 
-        setTimeout(goog.bind(this.xhr.send, this.xhr, "/wait/" + this.serial), 0);
+        setTimeout(goog.bind(this.xhr.send, this.xhr, "/wait/" + this.serial), Math.random() * 250);
     }
 
     start() {
