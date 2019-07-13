@@ -115,35 +115,25 @@ class WaitHandler(tornado.web.RequestHandler):
   WAIT_SMEAR = 20
 
   @login.required("team", on_fail=http.client.UNAUTHORIZED)
-  async def get(self, received_serial):
-    self.session.wait_delta(+1)
-
+  async def get(self, wid, received_serial):
+    wid = int(wid)
     received_serial = int(received_serial)
-    q = self.session.wait_queue
-    # Client acks all messages up through received_serial; these can
-    # be discarded.
-    while q and q[0][0] <= received_serial:
-      q.popleft()
 
-    allow_empty = False
-    while True:
-      if q or allow_empty:
-        self.set_header("Content-Type", "application/json")
-        self.set_header("Cache-Control", "no-store")
-        self.write(b"[")
-        for i, (ser, obj) in enumerate(q):
-          if i > 0: self.write(b",")
-          self.write(f"[{ser},{obj}]".encode("utf-8"))
-        self.write(b"]")
-        self.session.wait_delta(-1)
-        return
-      allow_empty = True
-      try:
-        await asyncio.wait_for(self.session.wait_event.wait(),
-                               self.WAIT_TIMEOUT + random.random() * self.WAIT_SMEAR)
-        self.session.wait_event.clear()
-      except asyncio.TimeoutError:
-        pass
+    waiter = self.session.get_waiter(wid)
+    if not waiter:
+      print(f"unknown waiter {wid}")
+      raise tornado.web.HTTPError(http.client.NOT_FOUND)
+
+    msgs = await waiter.wait(received_serial,
+                       self.WAIT_TIMEOUT + random.random() * self.WAIT_SMEAR)
+
+    self.set_header("Content-Type", "application/json")
+    self.set_header("Cache-Control", "no-store")
+    self.write(b"[")
+    for i, (ser, obj) in enumerate(msgs):
+      if i > 0: self.write(b",")
+      self.write(f"[{ser},{obj}]".encode("utf-8"))
+    self.write(b"]")
 
 
 class SubmitHandler(tornado.web.RequestHandler):
@@ -151,7 +141,7 @@ class SubmitHandler(tornado.web.RequestHandler):
     self.args = json.loads(self.request.body)
 
   @login.required("team", on_fail=http.client.UNAUTHORIZED)
-  def post(self):
+  async def post(self):
     answer = self.args["answer"]
 
     # Worst-case option for entering a single-emoji answer: enter the
@@ -161,12 +151,13 @@ class SubmitHandler(tornado.web.RequestHandler):
 
     shortname = self.args["puzzle_id"]
     submit_id = self.team.next_submit_id()
-    success = self.team.submit_answer(submit_id, shortname, answer)
-    if success:
-      self.set_status(http.client.NO_CONTENT.value)
-    else:
-      print(f"FAILED to submit {answer} for {shortname}")
-      self.set_status(http.client.BAD_REQUEST.value)
+
+    msgs = [{"method": "history_change", "puzzle_id": shortname}]
+    r = self.team.submit_answer(submit_id, shortname, answer)
+    if r:
+      msgs.extend(r)
+    await self.team.send_message(msgs)
+    self.set_status(http.client.NO_CONTENT.value)
 
 class SubmitHistoryHandler(tornado.web.RequestHandler):
   @login.required("team", on_fail=http.client.UNAUTHORIZED)
@@ -194,9 +185,10 @@ class SubmitHistoryHandler(tornado.web.RequestHandler):
 
 class SubmitCancelHandler(tornado.web.RequestHandler):
   @login.required("team", on_fail=http.client.UNAUTHORIZED)
-  def get(self, shortname, submit_id):
+  async def get(self, shortname, submit_id):
     submit_id = int(submit_id)
     self.team.cancel_submission(submit_id, shortname)
+    await self.team.send_message({"method": "history_change", "puzzle_id": shortname})
 
 class ClientDebugJS(tornado.web.RequestHandler):
   @login.required("team")
@@ -256,7 +248,7 @@ def GetHandlers(event_dir, debug, compiled_js, event_css):
     (r"/submit", SubmitHandler),
     (r"/submit_history/([a-z][a-z0-9_]*)", SubmitHistoryHandler),
     (r"/submit_cancel/([a-z][a-z0-9_]*)/(\d+)", SubmitCancelHandler),
-    (r"/wait/(\d+)", WaitHandler),
+    (r"/wait/(\d+)/(\d+)", WaitHandler),
     ]
   if debug:
     handlers.append((r"/client-debug.js", ClientDebugJS))

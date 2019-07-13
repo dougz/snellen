@@ -10,6 +10,9 @@ var log_entries;
 /** @type{?function()} */
 var puzzle_init;
 
+/** @type{number} */
+var waiter_id;
+
 class Message {
     constructor() {
 	/** @type{string} */

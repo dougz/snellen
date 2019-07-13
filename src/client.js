@@ -33,7 +33,7 @@ class Waiter {
 		return;
 	    }
 
-            setTimeout(goog.bind(this.xhr.send, this.xhr, "/wait/" + this.serial),
+            setTimeout(goog.bind(this.xhr.send, this.xhr, "/wait/" + waiter_id + "/" + this.serial),
                        this.backoff);
             return;
         }
@@ -47,12 +47,12 @@ class Waiter {
 	    this.dispatcher.dispatch(msg);
 	}
 
-        setTimeout(goog.bind(this.xhr.send, this.xhr, "/wait/" + this.serial), Math.random() * 250);
+        setTimeout(goog.bind(this.xhr.send, this.xhr, "/wait/" + waiter_id + "/" + this.serial), Math.random() * 250);
     }
 
     start() {
 	goog.events.listen(this.xhr, goog.net.EventType.COMPLETE, goog.bind(this.waitcomplete, this));
-	this.xhr.send("/wait/" + this.serial);
+	this.xhr.send("/wait/" + waiter_id + "/" + this.serial);
     }
 }
 

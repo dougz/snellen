@@ -11,6 +11,7 @@ import urllib.parse
 from collections import deque
 
 import tornado.web
+import tornado.ioloop
 
 import game
 from state import save_state
@@ -76,13 +77,41 @@ class AdminUser(LoginUser):
     return cls.BY_USERNAME.values()
 
 
+class Waiter:
+  def __init__(self, session, wid):
+    self.session = session
+    self.last_acked = 0
+    self.wid = wid
+    self.q = deque()
+
+  async def wait(self, received_serial, timeout):
+    # Discard any messages that have been acked.
+    q = self.q
+    while q and q[0][0] <= received_serial:
+      q.popleft()
+
+    allow_empty = False
+    while True:
+      if q or allow_empty:
+        return q
+      allow_empty = True
+      async with self.session.msg_cv:
+        try:
+          await asyncio.wait_for(self.session.msg_cv.wait(), timeout)
+        except asyncio.TimeoutError:
+          pass
+
+
+
+
+
 class Session:
   BY_KEY = {}
   SESSION_TIMEOUT = 3600   # seconds
   COOKIE_NAME = "SESSION"
 
-  WAIT_CLEAN_THRESHOLD = 15
-  WAIT_CLEAN_INTERVAL = 20  # seconds
+  #WAIT_CLEAN_THRESHOLD = 15
+  #WAIT_CLEAN_INTERVAL = 20  # seconds
 
   GLOBAL_WAITS = 0
 
@@ -94,22 +123,35 @@ class Session:
     self.capabilities = set(caps)
     self.expires = time.time() + self.SESSION_TIMEOUT
 
-    self.wait_queue = deque()
-    self.wait_serial = 1
-    self.wait_event = asyncio.Event()
+    self.next_msg_serial = 1
+    self.msg_cv = asyncio.Condition()
 
-    self.waits = 0
-    self.last_wait_clean = 0
+    self.waits = {}
+    self.next_wid = 1000
+    #self.last_wait_clean = 0
 
   def set_cookie(self, req):
     req.set_secure_cookie(self.COOKIE_NAME, self.key)
 
-  def send_message(self, obj):
-    if not isinstance(obj, str):
-      obj = json.dumps(obj)
-    self.wait_queue.append((self.wait_serial, obj))
-    self.wait_serial += 1
-    self.wait_event.set()
+  async def send_message_strings(self, strs):
+    if not strs: return
+    async with self.msg_cv:
+      e = [(self.next_msg_serial + i, s) for (i, s) in enumerate(strs)]
+      self.next_msg_serial += len(e)
+      for w in self.waits.values():
+        w.q.extend(e)
+      self.msg_cv.notify_all()
+
+  def new_waiter(self):
+    wid = self.next_wid
+    self.next_wid += 1
+
+    w = Waiter(self, wid)
+    self.waits[wid] = w
+    return wid
+
+  def get_waiter(self, wid):
+    return self.waits.get(wid)
 
   @classmethod
   def from_request(cls, req):

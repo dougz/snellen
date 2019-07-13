@@ -103,7 +103,7 @@ def main():
   save_state.set_classes(AdminUser=login.AdminUser,
                          Team=game.Team)
   save_state.open(os.path.join(event_dir, "state.log"))
-  save_state.replay()
+  save_state.replay(advance_time=game.Submission.process_submit_queue)
 
   print("Adding new teams...")
   with open(os.path.join(event_dir, "teams.py")) as f:
@@ -119,7 +119,7 @@ def main():
     login.AdminUser.enable_root(login.make_hash(root_password))
 
   answer_checking = tornado.ioloop.PeriodicCallback(
-    game.Submission.process_pending_submits, 1000)
+    game.Submission.realtime_process_submit_queue, 1000)
 
   app = make_app(event_dir,
                  answer_checking,
@@ -137,7 +137,6 @@ def main():
   answer_checking.start()
 
   loop = asyncio.get_event_loop()
-  print(loop)
   loop.set_default_executor(concurrent.futures.ThreadPoolExecutor(max_workers=4))
 
   print("Serving...")

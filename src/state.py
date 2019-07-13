@@ -57,11 +57,13 @@ class SaverClass:
       return wrapped_fn
 
   @classmethod
-  def replay(cls):
+  def replay(cls, advance_time=None):
     cls.log.seek(0, 0)
     for line in cls.log:
       record = json.loads(line)
       name, saver_id, now, args, kwargs = record
+      if advance_time:
+        advance_time(now)
 
       classname, num = saver_id.split(":")
       num = int(num)

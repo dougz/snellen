@@ -47,22 +47,23 @@ class Submission:
     self.submit_time = now
     self.extra_response = None
 
-    self.schedule_check()
-
   def __lt__(self, other):
     return self.submit_id < other.submit_id
 
-  def schedule_check(self):
+  def check_or_queue(self):
     self.check_time = self.compute_check_time()
     if self.check_time <= self.submit_time:
-      self.check_answer(self.submit_time)
+      return self.check_answer(self.submit_time)
     else:
       heapq.heappush(self.GLOBAL_SUBMIT_QUEUE, (self.check_time, self))
+      return []
 
   def compute_check_time(self):
+    # Note that self is already in the submissions list (at the end)
+    # when this is called.
     count = sum(1 for i in self.puzzle_state.submissions
                 if i.state in (self.PENDING, self.INCORRECT))
-    return self.puzzle_state.open_time + count * 60
+    return self.puzzle_state.open_time + (count-1) * 30
 
   def check_answer(self, now):
     answer = Puzzle.canonicalize_answer(self.answer)
@@ -75,11 +76,11 @@ class Submission:
         self.puzzle.incorrect_responses[answer] or "Keep going\u2026")
     else:
       self.state = self.INCORRECT
-    self.team.send_message({"method": "history_change", "puzzle_id": self.puzzle.shortname})
     if self.state == self.CORRECT:
       self.puzzle_state.answers_found.add(answer)
       if self.puzzle_state.answers_found == self.puzzle.answers:
-        self.team.solve_puzzle(self.puzzle, now)
+        return self.team.solve_puzzle(self.puzzle, now)
+    return []
 
   def json_dict(self):
     return {"submit_time": self.submit_time,
@@ -90,8 +91,15 @@ class Submission:
             "submit_id": self.submit_id}
 
   @classmethod
-  def process_pending_submits(cls):
-    now = time.time()
+  async def realtime_process_submit_queue(cls):
+    messages = cls.process_submit_queue(time.time())
+    for team, msgs in messages.items():
+      await team.send_message(msgs)
+
+  @classmethod
+  def process_submit_queue(cls, now):
+    """Processes the global submit queue up through time 'now'.  Returns a dict of {team: messages}."""
+    messages = {}
     q = cls.GLOBAL_SUBMIT_QUEUE
     while q and q[0][0] <= now:
       ct, sub = heapq.heappop(q)
@@ -99,7 +107,15 @@ class Submission:
       # It's possible for sub's check_time to have changed.  If it's
       # doesn't match the queue time, just drop this event.
       if sub.check_time == ct:
-        sub.check_answer(ct)
+        msgs = sub.check_answer(ct)
+        msgs.append({"method": "history_change", "puzzle_id": sub.puzzle.shortname})
+
+        if sub.team in messages:
+          messages[sub.team].extend(msgs)
+        else:
+          messages[sub.team] = msgs
+    return messages
+
 
 
 class Team(login.LoginUser):
@@ -139,10 +155,15 @@ class Team(login.LoginUser):
   def detach_session(self, session):
     self.active_sessions.remove(session)
 
-  def send_message(self, msg):
-    msg = json.dumps(msg)
+  async def send_message(self, objs):
+    """Send a message or list of messages to all sessions for this team."""
+    if not objs: return
+    if isinstance(objs, list):
+      strs = [json.dumps(o) for o in objs]
+    else:
+      strs = [json.dumps(objs)]
     for s in self.active_sessions:
-      s.send_message(msg)
+      await s.send_message_strings(strs)
 
   # This method is exported into the file that's used to create all
   # the teams.
@@ -173,23 +194,21 @@ class Team(login.LoginUser):
     puzzle = Puzzle.get_by_shortname(shortname)
     if not puzzle:
       print(f"no puzzle {shortname}")
-      return False
+      return
 
     state = self.puzzle_state[puzzle]
     if state.state != state.OPEN:
       print(f"puzzle {shortname} {state.state} for {self.username}")
-      return False
+      return
 
     pending = sum(1 for s in state.submissions if s.state == s.PENDING)
     if pending >= state.puzzle.max_queued:
       print(f"puzzle {shortname} max pending for {self.username}")
-      return False
+      return
 
     sub = Submission(now, submit_id, self, puzzle, answer)
     state.submissions.append(sub)
-    if sub.state == sub.PENDING:
-      self.send_message({"method": "history_change", "puzzle_id": shortname})
-    return True
+    return sub.check_or_queue()
 
   @save_state
   def cancel_submission(self, now, submit_id, shortname):
@@ -210,15 +229,13 @@ class Team(login.LoginUser):
         del state.submissions[i:]
 
         for sub in after:
-          if sub.state == sub.PENDING:
-            sub.schedule_check()
           state.submissions.append(sub)
+          if sub.state == sub.PENDING:
+            sub.check_or_queue()
         break
     else:
       print(f"failed to cancel submit {submit_id} puzzle {shortname} for {self.username}")
       return
-
-    self.send_message({"method": "history_change", "puzzle_id": shortname})
 
   def open_puzzle(self, puzzle, now):
     state = self.puzzle_state[puzzle]
@@ -229,16 +246,19 @@ class Team(login.LoginUser):
 
   def solve_puzzle(self, puzzle, now):
     state = self.puzzle_state[puzzle]
+    msgs = []
     if state.state != state.SOLVED:
       state.state = state.SOLVED
       state.solve_time = now
-      self.send_message(
-        {"method": "solve",
-         "title": html.escape(puzzle.title),
-         "audio": "https://snellen.storage.googleapis.com/applause.mp3",
-         })
+      for sub in state.submissions:
+        if sub.state == sub.PENDING:
+          sub.state = sub.MOOT
+      msgs.append({"method": "solve",
+                   "title": html.escape(puzzle.title),
+                   "audio": "https://snellen.storage.googleapis.com/applause.mp3"})
       self.activity_log.append((now, f'<a href="{puzzle.url}">{html.escape(puzzle.title)}</a> solved.'))
-      self.compute_puzzle_beam(now)
+      msgs.extend(self.compute_puzzle_beam(now))
+    return msgs
 
   def get_puzzle_state(self, puzzle):
     if isinstance(puzzle, str):
@@ -247,6 +267,7 @@ class Team(login.LoginUser):
     return self.puzzle_state[puzzle]
 
   def compute_puzzle_beam(self, now):
+    msgs = []
     self.open_puzzle(Puzzle.get_by_shortname("sample"), now)
     if self.puzzle_state[Puzzle.get_by_shortname("sample")].state == PuzzleState.SOLVED:
       for n in ("sample_multi", "seven_dials", "capital_letters"):
@@ -277,8 +298,10 @@ class Team(login.LoginUser):
       if st.state != PuzzleState.CLOSED:
         if st.puzzle.land not in self.open_lands:
           if st.puzzle.land.shortname != "mainstreet":
-            self.send_message({"method": "open", "title": html.escape(st.puzzle.land.name)})
+            msgs.append({"method": "open", "title": html.escape(st.puzzle.land.name)})
           self.open_lands.add(st.puzzle.land)
+
+    return msgs
 
 class Icon:
   def __init__(self, name, land, d):
