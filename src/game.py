@@ -185,8 +185,10 @@ class Team(login.LoginUser):
       print(f"puzzle {shortname} max pending for {self.username}")
       return False
 
-    state.submissions.append(Submission(now, submit_id, self, puzzle, answer))
-    self.send_message({"method": "history_change", "puzzle_id": shortname})
+    sub = Submission(now, submit_id, self, puzzle, answer)
+    state.submissions.append(sub)
+    if sub.state == sub.PENDING:
+      self.send_message({"method": "history_change", "puzzle_id": shortname})
     return True
 
   @save_state

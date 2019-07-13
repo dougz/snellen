@@ -50,6 +50,7 @@ def main():
   default_username = None
   default_password = None
   socket_path = "/tmp/snellen"
+  start_event = False
 
   opts, args = getopt.getopt(sys.argv[1:],
                              "c:e:r:t:s:",
@@ -59,7 +60,8 @@ def main():
                               "event_dir=",
                               "root_password=",
                               "template_path=",
-                              "socket_path="
+                              "socket_path=",
+                              "start_event",
                              ])
   for o, a in opts:
     if o in ("-t", "--template_path"):
@@ -72,6 +74,8 @@ def main():
       event_dir = a
     elif o in ("-s", "--socket_path"):
       socket_path = a
+    elif o == "--start_event":
+      start_event = True
     elif o == "--debug":
       debug = True
     elif o == "--default_credentials":
@@ -102,6 +106,11 @@ def main():
   print("Adding new teams...")
   with open(os.path.join(event_dir, "teams.py")) as f:
     exec(f.read(), {"add_team": game.Team.add_team})
+
+  if start_event:
+    for team in game.Team.BY_USERNAME.values():
+      if team.event_start is None:
+        team.start_event()
 
   if root_password:
     print("Enabling root user...")
