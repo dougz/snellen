@@ -8,12 +8,10 @@ class AdminHome(tornado.web.RequestHandler):
   @login.required("admin")
   def get(self):
 
-    x = sum(s.waits for s in login.Session.BY_KEY.values())
-
     self.render("admin_home.html", user=self.user, script=None,
                 sessions=len(login.Session.BY_KEY),
-                slow_sessions=x,
-                waits=login.Session.GLOBAL_WAITS)
+                waits=login.Session.VARZ["waits"],
+                waiters=login.Session.VARZ["waiters"])
 
 
 class AdminUsers(tornado.web.RequestHandler):

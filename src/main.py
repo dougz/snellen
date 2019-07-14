@@ -4,6 +4,7 @@ import asyncio
 import concurrent
 import getopt
 import os
+import resource
 import sys
 import yaml
 
@@ -88,6 +89,10 @@ def main():
   assert template_path is not None, "Must specify --template_path."
   assert event_dir is not None, "Must specify --event_dir."
 
+  soft, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
+  resource.setrlimit(resource.RLIMIT_NOFILE, (hard, hard))
+  print(f"Raised limit to {hard} file descriptors.")
+
   print("Load map config...")
   with open(os.path.join(event_dir, "map_config.yaml")) as f:
     cfg = yaml.load(f)
@@ -131,7 +136,7 @@ def main():
                  default_password=default_password)
 
   server = tornado.httpserver.HTTPServer(app)
-  socket = tornado.netutil.bind_unix_socket(socket_path, mode=0o666)
+  socket = tornado.netutil.bind_unix_socket(socket_path, mode=0o666, backlog=3072)
   server.add_socket(socket)
 
   answer_checking.start()
