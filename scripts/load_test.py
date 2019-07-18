@@ -24,21 +24,22 @@ async def main():
   soft, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
   resource.setrlimit(resource.RLIMIT_NOFILE, (hard, hard))
 
-
-
   client = tornado.httpclient.AsyncHTTPClient.configure(
     "tornado.curl_httpclient.CurlAsyncHTTPClient", max_clients=10000)
   client = tornado.httpclient.AsyncHTTPClient()
 
-  browsers = tornado.gen.multi([simulate_browser(i, client, "leftout", "thou") for i in range(300)])
-  await asyncio.gather(browsers,
-                       show_stats())
+  teams = tornado.gen.multi([simulate_team(client, f"team{i}", f"team{i}") for i in range(10)])
 
-  print(f"main is returning")
+  await asyncio.gather(teams, show_stats())
 
+
+async def simulate_team(client, username, password):
+  print(f"starting {username}")
+  browsers = tornado.gen.multi([simulate_browser(i, client, username, password) for i in range(30)])
+  await browsers
 
 async def simulate_browser(my_id, client, username, password):
-  await asyncio.sleep(my_id * 0.1)
+  await asyncio.sleep(my_id * 0.01)
 
   # Fetch the home page so we're issued a session cookie.
 
@@ -58,7 +59,7 @@ async def simulate_browser(my_id, client, username, password):
   req = tornado.httpclient.HTTPRequest(
     "http://snellen/login_submit",
     method="POST",
-    body="username=leftout&password=thou",
+    body=f"username={username}&password={password}",
     follow_redirects=False,
     headers={"Cookie": cookie})
 
