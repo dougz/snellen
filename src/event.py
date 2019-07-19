@@ -4,6 +4,7 @@ import json
 import os
 import random
 import re
+import time
 import tornado.web
 
 import game
@@ -35,6 +36,8 @@ class EventHomePage(util.TeamPageHandler):
 
 
 class LandMapPage(util.TeamPageHandler):
+  RECENT_OPEN_SECONDS = 15.0
+
   @login.required("team")
   def get(self, shortname):
     land = game.Land.BY_SHORTNAME.get(shortname, None)
@@ -52,7 +55,6 @@ class LandMapPage(util.TeamPageHandler):
             "url": p.url,
             "solved": False,
             }
-      items.append(d)
 
       if st.answers_found:
         d["answer"] = ", ".join(sorted(p.display_answers[a] for a in st.answers_found))
@@ -65,12 +67,28 @@ class LandMapPage(util.TeamPageHandler):
           if p.icon.poly: d["poly"] = p.icon.poly
           if "answer" in d: d["answer"] += ", \u2026"
       elif st.state == game.PuzzleState.SOLVED:
+
+        duration = time.time() - self.team.puzzle_state[p].solve_time
+        recent = duration < self.RECENT_OPEN_SECONDS
+
         if p.icon:
+          if recent:
+            dd = {"icon_url": p.icon.images["unlocked"],
+                  "pos_x": p.icon.pos[0],
+                  "pos_y": p.icon.pos[1],
+                  "width": p.icon.size[0],
+                  "height": p.icon.size[1]}
+            items.append(dd)
+
           d["icon_url"] = p.icon.images["solved"]
           d["pos_x"], d["pos_y"] = p.icon.pos
           d["width"], d["height"] = p.icon.size
           if p.icon.poly: d["poly"] = p.icon.poly
+          if recent: d["animate"] = True
+
         d["solved"] = True
+
+      items.append(d)
 
     json_data = "<script>var mapdata = """ + json.dumps(mapdata) + ";</script>"
 

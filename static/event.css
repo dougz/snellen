@@ -189,9 +189,14 @@ div#map img.base {
     position: absolute;
 }
 
-div#map img.icon {
+div#map .icon {
     position: absolute;
     pointer-events: none;
+}
+
+div#map img.animate {
+    opacity: 0;
+    animation: fadeIn 1.25s ease-out forwards;
 }
 
 div#map div.p {
@@ -255,4 +260,25 @@ h1 {
 }
 
 
+
+@keyframes twist {
+    0% {
+	transform: rotate(0.0deg) translateX(0px) scale(0.1) rotate(0.0deg);
+	opacity: 0;
+    }
+    5% {
+	opacity: 1;
+    }
+    70% {
+	opacity: 1;
+    }
+    100% {
+	transform: rotate(135.0deg) translateX(1px) scale(0.3) rotate(270.0deg);
+	opacity: 0;
+    }
+}
+
+.star {
+    animation: twist 1.25s ease-out forwards;
+}
 

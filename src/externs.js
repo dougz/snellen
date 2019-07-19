@@ -23,6 +23,10 @@ class Message {
 	this.title;
 	/** @type{?string} */
 	this.audio;
+	/** @type{?string} */
+	this.frompage;
+	/** @type{?string} */
+	this.topage;
     }
 }
 
@@ -78,6 +82,8 @@ class MapItem {
 	this.height;
 	/** @type{?string} */
 	this.poly;
+	/** @type{?boolean} */
+	this.animate;
     }
 }
 

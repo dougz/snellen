@@ -30,7 +30,6 @@ class AdminRoles:
 class LoginUser:
   async def check_password(self, password):
     def check():
-      print(f"checking on {threading.get_ident()} (of {threading.active_count()})")
       if bcrypt.checkpw(password.encode("utf-8"), self.password_hash):
         return True
       return False

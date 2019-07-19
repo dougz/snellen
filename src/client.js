@@ -84,6 +84,9 @@ class Dispatcher {
 	    var audio = new Audio(msg.audio);
 	    audio.play();
 	}
+	if (window.location.pathname == msg.frompage) {
+	    setTimeout(function() { window.location.href = msg.topage; }, 3000)
+	}
     }
 
     /** @param{Message} msg */
@@ -390,10 +393,14 @@ class MapDraw {
 
     draw_item(it) {
 	if (it.icon_url) {
-	    var el = goog.dom.createDom("IMG", {src: it.icon_url, className: "icon"});
+	    var el = goog.dom.createDom("IMG", {src: it.icon_url, className: it.animate ? "icon animate" : "icon"});
 	    el.style.left = "" + it.pos_x + "px";
 	    el.style.top = "" + it.pos_y + "px";
 	    this.map_el.appendChild(el);
+
+	    if (it.animate) {
+		this.add_sparkle(it.pos_x, it.pos_y, it.width, it.height);
+	    }
 
 	    if (it.poly && it.name) {
 		var area = goog.dom.createDom("AREA", {shape: "poly",
@@ -416,6 +423,30 @@ class MapDraw {
 	    }
 	    this.list_el.appendChild(el);
 	}
+    }
+
+    add_sparkle(x, y, width, height) {
+	console.log("sparkle " + x + "," + y + " " + width + "x" + height);
+	var div = goog.dom.createDom("DIV", {className: "icon"});
+	div.style.left = "" + x + "px";
+	div.style.top = "" + y + "px";
+	div.style.width = "" + width + "px";
+	div.style.height = "" + height + "px";
+
+	var star = '<path class="star" d="M0 -1L.5877 .809 -.9511 -.309 .9511 -.309 -.5877 .809Z" />';
+	var fivestar = star;
+	for (var i = 1; i < 5; ++i) {
+	    fivestar += `<g transform="rotate(${i*72})">` + star + "</g>";
+	}
+	var scale = Math.min(width, height) * 0.4;
+
+	var html = `<svg width="${width}" height="${height}" style="left: ${x}px; top: ${y}px;">` +
+	    `<g transform="translate(${width/2},${height/2}) scale(${scale})" fill="yellow">` +
+	    fivestar + '<g transform="scale(0.5) rotate(36)">' + fivestar +
+	    "</g></g></svg>";
+	div.innerHTML = html;
+
+	this.map_el.appendChild(div);
     }
 
     item_enter(it) {

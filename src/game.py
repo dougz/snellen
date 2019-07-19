@@ -147,7 +147,7 @@ class Team(login.LoginUser):
     for puzzle in Puzzle.all_puzzles():
       self.puzzle_state[puzzle] = PuzzleState(self, puzzle)
 
-    self.open_lands = set()
+    self.open_lands = {}
     self.activity_log = []
 
   def attach_session(self, session):
@@ -255,7 +255,9 @@ class Team(login.LoginUser):
           sub.state = sub.MOOT
       msgs.append({"method": "solve",
                    "title": html.escape(puzzle.title),
-                   "audio": "https://snellen.storage.googleapis.com/applause.mp3"})
+                   "audio": "https://snellen.storage.googleapis.com/applause.mp3",
+                   "frompage": puzzle.url,
+                   "topage": puzzle.land.url})
       self.activity_log.append((now, f'<a href="{puzzle.url}">{html.escape(puzzle.title)}</a> solved.'))
       msgs.extend(self.compute_puzzle_beam(now))
     return msgs
@@ -299,7 +301,7 @@ class Team(login.LoginUser):
         if st.puzzle.land not in self.open_lands:
           if st.puzzle.land.shortname != "mainstreet":
             msgs.append({"method": "open", "title": html.escape(st.puzzle.land.name)})
-          self.open_lands.add(st.puzzle.land)
+          self.open_lands[st.puzzle.land] = now
 
     return msgs
 
