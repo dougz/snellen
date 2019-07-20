@@ -82,7 +82,7 @@ class MapItem {
 	this.height;
 	/** @type{?string} */
 	this.poly;
-	/** @type{?boolean} */
+	/** @type{?string} */
 	this.animate;
     }
 }

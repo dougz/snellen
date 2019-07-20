@@ -32,11 +32,12 @@ class EventHomePage(util.TeamPageHandler):
 
     json_data = """<script>var mapdata = """ + json.dumps(mapdata) + ";</script>"
 
-    self.render("map.html", json_data=json_data)
+    self.render("map.html", json_data=json_data,
+                width=962, height=635)
 
 
 class LandMapPage(util.TeamPageHandler):
-  RECENT_OPEN_SECONDS = 15.0
+  RECENT_SECONDS = 10.0
 
   @login.required("team")
   def get(self, shortname):
@@ -51,6 +52,8 @@ class LandMapPage(util.TeamPageHandler):
                "items": items}
     for p in land.puzzles:
       st = self.team.puzzle_state[p]
+      if st.state == game.PuzzleState.CLOSED: continue
+
       d = { "name": p.title,
             "url": p.url,
             "solved": False,
@@ -60,39 +63,39 @@ class LandMapPage(util.TeamPageHandler):
         d["answer"] = ", ".join(sorted(p.display_answers[a] for a in st.answers_found))
 
       if st.state == game.PuzzleState.OPEN:
-        if p.icon:
-          d["icon_url"] = p.icon.images["unlocked"]
-          d["pos_x"], d["pos_y"] = p.icon.pos
-          d["width"], d["height"] = p.icon.size
-          if p.icon.poly: d["poly"] = p.icon.poly
-          if "answer" in d: d["answer"] += ", \u2026"
+        duration = time.time() - self.team.puzzle_state[p].open_time
+        recent = duration < self.RECENT_SECONDS
+        d["icon_url"] = p.icon.images["unlocked"]
+        d["pos_x"], d["pos_y"] = p.icon.pos
+        d["width"], d["height"] = p.icon.size
+        if p.icon.poly: d["poly"] = p.icon.poly
+        if "answer" in d: d["answer"] += ", \u2026"
+        if recent: d["animate"] = "delay_fade"
+
       elif st.state == game.PuzzleState.SOLVED:
-
         duration = time.time() - self.team.puzzle_state[p].solve_time
-        recent = duration < self.RECENT_OPEN_SECONDS
+        recent = duration < self.RECENT_SECONDS
+        if recent:
+          dd = {"icon_url": p.icon.images["unlocked"],
+                "pos_x": p.icon.pos[0],
+                "pos_y": p.icon.pos[1],
+                "width": p.icon.size[0],
+                "height": p.icon.size[1]}
+          items.append(dd)
 
-        if p.icon:
-          if recent:
-            dd = {"icon_url": p.icon.images["unlocked"],
-                  "pos_x": p.icon.pos[0],
-                  "pos_y": p.icon.pos[1],
-                  "width": p.icon.size[0],
-                  "height": p.icon.size[1]}
-            items.append(dd)
-
-          d["icon_url"] = p.icon.images["solved"]
-          d["pos_x"], d["pos_y"] = p.icon.pos
-          d["width"], d["height"] = p.icon.size
-          if p.icon.poly: d["poly"] = p.icon.poly
-          if recent: d["animate"] = True
-
+        d["icon_url"] = p.icon.images["solved"]
+        d["pos_x"], d["pos_y"] = p.icon.pos
+        d["width"], d["height"] = p.icon.size
+        if p.icon.poly: d["poly"] = p.icon.poly
+        if recent: d["animate"] = "sparkle"
         d["solved"] = True
 
       items.append(d)
 
     json_data = "<script>var mapdata = """ + json.dumps(mapdata) + ";</script>"
 
-    self.render("land.html", land=land, json_data=json_data)
+    self.render("land.html", land=land, json_data=json_data,
+                width=land.map_size[0], height=land.map_size[1])
 
 
 class DebugStartPage(util.TeamPageHandler):

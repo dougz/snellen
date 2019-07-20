@@ -318,6 +318,8 @@ class Land:
     self.size = tuple(cfg["size"])
     self.poly = cfg["poly"]
 
+    self.map_size = tuple(cfg["map_size"])
+
     print(f"  Adding land \"{shortname}\"...")
 
     self.locked_image = f"/assets/map/{shortname}_locked.png"
@@ -333,10 +335,10 @@ class Land:
       i = Icon(name, self, d)
       self.icons[name] = i
       p = d["puzzle"]
-      if isinstance(p, str):
-        p = Puzzle.from_zip(os.path.join(event_dir, "puzzles", p))
+      if p == "_":
+        p = Puzzle.filler_puzzle()
       else:
-        p = Puzzle.filler_puzzle(p)
+        p = Puzzle.from_zip(os.path.join(event_dir, "puzzles", p))
       p.land = self
       p.icon = i
       self.puzzles.append(p)
@@ -346,6 +348,8 @@ class Puzzle:
   BY_SHORTNAME = {}
 
   DEFAULT_MAX_QUEUED = 3
+
+  FILLER_COUNT = 0
 
   def __init__(self, shortname):
     if not re.match(r"^[a-z][a-z0-9_]*$", shortname):
@@ -359,7 +363,10 @@ class Puzzle:
     self.url = "/puzzle/" + shortname + "/"
 
   @classmethod
-  def filler_puzzle(cls, number):
+  def filler_puzzle(cls):
+    cls.FILLER_COUNT += 1
+    number = cls.FILLER_COUNT
+
     shortname = f"filler_{number}"
     self = cls(shortname)
 
@@ -371,6 +378,7 @@ class Puzzle:
     self.max_queued = self.DEFAULT_MAX_QUEUED
     self.answers = {"FILLER"}
     self.display_answers = {"FILLER": "FILLER"}
+    self.incorrect_responses = {}
 
     self.html_head = None
     self.html_body = "<p>The answer to this filler puzzle is <b>FILLER</b>.</p>"

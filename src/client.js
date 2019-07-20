@@ -79,19 +79,19 @@ class Dispatcher {
 
     /** @param{Message} msg */
     solve(msg) {
-	toast_manager.add_toast("<b>" + msg.title + "</b> was solved!", 5000);
+	toast_manager.add_toast("<b>" + msg.title + "</b> was solved!", 6000);
 	if (msg.audio) {
 	    var audio = new Audio(msg.audio);
 	    audio.play();
 	}
 	if (window.location.pathname == msg.frompage) {
-	    setTimeout(function() { window.location.href = msg.topage; }, 3000)
+	    setTimeout(function() { window.location.href = msg.topage; }, 7000);
 	}
     }
 
     /** @param{Message} msg */
     open(msg) {
-	toast_manager.add_toast("<b>" + msg.title + "</b> is now open!", 5000);
+	toast_manager.add_toast("<b>" + msg.title + "</b> is now open!", 6000);
     }
 }
 
@@ -393,12 +393,14 @@ class MapDraw {
 
     draw_item(it) {
 	if (it.icon_url) {
-	    var el = goog.dom.createDom("IMG", {src: it.icon_url, className: it.animate ? "icon animate" : "icon"});
+	    var el = goog.dom.createDom("IMG", {
+		src: it.icon_url,
+		className: it.animate ? ("icon " + it.animate) : "icon"});
 	    el.style.left = "" + it.pos_x + "px";
 	    el.style.top = "" + it.pos_y + "px";
 	    this.map_el.appendChild(el);
 
-	    if (it.animate) {
+	    if (it.animate == "sparkle") {
 		this.add_sparkle(it.pos_x, it.pos_y, it.width, it.height);
 	    }
 

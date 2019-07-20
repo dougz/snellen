@@ -179,8 +179,6 @@ div.toasthidden {
 
 div#map {
     position: relative;
-    width: 962px;
-    height: 635px;
     margin-left: auto;
     margin-right: auto;
 }
@@ -194,9 +192,16 @@ div#map .icon {
     pointer-events: none;
 }
 
-div#map img.animate {
+div#map img.sparkle {
     opacity: 0;
     animation: fadeIn 1.25s ease-out forwards;
+    animation-delay: 0.5s;
+}
+
+div#map img.delay_fade {
+    opacity: 0;
+    animation: fadeIn 0.75s ease-out forwards;
+    animation-delay: 1.75s;
 }
 
 div#map div.p {
@@ -279,6 +284,8 @@ h1 {
 }
 
 .star {
+    opacity: 0;
     animation: twist 1.25s ease-out forwards;
+    animation-delay: 0.5s;
 }
 
