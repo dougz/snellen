@@ -270,31 +270,19 @@ class Team(login.LoginUser):
 
   def compute_puzzle_beam(self, now):
     msgs = []
-    self.open_puzzle(Puzzle.get_by_shortname("sample"), now)
-    if self.puzzle_state[Puzzle.get_by_shortname("sample")].state == PuzzleState.SOLVED:
-      for n in ("sample_multi", "seven_dials", "capital_letters"):
-        p = Puzzle.get_by_shortname(n)
-        self.open_puzzle(p, now)
 
-    if self.puzzle_state[Puzzle.get_by_shortname("sample_multi")].state == PuzzleState.SOLVED:
-      for n in ("fab_four",):
-        p = Puzzle.get_by_shortname(n)
-        self.open_puzzle(p, now)
-
-    if self.puzzle_state[Puzzle.get_by_shortname("fab_four")].state == PuzzleState.SOLVED:
-      for n in ("lazy",):
-        p = Puzzle.get_by_shortname(n)
-        self.open_puzzle(p, now)
-
-    if self.puzzle_state[Puzzle.get_by_shortname("flags")].state == PuzzleState.SOLVED:
-      for n in ("bobby_tables",):
-        p = Puzzle.get_by_shortname(n)
-        self.open_puzzle(p, now)
-
-    if self.puzzle_state[Puzzle.get_by_shortname("lazy")].state == PuzzleState.SOLVED:
-      for n in ("flags",):
-        p = Puzzle.get_by_shortname(n)
-        self.open_puzzle(p, now)
+    # Always have two open puzzles in each land.
+    for land in Land.BY_SHORTNAME.values():
+      open_count = 0
+      locked = []
+      for p in land.puzzles:
+        if self.puzzle_state[p].state == PuzzleState.OPEN:
+          open_count += 1
+        elif self.puzzle_state[p].state == PuzzleState.CLOSED:
+          locked.append(p)
+      while open_count < 2 and locked:
+        self.open_puzzle(locked.pop(0), now)
+        open_count += 1
 
     for st in self.puzzle_state.values():
       if st.state != PuzzleState.CLOSED:
@@ -322,7 +310,7 @@ class Icon:
 class Land:
   BY_SHORTNAME = {}
 
-  def __init__(self, shortname, cfg):
+  def __init__(self, shortname, cfg, event_dir):
     self.BY_SHORTNAME[shortname] = self
     self.shortname = shortname
     self.name = cfg["name"]
@@ -330,31 +318,69 @@ class Land:
     self.size = tuple(cfg["size"])
     self.poly = cfg["poly"]
 
+    print(f"  Adding land \"{shortname}\"...")
+
     self.locked_image = f"/assets/map/{shortname}_locked.png"
     self.unlocked_image = f"/assets/map/{shortname}_unlocked.png"
     self.url = "/land/" + shortname
     self.base_image = "/assets/land/" + shortname + "/land_base.png"
 
-    self.icons = {}
-    for n, d in cfg.get("icons", {}).items():
-      self.icons[n] = Icon(n, self, d)
-
     self.puzzles = []
+
+    self.icons = {}
+    for d in cfg.get("icons", ()):
+      name = d["name"]
+      i = Icon(name, self, d)
+      self.icons[name] = i
+      p = d["puzzle"]
+      if isinstance(p, str):
+        p = Puzzle.from_zip(os.path.join(event_dir, "puzzles", p))
+      else:
+        p = Puzzle.filler_puzzle(p)
+      p.land = self
+      p.icon = i
+      self.puzzles.append(p)
+
 
 class Puzzle:
   BY_SHORTNAME = {}
 
   DEFAULT_MAX_QUEUED = 3
 
-  def __init__(self, path, initial_open):
-    shortname = os.path.basename(path)
+  def __init__(self, shortname):
     if not re.match(r"^[a-z][a-z0-9_]*$", shortname):
       raise ValueError(f"\"{shortname}\" is not a legal puzzle shortname")
     if shortname in self.BY_SHORTNAME:
       raise ValueError(f"duplicate puzzle shortname \"{shortname}\"")
 
-    print(f"  Adding puzzle {shortname}")
+    print(f"    Adding puzzle \"{shortname}\"...")
     self.BY_SHORTNAME[shortname] = self
+    self.shortname = shortname
+    self.url = "/puzzle/" + shortname + "/"
+
+  @classmethod
+  def filler_puzzle(cls, number):
+    shortname = f"filler_{number}"
+    self = cls(shortname)
+
+    self.title = f"Filler #{number}"
+    self.oncall = "nobody@example.org"
+    self.puzzletron_id = -1
+    self.version = 0
+
+    self.max_queued = self.DEFAULT_MAX_QUEUED
+    self.answers = {"FILLER"}
+    self.display_answers = {"FILLER": "FILLER"}
+
+    self.html_head = None
+    self.html_body = "<p>The answer to this filler puzzle is <b>FILLER</b>.</p>"
+
+    return self
+
+  @classmethod
+  def from_zip(cls, path):
+    shortname = os.path.basename(path)
+    self = cls(shortname)
 
     c = configparser.ConfigParser()
     c.read(os.path.join(path, "metadata.cfg"))
@@ -362,21 +388,11 @@ class Puzzle:
     p = c["PUZZLE"]
     assert shortname == p["shortname"]
 
-    self.initial_open = initial_open
     self.shortname = shortname
     self.title = p["title"]
     self.oncall = p["oncall"]
     self.puzzletron_id = int(p["puzzletron_id"])
     self.version = int(p["version"])
-    self.url = "/puzzle/" + shortname + "/"
-
-    self.land = Land.BY_SHORTNAME[p["land"]]
-    self.land.puzzles.append(self)
-
-    if "icon" in p:
-      self.icon = self.land.icons[p["icon"]]
-    else:
-      self.icon = None
 
     self.max_queued = p.get("max_queued", self.DEFAULT_MAX_QUEUED)
 
@@ -396,6 +412,8 @@ class Puzzle:
       self.incorrect_responses = {}
 
     self.load_html(path)
+
+    return self
 
   def load_html(self, path):
     with open(os.path.join(path, "puzzle.html")) as f:

@@ -97,13 +97,7 @@ def main():
   with open(os.path.join(event_dir, "map_config.yaml")) as f:
     cfg = yaml.load(f)
     for shortname, d in cfg.items():
-      game.Land(shortname, d)
-
-  print("Adding puzzles...")
-  with open(os.path.join(event_dir, "puzzles.py")) as f:
-    def add_puzzle(shortname, initial_open=False):
-      game.Puzzle(os.path.join(event_dir, "puzzles", shortname), initial_open)
-    exec(f.read(), {"add_puzzle": add_puzzle})
+      game.Land(shortname, d, event_dir)
 
   save_state.set_classes(AdminUser=login.AdminUser,
                          Team=game.Team)
