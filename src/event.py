@@ -63,8 +63,11 @@ class LandMapPage(util.TeamPageHandler):
         d["answer"] = ", ".join(sorted(p.display_answers[a] for a in st.answers_found))
 
       if st.state == game.PuzzleState.OPEN:
-        duration = time.time() - self.team.puzzle_state[p].open_time
-        recent = duration < self.RECENT_SECONDS
+        open_time = self.team.puzzle_state[p].open_time
+        duration = time.time() - open_time
+        recent = (duration < self.RECENT_SECONDS and
+                  open_time != self.team.event_start)
+
         d["icon_url"] = p.icon.images["unlocked"]
         d["pos_x"], d["pos_y"] = p.icon.pos
         d["width"], d["height"] = p.icon.size
@@ -171,14 +174,23 @@ class SubmitHandler(tornado.web.RequestHandler):
                     lambda m: chr(int(m.group(1), 16)), answer)
 
     shortname = self.args["puzzle_id"]
+    puzzle = game.Puzzle.get_by_shortname(shortname)
+    if not puzzle: raise tornado.web.HTTPError(http.client.NOT_FOUND)
+
     submit_id = self.team.next_submit_id()
 
-    msgs = [{"method": "history_change", "puzzle_id": shortname}]
     r = self.team.submit_answer(submit_id, shortname, answer)
     if r:
-      msgs.extend(r)
+      msgs = [{"method": "history_change", "puzzle_id": shortname,
+               "frompage": puzzle.url, "topage": puzzle.land.url}]
+    else:
+      msgs = [{"method": "history_change", "puzzle_id": shortname}]
     await self.team.send_message(msgs)
+
+    if r:
+      await self.team.send_message(r, delay=1.5)
     self.set_status(http.client.NO_CONTENT.value)
+
 
 class SubmitHistoryHandler(tornado.web.RequestHandler):
   @login.required("team", on_fail=http.client.UNAUTHORIZED)
@@ -234,27 +246,6 @@ class EventCSS(tornado.web.RequestHandler):
     self.set_header("Content-Type", "text/css")
     self.write(self.event_css)
 
-class PuzzleAsset(tornado.web.RequestHandler):
-  MIME_TYPES = {".jpg": "image/jpeg",
-                ".js": "text/javascript",
-                }
-
-  def initialize(self, event_dir=None):
-    self.event_dir = event_dir
-
-  @login.required("team")
-  def get(self, shortname, path):
-    puzzle = game.Puzzle.get_by_shortname(shortname)
-    if not puzzle:
-      raise tornado.web.HTTPError(http.client.NOT_FOUND)
-    _, ext = os.path.splitext(path)
-    mime_type = self.MIME_TYPES.get(ext, "application/octet-stream")
-
-    self.set_header("Content-Type", mime_type)
-    with open(os.path.join(self.event_dir, "puzzles", shortname, path), "rb") as f:
-      self.write(f.read())
-
-
 def GetHandlers(event_dir, debug, compiled_js, event_css):
   handlers = [
     (r"/", EventHomePage),
@@ -263,7 +254,6 @@ def GetHandlers(event_dir, debug, compiled_js, event_css):
     (r"/DEBUGstartevent", DebugStartPage),
     (r"/DEBUGdostartevent", DebugDoStartEvent),
     (r"/puzzle/([^/]+)/?", PuzzlePage),
-    (r"/puzzle/([^/]+)/(.+)", PuzzleAsset, {"event_dir": event_dir}),
     (r"/client.js", ClientJS, {"compiled_js": compiled_js}),
     (r"/event.css", EventCSS, {"event_css": event_css}),
     (r"/submit", SubmitHandler),

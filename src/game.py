@@ -1,3 +1,4 @@
+import asyncio
 import configparser
 import heapq
 import html
@@ -155,9 +156,16 @@ class Team(login.LoginUser):
   def detach_session(self, session):
     self.active_sessions.remove(session)
 
-  async def send_message(self, objs):
+  async def send_message(self, objs, delay=None, real_delay=None):
     """Send a message or list of messages to all sessions for this team."""
     if not objs: return
+
+    if delay:
+      asyncio.create_task(self.send_message(objs, real_delay=delay))
+      return
+    if real_delay:
+      await asyncio.sleep(real_delay)
+
     if isinstance(objs, list):
       strs = [json.dumps(o) for o in objs]
     else:
@@ -255,9 +263,7 @@ class Team(login.LoginUser):
           sub.state = sub.MOOT
       msgs.append({"method": "solve",
                    "title": html.escape(puzzle.title),
-                   "audio": "https://snellen.storage.googleapis.com/applause.mp3",
-                   "frompage": puzzle.url,
-                   "topage": puzzle.land.url})
+                   "audio": "https://snellen.storage.googleapis.com/applause.mp3"})
       self.activity_log.append((now, f'<a href="{puzzle.url}">{html.escape(puzzle.title)}</a> solved.'))
       msgs.extend(self.compute_puzzle_beam(now))
     return msgs
@@ -360,7 +366,7 @@ class Puzzle:
     print(f"    Adding puzzle \"{shortname}\"...")
     self.BY_SHORTNAME[shortname] = self
     self.shortname = shortname
-    self.url = "/puzzle/" + shortname + "/"
+    self.url = "/puzzle/" + shortname
 
   @classmethod
   def filler_puzzle(cls):

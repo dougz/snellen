@@ -75,6 +75,9 @@ class Dispatcher {
 	if (msg.puzzle_id == puzzle_id) {
 	    submit_dialog.update_history();
 	}
+	if (window.location.pathname == msg.frompage) {
+	    setTimeout(function() { window.location.href = msg.topage; }, 1000);
+	}
     }
 
     /** @param{Message} msg */
@@ -83,9 +86,6 @@ class Dispatcher {
 	if (msg.audio) {
 	    var audio = new Audio(msg.audio);
 	    audio.play();
-	}
-	if (window.location.pathname == msg.frompage) {
-	    setTimeout(function() { window.location.href = msg.topage; }, 7000);
 	}
     }
 
