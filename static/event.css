@@ -1,6 +1,46 @@
 body {
     font-family: sans-serif;
+    background-image: url("https://snellen.storage.googleapis.com/grass.jpg");
+    margin: 0;
 }
+
+#topnav {
+    min-width: 1060px;
+    font-size: 18px;
+    background: #666;
+    color: #eee;
+    border-bottom: 1px solid black;
+    padding: 8px 20px;
+}
+
+#topnav a {
+    text-decoration: none;
+    color: #eee;
+}
+
+a#submit {
+    font-weight: bold;
+    cursor: pointer;
+    padding: 2px 8px;
+    background-color: #eee;
+    color: black;
+    text-transform: uppercase;
+}
+
+a#submit:hover {
+    background-color: #ccc;
+    color: #c00;
+}
+
+#content {
+    width: 1020px;
+    margin: 30px auto;
+    padding: 30px 60px 40px 60px;
+    background-color: #fff;
+    box-shadow: 0 0 10px black;
+}
+
+/** submit dialog **/
 
 .goog-modalpopup {
     background: #fff;
@@ -125,10 +165,13 @@ input#answer {
     font-family: monospace;
 }
 
+/** puzzle content **/
+
 .flavor {
     font-style: italic;
 }
 
+/** notifications **/
 
 div.toasts {
     width: 300px;
@@ -145,7 +188,7 @@ div.toast {
     box-shadow: #999999 0 0 12px 0;
     box-sizing: border-box;
     border-radius: 4px;
-    animation: fadeIn 0.5s ease-out forwards;
+    animation: fadeIn 0.5s ease-out both;
 }
 
 div.toasthidden {
@@ -156,26 +199,20 @@ div.toasthidden {
     box-shadow: #999999 0 0 12px 0;
     box-sizing: border-box;
     border-radius: 4px;
-    animation: fadeOut 0.5s ease-out forwards;
+    animation: fadeOut 0.5s ease-in both;
 }
 
 @keyframes fadeIn {
-    0% {
-        opacity: 0;
-    }
-    100% {
-        opacity: 1;
-    }
+    0% { opacity: 0; }
+    100% { opacity: 1; }
 }
 
 @keyframes fadeOut {
-    0% {
-	opacity: 1;
-    }
-    100% {
-	opacity: 0;
-    }
+    0% { opacity: 1; }
+    100% { opacity: 0; }
 }
+
+/** park maps **/
 
 div#map {
     position: relative;
@@ -219,16 +256,12 @@ div#map div.p {
     text-shadow: 2px 2px 5px black;
 }
 
-
-canvas {
-    display: block;
-    width: 962px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
 .right {
     float: right;
+}
+
+span.spacer {
+    padding: 20px;
 }
 
 span.teamname {
@@ -245,15 +278,6 @@ h1 {
     text-align: center;
 }
 
-.debug {
-    display: none;
-    margin: 4px;
-    padding: 4px;
-    font-size: 84%;
-    border: 1px solid #666;
-    background-color: #ffd;
-}
-
 .unsolved {
     color: #999;
     font-weight: bold;
@@ -263,8 +287,6 @@ h1 {
 .solved {
     font-weight: bold;
 }
-
-
 
 @keyframes twist {
     0% {

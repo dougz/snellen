@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+  <meta name="viewport" content="width=1200, initial-scale=0"/>
+  <head>
+    <link rel=stylesheet href="/event.css">
+    <title>{% block title %}{% end %}</title>
+    {% if script %}{% raw script %}{% end %}
+    {% if json_data %}{% raw json_data %}{% end %}
+    {% block head %}{% end %}
+  </head>
+  <body>
+    <div id="topnav">
+      <span class=teamname>{{team.team_name}}</span>
+      <span class=spacer></span>
+      <a href="/">Penny Park</a>
+      {% block topnav_left %}{% end %}
+      <span class="right">
+	{% block topnav_right %}{% end %}
+	<span class=spacer></span>
+	<a href="/log">Activity Log</a>
+	<span class=spacer></span>
+	<a href="/logout">Logout</a>
+      </span>
+    </div>
+
+    <div id="content">
+      {% block content %}{% end %}
+    </div>
+  </body>
+</html>
+
+

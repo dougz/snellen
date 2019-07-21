@@ -1,28 +1,18 @@
-{% import time %}
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>{{puzzle.title}}</title>
-    <link rel=stylesheet href="/event.css">
-    {% raw script %}
-    {% if puzzle.html_head %}{% raw puzzle.html_head %}{% end %}
-  </head>
-  <body>
-    <div id="topnav">
-      <span class=teamname>{{team.team_name}}</span>
-      <span>&bull; <a href="/">Penny Park</a> &bull; <a href="{{puzzle.land.url}}">{{puzzle.land.name}}</a></span>
-      <span class=right><a href="/log">Activity Log</a> &bull;
-	<button id="submit">submit</button> &bull;
-	<a href="/logout">Logout</a></span>
-    </div>
+{% extends "player_base.html" %}
 
-    <p><span class=debug>debug: <b>opened</b> {{"none" if state.open_time is None else time.ctime(state.open_time)}}
-      <b>solved</b> {{"none" if state.solve_time is None else time.ctime(state.solve_time)}}</span></p>
+{% block title %}{{puzzle.title}}{% end %}
 
-    <h1>{{puzzle.title}}</h1>
-    <div id="puzz">
-      {% raw puzzle.html_body %}
-    </div>
-  </body>
-</html>
+{% block topnav_left %}
+&gt;  <a href="{{puzzle.land.url}}">{{puzzle.land.name}}</a>
+{% end %}
 
+{% block topnav_right %}
+<a id="submit">Submit</a>
+{% end %}
+
+{% block content %}
+<h1>{{puzzle.title}}</h1>
+<div id="puzz">
+  {% raw puzzle.html_body %}
+</div>
+{% end %}

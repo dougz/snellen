@@ -1,26 +1,16 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <link rel=stylesheet href="/event.css">
-    {% raw script %}
-    {% if json_data %}{% raw json_data %}{% end %}
-  </head>
-  <body>
-    <div id="topnav">
-      <span class=teamname>{{team.team_name}}</span>
-      <span class=right><a href="/log">Activity Log</a> &bull; <a href="/logout">Logout</a></span>
-    </div>
+{% extends "player_base.html" %}
 
-    <h1>Penny Park</h1>
+{% block title %}Penny Park{% end %}
 
-    <div id="map" style="width: {{width}}px; height: {{height}}px">
-    </div>
+{% block content %}
+<h1>Penny Park</h1>
 
-    <map id="mapmap" name="mapmap">
-    </map>
+<div id="map" style="width: {{width}}px; height: {{height}}px">
+</div>
 
-    <ul id="list" class=itemlist>
-    </ul>
+<map id="mapmap" name="mapmap">
+</map>
 
-  </body>
-</html>
+<ul id="list" class=itemlist>
+</ul>
+{% end %}

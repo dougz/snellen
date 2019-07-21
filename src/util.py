@@ -28,5 +28,6 @@ class TeamPageHandler(tornado.web.RequestHandler):
       script += """<script src="/client.js"></script>"""
 
     d["script"] = script
+    d["json_data"] = None
 
     return d

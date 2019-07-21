@@ -338,7 +338,7 @@ class Land:
       if p == "_":
         p = Puzzle.filler_puzzle()
       else:
-        p = Puzzle.from_zip(os.path.join(event_dir, "puzzles", p))
+        p = Puzzle.from_json(os.path.join(event_dir, "puzzles", p + ".json"))
       p.land = self
       p.icon = i
       self.puzzles.append(p)
@@ -384,6 +384,38 @@ class Puzzle:
     self.html_body = "<p>The answer to this filler puzzle is <b>FILLER</b>.</p>"
 
     return self
+
+  @classmethod
+  def from_json(cls, path):
+    shortname = os.path.splitext(os.path.basename(path))[0]
+    with open(path) as f:
+      j = json.load(f)
+
+    assert shortname == j["shortname"]
+    self = cls(shortname)
+
+    self.title = j["title"]
+    self.oncall = j["oncall"]
+    self.puzzletron_id = j["puzzletron_id"]
+    self.max_queued = j.get("max_queued", self.DEFAULT_MAX_QUEUED)
+
+    self.answers = set()
+    self.display_answers = {}
+    for a in j["answers"]:
+      disp = a.upper().strip()
+      a = self.canonicalize_answer(a)
+      self.display_answers[a] = disp
+      self.answers.add(a)
+
+    self.incorrect_responses = dict(
+        (self.canonicalize_answer(k), self.respace_text(v))
+        for (k, v) in j["incorrect_responses"].items())
+
+    self.html_head = j.get("html_head")
+    self.html_body = j["html_body"]
+
+    return self
+
 
   @classmethod
   def from_zip(cls, path):
@@ -453,6 +485,7 @@ class Puzzle:
 
   @staticmethod
   def respace_text(text):
+    if text is None: return None
     return " ".join(text.split()).strip()
 
 
