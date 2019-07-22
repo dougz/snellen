@@ -178,6 +178,7 @@ div.toasts {
     position: fixed;
     right: 20px;
     top: 28px;
+    overflow: auto;
 }
 
 div.toast {
@@ -210,6 +211,21 @@ div.toasthidden {
 @keyframes fadeOut {
     0% { opacity: 1; }
     100% { opacity: 0; }
+}
+
+div.mute {
+    padding: 4px 0 0 0;
+    margin: auto;
+    text-align: center;
+}
+
+div.mute input {
+    position: relative;
+    top: 2px;
+}
+
+label.mute {
+    font-size: 84%;
 }
 
 /** park maps **/

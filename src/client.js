@@ -1,6 +1,7 @@
 goog.require("goog.dom");
 goog.require("goog.dom.classlist");
 goog.require("goog.events");
+goog.require("goog.net.Cookies");
 goog.require("goog.net.XhrIo");
 goog.require("goog.ui.ModalPopup");
 goog.require("goog.json.Serializer");
@@ -33,7 +34,8 @@ class Waiter {
 		return;
 	    }
 
-            setTimeout(goog.bind(this.xhr.send, this.xhr, "/wait/" + waiter_id + "/" + this.serial),
+            setTimeout(goog.bind(this.xhr.send, this.xhr,
+				 "/wait/" + waiter_id + "/" + this.serial),
                        this.backoff);
             return;
         }
@@ -47,11 +49,14 @@ class Waiter {
 	    this.dispatcher.dispatch(msg);
 	}
 
-        setTimeout(goog.bind(this.xhr.send, this.xhr, "/wait/" + waiter_id + "/" + this.serial), Math.random() * 250);
+        setTimeout(goog.bind(this.xhr.send, this.xhr,
+			     "/wait/" + waiter_id + "/" + this.serial),
+		   Math.random() * 250);
     }
 
     start() {
-	goog.events.listen(this.xhr, goog.net.EventType.COMPLETE, goog.bind(this.waitcomplete, this));
+	goog.events.listen(this.xhr, goog.net.EventType.COMPLETE,
+			   goog.bind(this.waitcomplete, this));
 	this.xhr.send("/wait/" + waiter_id + "/" + this.serial);
     }
 }
@@ -82,11 +87,16 @@ class Dispatcher {
 
     /** @param{Message} msg */
     solve(msg) {
-	toast_manager.add_toast("<b>" + msg.title + "</b> was solved!", 6000);
+	var audio = null;
 	if (msg.audio) {
-	    var audio = new Audio(msg.audio);
-	    audio.play();
+	    if (cookies.get("mute")) {
+		audio = true;
+	    } else {
+		audio = new Audio(msg.audio);
+		audio.play();
+	    }
 	}
+	toast_manager.add_toast("<b>" + msg.title + "</b> was solved!", 6000, audio);
     }
 
     /** @param{Message} msg */
@@ -332,14 +342,46 @@ class ToastManager {
 	this.toasts = 0;
 	/** @type{Array<Element>} */
 	this.dead_toasts = [];
+
+	/** @type{number} */
+	this.serial = 0;
     }
 
-    add_toast(message, timeout) {
+    add_toast(message, timeout, audio) {
+	this.serial += 1;
 	var t = goog.dom.createDom("DIV", {className: "toast"});
 	t.innerHTML = message;
+	if (audio) {
+	    var box = goog.dom.createDom("INPUT", {id: "mutebutton" + this.serial});
+	    box.setAttribute("type", "checkbox");
+	    if (cookies.get("mute")) {
+		box.checked = true;
+	    }
+
+	    goog.events.listen(box, goog.events.EventType.CLICK,
+			       goog.bind(this.toggle_mute, this, box, audio));
+
+	    var label = goog.dom.createDom("LABEL", {className: "mute"},
+					   goog.dom.createTextNode("Mute audio"));
+	    label.setAttribute("for", "mutebutton" + this.serial);
+
+	    var mute = goog.dom.createDom("DIV", {className: "mute"}, box, label);
+	    t.appendChild(mute);
+	}
 	this.toasts += 1;
 	this.toasts_div.appendChild(t);
 	setTimeout(goog.bind(this.expire_toast, this, t), timeout);
+    }
+
+    toggle_mute(box, audio) {
+	if (box.checked) {
+	    cookies.set("mute", "1", 86400*3, "/");
+	    if (audio && audio != true) {
+		audio.pause();
+	    }
+	} else {
+	    cookies.set("mute", "", 1, "/");
+	}
     }
 
     expire_toast(t) {
@@ -428,7 +470,6 @@ class MapDraw {
     }
 
     add_sparkle(x, y, width, height) {
-	console.log("sparkle " + x + "," + y + " " + width + "x" + height);
 	var div = goog.dom.createDom("DIV", {className: "icon"});
 	div.style.left = "" + x + "px";
 	div.style.top = "" + y + "px";
@@ -477,10 +518,12 @@ var submit_dialog = null;
 var time_formatter = null;
 var toast_manager = null;
 var map_draw = null;
+var cookies = null;
 
 function initPage() {
     time_formatter = new TimeFormatter();
     toast_manager = new ToastManager();
+    cookies = goog.net.Cookies.getInstance();
 
     waiter = new Waiter(new Dispatcher());
     waiter.start();
