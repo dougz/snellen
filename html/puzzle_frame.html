@@ -10,6 +10,11 @@
 <a id="submit">Submit</a>
 {% end %}
 
+{% block head %}
+{% if puzzle.html_head %}{% raw puzzle.html_head %}{% end %}
+{% end %}
+
+
 {% block content %}
 <h1>{{puzzle.title}}</h1>
 <div id="puzz">

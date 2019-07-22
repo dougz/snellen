@@ -33,7 +33,7 @@ class Puzzle:
                 ".css": "text/css",
                 }
 
-  def __init__(self, zip_path, credentials, bucket):
+  def __init__(self, zip_path, args):
     self.zip_path = zip_path
 
     h = hashlib.sha256()
@@ -61,14 +61,16 @@ class Puzzle:
     self.answers = list(ca.values())
 
     self.incorrect_responses = {}
-    for k, v in c["INCORRECT_RESPONSES"].items():
-      self.incorrect_responses[k] = None if not v else v
+    if "INCORRECT_RESPONSES" in c:
+      for k, v in c["INCORRECT_RESPONSES"].items():
+        self.incorrect_responses[k] = None if not v else v
 
-    self.upload_assets(z, credentials, bucket, prefix)
+    self.upload_assets(z, args, prefix)
     self.parse_puzzle_html(z)
 
-  def upload_assets(self, z, credentials, bucket, prefix):
+  def upload_assets(self, z, args, prefix):
     self.asset_map = {}
+    bucket = args.bucket
 
     for n in z.namelist():
       if n in self.SPECIAL_FILES: continue
@@ -79,11 +81,11 @@ class Puzzle:
 
       path = f"puzzle/{prefix}/{self.shortname}/{n}"
 
-      if bucket:
+      if not args.skip_upload:
         print(f"  Uploading {n}...")
         r = requests.put(f"https://storage.googleapis.com/{bucket}/{path}",
                          headers={"Content-Type": self.MIME_TYPES[ext],
-                                  "Authorization": credentials.get()},
+                                  "Authorization": args.credentials.get()},
                          data=z.open(n))
         r.raise_for_status()
 
@@ -107,6 +109,12 @@ class Puzzle:
       self.html_head = None
     self.html_body = "".join(str(i) for i in soup.body.contents)
 
+    if False:
+      print("---- HEAD ----")
+      print(self.html_head)
+      print("---- BODY ----")
+      print(self.html_body)
+
   def json_dict(self):
     d = {}
     for n in ("shortname title oncall puzzletron_id max_queued "
@@ -127,14 +135,16 @@ def main():
   parser.add_argument("--output_dir", help="Directory for output json files.")
   parser.add_argument("--credentials", help="Private key for google cloud service account.")
   parser.add_argument("--bucket", help="Google cloud bucket to use.")
+  parser.add_argument("--skip_upload", action="store_true",
+                      help="Don't actually upload to GCS.")
   parser.add_argument("input_files", nargs="*",
                       help="The input .zip to process")
   args = parser.parse_args()
 
-  credentials = oauth2.Oauth2Token(args.credentials)
+  args.credentials = oauth2.Oauth2Token(args.credentials)
 
   for zipfn in args.input_files:
-    p = Puzzle(zipfn, credentials, args.bucket)
+    p = Puzzle(zipfn, args)
     p.save(args.output_dir)
 
 
