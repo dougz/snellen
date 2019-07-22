@@ -16,7 +16,7 @@
 
     Mac: `pip3 install bs4 bcrypt lxml tornado`
 
-- Download and symlink closure and closure-compiler in tools
+- Download and symlink closure and closure-compiler in external
 
     Here is one such procedure:
 
@@ -30,11 +30,11 @@
 
     `cd $SNELLEN_BASE`
 
-    `mkdir -p tools`
+    `mkdir -p external`
 
-    `ln -sf /path/to/closure-compiler-v20190301.jar tools/closure-compiler.jar`
+    `ln -sf /path/to/closure-compiler-v20190301.jar external/closure-compiler.jar`
 
-    `ln -sf /path/to/closure-library-20190301/closure tools/`
+    `ln -sf /path/to/closure-library-20190301/closure external/`
 
 - Run the recompile script
 
