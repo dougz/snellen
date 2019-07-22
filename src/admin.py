@@ -8,7 +8,10 @@ class AdminHome(tornado.web.RequestHandler):
   @login.required("admin")
   def get(self):
 
-    self.render("admin_home.html", user=self.user, script=None,
+    self.render("admin_home.html",
+                user=self.user,
+                game_state=game.Global.STATE,
+                script=None,
                 sessions=len(login.Session.BY_KEY),
                 waits=login.Session.VARZ["waits"],
                 waiters=login.Session.VARZ["waiters"])
@@ -85,6 +88,12 @@ class StopServer(tornado.web.RequestHandler):
     self.write("Stopping server\u2026")
 
 
+class StartEvent(tornado.web.RequestHandler):
+  @login.required(login.AdminRoles.CONTROL_EVENT)
+  def get(self):
+    game.Global.STATE.start_event()
+    self.redirect("/admin")
+
 class AdminDebugJS(tornado.web.RequestHandler):
   @login.required("admin")
   def get(self):
@@ -115,6 +124,7 @@ def GetHandlers(debug, answer_checking, admin_css, compiled_admin_js):
     (r"/admin_users", AdminUsers),
     (r"/(set|clear)_admin_role/([^/]+)/([^/]+)", UpdateAdminRole),
     (r"/create_user", CreateUser),
+    (r"/start_event", StartEvent),
     (r"/stop_server", StopServer, {"answer_checking": answer_checking}),
     (r"/teams", ShowTeams),
     (r"/puzzles", ShowPuzzles),

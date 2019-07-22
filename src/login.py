@@ -224,8 +224,8 @@ class required:
           # If teams try to access an admin page, return 404.
           raise tornado.web.HTTPError(http.client.NOT_FOUND)
 
-      if self.cap == "team" and self.require_start and not session.team.event_start:
-        req.redirect("/DEBUGstartevent")
+      if self.cap == "team" and self.require_start and not game.Global.STATE.event_start_time:
+        req.redirect("/")
         return
 
       session.expires = now + session.SESSION_TIMEOUT

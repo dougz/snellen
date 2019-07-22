@@ -6,6 +6,9 @@
 <p>sessions = {{sessions}}<br/>waiters = {{waiters}}<br/>waits = {{waits}}</p>
 
 <ul>
+  {% if not game_state.event_start_time and user.has_role("control_event") %}
+  <li><a href="/start_event">Start event!</a></li>
+  {% end %}
   <li><a href="/teams">Team list</a></li>
   <li><a href="/puzzles">Puzzle list</a></li>
   <li><a href="/admin_users">Admin users</a></li>

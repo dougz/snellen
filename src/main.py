@@ -100,18 +100,19 @@ def main():
       game.Land(shortname, d, event_dir)
 
   save_state.set_classes(AdminUser=login.AdminUser,
-                         Team=game.Team)
+                         Team=game.Team,
+                         Global=game.Global)
   save_state.open(os.path.join(event_dir, "state.log"))
   save_state.replay(advance_time=game.Submission.process_submit_queue)
+
+  if not game.Global.STATE: game.Global()
 
   print("Adding new teams...")
   with open(os.path.join(event_dir, "teams.py")) as f:
     exec(f.read(), {"add_team": game.Team.add_team})
 
   if start_event:
-    for team in game.Team.BY_USERNAME.values():
-      if team.event_start is None:
-        team.start_event()
+    game.Global.STATE.start_event()
 
   if root_password:
     print("Enabling root user...")

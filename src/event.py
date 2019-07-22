@@ -12,8 +12,13 @@ import login
 import util
 
 class EventHomePage(util.TeamPageHandler):
-  @login.required("team")
+  @login.required("team", require_start=False)
   def get(self):
+
+    if not game.Global.STATE.event_start_time:
+      self.render("not_started.html")
+      return
+
     items = []
     mapdata = {"base_url": "/assets/map/map_base.png",
                "items": items}
@@ -66,7 +71,7 @@ class LandMapPage(util.TeamPageHandler):
         open_time = self.team.puzzle_state[p].open_time
         duration = time.time() - open_time
         recent = (duration < self.RECENT_SECONDS and
-                  open_time != self.team.event_start)
+                  open_time != game.Global.STATE.event_start_time)
 
         d["icon_url"] = p.icon.images["unlocked"]
         d["pos_x"], d["pos_y"] = p.icon.pos
@@ -100,18 +105,6 @@ class LandMapPage(util.TeamPageHandler):
     self.render("land.html", land=land, json_data=json_data,
                 width=land.map_size[0], height=land.map_size[1])
 
-
-class DebugStartPage(util.TeamPageHandler):
-  @login.required("team", require_start=False)
-  def get(self):
-    self.render("debug_start.html")
-
-class DebugDoStartEvent(tornado.web.RequestHandler):
-  @login.required("team", require_start=False)
-  def get(self):
-    if self.team.event_start is None:
-      self.team.start_event()
-    self.redirect("/")
 
 class PuzzlePage(util.TeamPageHandler):
   @login.required("team")
@@ -233,7 +226,7 @@ class ClientDebugJS(tornado.web.RequestHandler):
 class ClientJS(tornado.web.RequestHandler):
   def initialize(self, compiled_js):
     self.compiled_js = compiled_js
-  @login.required("team")
+  @login.required("team", require_start=False)
   def get(self):
     self.set_header("Content-Type", "text/javascript")
     self.write(self.compiled_js)
@@ -241,7 +234,7 @@ class ClientJS(tornado.web.RequestHandler):
 class EventCSS(tornado.web.RequestHandler):
   def initialize(self, event_css):
     self.event_css = event_css
-  @login.required("team")
+  @login.required("team", require_start=False)
   def get(self):
     self.set_header("Content-Type", "text/css")
     self.write(self.event_css)
@@ -251,8 +244,6 @@ def GetHandlers(event_dir, debug, compiled_js, event_css):
     (r"/", EventHomePage),
     (r"/log", ActivityLogPage),
     (r"/land/([a-z0-9_]+)", LandMapPage),
-    (r"/DEBUGstartevent", DebugStartPage),
-    (r"/DEBUGdostartevent", DebugDoStartEvent),
     (r"/puzzle/([^/]+)/?", PuzzlePage),
     (r"/client.js", ClientJS, {"compiled_js": compiled_js}),
     (r"/event.css", EventCSS, {"event_css": event_css}),

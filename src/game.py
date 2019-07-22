@@ -1,5 +1,4 @@
 import asyncio
-import configparser
 import heapq
 import html
 import json
@@ -7,8 +6,6 @@ import os
 import re
 import time
 import unicodedata
-
-import bs4
 
 import login
 from state import save_state
@@ -141,8 +138,6 @@ class Team(login.LoginUser):
     self.team_name = team_name
     self.location = location
 
-    self.event_start = None
-
     # Create a PuzzleState object for all puzzles that exist.
     self.puzzle_state = {}
     for puzzle in Puzzle.all_puzzles():
@@ -180,11 +175,6 @@ class Team(login.LoginUser):
     if username not in cls.BY_USERNAME:
       print(f"  Adding team {username} \"{team_name}\"")
       t = Team(username, login.make_hash(password), team_name, location)
-
-  @save_state
-  def start_event(self, now):
-    self.event_start = now
-    self.compute_puzzle_beam(now)
 
   @classmethod
   def get_by_username(cls, username):
@@ -424,53 +414,6 @@ class Puzzle:
 
 
   @classmethod
-  def from_zip(cls, path):
-    shortname = os.path.basename(path)
-    self = cls(shortname)
-
-    c = configparser.ConfigParser()
-    c.read(os.path.join(path, "metadata.cfg"))
-
-    p = c["PUZZLE"]
-    assert shortname == p["shortname"]
-
-    self.shortname = shortname
-    self.title = p["title"]
-    self.oncall = p["oncall"]
-    self.puzzletron_id = int(p["puzzletron_id"])
-    self.version = int(p["version"])
-
-    self.max_queued = p.get("max_queued", self.DEFAULT_MAX_QUEUED)
-
-    self.answers = set()
-    self.display_answers = {}
-    for a in c["ANSWER"].values():
-      disp = a.upper().strip()
-      a = self.canonicalize_answer(a)
-      self.display_answers[a] = disp
-      self.answers.add(a)
-
-    if "INCORRECT_RESPONSES" in c:
-      self.incorrect_responses = dict(
-        (self.canonicalize_answer(k), self.respace_text(v))
-        for (k, v) in c["INCORRECT_RESPONSES"].items())
-    else:
-      self.incorrect_responses = {}
-
-    self.load_html(path)
-
-    return self
-
-  def load_html(self, path):
-    with open(os.path.join(path, "puzzle.html")) as f:
-      soup = bs4.BeautifulSoup(f, features="lxml")
-      if soup.head:
-        self.html_head = "".join(str(i) for i in soup.head.contents)
-      else:
-        self.html_head = None
-      self.html_body = "".join(str(i) for i in soup.body.contents)
-
-  @classmethod
   def get_by_shortname(cls, shortname):
     return cls.BY_SHORTNAME.get(shortname)
 
@@ -493,6 +436,29 @@ class Puzzle:
   def respace_text(text):
     if text is None: return None
     return " ".join(text.split()).strip()
+
+
+class Global:
+  STATE = None
+
+  @save_state
+  def __init__(self, now):
+    self.event_start_time = None
+    Global.STATE = self
+
+  @save_state
+  def start_event(self, now):
+    if self.event_start_time: return
+
+    self.event_start_time = now
+    for team in Team.BY_USERNAME.values():
+      team.compute_puzzle_beam(now)
+
+    # TODO trigger team reload
+
+
+
+
 
 
 
