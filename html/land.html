@@ -1,11 +1,11 @@
 {% extends "player_base.html" %}
 
-{% block title %}{{land.name}}{% end %}
+{% block title %}{{land.title}}{% end %}
 
 {% block content %}
-<h1>{{land.name}}</h1>
+<h1>{{land.title}}</h1>
 
-<div id="map" style="width: {{width}}px; height: {{height}}px">
+<div id="map" style="width: {{land.base_size[0]}}px; height: {{land.base_size[1]}}px">
 </div>
 
 <map id="mapmap" name="mapmap">

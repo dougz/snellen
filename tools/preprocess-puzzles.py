@@ -11,6 +11,7 @@ import requests
 import os
 import zipfile
 
+import common
 import oauth2
 
 SECRET_KEY_LENGTH = 16
@@ -21,17 +22,6 @@ class Puzzle:
   SOLUTION_HTML = "solution.html"
 
   SPECIAL_FILES = {METADATA_FILE, PUZZLE_HTML, SOLUTION_HTML}
-
-  MIME_TYPES = {".jpg": "image/jpeg",
-                ".png": "image/png",
-                ".js": "text/javascript",
-                ".txt": "text/plain",
-                ".html": "text/html",
-                ".zip": "application/zip",
-                ".wav": "audio/wav",
-                ".mp3": "audio/mpeg",
-                ".css": "text/css",
-                }
 
   def __init__(self, zip_path, args):
     self.zip_path = zip_path
@@ -76,7 +66,7 @@ class Puzzle:
       if n in self.SPECIAL_FILES: continue
 
       ext = os.path.splitext(n)[1].lower()
-      if ext not in self.MIME_TYPES:
+      if ext not in common.MIME_TYPES:
         raise ValueError(f"Don't know MIME type for '{n}'.")
 
       path = f"puzzle/{prefix}/{self.shortname}/{n}"
@@ -84,7 +74,7 @@ class Puzzle:
       if not args.skip_upload:
         print(f"  Uploading {n}...")
         r = requests.put(f"https://storage.googleapis.com/{bucket}/{path}",
-                         headers={"Content-Type": self.MIME_TYPES[ext],
+                         headers={"Content-Type": common.MIME_TYPES[ext],
                                   "Authorization": args.credentials.get()},
                          data=z.open(n))
         r.raise_for_status()

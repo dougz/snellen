@@ -267,8 +267,10 @@ class Team(login.LoginUser):
   def compute_puzzle_beam(self, now):
     msgs = []
 
+
     # Always have two open puzzles in each land.
     for land in Land.BY_SHORTNAME.values():
+      if not land.puzzles: continue
       open_count = 0
       locked = []
       for p in land.puzzles:
@@ -284,7 +286,7 @@ class Team(login.LoginUser):
       if st.state != PuzzleState.CLOSED:
         if st.puzzle.land not in self.open_lands:
           if st.puzzle.land.shortname != "mainstreet":
-            msgs.append({"method": "open", "title": html.escape(st.puzzle.land.name)})
+            msgs.append({"method": "open", "title": html.escape(st.puzzle.land.title)})
           self.open_lands[st.puzzle.land] = now
 
     return msgs
@@ -296,32 +298,32 @@ class Icon:
     self.pos = tuple(d["pos"])
     self.size = tuple(d["size"])
     self.poly = d.get("poly", None)
+    self.puzzle = None
+    self.to_land = None
 
     self.images = {
-      "locked": f"/assets/land/{land.shortname}/{name}_locked.png",
-      "unlocked": f"/assets/land/{land.shortname}/{name}_unlocked.png",
-      "solved": f"/assets/land/{land.shortname}/{name}_solved.png",
+      "locked": d.get("locked", None),
+      "unlocked": d.get("unlocked", None),
+      "solved": d.get("solved", None),
       }
 
 class Land:
   BY_SHORTNAME = {}
 
   def __init__(self, shortname, cfg, event_dir):
-    self.BY_SHORTNAME[shortname] = self
-    self.shortname = shortname
-    self.name = cfg["name"]
-    self.pos = tuple(cfg["pos"])
-    self.size = tuple(cfg["size"])
-    self.poly = cfg["poly"]
-
-    self.map_size = tuple(cfg["map_size"])
-
     print(f"  Adding land \"{shortname}\"...")
 
-    self.locked_image = f"/assets/map/{shortname}_locked.png"
-    self.unlocked_image = f"/assets/map/{shortname}_unlocked.png"
-    self.url = "/land/" + shortname
-    self.base_image = "/assets/land/" + shortname + "/land_base.png"
+    self.BY_SHORTNAME[shortname] = self
+    self.shortname = shortname
+    self.title = cfg["title"]
+
+    self.base_img = cfg["base_img"]
+    self.base_size = cfg["base_size"]
+
+    if shortname == "inner_only":
+      self.url = "/"
+    else:
+      self.url = "/land/" + shortname
 
     self.puzzles = []
 
@@ -330,14 +332,27 @@ class Land:
       name = d["name"]
       i = Icon(name, self, d)
       self.icons[name] = i
-      p = d["puzzle"]
-      if p == "_":
-        p = Puzzle.filler_puzzle()
-      else:
-        p = Puzzle.from_json(os.path.join(event_dir, "puzzles", p + ".json"))
-      p.land = self
-      p.icon = i
-      self.puzzles.append(p)
+      if "puzzle" in d:
+        p = d["puzzle"]
+        if p == "_":
+          p = Puzzle.filler_puzzle()
+        else:
+          p = Puzzle.from_json(os.path.join(event_dir, "puzzles", p + ".json"))
+        p.land = self
+        p.icon = i
+        self.puzzles.append(p)
+        i.puzzle = p
+
+  def __repr__(self):
+    return f"<Land \"{self.title}\">"
+
+  @classmethod
+  def resolve_lands(cls):
+    for land in cls.BY_SHORTNAME.values():
+      for i in land.icons.values():
+        if not i.puzzle:
+          i.to_land = cls.BY_SHORTNAME[i.name]
+
 
 
 class Puzzle:

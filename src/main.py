@@ -3,10 +3,10 @@
 import asyncio
 import concurrent
 import getopt
+import json
 import os
 import resource
 import sys
-import yaml
 
 import tornado.ioloop
 import tornado.httpserver
@@ -94,10 +94,11 @@ def main():
   print(f"Raised limit to {hard} file descriptors.")
 
   print("Load map config...")
-  with open(os.path.join(event_dir, "map_config.yaml")) as f:
-    cfg = yaml.load(f)
+  with open(os.path.join(event_dir, "map_config.json")) as f:
+    cfg = json.load(f)
     for shortname, d in cfg.items():
       game.Land(shortname, d, event_dir)
+  game.Land.resolve_lands()
 
   save_state.set_classes(AdminUser=login.AdminUser,
                          Team=game.Team,
@@ -110,6 +111,10 @@ def main():
   print("Adding new teams...")
   with open(os.path.join(event_dir, "teams.py")) as f:
     exec(f.read(), {"add_team": game.Team.add_team})
+
+  start_map = game.Land.BY_SHORTNAME["inner_only"]
+  for team in game.Team.BY_USERNAME.values():
+    team.open_lands[start_map] = 0
 
   if start_event:
     game.Global.STATE.start_event()

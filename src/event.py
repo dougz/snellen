@@ -11,41 +11,15 @@ import game
 import login
 import util
 
-class EventHomePage(util.TeamPageHandler):
-  @login.required("team", require_start=False)
-  def get(self):
-
-    if not game.Global.STATE.event_start_time:
-      self.render("not_started.html")
-      return
-
-    items = []
-    mapdata = {"base_url": "/assets/map/map_base.png",
-               "items": items}
-
-    for land in game.Land.BY_SHORTNAME.values():
-      d = {}
-      items.append(d)
-
-      if land in self.team.open_lands:
-        d["name"] = land.name
-        d["url"] = land.url
-        d["icon_url"] = land.unlocked_image
-        d["pos_x"], d["pos_y"] = land.pos
-        d["width"], d["height"] = land.size
-        d["poly"] = land.poly
-
-    json_data = """<script>var mapdata = """ + json.dumps(mapdata) + ";</script>"
-
-    self.render("map.html", json_data=json_data,
-                width=962, height=635)
-
 
 class LandMapPage(util.TeamPageHandler):
   RECENT_SECONDS = 10.0
 
   @login.required("team")
   def get(self, shortname):
+    self.show_map(shortname)
+
+  def show_map(self, shortname):
     land = game.Land.BY_SHORTNAME.get(shortname, None)
     if not land:
       raise tornado.web.HTTPError(http.client.NOT_FOUND)
@@ -53,57 +27,67 @@ class LandMapPage(util.TeamPageHandler):
       raise tornado.web.HTTPError(http.client.NOT_FOUND)
 
     items = []
-    mapdata = {"base_url": land.base_image,
+    mapdata = {"base_url": land.base_img,
                "items": items}
-    for p in land.puzzles:
-      st = self.team.puzzle_state[p]
-      if st.state == game.PuzzleState.CLOSED: continue
 
-      d = { "name": p.title,
-            "url": p.url,
-            "solved": False,
-            }
+    for i in land.icons.values():
+      if i.puzzle:
+        p = i.puzzle
+        st = self.team.puzzle_state[p]
+        if st.state == game.PuzzleState.CLOSED: continue
 
-      if st.answers_found:
-        d["answer"] = ", ".join(sorted(p.display_answers[a] for a in st.answers_found))
+        d = { "name": p.title, "url": p.url }
 
-      if st.state == game.PuzzleState.OPEN:
-        open_time = self.team.puzzle_state[p].open_time
-        duration = time.time() - open_time
-        recent = (duration < self.RECENT_SECONDS and
-                  open_time != game.Global.STATE.event_start_time)
+        if st.answers_found:
+          d["answer"] = ", ".join(sorted(p.display_answers[a] for a in st.answers_found))
 
-        d["icon_url"] = p.icon.images["unlocked"]
-        d["pos_x"], d["pos_y"] = p.icon.pos
-        d["width"], d["height"] = p.icon.size
-        if p.icon.poly: d["poly"] = p.icon.poly
-        if "answer" in d: d["answer"] += ", \u2026"
-        if recent: d["animate"] = "delay_fade"
+        if st.state == game.PuzzleState.OPEN:
+          if "answer" in d: d["answer"] += ", \u2026"
 
-      elif st.state == game.PuzzleState.SOLVED:
-        duration = time.time() - self.team.puzzle_state[p].solve_time
-        recent = duration < self.RECENT_SECONDS
-        if recent:
-          dd = {"icon_url": p.icon.images["unlocked"],
-                "pos_x": p.icon.pos[0],
-                "pos_y": p.icon.pos[1],
-                "width": p.icon.size[0],
-                "height": p.icon.size[1]}
-          items.append(dd)
+          open_time = self.team.puzzle_state[p].open_time
+          duration = time.time() - open_time
+          recent = (duration < self.RECENT_SECONDS and
+                    open_time != game.Global.STATE.event_start_time)
+          if recent: d["animate"] = "delay_fade"
+          d["solved"] = False
+          d["icon_url"] = i.images["unlocked"]
 
-        d["icon_url"] = p.icon.images["solved"]
-        d["pos_x"], d["pos_y"] = p.icon.pos
-        d["width"], d["height"] = p.icon.size
-        if p.icon.poly: d["poly"] = p.icon.poly
-        if recent: d["animate"] = "sparkle"
-        d["solved"] = True
+        elif st.state == game.PuzzleState.SOLVED:
+          duration = time.time() - self.team.puzzle_state[p].solve_time
+          recent = duration < self.RECENT_SECONDS
+          if recent:
+            dd = {"icon_url": i.images["unlocked"],
+                  "pos_x": i.pos[0],
+                  "pos_y": i.pos[1],
+                  "width": i.size[0],
+                  "height": i.size[1]}
+            items.append(dd)
+            d["animate"] = "sparkle"
+          d["solved"] = True
+          d["icon_url"] = i.images["solved"]
+      else:
+        if i.to_land not in self.team.open_lands: continue
+        d = { "name": i.to_land.title,
+              "url": i.to_land.url,
+              "icon_url": i.images["unlocked"] }
 
+      d["pos_x"], d["pos_y"] = i.pos
+      d["width"], d["height"] = i.size
+      if i.poly: d["poly"] = i.poly
       items.append(d)
 
     json_data = "<script>var mapdata = """ + json.dumps(mapdata) + ";</script>"
 
-    self.render("land.html", land=land, json_data=json_data,
-                width=land.map_size[0], height=land.map_size[1])
+    self.render("land.html", land=land, json_data=json_data)
+
+
+class EventHomePage(LandMapPage):
+  @login.required("team", require_start=False)
+  def get(self):
+    if not game.Global.STATE.event_start_time:
+      self.render("not_started.html")
+      return
+    self.show_map("inner_only")
 
 
 class PuzzlePage(util.TeamPageHandler):

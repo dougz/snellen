@@ -29,7 +29,7 @@
 #      log in a lot.
 
 
-exec python3 src/main.py \
+exec python3.7 src/main.py \
      --event_dir test_event \
      --template_path html \
      --root_password joshua \
