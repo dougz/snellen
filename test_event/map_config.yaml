@@ -44,103 +44,86 @@ bigtop:
       puzzle: flags
       pos: [0, 600]
       size: [200, 200]
-      poly: "0,800,200,800,200,600,0,600"
 
     - name: ferris-wheel
       puzzle: fab_four
       pos: [200, 600]
       size: [200, 200]
-      poly: "200,800,400,800,400,600,200,600"
 
     - name: bouncy-castle
       puzzle: bobby_tables
       pos: [0, 400]
       size: [200, 200]
-      poly: "0,600,200,600,200,400,0,400"
 
     - name: slide
       puzzle: _
       pos: [400, 600]
       size: [200, 200]
-      poly: "400,600,600,600,600,800,400,800"
 
     - name: ice-cream
       puzzle: _
       pos: [200, 400]
       size: [200, 200]
-      poly: "200,600,400,600,400,400,200,400"
 
     - name: castle
       puzzle: _
       pos: [0, 200]
       size: [200, 200]
-      poly: "0,400,200,400,200,200,0,200"
 
     - name: stall
       puzzle: _
       pos: [600, 600]
       size: [200, 200]
-      poly: "600,600,800,600,800,800,600,800"
 
     - name: swing
       puzzle: _
       pos: [800, 600]
       size: [200, 200]
-      poly: "800,800,1000,800,1000,600,800,600"
 
     - name: hot-air-balloon
       puzzle: _
       pos: [400, 200]
       size: [400, 400]
-      poly: "400,200,800,200,800,600,400,600"
 
     - name: cotton-candy
       puzzle: _
       pos: [0, 0]
       size: [200, 200]
-      poly: "0,200,200,200,200,0,0,0"
 
     - name: merry-go-round
       puzzle: _
       pos: [200, 200]
       size: [200, 200]
-      poly: "200,400,400,400,400,200,200,200"
 
     - name: popcorn
       puzzle: _
       pos: [200, 0]
       size: [200, 200]
-      poly: "200,200,400,200,400,0,200,0"
 
     - name: roller-coaster
       puzzle: _
       pos: [400, 0]
       size: [200, 200]
-      poly: "400,0,600,0,600,200,400,200"
 
     - name: simulator
       puzzle: _
       pos: [600, 0]
       size: [200, 200]
-      poly: "600,0,800,0,800,200,600,200"
 
     - name: target
       puzzle: _
       pos: [800, 400]
       size: [200, 200]
-      poly: "800,600,1000,600,1000,400,800,400"
 
     - name: tent
       puzzle: _
       pos: [800, 200]
       size: [200, 200]
-      poly: "800,400,1000,400,1000,200,800,200"
 
     - name: train
       puzzle: _
       pos: [800, 0]
       size: [200, 200]
-      poly: "800,200,1000,200,1000,0,800,0"
 
 forest:
   title: Enchanted Forest
