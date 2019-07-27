@@ -17,6 +17,9 @@ class Oauth2Token:
       self.cached = self._get_auth_token()
     return self.cached
 
+  def invalidate(self):
+    self.cached = None
+
   def _get_auth_token(self):
     with open(self.creds_file) as f:
       j = json.load(f)

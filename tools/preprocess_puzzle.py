@@ -7,7 +7,6 @@ import configparser
 import hashlib
 import io
 import json
-import requests
 import os
 import zipfile
 
@@ -16,6 +15,7 @@ import oauth2
 
 SECRET_KEY_LENGTH = 16
 
+
 class Puzzle:
   METADATA_FILE = "metadata.cfg"
   PUZZLE_HTML = "puzzle.html"
@@ -23,18 +23,12 @@ class Puzzle:
 
   SPECIAL_FILES = {METADATA_FILE, PUZZLE_HTML, SOLUTION_HTML}
 
-  def __init__(self, zip_path, args):
-    self.zip_path = zip_path
-
+  def __init__(self, zip_data, args):
     h = hashlib.sha256()
-    with open(zip_path, "rb") as f:
-      while True:
-        data = f.read(1 << 20)
-        if not data: break
-        h.update(data)
-    prefix = base64.urlsafe_b64encode(h.digest()).decode("ascii")[:SECRET_KEY_LENGTH]
+    h.update(zip_data)
+    self.prefix = base64.urlsafe_b64encode(h.digest()).decode("ascii")[:SECRET_KEY_LENGTH]
 
-    z = zipfile.ZipFile(zip_path)
+    z = zipfile.ZipFile(io.BytesIO(zip_data))
     c = configparser.ConfigParser()
     c.read_file(io.TextIOWrapper(z.open(Puzzle.METADATA_FILE)))
 
@@ -45,7 +39,7 @@ class Puzzle:
     self.puzzletron_id = int(cp["puzzletron_id"])
     self.max_queued = cp.get("max_queued", None)
 
-    print(f"Puzzle {self.shortname} \"{self.title}\" (prefix {prefix})")
+    print(f"Puzzle {self.shortname} \"{self.title}\" (prefix {self.prefix})")
 
     ca = c["ANSWER"]
     self.answers = list(ca.values())
@@ -55,10 +49,11 @@ class Puzzle:
       for k, v in c["INCORRECT_RESPONSES"].items():
         self.incorrect_responses[k] = None if not v else v
 
-    self.upload_assets(z, args, prefix)
+    self.upload_assets(z, args)
     self.parse_puzzle_html(z)
 
-  def upload_assets(self, z, args, prefix):
+
+  def upload_assets(self, z, args):
     self.asset_map = {}
     bucket = args.bucket
 
@@ -69,15 +64,11 @@ class Puzzle:
       if ext not in common.MIME_TYPES:
         raise ValueError(f"Don't know MIME type for '{n}'.")
 
-      path = f"puzzle/{prefix}/{self.shortname}/{n}"
+      path = f"puzzle/{self.prefix}/{self.shortname}/{n}"
 
       if not args.skip_upload:
         print(f"  Uploading {n}...")
-        r = requests.put(f"https://storage.googleapis.com/{bucket}/{path}",
-                         headers={"Content-Type": common.MIME_TYPES[ext],
-                                  "Authorization": args.credentials.get()},
-                         data=z.open(n))
-        r.raise_for_status()
+        common.upload_object(bucket, path, common.MIME_TYPES[ext], z.read(n), args.credentials)
 
       self.asset_map[n] = f"https://{bucket}.storage.googleapis.com/{path}"
 
@@ -134,7 +125,9 @@ def main():
   args.credentials = oauth2.Oauth2Token(args.credentials)
 
   for zipfn in args.input_files:
-    p = Puzzle(zipfn, args)
+    with open(zipfn, "rb") as f:
+      zip_data = f.read()
+      p = Puzzle(zip_data, args)
     p.save(args.output_dir)
 
 
