@@ -111,32 +111,6 @@ class ActivityLogPage(util.TeamPageHandler):
     json_data = """<script>var log_entries = """ + json.dumps(self.team.activity_log) + ";</script>"
     self.render("activity_log.html", json_data=json_data)
 
-class WaitHandler(tornado.web.RequestHandler):
-  WAIT_TIMEOUT = 300
-  WAIT_SMEAR = 20
-
-  @login.required("team", on_fail=http.client.UNAUTHORIZED)
-  async def get(self, wid, received_serial):
-    wid = int(wid)
-    received_serial = int(received_serial)
-
-    waiter = self.session.get_waiter(wid)
-    if not waiter:
-      print(f"unknown waiter {wid}")
-      raise tornado.web.HTTPError(http.client.NOT_FOUND)
-
-    msgs = await waiter.wait(received_serial,
-                       self.WAIT_TIMEOUT + random.random() * self.WAIT_SMEAR)
-
-    self.set_header("Content-Type", "application/json")
-    self.set_header("Cache-Control", "no-store")
-    self.write(b"[")
-    for i, (ser, obj) in enumerate(msgs):
-      if i > 0: self.write(b",")
-      self.write(f"[{ser},{obj}]".encode("utf-8"))
-    self.write(b"]")
-
-
 class SubmitHandler(tornado.web.RequestHandler):
   def prepare(self):
     self.args = json.loads(self.request.body)
@@ -234,7 +208,6 @@ def GetHandlers(event_dir, debug, compiled_js, event_css):
     (r"/submit", SubmitHandler),
     (r"/submit_history/([a-z][a-z0-9_]*)", SubmitHistoryHandler),
     (r"/submit_cancel/([a-z][a-z0-9_]*)/(\d+)", SubmitCancelHandler),
-    (r"/wait/(\d+)/(\d+)", WaitHandler),
     ]
   if debug:
     handlers.append((r"/client-debug.js", ClientDebugJS))

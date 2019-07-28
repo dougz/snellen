@@ -1,6 +1,9 @@
 import asyncio
+import collections
 import http.client
 import json
+import random
+import time
 import tornado.web
 import tornado.httpclient
 import tornado.httpserver
@@ -18,6 +21,7 @@ PROXY_WAIT_TIMEOUT = 30 # seconds
 
 class ProxyWait:
   PROXIES = []
+  NEXT_WID = 1
 
   def __init__(self, wpid):
     self.cv = asyncio.Condition()
@@ -29,14 +33,19 @@ class ProxyWait:
       cls.PROXIES.append(ProxyWait(i))
 
   @classmethod
-  async def send_message(cls, team, strs):
+  async def send_message(cls, team, serial, strs):
     if not isinstance(team, str):
       team = team.username
-    x = (team, strs)
+    x = (team,  tuple((serial+i, s) for (i, s) in enumerate(strs)))
     for p in cls.PROXIES:
       async with p.cv:
         p.q.append(x)
         p.cv.notify_all()
+
+  @classmethod
+  def get_waiter_id(cls):
+    wid, cls.NEXT_WID = cls.NEXT_WID, cls.NEXT_WID+1
+    return wid
 
 
 class ProxyWaitHandler(tornado.web.RequestHandler):
@@ -105,10 +114,11 @@ class ProxyWaitClient:
     # Give main server time to start up.
     await asyncio.sleep(2.0)
 
-    print(f"fetcher {self.wpid} is starting")
     while True:
       msgs = await self.get_messages()
-      print(msgs)
+      for team, items in msgs:
+        team = ProxyTeam.get_team(team)
+        await team.send_messages(items)
 
 
   async def get_messages(self):
@@ -148,6 +158,82 @@ class ProxyWaitClient:
     raise tornado.web.HTTPError(http.client.UNAUTHORIZED)
 
 
+class ProxyTeam:
+  BY_TEAM = {}
+
+  @classmethod
+  def get_team(cls, team):
+    t = cls.BY_TEAM.get(team)
+    if t: return t
+    t = ProxyTeam(team)
+    cls.BY_TEAM[team] = t
+    return t
+
+  def __init__(self, team):
+    self.team = team
+    self.cv = asyncio.Condition()
+    self.waiters = set()
+
+  def __str__(self):
+    return f"<ProxyTeam {self.team}>"
+
+  async def send_messages(self, msgs):
+    if not msgs: return
+    async with self.cv:
+      for w in self.waiters:
+        w.q.extend(msgs)
+      self.cv.notify_all()
+
+  def add_waiter(self, waiter):
+    self.waiters.add(waiter)
+
+
+class Waiter:
+  WAITER_TIMEOUT = 30  # seconds
+
+  BY_WID = {}
+
+  @classmethod
+  def get_waiter(cls, wid, team):
+    if wid not in cls.BY_WID:
+      cls.BY_WID[wid] = Waiter(wid, team)
+    return cls.BY_WID[wid]
+
+  def __init__(self, wid, team):
+    self.team = team
+    team.add_waiter(self)
+    self.last_acked = 0
+    self.wid = wid
+    self.q = collections.deque()
+
+    self.wait_in_progress = False
+    self.last_return = time.time()
+
+  def purgeable(self, now):
+    return (not self.wait_in_progress and
+            now - self.last_return > self.WAITER_TIMEOUT)
+
+  async def wait(self, received_serial, timeout):
+    self.wait_in_progress = True
+    # Discard any messages that have been acked.
+    q = self.q
+    while q and q[0][0] <= received_serial:
+      q.popleft()
+
+    allow_empty = False
+    while True:
+      if q or allow_empty:
+        self.wait_in_progress = False
+        self.last_return = time.time()
+        return q
+      allow_empty = True
+      async with self.team.cv:
+        try:
+          await asyncio.wait_for(self.team.cv.wait(), timeout)
+        except asyncio.TimeoutError:
+          pass
+
+
 
 class WaitHandler(tornado.web.RequestHandler):
   WAIT_TIMEOUT = 300
@@ -159,21 +245,20 @@ class WaitHandler(tornado.web.RequestHandler):
   async def get(self, wid, received_serial):
     key = self.get_secure_cookie(login.Session.COOKIE_NAME)
     team = await self.proxy_client.check_session(key)
+    team = ProxyTeam.get_team(team)
 
     wid = int(wid)
     received_serial = int(received_serial)
 
-    print(f"received wait {wid} {received_serial} session {key} team {team}")
+    waiter = Waiter.get_waiter(wid, team)
+    msgs = await waiter.wait(received_serial,
+                             self.WAIT_TIMEOUT + random.random() * self.WAIT_SMEAR)
 
-    # waiter = self.session.get_waiter(wid)
-    # if not waiter:
-    #   print(f"unknown waiter {wid}")
-    #   raise tornado.web.HTTPError(http.client.NOT_FOUND)
-
-    # msgs = await waiter.wait(received_serial,
-    #                    self.WAIT_TIMEOUT + random.random() * self.WAIT_SMEAR)
-    await asyncio.sleep(10.0)
-    msgs = ()
+    if False:
+      if msgs:
+        print(f"msgs {msgs[0][0]}..{msgs[-1][0]} to {team} wid {wid}")
+      else:
+        print(f"empty response to {team} wid {wid}")
 
     self.set_header("Content-Type", "application/json")
     self.set_header("Cache-Control", "no-store")

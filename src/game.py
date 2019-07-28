@@ -147,6 +147,9 @@ class Team(login.LoginUser):
     self.open_lands = {}
     self.activity_log = []
 
+    self.message_mu = asyncio.Lock()
+    self.message_serial = 1
+
   def attach_session(self, session):
     self.active_sessions.add(session)
   def detach_session(self, session):
@@ -167,10 +170,9 @@ class Team(login.LoginUser):
     else:
       strs = [json.dumps(objs)]
 
-    await wait_proxy.ProxyWait.send_message(self, strs)
-
-#    for s in self.active_sessions:
-#      await s.send_message_strings(strs)
+    async with self.message_mu:
+      await wait_proxy.ProxyWait.send_message(self, self.message_serial, strs)
+      self.message_serial += len(strs)
 
   # This method is exported into the file that's used to create all
   # the teams.

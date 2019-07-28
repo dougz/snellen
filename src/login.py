@@ -76,53 +76,12 @@ class AdminUser(LoginUser):
     return cls.BY_USERNAME.values()
 
 
-class Waiter:
-  WAITER_TIMEOUT = 30  # seconds
-
-  def __init__(self, session, wid):
-    self.session = session
-    self.last_acked = 0
-    self.wid = wid
-    self.q = deque()
-
-    self.wait_in_progress = False
-    self.last_return = time.time()
-
-  def purgeable(self, now):
-    return (not self.wait_in_progress and
-            now - self.last_return > self.WAITER_TIMEOUT)
-
-  async def wait(self, received_serial, timeout):
-    Session.VARZ["waits"] += 1
-    self.wait_in_progress = True
-    # Discard any messages that have been acked.
-    q = self.q
-    while q and q[0][0] <= received_serial:
-      q.popleft()
-
-    allow_empty = False
-    while True:
-      if q or allow_empty:
-        self.wait_in_progress = False
-        self.last_return = time.time()
-        Session.VARZ["waits"] -= 1
-        return q
-      allow_empty = True
-      async with self.session.msg_cv:
-        try:
-          await asyncio.wait_for(self.session.msg_cv.wait(), timeout)
-        except asyncio.TimeoutError:
-          pass
-
-
 class Session:
   BY_KEY = {}
   SESSION_TIMEOUT = 3600   # seconds
   COOKIE_NAME = "SESSION"
 
   VARZ = {
-    "waiters": 0,
-    "waits": 0,
     }
 
   def __init__(self, user=None, *caps):
@@ -136,42 +95,8 @@ class Session:
     self.next_msg_serial = 1
     self.msg_cv = asyncio.Condition()
 
-    self.waits = {}
-    self.next_wid = 1000 * len(self.BY_KEY)
-
   def set_cookie(self, req):
     req.set_secure_cookie(self.COOKIE_NAME, self.key)
-
-  async def send_message_strings(self, strs):
-    if not strs: return
-    now = time.time()
-    to_purge = []
-    async with self.msg_cv:
-      e = [(self.next_msg_serial + i, s) for (i, s) in enumerate(strs)]
-      self.next_msg_serial += len(e)
-      for w in self.waits.values():
-        if w.purgeable(now):
-          to_purge.append(w.wid)
-        else:
-          w.q.extend(e)
-      self.msg_cv.notify_all()
-      if to_purge:
-        for wid in to_purge:
-          del self.waits[wid]
-        Session.VARZ["waiters"] -= len(to_purge)
-
-  def new_waiter(self):
-    Session.VARZ["waiters"] += 1
-
-    wid = self.next_wid
-    self.next_wid += 1
-
-    w = Waiter(self, wid)
-    self.waits[wid] = w
-    return wid
-
-  def get_waiter(self, wid):
-    return self.waits.get(wid)
 
   @classmethod
   def from_request(cls, req):

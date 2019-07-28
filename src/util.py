@@ -1,10 +1,12 @@
 import tornado.web
 
+import wait_proxy
+
 class TeamPageHandler(tornado.web.RequestHandler):
   def get_template_namespace(self):
     d = {"team": self.team}
 
-    wid = self.session.new_waiter()
+    wid = wait_proxy.ProxyWait.get_waiter_id()
 
     if hasattr(self, "puzzle"):
       d["puzzle"] = self.puzzle
