@@ -59,6 +59,7 @@ class Puzzle:
 
     for n in z.namelist():
       if n in self.SPECIAL_FILES: continue
+      if n.endswith("/"): continue
 
       ext = os.path.splitext(n)[1].lower()
       if ext not in common.MIME_TYPES:
@@ -76,7 +77,7 @@ class Puzzle:
     soup = bs4.BeautifulSoup(z.open(Puzzle.PUZZLE_HTML), features="html5lib")
 
     for i in soup.find_all():
-      for attr in ("src", "href", "rel"):
+      for attr in ("src", "href"):
         if attr in i.attrs:
           v = i[attr]
           vv = self.asset_map.get(v)
