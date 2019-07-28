@@ -9,6 +9,7 @@ import unicodedata
 
 import login
 from state import save_state
+import wait_proxy
 
 class PuzzleState:
   CLOSED = "closed"
@@ -165,8 +166,11 @@ class Team(login.LoginUser):
       strs = [json.dumps(o) for o in objs]
     else:
       strs = [json.dumps(objs)]
-    for s in self.active_sessions:
-      await s.send_message_strings(strs)
+
+    await wait_proxy.ProxyWait.send_message(self, strs)
+
+#    for s in self.active_sessions:
+#      await s.send_message_strings(strs)
 
   # This method is exported into the file that's used to create all
   # the teams.

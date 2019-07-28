@@ -111,11 +111,12 @@ def main_server(options):
 def wait_server(n, options):
   print(f"I am wait server {n}")
 
-  proxy_client = wait_proxy.ProxyWaitClient(n)
+  proxy_client = wait_proxy.ProxyWaitClient(n, options)
 
   ioloop = tornado.ioloop.IOLoop.current()
+  ioloop.spawn_callback(proxy_client.fetch)
   try:
-    ioloop.run_sync(proxy_client.serve)
+    ioloop.start()
   except KeyboardInterrupt:
     pass
 
@@ -144,7 +145,7 @@ def main():
   parser.add_argument("--default_credentials",
                       help="Fill username/password field automatically.")
   parser.add_argument("-w", "--wait_proxies",
-                      type=int, default=2,
+                      type=int, default=1,
                       help="Number of wait proxy servers to start.")
   parser.add_argument("--wait_proxy_port",
                       type=int, default=2020,

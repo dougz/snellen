@@ -180,6 +180,11 @@ class Session:
     return cls.BY_KEY.get(key)
 
   @classmethod
+  def from_key(cls, key):
+    x = cls.BY_KEY.get(key)
+    return x
+
+  @classmethod
   def delete_from_request(cls, req):
     key = req.get_secure_cookie(cls.COOKIE_NAME)
     if key:
