@@ -113,10 +113,20 @@ class Client:
     ioloop = tornado.ioloop.IOLoop.current()
     ioloop.spawn_callback(self.fetch)
     ioloop.spawn_callback(self.purge)
+    ioloop.spawn_callback(self.print_stats)
     try:
       ioloop.start()
     except KeyboardInterrupt:
       pass
+
+  async def print_stats(self):
+    while True:
+      out = {}
+      for t in ProxyTeam.all_teams():
+        out[t.team] = len(t.waiters)
+      print(f"proxy #{self.wpid}: {out}")
+
+      await asyncio.sleep(2.5)
 
   async def fetch(self):
     # Give main server time to start up.
@@ -151,7 +161,7 @@ class Client:
         return json.loads(response.body)
       except tornado.httpclient.HTTPClientError as e:
         if e.code == 502:
-          print(f"proxy {wpid} got 502; retrying")
+          print(f"proxy {self.wpid} got 502; retrying")
           await asyncio.sleep(1.0)
         else:
           raise

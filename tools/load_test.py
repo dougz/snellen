@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+import argparse
 import asyncio
 import json
 import pprint
@@ -20,7 +21,7 @@ async def show_stats():
     await asyncio.sleep(1.0)
 
 
-async def main():
+async def main(options):
   soft, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
   resource.setrlimit(resource.RLIMIT_NOFILE, (hard, hard))
 
@@ -28,17 +29,17 @@ async def main():
     "tornado.curl_httpclient.CurlAsyncHTTPClient", max_clients=10000)
   client = tornado.httpclient.AsyncHTTPClient()
 
-  teams = tornado.gen.multi([simulate_team(client, f"team{i}", f"team{i}") for i in range(10)])
+  teams = tornado.gen.multi([simulate_team(client, f"team{i+1}", f"team{i+1}", options) for i in range(options.teams)])
 
   await asyncio.gather(teams, show_stats())
 
 
-async def simulate_team(client, username, password):
+async def simulate_team(client, username, password, options):
   print(f"starting {username}")
-  browsers = tornado.gen.multi([simulate_browser(i, client, username, password) for i in range(30)])
+  browsers = tornado.gen.multi([simulate_browser(i, client, username, password, options) for i in range(options.browsers)])
   await browsers
 
-async def simulate_browser(my_id, client, username, password):
+async def simulate_browser(my_id, client, username, password, options):
   await asyncio.sleep(my_id * 0.01)
 
   # Fetch the home page so we're issued a session cookie.
@@ -71,7 +72,7 @@ async def simulate_browser(my_id, client, username, password):
 
     #print(f"--- {my_id} logged in ---")
 
-  tabs = tornado.gen.multi([simulate_tab(my_id, i, cookie, client) for i in range(10)])
+  tabs = tornado.gen.multi([simulate_tab(my_id, i, cookie, client) for i in range(options.tabs)])
   await tabs
 
 async def simulate_tab(my_id, tab_num, cookie, client):
@@ -127,5 +128,14 @@ async def simulate_tab(my_id, tab_num, cookie, client):
 
 
 if __name__ == "__main__":
+  parser = argparse.ArgumentParser()
+  parser.add_argument("-t", "--teams", type=int, default=1)
+  parser.add_argument("-b", "--browsers", type=int, default=1)
+  parser.add_argument("-i", "--tabs", type=int, default=1)
+  options = parser.parse_args()
+
+  async def go():
+    await main(options)
+
   ioloop = tornado.ioloop.IOLoop.current()
-  ioloop.run_sync(main)
+  ioloop.run_sync(go)
