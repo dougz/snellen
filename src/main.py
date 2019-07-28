@@ -20,6 +20,7 @@ import event
 import game
 import login
 from state import save_state
+import wait_proxy
 
 
 assert sys.hexversion >= 0x03060700, "Need Python 3.6.7 or newer!"
@@ -40,7 +41,8 @@ def make_app(options, answer_checking, **kwargs):
   return tornado.web.Application(
     login.GetHandlers() +
     admin.GetHandlers(options.debug, answer_checking, admin_css, compiled_admin_js) +
-    event.GetHandlers(options.event_dir, options.debug, compiled_js, event_css),
+    event.GetHandlers(options.event_dir, options.debug, compiled_js, event_css) +
+    wait_proxy.GetHandlers(),
     options=options,
     cookie_secret=options.cookie_secret,
     template_path=options.template_path,
@@ -60,6 +62,8 @@ def main_server(options):
                          Global=game.Global)
   save_state.open(os.path.join(options.event_dir, "state.log"))
   save_state.replay(advance_time=game.Submission.process_submit_queue)
+
+  wait_proxy.ProxyWait.init_proxies(options.wait_proxies)
 
   if not game.Global.STATE: game.Global()
 
@@ -86,18 +90,36 @@ def main_server(options):
                  autoreload=False)
 
   server = tornado.httpserver.HTTPServer(app)
-  socket = tornado.netutil.bind_unix_socket(options.socket_path, mode=0o666, backlog=3072)
-  server.add_socket(socket)
+  sockets = [tornado.netutil.bind_unix_socket(options.socket_path, mode=0o666, backlog=3072)]
+  sockets.extend(tornado.netutil.bind_sockets(options.wait_proxy_port, address="localhost"))
+  server.add_sockets(sockets)
 
   answer_checking.start()
 
   loop = asyncio.get_event_loop()
   loop.set_default_executor(concurrent.futures.ThreadPoolExecutor(max_workers=4))
 
-  print("Serving...")
-  tornado.ioloop.IOLoop.instance().start()
+  try:
+    print("Serving...")
+    tornado.ioloop.IOLoop.current().start()
+  except KeyboardInterrupt:
+    pass
 
   save_state.close()
+
+
+def wait_server(n, options):
+  print(f"I am wait server {n}")
+
+  proxy_client = wait_proxy.ProxyWaitClient(n)
+
+  ioloop = tornado.ioloop.IOLoop.current()
+  try:
+    ioloop.run_sync(proxy_client.serve)
+  except KeyboardInterrupt:
+    pass
+
+  print(f"Wait server {n} exiting")
 
 
 def main():
@@ -121,6 +143,13 @@ def main():
                       help="Serve debug javascript.")
   parser.add_argument("--default_credentials",
                       help="Fill username/password field automatically.")
+  parser.add_argument("-w", "--wait_proxies",
+                      type=int, default=2,
+                      help="Number of wait proxy servers to start.")
+  parser.add_argument("--wait_proxy_port",
+                      type=int, default=2020,
+                      help=("Port for communicating between wait proxy "
+                            "and main server"))
 
   options = parser.parse_args()
 
@@ -130,6 +159,11 @@ def main():
   soft, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
   resource.setrlimit(resource.RLIMIT_NOFILE, (hard, hard))
   print(f"Raised limit to {hard} file descriptors.")
+
+  for i in range(options.wait_proxies):
+    if os.fork() == 0:
+      wait_server(i, options)
+      return
 
   main_server(options)
 
