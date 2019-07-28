@@ -241,10 +241,18 @@ class Login(tornado.web.RequestHandler):
     session = Session.from_request(self)
     target = self.get_argument("redirect_to", None)
     bad_login = self.get_argument("bad_login", None)
+
+    options = self.application.settings["options"]
+    if options.default_credentials:
+      default_username, default_password = options.default_credentials.split(":", 1)
+    else:
+      default_username = None
+      default_password = None
+
     self.render("login.html",
                 bad_login=bad_login,
-                default_username=self.application.settings["default_username"],
-                default_password=self.application.settings["default_password"],
+                default_username=default_username,
+                default_password=default_password,
                 target=target)
 
 
