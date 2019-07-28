@@ -63,7 +63,7 @@ def main_server(options):
   save_state.open(os.path.join(options.event_dir, "state.log"))
   save_state.replay(advance_time=game.Submission.process_submit_queue)
 
-  wait_proxy.ProxyWait.init_proxies(options.wait_proxies)
+  wait_proxy.Server.init_proxies(options.wait_proxies)
 
   if not game.Global.STATE: game.Global()
 
@@ -110,16 +110,7 @@ def main_server(options):
 
 def wait_server(n, options):
   print(f"I am wait server {n}")
-
-  proxy_client = wait_proxy.ProxyWaitClient(n, options)
-
-  ioloop = tornado.ioloop.IOLoop.current()
-  ioloop.spawn_callback(proxy_client.fetch)
-  try:
-    ioloop.start()
-  except KeyboardInterrupt:
-    pass
-
+  wait_proxy.Client(n, options).start()
   print(f"Wait server {n} exiting")
 
 
@@ -145,7 +136,7 @@ def main():
   parser.add_argument("--default_credentials",
                       help="Fill username/password field automatically.")
   parser.add_argument("-w", "--wait_proxies",
-                      type=int, default=1,
+                      type=int, default=2,
                       help="Number of wait proxy servers to start.")
   parser.add_argument("--wait_proxy_port",
                       type=int, default=2020,

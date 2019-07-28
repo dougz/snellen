@@ -6,7 +6,7 @@ class TeamPageHandler(tornado.web.RequestHandler):
   def get_template_namespace(self):
     d = {"team": self.team}
 
-    wid = wait_proxy.ProxyWait.get_waiter_id()
+    wid = wait_proxy.Server.new_waiter_id()
 
     if hasattr(self, "puzzle"):
       d["puzzle"] = self.puzzle

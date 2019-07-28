@@ -171,7 +171,7 @@ class Team(login.LoginUser):
       strs = [json.dumps(objs)]
 
     async with self.message_mu:
-      await wait_proxy.ProxyWait.send_message(self, self.message_serial, strs)
+      await wait_proxy.Server.send_message(self, self.message_serial, strs)
       self.message_serial += len(strs)
 
   # This method is exported into the file that's used to create all
