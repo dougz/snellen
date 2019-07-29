@@ -46,6 +46,7 @@ def make_app(options, answer_checking, **kwargs):
     options=options,
     cookie_secret=options.cookie_secret,
     template_path=options.template_path,
+    debug=options.debug,
     **kwargs)
 
 
