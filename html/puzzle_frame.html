@@ -10,6 +10,16 @@
 <a id="submit">Submit</a>
 {% end %}
 
+{% block topnav_extra %}
+<div id="panel" class="submit-panel">
+  <div id="icon">
+    <img src="{{puzzle.icon.images['unlocked']}}"></img>
+  </div>
+  <div id="submit_table"></div>
+</div>
+{% end %}
+
+
 {% block head %}
 {% if puzzle.html_head %}{% raw puzzle.html_head %}{% end %}
 {% end %}

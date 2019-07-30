@@ -128,8 +128,12 @@ class SubmitDialog {
 	this.built = false;
 	/** @type{Object|undefined} */
 	this.serializer = null;
-	/** @type{Object|undefined} */
-	this.dialog = null;
+
+	/** @type{Element|undefined} */
+	this.topnav = null;
+	/** @type{Element|undefined} */
+	this.panel = null;
+
 	/** @type{Element|undefined} */
 	this.input = null;
 	/** @type{Element|undefined} */
@@ -149,10 +153,10 @@ class SubmitDialog {
     build() {
 	this.serializer = new goog.json.Serializer();
 
-	this.dialog = new goog.ui.ModalPopup();
-	this.dialog.render();
+	this.topnav = goog.dom.getElement("topnav");
+	this.panel = goog.dom.getElement("panel");
 
-	var content =  this.dialog.getContentElement();
+	var content =  goog.dom.getElement("submit_table");
 
 	this.top_note = goog.dom.createDom("SPAN");
 	this.top_note.style.display = "none";
@@ -184,7 +188,7 @@ class SubmitDialog {
 
     update_history() {
 	if (!this.built) return;
-	if (!this.dialog.isVisible()) return;
+	if (this.panel.style == "none") return;
 	goog.net.XhrIo.send("/submit_history/" + puzzle_id, goog.bind(function(e) {
 	    var code = e.target.getStatus();
 	    if (code == 200) {
@@ -272,7 +276,6 @@ class SubmitDialog {
 		this.history.appendChild(goog.dom.createDom("TR", null, td));
 	    }
 	}
-	this.dialog.reposition();
 
 	if (this.counters.length > 0) {
 	    this.update_counters();
@@ -317,14 +320,17 @@ class SubmitDialog {
 
     show() {
 	if (!this.built) this.build();
-	this.dialog.setVisible(true);
+	this.panel.style.display = "flex";
+	goog.dom.classlist.add(this.panel, "submit-panel-visible");
+	goog.dom.classlist.add(this.topnav, "topnav-expand");
 	this.update_history();
-	this.input.focus();
 	return false;
     }
 
     close() {
-	this.dialog.setVisible(false);
+	this.panel.style.display = "none";
+	goog.dom.classlist.remove(this.panel, "submit-panel-visible");
+	goog.dom.classlist.remove(this.topnav, "topnav-expand");
 	if (this.timer) {
 	    clearInterval(this.timer);
 	    this.timer = null;

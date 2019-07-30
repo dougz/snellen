@@ -42,6 +42,49 @@ a#submit:hover {
 
 /** submit dialog **/
 
+.submit-panel {
+    height: 300px;
+    display: none;
+    flex-direction: row;
+    align-items: center;
+}
+
+.submit-panel #icon {
+    margin: 20px;
+}
+
+#submit_table {
+    height: 300px;
+    overflow: auto;
+}
+
+@keyframes slide {
+    0% {
+	transform: translateY(-300px);
+    }
+    100% {
+	transform: ;
+    }
+}
+
+.submit-panel-visible {
+    animation: slide 0.5s ease-out forwards;
+}
+
+@keyframes expand {
+    0% {
+	height: 26px;
+    }
+    100% {
+	height: 326px;
+    }
+}
+
+.topnav-expand {
+    animation: expand 0.5s ease-out forwards;
+}
+
+
 .goog-modalpopup {
     background: #fff;
     border: 3px solid #003399;

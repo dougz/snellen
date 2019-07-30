@@ -113,8 +113,9 @@ class Client:
     ioloop = tornado.ioloop.IOLoop.current()
     ioloop.spawn_callback(self.fetch)
     ioloop.spawn_callback(self.purge)
-    ioloop.spawn_callback(self.print_stats)
+    #ioloop.spawn_callback(self.print_stats)
     try:
+      print(f"proxy waiter #{self.wpid} listening")
       ioloop.start()
     except KeyboardInterrupt:
       pass
@@ -312,10 +313,3 @@ class WaitHandler(tornado.web.RequestHandler):
       if i > 0: self.write(b",")
       self.write(f"[{ser},{obj}]".encode("utf-8"))
     self.write(b"]")
-
-
-
-
-
-
-
