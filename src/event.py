@@ -89,9 +89,9 @@ class PuzzlePage(util.TeamPageHandler):
 
     if (state.state == game.PuzzleState.SOLVED and
         not state.recent_solve()):
-      thumb = "solved-thumb"
+      thumb = "solved_thumb"
     else:
-      thumb = "unlocked-thumb"
+      thumb = "unlocked_thumb"
 
     self.puzzle = puzzle
     self.render("puzzle_frame.html", thumb=thumb)
@@ -152,7 +152,7 @@ class SubmitHistoryHandler(tornado.web.RequestHandler):
       d["total"] = len(state.puzzle.answers)
 
     if state.recent_solve():
-      d["overlay"] = state.puzzle.icon.images["solved-thumb"]
+      d["overlay"] = state.puzzle.icon.images["solved_thumb"]
       d["width"] = state.puzzle.icon.size[0]
       d["height"] = state.puzzle.icon.size[1]
 

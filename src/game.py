@@ -314,15 +314,16 @@ class Icon:
     self.poly = d.get("poly", None)
     self.puzzle = None
     self.to_land = None
+    self.thumb_size = d.get("thumb_size", self.size)
 
     self.images = {
       "locked": d.get("locked", None),
       "unlocked": d.get("unlocked", None),
       "solved": d.get("solved", None),
+      "unlocked_thumb": d.get("unlocked_thumb", d.get("unlocked")),
+      "solved_thumb": d.get("solved_thumb", d.get("solved")),
       }
 
-    self.images["unlocked-thumb"] = self.images["unlocked"]
-    self.images["solved-thumb"] = self.images["solved"]
 
 class Land:
   BY_SHORTNAME = {}

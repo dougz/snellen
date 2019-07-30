@@ -73,13 +73,16 @@ def convert_map(shortname, d, args):
 
       if "puzzle" in ic: oic["puzzle"] = ic["puzzle"]
 
-      for variant in ("locked", "unlocked", "solved"):
+      for variant in ("locked", "unlocked", "solved",
+                      "unlocked_thumb", "solved_thumb"):
         icon_image = os.path.join(args.input_assets, shortname,
                                   ic["name"] + "_" + variant + ".png")
         if not os.path.exists(icon_image): continue
 
         if "size" not in oic:
           oic["size"] = get_image_size(icon_image)
+        if variant.endswith("_thumb") and "thumb_size" not in oic:
+          oic["thumb_size"] = get_image_size(icon_image)
 
         oic[variant] = upload_file(icon_image, args)
 
