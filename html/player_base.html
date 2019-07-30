@@ -10,18 +10,16 @@
   </head>
   <body>
     <div id="topnav">
-      <span class=teamname>{{team.team_name}}</span>
-      <span class=spacer></span>
-      <a href="/">Penny Park</a>
-      {% block topnav_left %}{% end %}
-      <span class="right">
-	{% block topnav_right %}{% end %}
-	<span class=spacer></span>
-	<a href="/log">Activity Log</a>
-	<span class=spacer></span>
-	<a href="/logout">Logout</a>
+      <span id="teamname">{{team.team_name}}</span>
+      <span>
+	<a href="/">Penny Park</a>
+	{% block crumbs %}{% end %}
       </span>
-      {% block topnav_extra %}{% end %}
+      {% block topnav_extraleft %}{% end %}
+      <span class="spacer"></span>
+      {% block topnav_extraright %}{% end %}
+      <a href="/log">Activity Log</a>
+      <a href="/logout">Logout</a>
     </div>
 
     <div id="content">

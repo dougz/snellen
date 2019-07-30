@@ -2,11 +2,11 @@
 
 {% block title %}{{puzzle.title}}{% end %}
 
-{% block topnav_left %}
-&gt;  <a href="{{puzzle.land.url}}">{{puzzle.land.title}}</a>
+{% block crumbs %}
+&gt; <a href="{{puzzle.land.url}}">{{puzzle.land.title}}</a>
 {% end %}
 
-{% block topnav_right %}
+{% block topnav_extraright %}
 <a id="submit">Submit</a>
 {% end %}
 

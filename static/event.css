@@ -6,11 +6,30 @@ body {
 
 #topnav {
     min-width: 1060px;
+    height: 24px;
     font-size: 18px;
     background: #666;
     color: #eee;
     border-bottom: 1px solid black;
     padding: 8px 20px;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+#topnav > span, #topnav > a {
+    margin: 0 20px;
+}
+
+#teamname {
+    font-weight: bold;
+}
+
+
+
+#topnav .spacer {
+    flex-grow: 100;
 }
 
 #topnav a {
@@ -317,14 +336,6 @@ div#map div.p {
 
 .right {
     float: right;
-}
-
-span.spacer {
-    padding: 20px;
-}
-
-span.teamname {
-    font-weight: bold;
 }
 
 .itemlist {
