@@ -126,17 +126,15 @@ class SubmitDialog {
     constructor() {
 	/** @type{boolean} */
 	this.built = false;
-	/** @type{Object|undefined} */
+	/** @type{Object|null} */
 	this.serializer = null;
 
-	/** @type{Element|undefined} */
-	this.topnav = null;
-	/** @type{Element|undefined} */
+	/** @type{Element|null} */
 	this.panel = null;
 
-	/** @type{Element|undefined} */
+	/** @type{Element|null} */
 	this.input = null;
-	/** @type{Element|undefined} */
+	/** @type{Element|null} */
 	this.submit_div = null;
 	/** @type{?Element} */
 	this.top_note = null;
@@ -153,7 +151,6 @@ class SubmitDialog {
     build() {
 	this.serializer = new goog.json.Serializer();
 
-	this.topnav = goog.dom.getElement("topnav");
 	this.panel = goog.dom.getElement("panel");
 
 	var content =  goog.dom.getElement("submit_table");
@@ -318,19 +315,24 @@ class SubmitDialog {
 	}
     }
 
+    toggle() {
+	if (!this.built) this.build();
+	if (goog.dom.classlist.contains(this.panel, "submit-panel-visible")) {
+	    this.close();
+	} else {
+	    this.show();
+	}
+    }
+
     show() {
 	if (!this.built) this.build();
-	this.panel.style.display = "flex";
-	goog.dom.classlist.add(this.panel, "submit-panel-visible");
-	goog.dom.classlist.add(this.topnav, "topnav-expand");
+	goog.dom.classlist.addRemove(this.panel, "submit-panel-invisible", "submit-panel-visible");
 	this.update_history();
 	return false;
     }
 
     close() {
-	this.panel.style.display = "none";
-	goog.dom.classlist.remove(this.panel, "submit-panel-visible");
-	goog.dom.classlist.remove(this.topnav, "topnav-expand");
+	goog.dom.classlist.addRemove(this.panel, "submit-panel-visible", "submit-panel-invisible");
 	if (this.timer) {
 	    clearInterval(this.timer);
 	    this.timer = null;
@@ -538,7 +540,7 @@ function initPage() {
     var a = goog.dom.getElement("submit");
     if (a) {
 	submit_dialog = new SubmitDialog();
-	a.onclick = function() { submit_dialog.show(); return false; };
+	a.onclick = function() { submit_dialog.toggle(); return false; };
 	if (puzzle_id && puzzle_init) puzzle_init();
     }
 
