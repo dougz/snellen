@@ -44,25 +44,10 @@ class LandMapPage(util.TeamPageHandler):
         if st.state == game.PuzzleState.OPEN:
           if "answer" in d: d["answer"] += ", \u2026"
 
-          open_time = self.team.puzzle_state[p].open_time
-          duration = time.time() - open_time
-          recent = (duration < self.RECENT_SECONDS and
-                    open_time != game.Global.STATE.event_start_time)
-          if recent: d["animate"] = "delay_fade"
           d["solved"] = False
           d["icon_url"] = i.images["unlocked"]
 
         elif st.state == game.PuzzleState.SOLVED:
-          duration = time.time() - self.team.puzzle_state[p].solve_time
-          recent = duration < self.RECENT_SECONDS
-          if recent:
-            dd = {"icon_url": i.images["unlocked"],
-                  "pos_x": i.pos[0],
-                  "pos_y": i.pos[1],
-                  "width": i.size[0],
-                  "height": i.size[1]}
-            items.append(dd)
-            d["animate"] = "sparkle"
           d["solved"] = True
           d["icon_url"] = i.images["solved"]
       else:
@@ -102,8 +87,14 @@ class PuzzlePage(util.TeamPageHandler):
       print(f"no puzzle called {shortname}")
       raise tornado.web.HTTPError(http.client.NOT_FOUND)
 
+    if (state.state == game.PuzzleState.SOLVED and
+        not state.recent_solve()):
+      thumb = "solved-thumb"
+    else:
+      thumb = "unlocked-thumb"
+
     self.puzzle = puzzle
-    self.render("puzzle_frame.html")
+    self.render("puzzle_frame.html", thumb=thumb)
 
 class ActivityLogPage(util.TeamPageHandler):
   @login.required("team")
@@ -130,16 +121,10 @@ class SubmitHandler(tornado.web.RequestHandler):
 
     submit_id = self.team.next_submit_id()
 
+    msgs = [{"method": "history_change", "puzzle_id": shortname}]
     r = self.team.submit_answer(submit_id, shortname, answer)
-    if r:
-      msgs = [{"method": "history_change", "puzzle_id": shortname,
-               "frompage": puzzle.url, "topage": puzzle.land.url}]
-    else:
-      msgs = [{"method": "history_change", "puzzle_id": shortname}]
+    if r: msgs.extend(r)
     await self.team.send_message(msgs)
-
-    if r:
-      await self.team.send_message(r, delay=1.5)
     self.set_status(http.client.NO_CONTENT.value)
 
 
@@ -165,6 +150,12 @@ class SubmitHistoryHandler(tornado.web.RequestHandler):
     if len(state.puzzle.answers) > 1:
       d["correct"] = len(state.answers_found)
       d["total"] = len(state.puzzle.answers)
+
+    if state.recent_solve():
+      d["overlay"] = state.puzzle.icon.images["solved-thumb"]
+      d["width"] = state.puzzle.icon.size[0]
+      d["height"] = state.puzzle.icon.size[1]
+
     self.write(json.dumps(d))
 
 class SubmitCancelHandler(tornado.web.RequestHandler):

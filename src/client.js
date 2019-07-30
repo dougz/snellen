@@ -146,6 +146,9 @@ class SubmitDialog {
 	this.timer = null;
 	/** @type{Array} */
 	this.counters = null;
+
+	/** @type{boolean} */
+	this.has_overlay = false;
     }
 
     build() {
@@ -278,6 +281,39 @@ class SubmitDialog {
 	    this.update_counters();
 	    this.timer = setInterval(goog.bind(this.update_counters, this), 1000);
 	}
+
+	if (response.overlay && !this.has_overlay) {
+	    // actually the div containing the icon images
+	    var thumb = goog.dom.getElement("thumb");
+
+	    var el = goog.dom.createDom("IMG", {
+		src: response.overlay,
+		className: "icon"});
+	    thumb.appendChild(el);
+
+	    this.add_sparkle(thumb, response.width, response.height);
+	}
+    }
+
+    add_sparkle(parent, width, height) {
+	var div = goog.dom.createDom("DIV", {className: "icon"});
+	div.style.width = "" + width + "px";
+	div.style.height = "" + height + "px";
+
+	var star = '<path class="star" d="M0 -1L.5877 .809 -.9511 -.309 .9511 -.309 -.5877 .809Z" />';
+	var fivestar = star;
+	for (var i = 1; i < 5; ++i) {
+	    fivestar += `<g transform="rotate(${i*72})">` + star + "</g>";
+	}
+	var scale = Math.min(width, height) * 0.4;
+
+	var html = `<svg width="${width}" height="${height}">` +
+	    `<g transform="translate(${width/2},${height/2}) scale(${scale})" fill="yellow">` +
+	    fivestar + '<g transform="scale(0.5) rotate(36)">' + fivestar +
+	    "</g></g></svg>";
+	div.innerHTML = html;
+
+	parent.appendChild(div);
     }
 
     update_counters() {
@@ -328,6 +364,8 @@ class SubmitDialog {
 	if (!this.built) this.build();
 	goog.dom.classlist.addRemove(this.panel, "submit-panel-invisible", "submit-panel-visible");
 	this.update_history();
+	console.log("focusing on input");
+	this.input.focus();
 	return false;
     }
 
@@ -445,14 +483,14 @@ class MapDraw {
 	if (it.icon_url) {
 	    var el = goog.dom.createDom("IMG", {
 		src: it.icon_url,
-		className: it.animate ? ("icon " + it.animate) : "icon"});
+		className: "icon"});
 	    el.style.left = "" + it.pos_x + "px";
 	    el.style.top = "" + it.pos_y + "px";
 	    this.map_el.appendChild(el);
 
-	    if (it.animate == "sparkle") {
-		this.add_sparkle(it.pos_x, it.pos_y, it.width, it.height);
-	    }
+	    // if (it.animate == "sparkle") {
+	    // 	this.add_sparkle(it.pos_x, it.pos_y, it.width, it.height);
+	    // }
 
 	    if (it.poly && it.name) {
 		var area = goog.dom.createDom("AREA", {shape: "poly",
@@ -475,29 +513,6 @@ class MapDraw {
 	    }
 	    this.list_el.appendChild(el);
 	}
-    }
-
-    add_sparkle(x, y, width, height) {
-	var div = goog.dom.createDom("DIV", {className: "icon"});
-	div.style.left = "" + x + "px";
-	div.style.top = "" + y + "px";
-	div.style.width = "" + width + "px";
-	div.style.height = "" + height + "px";
-
-	var star = '<path class="star" d="M0 -1L.5877 .809 -.9511 -.309 .9511 -.309 -.5877 .809Z" />';
-	var fivestar = star;
-	for (var i = 1; i < 5; ++i) {
-	    fivestar += `<g transform="rotate(${i*72})">` + star + "</g>";
-	}
-	var scale = Math.min(width, height) * 0.4;
-
-	var html = `<svg width="${width}" height="${height}" style="left: ${x}px; top: ${y}px;">` +
-	    `<g transform="translate(${width/2},${height/2}) scale(${scale})" fill="yellow">` +
-	    fivestar + '<g transform="scale(0.5) rotate(36)">' + fivestar +
-	    "</g></g></svg>";
-	div.innerHTML = html;
-
-	this.map_el.appendChild(div);
     }
 
     item_enter(it) {

@@ -83,10 +83,6 @@ a#submit:hover {
     overflow: hidden;
 }
 
-.submit-panel #icon {
-    margin: 20px;
-}
-
 #submit_table {
     overflow: auto;
     max-height: 260px;
@@ -110,6 +106,29 @@ a#submit:hover {
 .submit-panel-invisible {
     animation: slide2 150ms ease-in reverse;
 }
+
+/** submit panel thumbnail attraction image */
+
+div#thumb {
+    position: relative;
+    margin: 20px;
+}
+
+div#thumb img.base {
+    position: absolute;
+}
+
+div#thumb .icon {
+    position: absolute;
+    pointer-events: none;
+    opacity: 0;
+    animation: fadeIn 2s ease-out forwards;
+    animation-delay: 1s;
+}
+
+
+
+
 
 table.submissions {
     padding: 20px;
@@ -368,6 +387,6 @@ h1 {
 .star {
     opacity: 0;
     animation: twist 3.0s ease-out forwards;
-    animation-delay: 1.0s;
+    /*animation-delay: 1.0s;*/
 }
 

@@ -16,6 +16,8 @@ class PuzzleState:
   OPEN = "open"
   SOLVED = "solved"
 
+  RECENT_TIME = 10.0  # seconds
+
   def __init__(self, team, puzzle):
     self.team = team
     self.puzzle = puzzle
@@ -24,6 +26,12 @@ class PuzzleState:
     self.open_time = None
     self.solve_time = None
     self.answers_found = set()
+
+  def recent_solve(self, now=None):
+    if now is None:
+      now = time.time()
+    return (self.state == PuzzleState.SOLVED and
+            0 <= now - self.solve_time <= PuzzleState.RECENT_TIME)
 
 
 class Submission:
@@ -312,6 +320,9 @@ class Icon:
       "unlocked": d.get("unlocked", None),
       "solved": d.get("solved", None),
       }
+
+    self.images["unlocked-thumb"] = self.images["unlocked"]
+    self.images["solved-thumb"] = self.images["solved"]
 
 class Land:
   BY_SHORTNAME = {}

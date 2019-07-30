@@ -57,6 +57,12 @@ class SubmissionHistory {
 	this.correct;
 	/** @type{?number} */
 	this.total;
+	/** @type{?string} */
+	this.overlay;
+	/** @type{?number} */
+	this.width;
+	/** @type{?number} */
+	this.height;
     }
 }
 

@@ -12,8 +12,8 @@
 
 {% block midnav %}
 <div id="panel" class="submit-panel">
-  <div id="icon">
-    <img src="{{puzzle.icon.images['unlocked']}}"></img>
+  <div id="thumb" style="width: {{puzzle.icon.size[0]}}px; height: {{puzzle.icon.size[1]}}px;">
+    <img class="base" src="{{puzzle.icon.images[thumb]}}"></img>
   </div>
   <div id="submit_table"></div>
 </div>
