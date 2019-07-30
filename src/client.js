@@ -78,10 +78,7 @@ class Dispatcher {
     /** @param{Message} msg */
     history_change(msg) {
 	if (msg.puzzle_id == puzzle_id) {
-	    submit_dialog.update_history();
-	}
-	if (window.location.pathname == msg.frompage) {
-	    setTimeout(function() { window.location.href = msg.topage; }, 1000);
+	    submit_panel.update_history();
 	}
     }
 
@@ -122,7 +119,7 @@ class TimeFormatter {
     }
 }
 
-class SubmitDialog {
+class SubmitPanel {
     constructor() {
 	/** @type{boolean} */
 	this.built = false;
@@ -362,15 +359,21 @@ class SubmitDialog {
 
     show() {
 	if (!this.built) this.build();
-	goog.dom.classlist.addRemove(this.panel, "submit-panel-invisible", "submit-panel-visible");
+	goog.dom.classlist.addRemove(this.panel, "submit-panel-invisible",
+				     "submit-panel-visible");
 	this.update_history();
-	console.log("focusing on input");
-	this.input.focus();
+	// focus on input field, once slide-out animation is complete.
+	setTimeout(goog.bind(this.focus_input, this), 200);
 	return false;
     }
 
+    focus_input() {
+	this.input.focus();
+    }
+
     close() {
-	goog.dom.classlist.addRemove(this.panel, "submit-panel-visible", "submit-panel-invisible");
+	goog.dom.classlist.addRemove(this.panel, "submit-panel-visible",
+				     "submit-panel-invisible");
 	if (this.timer) {
 	    clearInterval(this.timer);
 	    this.timer = null;
@@ -482,15 +485,10 @@ class MapDraw {
     draw_item(it) {
 	if (it.icon_url) {
 	    var el = goog.dom.createDom("IMG", {
-		src: it.icon_url,
-		className: "icon"});
+		src: it.icon_url, className: "icon"});
 	    el.style.left = "" + it.pos_x + "px";
 	    el.style.top = "" + it.pos_y + "px";
 	    this.map_el.appendChild(el);
-
-	    // if (it.animate == "sparkle") {
-	    // 	this.add_sparkle(it.pos_x, it.pos_y, it.width, it.height);
-	    // }
 
 	    if (it.poly && it.name) {
 		var area = goog.dom.createDom("AREA", {shape: "poly",
@@ -498,8 +496,10 @@ class MapDraw {
 						       href: it.url});
 		this.mapmap_el.appendChild(area);
 
-		goog.events.listen(area, goog.events.EventType.MOUSEENTER, goog.bind(this.item_enter, this, it));
-		goog.events.listen(area, goog.events.EventType.MOUSELEAVE, goog.bind(this.item_leave, this, it));
+		goog.events.listen(area, goog.events.EventType.MOUSEENTER,
+				   goog.bind(this.item_enter, this, it));
+		goog.events.listen(area, goog.events.EventType.MOUSELEAVE,
+				   goog.bind(this.item_leave, this, it));
 	    }
 	}
 
@@ -537,7 +537,7 @@ class MapDraw {
 }
 
 var waiter = null;
-var submit_dialog = null;
+var submit_panel = null;
 var time_formatter = null;
 var toast_manager = null;
 var map_draw = null;
@@ -554,8 +554,8 @@ function initPage() {
     // Only present on the puzzle pages.
     var a = goog.dom.getElement("submit");
     if (a) {
-	submit_dialog = new SubmitDialog();
-	a.onclick = function() { submit_dialog.toggle(); return false; };
+	submit_panel = new SubmitPanel();
+	a.onclick = function() { submit_panel.toggle(); return false; };
 	if (puzzle_id && puzzle_init) puzzle_init();
     }
 
