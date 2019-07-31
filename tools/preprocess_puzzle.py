@@ -23,7 +23,7 @@ class Puzzle:
 
   SPECIAL_FILES = {METADATA_FILE, PUZZLE_HTML, SOLUTION_HTML}
 
-  def __init__(self, zip_data, args):
+  def __init__(self, zip_data, options, include_solutions=False):
     h = hashlib.sha256()
     h.update(zip_data)
     self.prefix = base64.urlsafe_b64encode(h.digest()).decode("ascii")[:SECRET_KEY_LENGTH]
@@ -49,17 +49,20 @@ class Puzzle:
       for k, v in c["INCORRECT_RESPONSES"].items():
         self.incorrect_responses[k] = None if not v else v
 
-    self.upload_assets(z, args)
+    self.upload_assets(z, options, include_solutions)
     self.parse_puzzle_html(z)
+    if include_solutions:
+      self.parse_solution_html(z)
 
 
-  def upload_assets(self, z, args):
+  def upload_assets(self, z, options, include_solutions):
     self.asset_map = {}
-    bucket = args.bucket
+    bucket = options.bucket
 
     for n in z.namelist():
       if n in self.SPECIAL_FILES: continue
       if n.endswith("/"): continue
+      if not include_solutions and n.startswith("solution/"): continue
 
       ext = os.path.splitext(n)[1].lower()
       if ext not in common.CONTENT_TYPES:
@@ -67,15 +70,13 @@ class Puzzle:
 
       path = f"puzzle/{self.prefix}/{self.shortname}/{n}"
 
-      if not args.skip_upload:
+      if not options.skip_upload:
         print(f"  Uploading {n}...")
-        common.upload_object(bucket, path, common.CONTENT_TYPES[ext], z.read(n), args.credentials)
+        common.upload_object(bucket, path, common.CONTENT_TYPES[ext], z.read(n), options.credentials)
 
-      self.asset_map[n] = f"https://{bucket}.storage.googleapis.com/{path}"
+      self.asset_map[n] = f"https://{options.public_host}/{path}"
 
-  def parse_puzzle_html(self, z):
-    soup = bs4.BeautifulSoup(z.open(Puzzle.PUZZLE_HTML), features="html5lib")
-
+  def rewrite_html(self, soup):
     for i in soup.find_all():
       for attr in ("src", "href"):
         if attr in i.attrs:
@@ -85,17 +86,23 @@ class Puzzle:
             print(f"  Rewriting <{i.name} {attr}=\"{v}\"> to {vv}")
             i[attr] = vv
 
+  def parse_puzzle_html(self, z):
+    soup = bs4.BeautifulSoup(z.open(Puzzle.PUZZLE_HTML), features="html5lib")
+    self.rewrite_html(soup)
     if soup.head:
       self.html_head = "".join(str(i) for i in soup.head.contents)
     else:
       self.html_head = None
     self.html_body = "".join(str(i) for i in soup.body.contents)
 
-    if False:
-      print("---- HEAD ----")
-      print(self.html_head)
-      print("---- BODY ----")
-      print(self.html_body)
+  def parse_solution_html(self, z):
+    soup = bs4.BeautifulSoup(z.open(Puzzle.SOLUTION_HTML), features="html5lib")
+    self.rewrite_html(soup)
+    if soup.head:
+      self.solution_head = "".join(str(i) for i in soup.head.contents)
+    else:
+      self.solution_head = None
+    self.solution_body = "".join(str(i) for i in soup.body.contents)
 
   def json_dict(self):
     d = {}
@@ -117,19 +124,20 @@ def main():
   parser.add_argument("--output_dir", help="Directory for output json files.")
   parser.add_argument("--credentials", help="Private key for google cloud service account.")
   parser.add_argument("--bucket", help="Google cloud bucket to use.")
+  parser.add_argument("--public_host", help="Hostname for assets in urls.")
   parser.add_argument("--skip_upload", action="store_true",
                       help="Don't actually upload to GCS.")
   parser.add_argument("input_files", nargs="*",
                       help="The input .zip to process")
-  args = parser.parse_args()
+  options = parser.parse_args()
 
-  args.credentials = oauth2.Oauth2Token(args.credentials)
+  options.credentials = oauth2.Oauth2Token(options.credentials)
 
-  for zipfn in args.input_files:
+  for zipfn in options.input_files:
     with open(zipfn, "rb") as f:
       zip_data = f.read()
-      p = Puzzle(zip_data, args)
-    p.save(args.output_dir)
+      p = Puzzle(zip_data, options)
+    p.save(options.output_dir)
 
 
 if __name__ == "__main__":

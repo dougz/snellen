@@ -1,0 +1,30 @@
+{% extends "puzzle_frame.html" %}
+
+{% block topnav_extraright %}
+{% if solution_url %}
+<a href="{{solution_url}}">Solution</a>
+{% end %}
+{% end %}
+
+{% block midnav %}
+{% end %}
+
+{% block head %}
+{% if solution_url %}
+{% if puzzle.html_head %}{% raw puzzle.html_head %}{% end %}
+{% else %}
+{% if puzzle.solution_head %}{% raw puzzle.solution_head %}{% end %}
+{% end %}
+{% end %}
+
+
+{% block content %}
+<h1>{{puzzle.title}}</h1>
+<div id="puzz">
+  {% if solution_url %}
+  {% raw puzzle.html_body %}
+  {% else %}
+  {% raw puzzle.solution_body %}
+  {% end %}
+</div>
+{% end %}
