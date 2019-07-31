@@ -3,8 +3,6 @@
 {% block title %}Admin Home{% end %}
 
 {% block content %}
-<p>sessions = {{sessions}}<br/>waiters = {{waiters}}<br/>waits = {{waits}}</p>
-
 <ul>
   {% if not game_state.event_start_time and user.has_role("control_event") %}
   <li><a href="/start_event">Start event!</a></li>

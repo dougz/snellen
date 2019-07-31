@@ -3,32 +3,22 @@ import tornado.web
 
 import game
 import login
+import util
 
-class AdminHome(tornado.web.RequestHandler):
+class AdminHomePage(util.AdminPageHandler):
   @login.required("admin")
   def get(self):
 
     self.render("admin_home.html",
                 user=self.user,
                 game_state=game.Global.STATE,
-                script=None,
-                sessions=len(login.Session.BY_KEY),
-                waits=login.Session.VARZ["waits"],
-                waiters=login.Session.VARZ["waiters"])
+                sessions=len(login.Session.BY_KEY))
 
 
-class AdminUsers(tornado.web.RequestHandler):
+class AdminUsersPage(util.AdminPageHandler):
   @login.required("admin")
   def get(self):
-    if self.application.settings.get("debug"):
-      script = ("""<script src="/closure/goog/base.js"></script>\n"""
-                """<script src="/admin-debug.js"></script>""")
-    else:
-      script = """<script src="/admin.js"></script>"""
-    script += """<script>\nwindow.onload = activateRoleCheckboxes;\n</script>"""
-
     self.render("admin_users.html",
-                script=script,
                 roles=login.AdminRoles.ROLES,
                 users=login.AdminUser.all_users(),
                 user=self.user)
@@ -45,18 +35,18 @@ class UpdateAdminRole(tornado.web.RequestHandler):
     self.set_status(http.client.NO_CONTENT.value)
 
 
-class ShowTeams(tornado.web.RequestHandler):
+class ShowTeamsPage(util.AdminPageHandler):
   @login.required("admin")
   def get(self):
     self.render("teams.html", user=self.user,
-                teams=game.Team.BY_USERNAME, script=None)
+                teams=game.Team.BY_USERNAME)
 
 
-class ShowPuzzles(tornado.web.RequestHandler):
+class ShowPuzzlesPage(util.AdminPageHandler):
   @login.required("admin")
   def get(self):
     self.render("puzzles.html", user=self.user,
-                puzzles=game.Puzzle.BY_SHORTNAME, script=None)
+                puzzles=game.Puzzle.BY_SHORTNAME)
 
 
 class CreateUser(tornado.web.RequestHandler):
@@ -76,7 +66,7 @@ class CreateUser(tornado.web.RequestHandler):
     self.redirect("/admin_users")
 
 
-class StopServer(tornado.web.RequestHandler):
+class StopServerPage(util.AdminPageHandler):
   def initialize(self, answer_checking):
     self.answer_checking = answer_checking
 
@@ -94,45 +84,37 @@ class StartEvent(tornado.web.RequestHandler):
     game.Global.STATE.start_event()
     self.redirect("/admin")
 
-class AdminDebugJS(tornado.web.RequestHandler):
+# Debug-only handlers that reread the source file each time.
+
+class AdminJS(tornado.web.RequestHandler):
   @login.required("admin")
   def get(self):
-    self.set_header("Content-Type", "text/javascript")
+    self.set_header("Content-Type", "text/javascript; charset=utf-8")
     with open("src/admin.js", "rb") as f:
       self.write(f.read())
 
-class AdminJS(tornado.web.RequestHandler):
-  def initialize(self, compiled_admin_js):
-    self.compiled_admin_js = compiled_admin_js
-  @login.required("admin")
-  def get(self):
-    self.set_header("Content-Type", "text/javascript")
-    self.write(self.compiled_admin_js)
-
 class AdminCSS(tornado.web.RequestHandler):
-  def initialize(self, admin_css):
-    self.admin_css = admin_css
   @login.required("admin")
   def get(self):
-    self.set_header("Content-Type", "text/css")
-    self.write(self.admin_css)
+    self.set_header("Content-Type", "text/css; charset=utf-8")
+    with open("static/admin.css", "rb") as f:
+      self.write(f.read())
 
 
-def GetHandlers(debug, answer_checking, admin_css, compiled_admin_js):
+def GetHandlers(debug, answer_checking):
   handlers = [
-    (r"/admin", AdminHome),
-    (r"/admin_users", AdminUsers),
+    (r"/admin", AdminHomePage),
+    (r"/admin_users", AdminUsersPage),
     (r"/(set|clear)_admin_role/([^/]+)/([^/]+)", UpdateAdminRole),
     (r"/create_user", CreateUser),
     (r"/start_event", StartEvent),
-    (r"/stop_server", StopServer, {"answer_checking": answer_checking}),
-    (r"/teams", ShowTeams),
-    (r"/puzzles", ShowPuzzles),
-    (r"/admin.js", AdminJS, {"compiled_admin_js": compiled_admin_js}),
-    (r"/admin.css", AdminCSS, {"admin_css": admin_css}),
+    (r"/stop_server", StopServerPage, {"answer_checking": answer_checking}),
+    (r"/teams", ShowTeamsPage),
+    (r"/puzzles", ShowPuzzlesPage),
     ]
   if debug:
-    handlers.append((r"/admin-debug.js", AdminDebugJS))
+    handlers.append((r"/admin.js", AdminJS))
+    handlers.append((r"/admin.css", AdminCSS))
   return handlers
 
 

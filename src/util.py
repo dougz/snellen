@@ -3,6 +3,13 @@ import tornado.web
 import wait_proxy
 
 class TeamPageHandler(tornado.web.RequestHandler):
+  def prepare(self):
+    self.set_header("Content-Type", "text/html; charset=utf-8")
+
+  @classmethod
+  def set_static_content(cls, static_content):
+    cls.static_content = static_content
+
   def get_template_namespace(self):
     d = {"team": self.team}
 
@@ -25,11 +32,35 @@ class TeamPageHandler(tornado.web.RequestHandler):
 
     if self.application.settings.get("debug"):
       script += ("""<script src="/closure/goog/base.js"></script>\n"""
-                        """<script src="/client-debug.js"></script>""")
+                        """<script src="/client.js"></script>""")
+      d["css"] = "/event.css"
     else:
-      script += """<script src="/client.js"></script>"""
+      script += f"""<script src="{self.static_content["client-compiled.js"]}"></script>"""
+      d["css"] = self.static_content["event.css"]
 
     d["script"] = script
     d["json_data"] = None
 
     return d
+
+class AdminPageHandler(tornado.web.RequestHandler):
+  def prepare(self):
+    self.set_header("Content-Type", "text/html; charset=utf-8")
+
+  @classmethod
+  def set_static_content(cls, static_content):
+    cls.static_content = static_content
+
+  def get_template_namespace(self):
+    d = {}
+
+    if self.application.settings.get("debug"):
+      d["script"] = ("""<script src="/closure/goog/base.js"></script>\n"""
+                     """<script src="/admin.js"></script>""")
+      d["css"] = "/admin.css"
+    else:
+      d["script"] = f"""<script src="{self.static_content["admin-compiled.js"]}"></script>"""
+      d["css"] = self.static_content["admin.css"]
+
+    return d
+

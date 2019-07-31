@@ -2,8 +2,9 @@
 <html>
   <head>
     <title>{% block title %}{% end %}</title>
-    <link rel=stylesheet href="/admin.css">
+    <link rel=stylesheet href="{{css}}">
     {% if script %}{% raw script %}{% end %}
+    {% block head %}{% end %}
   </head>
   <body>
     <span class=username>

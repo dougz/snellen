@@ -62,14 +62,14 @@ class Puzzle:
       if n.endswith("/"): continue
 
       ext = os.path.splitext(n)[1].lower()
-      if ext not in common.MIME_TYPES:
-        raise ValueError(f"Don't know MIME type for '{n}'.")
+      if ext not in common.CONTENT_TYPES:
+        raise ValueError(f"Don't know Content-Type for '{n}'.")
 
       path = f"puzzle/{self.prefix}/{self.shortname}/{n}"
 
       if not args.skip_upload:
         print(f"  Uploading {n}...")
-        common.upload_object(bucket, path, common.MIME_TYPES[ext], z.read(n), args.credentials)
+        common.upload_object(bucket, path, common.CONTENT_TYPES[ext], z.read(n), args.credentials)
 
       self.asset_map[n] = f"https://{bucket}.storage.googleapis.com/{path}"
 

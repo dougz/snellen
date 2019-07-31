@@ -2,6 +2,10 @@
 
 {% block title %}Admin Users{% end %}
 
+{% block head %}
+<script>window.onload = activateRoleCheckboxes;</script>
+{% end %}
+
 {% block content %}
 <table id="user-roles">
   <tr>

@@ -21,6 +21,7 @@ import game
 import login
 from state import save_state
 import wait_proxy
+import util
 
 
 assert sys.hexversion >= 0x03060700, "Need Python 3.6.7 or newer!"
@@ -28,20 +29,11 @@ assert tornado.version_info >= (5, 0, 2, 0), "Need Tornado 5.0.2 or newer!"
 
 
 def make_app(options, answer_checking, **kwargs):
-  with open("bin/client-compiled.js", "rb") as f:
-    compiled_js = f.read()
-  with open("bin/admin-compiled.js", "rb") as f:
-    compiled_admin_js = f.read()
-  with open("static/event.css", "rb") as f:
-    event_css = f.read()
-  with open("static/admin.css", "rb") as f:
-    admin_css = f.read()
-
   debug = kwargs.get("debug")
   return tornado.web.Application(
     login.GetHandlers() +
-    admin.GetHandlers(options.debug, answer_checking, admin_css, compiled_admin_js) +
-    event.GetHandlers(options.event_dir, options.debug, compiled_js, event_css) +
+    admin.GetHandlers(options.debug, answer_checking) +
+    event.GetHandlers(options.debug) +
     wait_proxy.GetHandlers(),
     options=options,
     cookie_secret=options.cookie_secret,
@@ -54,8 +46,10 @@ def main_server(options):
   print("Load map config...")
   with open(os.path.join(options.event_dir, "map_config.json")) as f:
     cfg = json.load(f)
-    for shortname, d in cfg.items():
+    for shortname, d in cfg["maps"].items():
       game.Land(shortname, d, options.event_dir)
+    util.TeamPageHandler.set_static_content(cfg["static"])
+    util.AdminPageHandler.set_static_content(cfg["static"])
   game.Land.resolve_lands()
 
   save_state.set_classes(AdminUser=login.AdminUser,
@@ -86,9 +80,7 @@ def main_server(options):
   answer_checking = tornado.ioloop.PeriodicCallback(
     game.Submission.realtime_process_submit_queue, 1000)
 
-  app = make_app(options,
-                 answer_checking,
-                 autoreload=False)
+  app = make_app(options, answer_checking, autoreload=False)
 
   server = tornado.httpserver.HTTPServer(app)
   sockets = [tornado.netutil.bind_unix_socket(options.socket_path, mode=0o666, backlog=3072)]

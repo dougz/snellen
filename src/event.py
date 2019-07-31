@@ -165,42 +165,34 @@ class SubmitCancelHandler(tornado.web.RequestHandler):
     self.team.cancel_submission(submit_id, shortname)
     await self.team.send_message({"method": "history_change", "puzzle_id": shortname})
 
-class ClientDebugJS(tornado.web.RequestHandler):
+# Debug-only handlers that reread the source file each time.
+
+class ClientJS(tornado.web.RequestHandler):
   @login.required("team")
   def get(self):
-    self.set_header("Content-Type", "text/javascript")
+    self.set_header("Content-Type", "text/javascript; charset=utf-8")
     with open("src/client.js", "rb") as f:
       self.write(f.read())
 
-class ClientJS(tornado.web.RequestHandler):
-  def initialize(self, compiled_js):
-    self.compiled_js = compiled_js
-  @login.required("team", require_start=False)
-  def get(self):
-    self.set_header("Content-Type", "text/javascript")
-    self.write(self.compiled_js)
-
 class EventCSS(tornado.web.RequestHandler):
-  def initialize(self, event_css):
-    self.event_css = event_css
   @login.required("team", require_start=False)
   def get(self):
-    self.set_header("Content-Type", "text/css")
-    self.write(self.event_css)
+    self.set_header("Content-Type", "text/css; charset=utf-8")
+    with open("static/event.css", "rb") as f:
+      self.write(f.read())
 
-def GetHandlers(event_dir, debug, compiled_js, event_css):
+def GetHandlers(debug):
   handlers = [
     (r"/", EventHomePage),
     (r"/log", ActivityLogPage),
     (r"/land/([a-z0-9_]+)", LandMapPage),
     (r"/puzzle/([^/]+)/?", PuzzlePage),
-    (r"/client.js", ClientJS, {"compiled_js": compiled_js}),
-    (r"/event.css", EventCSS, {"event_css": event_css}),
     (r"/submit", SubmitHandler),
     (r"/submit_history/([a-z][a-z0-9_]*)", SubmitHistoryHandler),
     (r"/submit_cancel/([a-z][a-z0-9_]*)/(\d+)", SubmitCancelHandler),
     ]
   if debug:
-    handlers.append((r"/client-debug.js", ClientDebugJS))
+    handlers.append((r"/client.js", ClientJS))
+    handlers.append((r"/event.css", EventCSS))
   return handlers
 
