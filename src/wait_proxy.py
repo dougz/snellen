@@ -154,7 +154,7 @@ class Client:
   async def get_messages(self):
     while True:
       req = tornado.httpclient.HTTPRequest(
-        f"http://localhost/proxywait/{self.wpid}",
+        f"http://localhost:{self.options.wait_proxy_port}/proxywait/{self.wpid}",
         connect_timeout=5.0,
         request_timeout=PROXY_WAIT_TIMEOUT+10)
       try:
@@ -173,7 +173,7 @@ class Client:
     if team: return team
 
     req = tornado.httpclient.HTTPRequest(
-      f"http://localhost/checksession/{key}",
+      f"http://localhost:{self.options.wait_proxy_port}/checksession/{key}",
       connect_timeout=5.0,
       request_timeout=10.0)
     try:

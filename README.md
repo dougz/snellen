@@ -12,7 +12,7 @@
 
 - Install the Python 3 libraries
 
-    Linux: `apt-get install python3-bs4 python3-bcrypt python3-lxml python3-tornado`
+    Linux: `apt-get install python3-bs4 python3-bcrypt python3-lxml python3-tornado python3-pycurl`
 
     Mac: `pip3 install bs4 bcrypt lxml tornado`
 
