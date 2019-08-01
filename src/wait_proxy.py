@@ -161,11 +161,8 @@ class Client:
         response = await self.client.fetch(req)
         return json.loads(response.body)
       except tornado.httpclient.HTTPClientError as e:
-        if e.code == 502:
-          print(f"proxy {self.wpid} got 502; retrying")
-          await asyncio.sleep(1.0)
-        else:
-          raise
+        print(f"proxy {self.wpid} got {e.code}; retrying")
+        await asyncio.sleep(1.0)
 
   async def check_session(self, key):
     key = key.decode("ascii")
