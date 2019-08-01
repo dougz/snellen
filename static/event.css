@@ -55,6 +55,7 @@ a#submit:hover {
 }
 
 #content {
+    font-size: 16px;
     width: 1020px;
     margin-top: 30px;
     margin-bottom: 30px;
