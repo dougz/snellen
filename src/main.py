@@ -142,8 +142,11 @@ def main():
   assert options.event_dir is not None, "Must specify --event_dir."
 
   soft, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
-  resource.setrlimit(resource.RLIMIT_NOFILE, (hard, hard))
-  print(f"Raised limit to {hard} file descriptors.")
+  try:
+    resource.setrlimit(resource.RLIMIT_NOFILE, (hard, hard))
+    print(f"Raised limit to {hard} file descriptors.")
+  except ValueError:
+    print("Warning: unable to increase file descriptor limit!")
 
   for i in range(options.wait_proxies):
     if os.fork() == 0:

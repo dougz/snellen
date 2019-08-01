@@ -12,9 +12,17 @@
 
 - Install the Python 3 libraries
 
-    Linux: `apt-get install python3-bs4 python3-bcrypt python3-lxml python3-tornado python3-pycurl`
+    Linux:
 
-    Mac: `pip3 install bs4 bcrypt lxml tornado`
+    `apt-get install python3-bs4 python3-bcrypt python3-lxml python3-tornado python3-pycurl`
+
+    Mac:
+
+    `brew install openssl`
+
+    `pip3 install bs4 bcrypt lxml tornado`
+
+    `pip3 install --install-option="--with-openssl" --install-option="--openssl-dir=/usr/local/opt/openssl" pycurl`
 
 - Download and symlink closure and closure-compiler in external
 
