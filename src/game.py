@@ -474,6 +474,7 @@ class Global:
   def __init__(self, now):
     self.event_start_time = None
     Global.STATE = self
+    Achievement.define_achievements()
 
   @save_state
   def start_event(self, now):
@@ -484,6 +485,31 @@ class Global:
       team.compute_puzzle_beam(now)
 
     # TODO trigger team reload
+
+
+class Achievement:
+  ALL = []
+
+  def __init__(self, name, title, subtitle):
+    self.name = name
+    self.title = title
+    self.subtitle = subtitle
+
+    Achievement.ALL.append(self)
+
+  @classmethod
+  def define_achivements(cls):
+    Achievement(solve_puzzle,
+                "That's how this works",
+                "Solve a puzzle.")
+    Achievement(log_out,
+                "Come back!",
+                "Log out of the hunt server before the coin is found.")
+    Achievement(visit_log,
+                "Reminisce",
+                "Visit the Activity Log page during the hunt.")
+
+
 
 
 
