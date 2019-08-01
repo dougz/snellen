@@ -13,8 +13,8 @@ fi
 
 cd "$SNELLEN_BASE"
 
-rm -rf src/__pycache__
+rm -rf src/__pycache__ tools/__pycache__
 
 scripts/recompile.sh
-tar czvf "$tarball" bin config html scripts src static test_event
+tar czvf "$tarball" bin config html scripts src static test_event tools misc
 
