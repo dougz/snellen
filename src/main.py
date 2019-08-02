@@ -28,11 +28,11 @@ assert sys.hexversion >= 0x03060700, "Need Python 3.6.7 or newer!"
 assert tornado.version_info >= (5, 0, 2, 0), "Need Tornado 5.0.2 or newer!"
 
 
-def make_app(options, answer_checking, **kwargs):
+def make_app(options, **kwargs):
   debug = kwargs.get("debug")
   return tornado.web.Application(
     login.GetHandlers() +
-    admin.GetHandlers(options.debug, answer_checking) +
+    admin.GetHandlers(options.debug) +
     event.GetHandlers(options.debug) +
     wait_proxy.GetHandlers(),
     options=options,
@@ -77,20 +77,16 @@ def main_server(options):
     print("Enabling root user...")
     login.AdminUser.enable_root(login.make_hash(options.root_password))
 
-  answer_checking = tornado.ioloop.PeriodicCallback(
-    game.Submission.realtime_process_submit_queue, 1000)
-
-  app = make_app(options, answer_checking, autoreload=False)
+  app = make_app(options, autoreload=False)
 
   server = tornado.httpserver.HTTPServer(app)
   sockets = [tornado.netutil.bind_unix_socket(options.socket_path, mode=0o666, backlog=3072)]
   sockets.extend(tornado.netutil.bind_sockets(options.wait_proxy_port, address="localhost"))
   server.add_sockets(sockets)
 
-  answer_checking.start()
-
   loop = asyncio.get_event_loop()
   loop.set_default_executor(concurrent.futures.ThreadPoolExecutor(max_workers=4))
+  loop.create_task(game.Submission.realtime_process_submit_queue())
 
   try:
     print("Serving...")
@@ -102,9 +98,7 @@ def main_server(options):
 
 
 def wait_server(n, options):
-  print(f"I am wait server {n}")
   wait_proxy.Client(n, options).start()
-  print(f"Wait server {n} exiting")
 
 
 def main():

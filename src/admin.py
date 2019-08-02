@@ -4,6 +4,7 @@ import tornado.web
 import game
 import login
 import util
+import wait_proxy
 
 class AdminHomePage(util.AdminPageHandler):
   @login.required("admin")
@@ -67,12 +68,9 @@ class CreateUser(tornado.web.RequestHandler):
 
 
 class StopServerPage(util.AdminPageHandler):
-  def initialize(self, answer_checking):
-    self.answer_checking = answer_checking
-
   @login.required(login.AdminRoles.CONTROL_EVENT)
-  def get(self):
-    self.answer_checking.stop()
+  async def get(self):
+    await wait_proxy.Server.exit()
     loop = tornado.ioloop.IOLoop.current()
     loop.call_later(1.5, loop.stop)
     self.write("Stopping server\u2026")
@@ -101,14 +99,14 @@ class AdminCSS(tornado.web.RequestHandler):
       self.write(f.read())
 
 
-def GetHandlers(debug, answer_checking):
+def GetHandlers(debug):
   handlers = [
     (r"/admin", AdminHomePage),
     (r"/admin_users", AdminUsersPage),
     (r"/(set|clear)_admin_role/([^/]+)/([^/]+)", UpdateAdminRole),
     (r"/create_user", CreateUser),
     (r"/start_event", StartEvent),
-    (r"/stop_server", StopServerPage, {"answer_checking": answer_checking}),
+    (r"/stop_server", StopServerPage),
     (r"/teams", ShowTeamsPage),
     (r"/puzzles", ShowPuzzlesPage),
     ]

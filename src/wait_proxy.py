@@ -49,6 +49,10 @@ class Server:
     wid, cls.NEXT_WID = cls.NEXT_WID, cls.NEXT_WID+1
     return wid
 
+  @classmethod
+  async def exit(cls):
+    await cls.send_message("__EXIT", 0, [""])
+
 
 class ProxyWaitHandler(tornado.web.RequestHandler):
   async def get(self, wpid):
@@ -136,6 +140,10 @@ class Client:
     while True:
       msgs = await self.get_messages()
       for team, items in msgs:
+        if team == "__EXIT":
+          print(f"proxy waiter #{self.wpid} exiting")
+          asyncio.get_running_loop().stop()
+          return
         team = ProxyTeam.get_team(team)
         await team.send_messages(items)
 

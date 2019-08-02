@@ -99,9 +99,12 @@ class Submission:
 
   @classmethod
   async def realtime_process_submit_queue(cls):
-    messages = cls.process_submit_queue(time.time())
-    for team, msgs in messages.items():
-      await team.send_message(msgs)
+    while True:
+      messages = cls.process_submit_queue(time.time())
+      for team, msgs in messages.items():
+        team.send_messages(msgs)
+        asyncio.create_task(team.flush_messages())
+      await asyncio.sleep(1.0)
 
   @classmethod
   def process_submit_queue(cls, now):
@@ -157,26 +160,24 @@ class Team(login.LoginUser):
 
     self.message_mu = asyncio.Lock()
     self.message_serial = 1
+    self.pending_messages = []
 
   def attach_session(self, session):
     self.active_sessions.add(session)
   def detach_session(self, session):
     self.active_sessions.remove(session)
 
-  async def send_message(self, objs, delay=None, real_delay=None):
-    """Send a message or list of messages to all sessions for this team."""
-    if not objs: return
+  def send_messages(self, objs):
+    """Send a list of messages to all browsers for this team."""
+    self.pending_messages.extend(objs)
 
-    if delay:
-      asyncio.create_task(self.send_message(objs, real_delay=delay))
-      return
-    if real_delay:
-      await asyncio.sleep(real_delay)
+  async def flush_messages(self):
+    """Flush the pending message queue, actually sending them to the team."""
+    if not self.pending_messages: return
 
+    objs, self.pending_messages = self.pending_messages, []
     if isinstance(objs, list):
       strs = [json.dumps(o) for o in objs]
-    else:
-      strs = [json.dumps(objs)]
 
     async with self.message_mu:
       await wait_proxy.Server.send_message(self, self.message_serial, strs)

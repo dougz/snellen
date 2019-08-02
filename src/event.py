@@ -102,12 +102,12 @@ class ActivityLogPage(util.TeamPageHandler):
     json_data = """<script>var log_entries = """ + json.dumps(self.team.activity_log) + ";</script>"
     self.render("activity_log.html", json_data=json_data)
 
-class SubmitHandler(tornado.web.RequestHandler):
+class SubmitHandler(util.TeamHandler):
   def prepare(self):
     self.args = json.loads(self.request.body)
 
   @login.required("team", on_fail=http.client.UNAUTHORIZED)
-  async def post(self):
+  def post(self):
     answer = self.args["answer"]
 
     # Worst-case option for entering a single-emoji answer: enter the
@@ -124,11 +124,10 @@ class SubmitHandler(tornado.web.RequestHandler):
     msgs = [{"method": "history_change", "puzzle_id": shortname}]
     r = self.team.submit_answer(submit_id, shortname, answer)
     if r: msgs.extend(r)
-    await self.team.send_message(msgs)
+    self.team.pending_messages.extend(msgs)
     self.set_status(http.client.NO_CONTENT.value)
 
-
-class SubmitHistoryHandler(tornado.web.RequestHandler):
+class SubmitHistoryHandler(util.TeamHandler):
   @login.required("team", on_fail=http.client.UNAUTHORIZED)
   def get(self, shortname):
     state = self.team.get_puzzle_state(shortname)
@@ -158,12 +157,12 @@ class SubmitHistoryHandler(tornado.web.RequestHandler):
 
     self.write(json.dumps(d))
 
-class SubmitCancelHandler(tornado.web.RequestHandler):
+class SubmitCancelHandler(util.TeamHandler):
   @login.required("team", on_fail=http.client.UNAUTHORIZED)
-  async def get(self, shortname, submit_id):
+  def get(self, shortname, submit_id):
     submit_id = int(submit_id)
     self.team.cancel_submission(submit_id, shortname)
-    await self.team.send_message({"method": "history_change", "puzzle_id": shortname})
+    self.team.send_messages([{"method": "history_change", "puzzle_id": shortname}])
 
 # Debug-only handlers that reread the source file each time.
 

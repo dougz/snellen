@@ -58,7 +58,7 @@ class AdminUser(LoginUser):
     obj.username = "root"
     obj.password_hash = password_hash.encode("ascii")
     obj.fullname = "Root"
-    obj.roles = set((AdminRoles.ADMIN, AdminRoles.CREATE_USERS))
+    obj.roles = set((AdminRoles.ADMIN, AdminRoles.CREATE_USERS, AdminRoles.CONTROL_EVENT))
     cls.BY_USERNAME["root"] = obj
 
   def has_role(self, role):
