@@ -156,6 +156,8 @@ class Team(login.LoginUser):
     self.message_serial = 1
     self.pending_messages = []
 
+    self.achievements = {}
+
   def __repr__(self):
     return f"<Team {self.username}>"
   __str__ = __repr__
@@ -181,6 +183,16 @@ class Team(login.LoginUser):
 
   def discard_messages(self):
     self.pending_messages = []
+
+  def achieve(self, ach):
+    if ach not in self.achievements:
+      self.record_achievement(ach.name)
+
+  @save_state
+  def record_achievement(self, now, aname):
+    ach = Achievement.by_name(aname)
+    self.achievements[ach] = now
+    self.send_messages([{"method": "achieve", "title": ach.title}])
 
   # This method is exported into the file that's used to create all
   # the teams.
@@ -489,37 +501,29 @@ class Global:
 
 class Achievement:
   ALL = []
+  BY_NAME = {}
 
   def __init__(self, name, title, subtitle):
     self.name = name
     self.title = title
     self.subtitle = subtitle
-
+    setattr(cls, name, self)
     Achievement.ALL.append(self)
 
   @classmethod
+  def by_name(cls, aname):
+    return cls.BY_NAME[aname]
+
+  @classmethod
   def define_achivements(cls):
-    Achievement(solve_puzzle,
+    Achievement("solve_puzzle",
                 "That's how this works",
                 "Solve a puzzle.")
-    Achievement(log_out,
+
+    Achievement("log_out",
                 "Come back!",
                 "Log out of the hunt server before the coin is found.")
-    Achievement(visit_log,
+
+    Achievement("visit_log",
                 "Reminisce",
                 "Visit the Activity Log page during the hunt.")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
