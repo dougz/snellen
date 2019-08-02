@@ -121,10 +121,7 @@ class SubmitHandler(util.TeamHandler):
 
     submit_id = self.team.next_submit_id()
 
-    msgs = [{"method": "history_change", "puzzle_id": shortname}]
-    r = self.team.submit_answer(submit_id, shortname, answer)
-    if r: msgs.extend(r)
-    self.team.pending_messages.extend(msgs)
+    self.team.submit_answer(submit_id, shortname, answer)
     self.set_status(http.client.NO_CONTENT.value)
 
 class SubmitHistoryHandler(util.TeamHandler):
