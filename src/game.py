@@ -192,6 +192,7 @@ class Team(login.LoginUser):
   def record_achievement(self, now, aname):
     ach = Achievement.by_name(aname)
     self.achievements[ach] = now
+    self.activity_log.append((now, f'Received the <b>{html.escape(ach.title)}</b> pin.'))
     self.send_messages([{"method": "achieve", "title": ach.title}])
 
   # This method is exported into the file that's used to create all
@@ -283,6 +284,7 @@ class Team(login.LoginUser):
           "title": html.escape(puzzle.title),
           "audio": "https://snellen.storage.googleapis.com/applause.mp3"}])
       self.activity_log.append((now, f'<a href="{puzzle.url}">{html.escape(puzzle.title)}</a> solved.'))
+      self.achieve(Achievement.solve_puzzle)
       self.compute_puzzle_beam(now)
 
   def get_puzzle_state(self, puzzle):
@@ -507,7 +509,8 @@ class Achievement:
     self.name = name
     self.title = title
     self.subtitle = subtitle
-    setattr(cls, name, self)
+    setattr(Achievement, name, self)
+    Achievement.BY_NAME[name] = self
     Achievement.ALL.append(self)
 
   @classmethod
@@ -515,7 +518,7 @@ class Achievement:
     return cls.BY_NAME[aname]
 
   @classmethod
-  def define_achivements(cls):
+  def define_achievements(cls):
     Achievement("solve_puzzle",
                 "That's how this works",
                 "Solve a puzzle.")
