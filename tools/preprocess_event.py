@@ -88,6 +88,7 @@ def convert_map(shortname, d, options):
 
 
 def convert_static_files(out, options):
+  print("Processing static assets...")
   for fn in ("bin/admin-compiled.js",
              "bin/client-compiled.js",
              "static/admin.css",
@@ -109,6 +110,8 @@ def main():
                       help="Don't actually upload to GCS.")
   parser.add_argument("--input_file", help="The input .yaml to process")
   parser.add_argument("--input_assets", help="The directory of input assets")
+  parser.add_argument("--static_only", action="store_true",
+                      help="Don't process map; just upload static assets.")
   options = parser.parse_args()
 
   options.credentials = oauth2.Oauth2Token(options.credentials)
@@ -116,12 +119,19 @@ def main():
   with open(options.input_file) as f:
     y = yaml.load(f)
 
-  output = {"maps": {}, "static": {}}
-  for shortname, d in y.items():
-    output["maps"][shortname] = convert_map(shortname, d, options)
+  if options.static_only:
+    with open(options.output_file) as f:
+      output = json.load(f)
+  else:
+    output = {}
 
+  if not options.static_only:
+    output["maps"] = {}
+    for shortname, d in y.items():
+      output["maps"][shortname] = convert_map(shortname, d, options)
+
+  output["static"] = {}
   convert_static_files(output["static"], options)
-
 
   with open(options.output_file, "w") as f:
     json.dump(output, f)
