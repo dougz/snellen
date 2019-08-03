@@ -61,6 +61,7 @@ def main_server(options):
   wait_proxy.Server.init_proxies(options.wait_proxies)
 
   if not game.Global.STATE: game.Global()
+  game.Global.STATE.set_static_dir(cfg["static"])
 
   print("Adding new teams...")
   with open(os.path.join(options.event_dir, "teams.py")) as f:

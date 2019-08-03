@@ -1,0 +1,20 @@
+{% extends "player_base.html" %}
+
+{% block title %}Pins{% end %}
+
+{% block content %}
+<h1>Pins</h1>
+
+<p class="disclaimer">This is not a puzzle.</p>
+
+<ul id="pins">
+  {% for ach in achievements %}
+  {% if ach in team.achievements %}
+  <li class="yes"><img src="{{ach.yes_url}}"><div><b>{{ach.title}}</b><br><i>{{ach.subtitle}}</i></div></li>
+  {% else %}
+  <li class="no"><img src="{{ach.no_url}}">{{ach.title}}</li>
+  {% end %}
+  {% end %}
+</ul>
+
+{% end %}

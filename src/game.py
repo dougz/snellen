@@ -488,7 +488,10 @@ class Global:
   def __init__(self, now):
     self.event_start_time = None
     Global.STATE = self
-    Achievement.define_achievements()
+
+  def set_static_dir(self, static_dir):
+    self.static_dir = static_dir
+    Achievement.define_achievements(static_dir)
 
   @save_state
   def start_event(self, now):
@@ -509,6 +512,8 @@ class Achievement:
     self.name = name
     self.title = title
     self.subtitle = subtitle
+    self.yes_url = Achievement.static_dir[name + "_yes.png"]
+    self.no_url = Achievement.static_dir[name + "_no.png"]
     setattr(Achievement, name, self)
     Achievement.BY_NAME[name] = self
     Achievement.ALL.append(self)
@@ -518,7 +523,9 @@ class Achievement:
     return cls.BY_NAME[aname]
 
   @classmethod
-  def define_achievements(cls):
+  def define_achievements(cls, static_dir):
+    cls.static_dir = static_dir
+
     Achievement("solve_puzzle",
                 "That's how this works",
                 "Solve a puzzle.")
