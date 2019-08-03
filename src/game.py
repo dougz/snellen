@@ -499,10 +499,6 @@ class Global:
     self.event_start_time = None
     Global.STATE = self
 
-  def set_static_dir(self, static_dir):
-    self.static_dir = static_dir
-    Achievement.define_achievements(static_dir)
-
   @save_state
   def start_event(self, now):
     if self.event_start_time: return
