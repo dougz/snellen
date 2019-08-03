@@ -87,7 +87,7 @@ class Puzzle:
             i[attr] = vv
 
   def parse_puzzle_html(self, z):
-    soup = bs4.BeautifulSoup(z.open(Puzzle.PUZZLE_HTML), features="html5lib")
+    soup = bs4.BeautifulSoup(z.read(Puzzle.PUZZLE_HTML).decode("utf-8"), features="html5lib")
     self.rewrite_html(soup)
     if soup.head:
       self.html_head = "".join(str(i) for i in soup.head.contents)
