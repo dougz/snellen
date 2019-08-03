@@ -1,14 +1,20 @@
 import requests
 
-CONTENT_TYPES = {".jpg": "image/jpeg",
-              ".png": "image/png",
-              ".js": "text/javascript; charset=utf-8",
-              ".txt": "text/plain; charset=utf-8",
-              ".html": "text/html; charset=utf-8",
-              ".zip": "application/zip",
-              ".wav": "audio/wav",
-              ".mp3": "audio/mpeg",
-              ".css": "text/css; charset=utf-8",
+CONTENT_TYPES = {
+  ".jpg": "image/jpeg",
+  ".png": "image/png",
+  ".svg": "image/svg+xml",
+  ".webp": "image/webp",
+
+  ".wav": "audio/wav",
+  ".mp3": "audio/mpeg",
+
+  ".js": "text/javascript; charset=utf-8",
+  ".txt": "text/plain; charset=utf-8",
+  ".html": "text/html; charset=utf-8",
+  ".css": "text/css; charset=utf-8",
+
+  ".zip": "application/zip",
 }
 
 def upload_object(bucket, path, content_type, data, creds):
@@ -23,7 +29,7 @@ def upload_object(bucket, path, content_type, data, creds):
   for i in range(2):
     r = requests.put(f"https://storage.googleapis.com/{bucket}/{path}",
                      headers={"Content-Type": content_type,
-                              "Cache-Control": "public,max-age=86400",
+                              "Cache-Control": "public,max-age=345600",
                               "Authorization": creds.get()},
                      data=data)
     if r.status_code == 401:
