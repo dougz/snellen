@@ -81,7 +81,19 @@ class UploadHandler(tornado.web.RequestHandler):
                            puzzle_html, self.options.credentials)
 
       p.puzzle_url = f"https://{self.options.public_host}/{path}"
-      self.redirect(p.puzzle_url)
+
+      path = f"html/{p.pp.prefix}/meta.html"
+      meta_html = self.render_string("meta.html",
+                                     puzzle_url=p.puzzle_url,
+                                     solution_url=p.solution_url,
+                                     puzzle=p.pp)
+      common.upload_object(self.options.bucket, path,
+                           common.CONTENT_TYPES[".html"],
+                           meta_html, self.options.credentials)
+
+      p.meta_url = f"https://{self.options.public_host}/{path}"
+
+      self.redirect(p.meta_url)
     except Exception as e:
       p.error_msg = traceback.format_exc()
       self.redirect(f"/error/{p.pid}")
