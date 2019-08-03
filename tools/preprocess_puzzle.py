@@ -115,7 +115,7 @@ class Puzzle:
 
   def save(self, output_dir):
     with open(os.path.join(output_dir, self.shortname + ".json"), "w") as f:
-      json.dump(self.json_dict(), f)
+      json.dump(self.json_dict(), f, sort_keys=True)
 
 
 def main():

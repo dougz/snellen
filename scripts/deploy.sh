@@ -12,7 +12,6 @@ version="$(date +"%Y%m%d-%H%M%S")-1"
 
 t=$(mktemp -d /run/shm/deploy.XXXXXX)
 cleanup() {
-    #echo $t
     rm -rf "$t"
 }
 trap cleanup EXIT

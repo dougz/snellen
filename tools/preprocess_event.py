@@ -140,10 +140,7 @@ def main():
   convert_static_files(output["static"], options)
 
   with open(options.output_file, "w") as f:
-    json.dump(output, f)
-
-
-
+    json.dump(output, f, sort_keys=True)
 
 
 if __name__ == "__main__":
