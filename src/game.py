@@ -188,6 +188,16 @@ class Team(login.LoginUser):
     if ach not in self.achievements:
       self.record_achievement(ach.name)
 
+  def delayed_achieve(self, ach, delay=1.0):
+    """Like achieve(), but delayed slightly.  Useful for achievements
+    triggered by page load, so the loaded page gets the
+    notification."""
+    async def future():
+      await asyncio.sleep(delay)
+      self.achieve(ach)
+      await self.flush_messages()
+    asyncio.create_task(future())
+
   @save_state
   def record_achievement(self, now, aname):
     ach = Achievement.by_name(aname)
