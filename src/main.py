@@ -24,8 +24,8 @@ import wait_proxy
 import util
 
 
-assert sys.hexversion >= 0x03060700, "Need Python 3.6.7 or newer!"
-assert tornado.version_info >= (5, 0, 2, 0), "Need Tornado 5.0.2 or newer!"
+assert sys.hexversion >= 0x03070300, "Need Python 3.7.3 or newer!"
+assert tornado.version_info >= (5, 1, 1, 0), "Need Tornado 5.1.1 or newer!"
 
 
 def make_app(options, **kwargs):
