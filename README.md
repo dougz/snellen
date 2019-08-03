@@ -12,9 +12,9 @@
 
 - Install the Python 3 libraries
 
-    Linux: `apt-get install python3-bs4 python3-bcrypt python3-lxml python3-tornado python3-pycurl`
+    Linux: `apt-get install python3-bs4 python3-bcrypt python3-html5lib python3-tornado python3-pycurl`
 
-    Mac: `pip3 install bs4 bcrypt lxml tornado`
+    Mac: `pip3 install bs4 bcrypt html5lib tornado`
 
 - Download and symlink closure and closure-compiler in external
 
