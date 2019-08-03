@@ -99,8 +99,14 @@ class PuzzlePage(util.TeamPageHandler):
 class ActivityLogPage(util.TeamPageHandler):
   @login.required("team")
   def get(self):
+    self.team.delayed_achieve(game.Achievement.visit_log)
     json_data = """<script>var log_entries = """ + json.dumps(self.team.activity_log) + ";</script>"
     self.render("activity_log.html", json_data=json_data)
+
+class AchievementPage(util.TeamPageHandler):
+  @login.required("team")
+  def get(self):
+    self.render("achievements.html", achievements=game.Achievement.ALL)
 
 class SubmitHandler(util.TeamHandler):
   def prepare(self):
@@ -181,6 +187,7 @@ def GetHandlers(debug):
   handlers = [
     (r"/", EventHomePage),
     (r"/log", ActivityLogPage),
+    (r"/pins", AchievementPage),
     (r"/land/([a-z0-9_]+)", LandMapPage),
     (r"/puzzle/([^/]+)/?", PuzzlePage),
     (r"/submit", SubmitHandler),

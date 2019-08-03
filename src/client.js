@@ -67,6 +67,7 @@ class Dispatcher {
 	    "history_change": this.history_change,
 	    "solve": this.solve,
 	    "open": this.open,
+	    "achieve": this.achieve,
 	}
     }
 
@@ -99,6 +100,11 @@ class Dispatcher {
     /** @param{Message} msg */
     open(msg) {
 	toast_manager.add_toast("<b>" + msg.title + "</b> is now open!", 6000);
+    }
+
+    /** @param{Message} msg */
+    achieve(msg) {
+	toast_manager.add_toast("You received the <b>" + msg.title + "</b> pin!", 6000);
     }
 }
 

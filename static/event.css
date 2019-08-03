@@ -4,6 +4,23 @@ body {
     margin: 0;
 }
 
+.disclaimer {
+    text-align: center;
+    font-style: italic;
+}
+
+#pins li {
+    display: flex;
+    align-items: center;
+    column-gap: 10px;
+    margin-bottom: 20px;
+}
+
+#pins li img { margin-right: 20px; }
+
+#pins { font-size: 120%; }
+#pins .no { color: #999; }
+
 #topnav {
     min-width: 1060px;
     height: 24px;

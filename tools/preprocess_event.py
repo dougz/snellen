@@ -88,6 +88,7 @@ def convert_map(shortname, d, options):
 
 
 def convert_static_files(out, options):
+  print("Processing static assets...")
   for fn in ("bin/admin-compiled.js",
              "bin/client-compiled.js",
              "static/admin.css",
@@ -96,30 +97,46 @@ def convert_static_files(out, options):
     base = os.path.basename(fn)
     out[base] = upload_file(fn, options)
 
+  for fn in os.listdir(os.path.join(options.event_dir, "assets/achievements")):
+    if not fn.endswith(".png"): continue
+    base = fn
+    out[base] = upload_file(
+      os.path.join(options.event_dir, "assets/achievements", fn), options)
+
 
 def main():
   parser = argparse.ArgumentParser(
     description="Process an event yaml file and upload assets to GCS.")
 
+  parser.add_argument("--event_dir", help="Event directory with inputs to process.")
   parser.add_argument("--output_file", help="Output json file.")
   parser.add_argument("--credentials", help="Private key for google cloud service account.")
   parser.add_argument("--bucket", help="Google cloud bucket to use.")
   parser.add_argument("--public_host", help="Hostname for assets in urls.")
   parser.add_argument("--skip_upload", action="store_true",
                       help="Don't actually upload to GCS.")
-  parser.add_argument("--input_file", help="The input .yaml to process")
   parser.add_argument("--input_assets", help="The directory of input assets")
+  parser.add_argument("--static_only", action="store_true",
+                      help="Don't process map; just upload static assets.")
   options = parser.parse_args()
 
   options.credentials = oauth2.Oauth2Token(options.credentials)
 
-  with open(options.input_file) as f:
+  with open(os.path.join(options.event_dir, "map_config.yaml")) as f:
     y = yaml.load(f)
 
-  output = {"maps": {}, "static": {}}
-  for shortname, d in y.items():
-    output["maps"][shortname] = convert_map(shortname, d, options)
+  if options.static_only:
+    with open(options.output_file) as f:
+      output = json.load(f)
+  else:
+    output = {}
 
+  if not options.static_only:
+    output["maps"] = {}
+    for shortname, d in y.items():
+      output["maps"][shortname] = convert_map(shortname, d, options)
+
+  output["static"] = {}
   convert_static_files(output["static"], options)
 
   with open(options.output_file, "w") as f:

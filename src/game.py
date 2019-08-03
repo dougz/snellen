@@ -156,6 +156,8 @@ class Team(login.LoginUser):
     self.message_serial = 1
     self.pending_messages = []
 
+    self.achievements = {}
+
   def __repr__(self):
     return f"<Team {self.username}>"
   __str__ = __repr__
@@ -181,6 +183,27 @@ class Team(login.LoginUser):
 
   def discard_messages(self):
     self.pending_messages = []
+
+  def achieve(self, ach):
+    if ach not in self.achievements:
+      self.record_achievement(ach.name)
+
+  def delayed_achieve(self, ach, delay=1.0):
+    """Like achieve(), but delayed slightly.  Useful for achievements
+    triggered by page load, so the loaded page gets the
+    notification."""
+    async def future():
+      await asyncio.sleep(delay)
+      self.achieve(ach)
+      await self.flush_messages()
+    asyncio.create_task(future())
+
+  @save_state
+  def record_achievement(self, now, aname):
+    ach = Achievement.by_name(aname)
+    self.achievements[ach] = now
+    self.activity_log.append((now, f'Received the <b>{html.escape(ach.title)}</b> pin.'))
+    self.send_messages([{"method": "achieve", "title": ach.title}])
 
   # This method is exported into the file that's used to create all
   # the teams.
@@ -271,6 +294,7 @@ class Team(login.LoginUser):
           "title": html.escape(puzzle.title),
           "audio": "https://snellen.storage.googleapis.com/applause.mp3"}])
       self.activity_log.append((now, f'<a href="{puzzle.url}">{html.escape(puzzle.title)}</a> solved.'))
+      self.achieve(Achievement.solve_puzzle)
       self.compute_puzzle_beam(now)
 
   def get_puzzle_state(self, puzzle):
@@ -475,6 +499,10 @@ class Global:
     self.event_start_time = None
     Global.STATE = self
 
+  def set_static_dir(self, static_dir):
+    self.static_dir = static_dir
+    Achievement.define_achievements(static_dir)
+
   @save_state
   def start_event(self, now):
     if self.event_start_time: return
@@ -486,14 +514,36 @@ class Global:
     # TODO trigger team reload
 
 
+class Achievement:
+  ALL = []
+  BY_NAME = {}
 
+  def __init__(self, name, title, subtitle):
+    self.name = name
+    self.title = title
+    self.subtitle = subtitle
+    self.yes_url = Achievement.static_dir[name + "_yes.png"]
+    self.no_url = Achievement.static_dir[name + "_no.png"]
+    setattr(Achievement, name, self)
+    Achievement.BY_NAME[name] = self
+    Achievement.ALL.append(self)
 
+  @classmethod
+  def by_name(cls, aname):
+    return cls.BY_NAME[aname]
 
+  @classmethod
+  def define_achievements(cls, static_dir):
+    cls.static_dir = static_dir
 
+    Achievement("solve_puzzle",
+                "That's how this works",
+                "Solve a puzzle.")
 
+    Achievement("log_out",
+                "Come back!",
+                "Log out of the hunt server before the coin is found.")
 
-
-
-
-
-
+    Achievement("visit_log",
+                "Reminisce",
+                "Visit the Activity Log page during the hunt.")
