@@ -16,6 +16,7 @@ import tornado.web
 
 
 import admin
+import debug
 import event
 import game
 import login
@@ -28,14 +29,19 @@ assert sys.hexversion >= 0x03070300, "Need Python 3.7.3 or newer!"
 assert tornado.version_info >= (5, 1, 1, 0), "Need Tornado 5.1.1 or newer!"
 
 
-def make_app(options, **kwargs):
-  debug = kwargs.get("debug")
+def make_app(options, static_dir, **kwargs):
+  handlers = []
+  handlers.extend(login.GetHandlers())
+  handlers.extend(admin.GetHandlers())
+  handlers.extend(event.GetHandlers())
+  handlers.extend(wait_proxy.GetHandlers())
+  if options.debug:
+    handlers.extend(debug.GetHandlers())
+
   return tornado.web.Application(
-    login.GetHandlers() +
-    admin.GetHandlers(options.debug) +
-    event.GetHandlers(options.debug) +
-    wait_proxy.GetHandlers(),
+    handlers,
     options=options,
+    static_dir=static_dir,
     cookie_secret=options.cookie_secret,
     template_path=options.template_path,
     debug=options.debug,
@@ -79,7 +85,7 @@ def main_server(options):
     print("Enabling root user...")
     login.AdminUser.enable_root(login.make_hash(options.root_password))
 
-  app = make_app(options, autoreload=False)
+  app = make_app(options, cfg["static"], autoreload=False)
 
   server = tornado.httpserver.HTTPServer(app)
   sockets = [tornado.netutil.bind_unix_socket(options.socket_path, mode=0o666, backlog=3072)]

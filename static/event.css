@@ -273,22 +273,32 @@ div.toasts {
 div.toast {
     margin: 12px 0px;
     padding: 16px;
-    background-color: #2f98b4;
     color: white;
     box-shadow: #999999 0 0 12px 0;
     box-sizing: border-box;
-    border-radius: 4px;
+    border-radius: 12px;
     animation: fadeIn 0.5s ease-out both;
+}
+
+.toastblue {
+    background-color: #19647e;
+}
+
+.toastgold {
+    background-color: #f9c22e;
+}
+
+.toastsalmon {
+    background-color: #f15946;
 }
 
 div.toasthidden {
     margin: 12px 0px;
     padding: 16px;
-    background-color: #2f98b4;
     color: white;
     box-shadow: #999999 0 0 12px 0;
     box-sizing: border-box;
-    border-radius: 4px;
+    border-radius: 12px;
     animation: fadeOut 0.5s ease-in both;
 }
 
@@ -300,6 +310,19 @@ div.toasthidden {
 @keyframes fadeOut {
     0% { opacity: 1; }
     100% { opacity: 0; }
+}
+
+img.mute {
+    float: right;
+    width: 18px;
+    height: 18px;
+    margin-left: 4px;
+    margin-bottom: 4px;
+    background-image: url(@@STATIC:mute.png@@);
+}
+
+.muteoff {
+    background-position: -18px 0px;
 }
 
 div.mute {

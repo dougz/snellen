@@ -4,6 +4,7 @@ import argparse
 import base64
 import hashlib
 import json
+import re
 import os
 import yaml
 from PIL import Image
@@ -17,13 +18,15 @@ SECRET_KEY_LENGTH = 16
 DEFAULT_BASE_IMG = "map_base.png"
 
 
-def upload_file(path, options):
+def upload_file(path, options, processor=None):
   ext = os.path.splitext(path)[1].lower()
   if ext not in common.CONTENT_TYPES:
     raise ValueError(f"Don't know Content-Type for '{n}'.")
 
   with open(path, "rb") as f:
     data = f.read()
+
+  if processor: data = processor(data)
 
   h = hashlib.sha256()
   h.update(data)
@@ -89,13 +92,23 @@ def convert_map(shortname, d, options):
 
 def convert_static_files(out, options):
   print("Processing static assets...")
-  for fn in ("bin/admin-compiled.js",
+
+  def css_processor(data):
+    text = data.decode("utf-8")
+    def replacer(m):
+      return out.get(m.group(1), m.group(1))
+    text = re.sub(r"@@STATIC:([^@]+)@@", replacer, text)
+    return text.encode("utf-8")
+
+  for fn in ("static/mute.png",
+             "bin/admin-compiled.js",
              "bin/client-compiled.js",
              "static/admin.css",
              "static/event.css",
              ):
+    processor = css_processor if fn.endswith(".css") else None
     base = os.path.basename(fn)
-    out[base] = upload_file(fn, options)
+    out[base] = upload_file(fn, options, processor=processor)
 
   for fn in os.listdir(os.path.join(options.event_dir, "assets/achievements")):
     if not fn.endswith(".png"): continue
@@ -140,7 +153,7 @@ def main():
   convert_static_files(output["static"], options)
 
   with open(options.output_file, "w") as f:
-    json.dump(output, f, sort_keys=True)
+    json.dump(output, f, sort_keys=True, indent=2)
 
 
 if __name__ == "__main__":

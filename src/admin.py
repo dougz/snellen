@@ -84,22 +84,8 @@ class StartEvent(tornado.web.RequestHandler):
 
 # Debug-only handlers that reread the source file each time.
 
-class AdminJS(tornado.web.RequestHandler):
-  @login.required("admin")
-  def get(self):
-    self.set_header("Content-Type", "text/javascript; charset=utf-8")
-    with open("src/admin.js", "rb") as f:
-      self.write(f.read())
 
-class AdminCSS(tornado.web.RequestHandler):
-  @login.required("admin")
-  def get(self):
-    self.set_header("Content-Type", "text/css; charset=utf-8")
-    with open("static/admin.css", "rb") as f:
-      self.write(f.read())
-
-
-def GetHandlers(debug):
+def GetHandlers():
   handlers = [
     (r"/admin", AdminHomePage),
     (r"/admin_users", AdminUsersPage),
@@ -110,9 +96,6 @@ def GetHandlers(debug):
     (r"/teams", ShowTeamsPage),
     (r"/puzzles", ShowPuzzlesPage),
     ]
-  if debug:
-    handlers.append((r"/admin.js", AdminJS))
-    handlers.append((r"/admin.css", AdminCSS))
   return handlers
 
 

@@ -167,23 +167,7 @@ class SubmitCancelHandler(util.TeamHandler):
     self.team.cancel_submission(submit_id, shortname)
     self.team.send_messages([{"method": "history_change", "puzzle_id": shortname}])
 
-# Debug-only handlers that reread the source file each time.
-
-class ClientJS(tornado.web.RequestHandler):
-  @login.required("team")
-  def get(self):
-    self.set_header("Content-Type", "text/javascript; charset=utf-8")
-    with open("src/client.js", "rb") as f:
-      self.write(f.read())
-
-class EventCSS(tornado.web.RequestHandler):
-  @login.required("team", require_start=False)
-  def get(self):
-    self.set_header("Content-Type", "text/css; charset=utf-8")
-    with open("static/event.css", "rb") as f:
-      self.write(f.read())
-
-def GetHandlers(debug):
+def GetHandlers():
   handlers = [
     (r"/", EventHomePage),
     (r"/log", ActivityLogPage),
@@ -194,8 +178,5 @@ def GetHandlers(debug):
     (r"/submit_history/([a-z][a-z0-9_]*)", SubmitHistoryHandler),
     (r"/submit_cancel/([a-z][a-z0-9_]*)/(\d+)", SubmitCancelHandler),
     ]
-  if debug:
-    handlers.append((r"/client.js", ClientJS))
-    handlers.append((r"/event.css", EventCSS))
   return handlers
 

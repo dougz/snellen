@@ -28,11 +28,11 @@ class Waiter {
         if (this.xhr.getStatus() != 200) {
             this.backoff = Math.min(10000, Math.floor(this.backoff*1.5));
 
-	    // XXX cancel early for development
-	    if (this.backoff > 1000) {
-		console.log("aborting retries");
-		return;
-	    }
+	    // // XXX cancel early for development
+	    // if (this.backoff > 1000) {
+	    // 	console.log("aborting retries");
+	    // 	return;
+	    // }
 
             setTimeout(goog.bind(this.xhr.send, this.xhr,
 				 "/wait/" + waiter_id + "/" + this.serial),
@@ -87,12 +87,11 @@ class Dispatcher {
     solve(msg) {
 	var audio = null;
 	if (msg.audio) {
+	    audio = new Audio(msg.audio);
 	    if (cookies.get("mute")) {
-		audio = true;
-	    } else {
-		audio = new Audio(msg.audio);
-		audio.play();
+		audio.muted = true;
 	    }
+	    audio.play();
 	}
 	toast_manager.add_toast("<b>" + msg.title + "</b> was solved!", 6000, audio);
     }
@@ -104,7 +103,7 @@ class Dispatcher {
 
     /** @param{Message} msg */
     achieve(msg) {
-	toast_manager.add_toast("You received the <b>" + msg.title + "</b> pin!", 6000);
+	toast_manager.add_toast("You received the <b>" + msg.title + "</b> pin!", 6000, null, "gold");
     }
 }
 
@@ -402,40 +401,45 @@ class ToastManager {
 	this.serial = 0;
     }
 
-    add_toast(message, timeout, audio) {
+    add_toast(message, timeout, audio, color="blue") {
 	this.serial += 1;
-	var t = goog.dom.createDom("DIV", {className: "toast"});
-	t.innerHTML = message;
+	var tt = goog.dom.createDom("DIV");
+	tt.innerHTML = message;
+
+	var icon = null;
 	if (audio) {
-	    var box = goog.dom.createDom("INPUT", {id: "mutebutton" + this.serial});
-	    box.setAttribute("type", "checkbox");
-	    if (cookies.get("mute")) {
-		box.checked = true;
-	    }
+	    icon = goog.dom.createDom(
+		"IMG",
+		{src: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGNgYGBgAAAABQABpfZFQAAAAABJRU5ErkJggg==",
+		 className: cookies.get("mute") ? "mute" : "mute muteoff"});
 
-	    goog.events.listen(box, goog.events.EventType.CLICK,
-			       goog.bind(this.toggle_mute, this, box, audio));
-
-	    var label = goog.dom.createDom("LABEL", {className: "mute"},
-					   goog.dom.createTextNode("Mute audio"));
-	    label.setAttribute("for", "mutebutton" + this.serial);
-
-	    var mute = goog.dom.createDom("DIV", {className: "mute"}, box, label);
-	    t.appendChild(mute);
+	    goog.events.listen(icon, goog.events.EventType.CLICK,
+			       goog.bind(this.toggle_mute, this, icon, audio));
 	}
+
+	var t = goog.dom.createDom("DIV", {className: "toast toast"+color}, icon, tt);
+
 	this.toasts += 1;
 	this.toasts_div.appendChild(t);
 	setTimeout(goog.bind(this.expire_toast, this, t), timeout);
     }
 
-    toggle_mute(box, audio) {
-	if (box.checked) {
-	    cookies.set("mute", "1", 86400*3, "/");
-	    if (audio && audio != true) {
-		audio.pause();
-	    }
-	} else {
+    toggle_mute(icon, audio) {
+	if (cookies.get("mute")) {
+	    // Turn muting off.
 	    cookies.set("mute", "", 1, "/");
+	    if (audio) {
+		audio.muted = false;
+	    }
+	    icon.className = "mute muteoff";
+
+	} else {
+	    // Turn muting on
+	    cookies.set("mute", "1", 86400*3, "/");
+	    if (audio) {
+		audio.muted = true;
+	    }
+	    icon.className = "mute";
 	}
     }
 
