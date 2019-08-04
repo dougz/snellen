@@ -1,7 +1,6 @@
 goog.require("goog.dom");
 goog.require("goog.dom.classlist");
 goog.require("goog.events");
-goog.require("goog.net.Cookies");
 goog.require("goog.net.XhrIo");
 goog.require("goog.ui.ModalPopup");
 goog.require("goog.json.Serializer");
@@ -88,7 +87,7 @@ class Dispatcher {
 	var audio = null;
 	if (msg.audio) {
 	    audio = new Audio(msg.audio);
-	    if (cookies.get("mute")) {
+	    if (localStorage.getItem("mute")) {
 		audio.muted = true;
 	    }
 	    audio.play();
@@ -411,7 +410,7 @@ class ToastManager {
 	    icon = goog.dom.createDom(
 		"IMG",
 		{src: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGNgYGBgAAAABQABpfZFQAAAAABJRU5ErkJggg==",
-		 className: cookies.get("mute") ? "mute" : "mute muteoff"});
+		 className: localStorage.getItem("mute") ? "mute" : "mute muteoff"});
 
 	    goog.events.listen(icon, goog.events.EventType.CLICK,
 			       goog.bind(this.toggle_mute, this, icon, audio));
@@ -425,9 +424,9 @@ class ToastManager {
     }
 
     toggle_mute(icon, audio) {
-	if (cookies.get("mute")) {
+	if (localStorage.getItem("mute")) {
 	    // Turn muting off.
-	    cookies.set("mute", "", 1, "/");
+	    localStorage.removeItem("mute");
 	    if (audio) {
 		audio.muted = false;
 	    }
@@ -435,7 +434,7 @@ class ToastManager {
 
 	} else {
 	    // Turn muting on
-	    cookies.set("mute", "1", 86400*3, "/");
+	    localStorage.setItem("mute", "1");
 	    if (audio) {
 		audio.muted = true;
 	    }
@@ -551,12 +550,10 @@ var submit_panel = null;
 var time_formatter = null;
 var toast_manager = null;
 var map_draw = null;
-var cookies = null;
 
 function initPage() {
     time_formatter = new TimeFormatter();
     toast_manager = new ToastManager();
-    cookies = goog.net.Cookies.getInstance();
 
     waiter = new Waiter(new Dispatcher());
     waiter.start();
