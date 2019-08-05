@@ -344,6 +344,9 @@ class SubmitPanel {
 	if (e.keyCode == goog.events.KeyCodes.ENTER) {
 	    this.submit();
 	    e.preventDefault();
+	} else if (e.keyCode == goog.events.KeyCodes.ESC) {
+	    this.close();
+	    e.preventDefault();
 	}
     }
 
@@ -594,7 +597,8 @@ function initPage() {
     var a = goog.dom.getElement("submit");
     if (a) {
 	submit_panel = new SubmitPanel();
-	a.onclick = function() { submit_panel.toggle(); return false; };
+	goog.events.listen(a, goog.events.EventType.CLICK,
+			   goog.bind(submit_panel.toggle, submit_panel));
 	if (puzzle_id && puzzle_init) puzzle_init();
     }
 
