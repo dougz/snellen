@@ -84,15 +84,10 @@ class Dispatcher {
 
     /** @param{Message} msg */
     solve(msg) {
-	var audio = null;
 	if (msg.audio) {
-	    audio = new Audio(msg.audio);
-	    if (localStorage.getItem("mute")) {
-		audio.muted = true;
-	    }
-	    audio.play();
+	    audio_manager.start(msg.audio);
 	}
-	toast_manager.add_toast("<b>" + msg.title + "</b> was solved!", 6000, audio);
+	toast_manager.add_toast("<b>" + msg.title + "</b> was solved!", 6000, true);
     }
 
     /** @param{Message} msg */
@@ -413,7 +408,7 @@ class ToastManager {
 		 className: localStorage.getItem("mute") ? "mute" : "mute muteoff"});
 
 	    goog.events.listen(icon, goog.events.EventType.CLICK,
-			       goog.bind(this.toggle_mute, this, icon, audio));
+			       goog.bind(audio_manager.toggle_mute, audio_manager));
 	}
 
 	var t = goog.dom.createDom("DIV", {className: "toast toast"+color}, icon, tt);
@@ -421,25 +416,6 @@ class ToastManager {
 	this.toasts += 1;
 	this.toasts_div.appendChild(t);
 	setTimeout(goog.bind(this.expire_toast, this, t), timeout);
-    }
-
-    toggle_mute(icon, audio) {
-	if (localStorage.getItem("mute")) {
-	    // Turn muting off.
-	    localStorage.removeItem("mute");
-	    if (audio) {
-		audio.muted = false;
-	    }
-	    icon.className = "mute muteoff";
-
-	} else {
-	    // Turn muting on
-	    localStorage.setItem("mute", "1");
-	    if (audio) {
-		audio.muted = true;
-	    }
-	    icon.className = "mute";
-	}
     }
 
     expire_toast(t) {
@@ -545,15 +521,71 @@ class MapDraw {
     }
 }
 
+class AudioManager {
+    constructor() {
+	this.current = null;
+	this.current_url = null;
+	window.addEventListener("storage", goog.bind(this.mute_changed, this));
+    }
+
+    start(url) {
+	if (this.current && !this.current.ended) {
+	    // previous audio still playing, skip this one
+	    return;
+	}
+	if (!this.current || url != this.current_url) {
+	    this.current = new Audio(url);
+	    this.current_url = url;
+	}
+	if (localStorage.getItem("mute")) {
+	    this.current.muted = true;
+	}
+	this.current.play();
+    }
+
+    toggle_mute() {
+	if (localStorage.getItem("mute")) {
+	    // Turn muting off.
+	    localStorage.removeItem("mute");
+	    this.mute_changed();
+	    return false;
+	} else {
+	    // Turn muting on
+	    localStorage.setItem("mute", "1");
+	    this.mute_changed();
+	    return true;
+	}
+    }
+
+    mute_changed() {
+	var els = document.querySelectorAll(".mute");
+	console.log("found " + els.length + " mute icons");
+
+	if (localStorage.getItem("mute")) {
+	    if (this.current) this.current.muted = true;
+	    for (var i = 0; i < els.length; ++i) {
+		els[i].className = "mute";
+	    }
+	} else {
+	    if (this.current) this.current.muted = false;
+	    for (var i = 0; i < els.length; ++i) {
+		els[i].className = "mute muteoff";
+	    }
+	}
+    }
+}
+
 var waiter = null;
 var submit_panel = null;
 var time_formatter = null;
 var toast_manager = null;
+var audio_manager = null;
 var map_draw = null;
 
 function initPage() {
     time_formatter = new TimeFormatter();
     toast_manager = new ToastManager();
+    audio_manager = new AudioManager();
 
     waiter = new Waiter(new Dispatcher());
     waiter.start();
