@@ -1,5 +1,9 @@
+@import url('https://fonts.googleapis.com/css?family=Merriweather+Sans&display=block');
+@import url('https://fonts.googleapis.com/css?family=Merriweather&display=block');
+@import url('https://fonts.googleapis.com/css?family=Inconsolata&display=block');
+
 body {
-    font-family: sans-serif;
+    font-family: 'Merriweather Sans', serif;
     background-image: url("https://snellen.storage.googleapis.com/grass.jpg");
     margin: 0;
 }
@@ -22,6 +26,8 @@ body {
 #pins .no { color: #999; }
 
 #topnav {
+    font-family: 'Merriweather', sans-serif;
+
     min-width: 1060px;
     height: 24px;
     font-size: 18px;
@@ -179,7 +185,7 @@ td.submit-state {
 }
 td.submit-answer {
     font-weight: bold;
-    font-family: Consolas, monospace;
+    font-family: 'Inconsolata', monospace;
 }
 
 .submit-cancel {
@@ -253,14 +259,16 @@ td.submit-answer {
 }
 
 input#answer {
-    font-family: monospace;
+    font-family: 'Inconsolata', monospace;
 }
 
 /** puzzle content **/
 
-.flavor {
-    font-style: italic;
-}
+.flavor { font-style: italic; }
+.sans-serif { font-family: 'Merriweather Sans', sans-serif; }
+.serif { font-family: 'Merriweather', serif; }
+.mono { font-family: 'Inconsolata', monospace; }
+.answer { font-weight: bold; text-transform: uppercase; }
 
 /** notifications **/
 
