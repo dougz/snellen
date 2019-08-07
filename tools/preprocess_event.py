@@ -35,7 +35,7 @@ def upload_file(path, options, processor=None):
   target_path = f"assets/{name}{ext}"
   url = f"https://{options.public_host}/{target_path}"
 
-  common.upload_object(options.bucket, target_path, common.CONTENT_TYPES[ext],
+  common.upload_object(path, options.bucket, target_path, common.CONTENT_TYPES[ext],
                        data, options.credentials)
   return url
 
@@ -90,7 +90,7 @@ def convert_map(shortname, d, options):
   return out
 
 
-def convert_static_files(out, options):
+def convert_static_files(out, options, lands):
   print("Processing static assets...")
 
   def css_processor(data):
@@ -100,21 +100,28 @@ def convert_static_files(out, options):
     text = re.sub(r"@@STATIC:([^@]+)@@", replacer, text)
     return text.encode("utf-8")
 
-  for fn in ("static/mute.png",
-             "bin/admin-compiled.js",
-             "bin/client-compiled.js",
-             "static/admin.css",
-             "static/event.css",
-             ):
-    processor = css_processor if fn.endswith(".css") else None
-    base = os.path.basename(fn)
-    out[base] = upload_file(fn, options, processor=processor)
+  to_convert = [("mute.png", "static/mute.png"),
+                ("admin-compiled.js", "bin/admin-compiled.js"),
+                ("client-compiled.js", "bin/client-compiled.js"),
+                ("admin.css", "static/admin.css"),
+                ("event.css", "static/event.css"),
+                ]
+
+  for land in lands:
+    fn = os.path.join(options.input_assets, land, "land.css")
+    if os.path.exists(fn):
+      to_convert.append((os.path.join(land, "land.css"), fn))
 
   for fn in os.listdir(os.path.join(options.event_dir, "assets/achievements")):
     if not fn.endswith(".png"): continue
-    base = fn
-    out[base] = upload_file(
-      os.path.join(options.event_dir, "assets/achievements", fn), options)
+    base = os.path.basename(fn)
+    to_convert.append((os.path.join("achievements", base),
+                       os.path.join(options.event_dir, "assets/achievements", fn)))
+
+
+  for key, fn in to_convert:
+    processor = css_processor if fn.endswith(".css") else None
+    out[key] = upload_file(fn, options, processor=processor)
 
 
 def main():
@@ -150,7 +157,7 @@ def main():
       output["maps"][shortname] = convert_map(shortname, d, options)
 
   output["static"] = {}
-  convert_static_files(output["static"], options)
+  convert_static_files(output["static"], options, output["maps"].keys())
 
   with open(options.output_file, "w") as f:
     json.dump(output, f, sort_keys=True, indent=2)

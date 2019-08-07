@@ -17,15 +17,15 @@ CONTENT_TYPES = {
   ".zip": "application/zip",
 }
 
-def upload_object(bucket, path, content_type, data, creds):
+def upload_object(source, bucket, path, content_type, data, creds):
   r = requests.head(f"https://{bucket}.storage.googleapis.com/{path}")
   if r.status_code in (200, 204):
-    print(f"    already have {path}...")
+    print(f"    Already have {source} as {path}...")
     return
   if r.status_code != 404:
     r.raise_for_status()
 
-  print(f"    uploading {path}...")
+  print(f"    Uploading {source} as {path}...")
   for i in range(2):
     r = requests.put(f"https://storage.googleapis.com/{bucket}/{path}",
                      headers={"Content-Type": content_type,

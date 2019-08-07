@@ -1,0 +1,12 @@
+@import url('https://fonts.googleapis.com/css?family=Bevan&display=block');
+
+h1 {
+    font-family: 'Bevan', 'Merriweather Sans', sans-serif;
+    font-size: 60px;
+    font-weight: normal;
+}
+
+div#map div.p {
+    font-family: 'Bevan', 'Merriweather Sans', sans-serif;
+    font-weight: normal;
+}

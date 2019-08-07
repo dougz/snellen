@@ -3,7 +3,9 @@
   <head>
     <meta name="viewport" content="width=1200, initial-scale=0">
     <meta charset="utf-8">
-    <link rel=stylesheet href="{{css}}">
+    {% for c in css %}
+    <link rel=stylesheet href="{{c}}">
+    {% end %}
     <title>{% block title %}{% end %}</title>
     {% if script %}{% raw script %}{% end %}
     {% if json_data %}{% raw json_data %}{% end %}

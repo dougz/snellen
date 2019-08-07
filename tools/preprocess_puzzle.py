@@ -71,8 +71,7 @@ class Puzzle:
       path = f"puzzle/{self.prefix}/{self.shortname}/{n}"
 
       if not options.skip_upload:
-        print(f"  Uploading {n}...")
-        common.upload_object(bucket, path, common.CONTENT_TYPES[ext], z.read(n), options.credentials)
+        common.upload_object(n, bucket, path, common.CONTENT_TYPES[ext], z.read(n), options.credentials)
 
       self.asset_map[n] = f"https://{options.public_host}/{path}"
 

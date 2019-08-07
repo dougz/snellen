@@ -506,16 +506,17 @@
     }
   },
   "static": {
+    "achievements/log_out_no.png": "https://snellen-preview.storage.googleapis.com/assets/tagvxQTlUqqqmtI6.png",
+    "achievements/log_out_yes.png": "https://snellen-preview.storage.googleapis.com/assets/ll15zt_jbZem1pZN.png",
+    "achievements/solve_puzzle_no.png": "https://snellen-preview.storage.googleapis.com/assets/8qru3IK-qBWW4cRp.png",
+    "achievements/solve_puzzle_yes.png": "https://snellen-preview.storage.googleapis.com/assets/EJ6JAUWhm2zVQU6p.png",
+    "achievements/visit_log_no.png": "https://snellen-preview.storage.googleapis.com/assets/lpluUgiAGErLK7Bj.png",
+    "achievements/visit_log_yes.png": "https://snellen-preview.storage.googleapis.com/assets/m3LcMWU_hGIcFNdV.png",
     "admin-compiled.js": "https://snellen-preview.storage.googleapis.com/assets/sIkoeh4heD2Qp4Lv.js",
     "admin.css": "https://snellen-preview.storage.googleapis.com/assets/gmsbPwv_lYHJ8t36.css",
     "client-compiled.js": "https://snellen-preview.storage.googleapis.com/assets/ssR-PqDRx1N1s60y.js",
-    "event.css": "https://snellen-preview.storage.googleapis.com/assets/VylhmNsFSESsZYog.css",
-    "log_out_no.png": "https://snellen-preview.storage.googleapis.com/assets/tagvxQTlUqqqmtI6.png",
-    "log_out_yes.png": "https://snellen-preview.storage.googleapis.com/assets/ll15zt_jbZem1pZN.png",
-    "mute.png": "https://snellen-preview.storage.googleapis.com/assets/SBTeirgb1CBwnCHE.png",
-    "solve_puzzle_no.png": "https://snellen-preview.storage.googleapis.com/assets/8qru3IK-qBWW4cRp.png",
-    "solve_puzzle_yes.png": "https://snellen-preview.storage.googleapis.com/assets/EJ6JAUWhm2zVQU6p.png",
-    "visit_log_no.png": "https://snellen-preview.storage.googleapis.com/assets/lpluUgiAGErLK7Bj.png",
-    "visit_log_yes.png": "https://snellen-preview.storage.googleapis.com/assets/m3LcMWU_hGIcFNdV.png"
+    "event.css": "https://snellen-preview.storage.googleapis.com/assets/6U_s__4Z-uVox7N1.css",
+    "forest/land.css": "https://snellen-preview.storage.googleapis.com/assets/5BlXSdqoCuhF-ma6.css",
+    "mute.png": "https://snellen-preview.storage.googleapis.com/assets/SBTeirgb1CBwnCHE.png"
   }
 }

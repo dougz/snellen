@@ -26,6 +26,8 @@ class LandMapPage(util.TeamPageHandler):
     if land not in self.team.open_lands:
       raise tornado.web.HTTPError(http.client.NOT_FOUND)
 
+    self.land = land
+
     items = []
     mapdata = {"base_url": land.base_img,
                "items": items}
@@ -65,6 +67,16 @@ class LandMapPage(util.TeamPageHandler):
 
     self.render("land.html", land=land, json_data=json_data)
 
+  def get_template_namespace(self):
+    d = super().get_template_namespace()
+    if self.application.settings.get("debug"):
+      d["css"].append(f"/assets/{self.land.shortname}/land.css")
+    else:
+      css = f"{self.land.shortname}/land.css"
+      if css in self.static_content:
+        d["css"].append(self.static_content[css])
+    return d
+
 
 class EventHomePage(LandMapPage):
   @login.required("team", require_start=False)
@@ -95,6 +107,18 @@ class PuzzlePage(util.TeamPageHandler):
 
     self.puzzle = puzzle
     self.render("puzzle_frame.html", thumb=thumb)
+
+  def get_template_namespace(self):
+    land = self.puzzle.land
+    d = super().get_template_namespace()
+    if self.application.settings.get("debug"):
+      d["css"].append(f"/assets/{land.shortname}/land.css")
+    else:
+      css = f"{land.shortname}/land.css"
+      if css in self.static_content:
+        d["css"].append(self.static_content[css])
+    return d
+
 
 class ActivityLogPage(util.TeamPageHandler):
   @login.required("team")

@@ -40,10 +40,10 @@ class TeamPageHandler(TeamHandler):
     if self.application.settings.get("debug"):
       script += ("""<script src="/closure/goog/base.js"></script>\n"""
                         """<script src="/client.js"></script>""")
-      d["css"] = "/event.css"
+      d["css"] = ["/event.css"]
     else:
       script += f"""<script src="{self.static_content["client-compiled.js"]}"></script>"""
-      d["css"] = self.static_content["event.css"]
+      d["css"] = [self.static_content["event.css"]]
 
     d["script"] = script
     d["json_data"] = None

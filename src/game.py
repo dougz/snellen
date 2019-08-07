@@ -518,8 +518,8 @@ class Achievement:
     self.name = name
     self.title = title
     self.subtitle = subtitle
-    self.yes_url = Achievement.static_dir[name + "_yes.png"]
-    self.no_url = Achievement.static_dir[name + "_no.png"]
+    self.yes_url = Achievement.static_dir["achievements/" + name + "_yes.png"]
+    self.no_url = Achievement.static_dir["achievements/" + name + "_no.png"]
     setattr(Achievement, name, self)
     Achievement.BY_NAME[name] = self
     Achievement.ALL.append(self)
