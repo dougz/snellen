@@ -15,6 +15,7 @@ CONTENT_TYPES = {
   ".css": "text/css; charset=utf-8",
 
   ".zip": "application/zip",
+  ".pdf": "application/pdf",
 }
 
 def upload_object(source, bucket, path, content_type, data, creds):
