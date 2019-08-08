@@ -59,7 +59,7 @@ class UploadHandler(tornado.web.RequestHandler):
                                        solution_url=None,
                                        puzzle=p.pp,
                                        team=Team,
-                                       css=self.static_content["event.css"],
+                                       css=[self.static_content["event.css"]],
                                        script=None,
                                        json_data=None)
       common.upload_object("solution.html",
@@ -74,7 +74,7 @@ class UploadHandler(tornado.web.RequestHandler):
                                        solution_url=p.solution_url,
                                        puzzle=p.pp,
                                        team=Team,
-                                       css=self.static_content["event.css"],
+                                       css=[self.static_content["event.css"]],
                                        script=None,
                                        json_data=None)
       common.upload_object("puzzle.html",
