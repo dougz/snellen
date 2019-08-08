@@ -62,7 +62,8 @@ class UploadHandler(tornado.web.RequestHandler):
                                        css=self.static_content["event.css"],
                                        script=None,
                                        json_data=None)
-      common.upload_object(self.options.bucket, path,
+      common.upload_object("solution.html",
+                           self.options.bucket, path,
                            common.CONTENT_TYPES[".html"],
                            puzzle_html, self.options.credentials)
 
@@ -76,7 +77,8 @@ class UploadHandler(tornado.web.RequestHandler):
                                        css=self.static_content["event.css"],
                                        script=None,
                                        json_data=None)
-      common.upload_object(self.options.bucket, path,
+      common.upload_object("puzzle.html",
+                           self.options.bucket, path,
                            common.CONTENT_TYPES[".html"],
                            puzzle_html, self.options.credentials)
 
@@ -87,7 +89,8 @@ class UploadHandler(tornado.web.RequestHandler):
                                      puzzle_url=p.puzzle_url,
                                      solution_url=p.solution_url,
                                      puzzle=p.pp)
-      common.upload_object(self.options.bucket, path,
+      common.upload_object("meta.html",
+                           self.options.bucket, path,
                            common.CONTENT_TYPES[".html"],
                            meta_html, self.options.credentials)
 
