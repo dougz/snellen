@@ -1,5 +1,6 @@
 import functools
 import json
+import sys
 import time
 
 class SaverClass:
@@ -7,6 +8,8 @@ class SaverClass:
   class_map = {}
   log = None
   next_id = 1
+
+  REPLAYING = False
 
   @classmethod
   def open(cls, filename):
@@ -58,27 +61,32 @@ class SaverClass:
 
   @classmethod
   def replay(cls, advance_time=None):
-    cls.log.seek(0, 0)
-    for line in cls.log:
-      record = json.loads(line)
-      name, saver_id, now, args, kwargs = record
-      if advance_time:
-        advance_time(now)
+    cls.REPLAYING = True
+    try:
+      cls.log.seek(0, 0)
+      for line in cls.log:
+        record = json.loads(line)
+        name, saver_id, now, args, kwargs = record
+        if advance_time:
+          advance_time(now)
 
-      classname, num = saver_id.split(":")
-      num = int(num)
-      if cls.next_id <= num:
-        cls.next_id = num + 1
-      klass = cls.class_map[classname]
-      if name == "__init__":
-        obj = klass.__new__(klass)
-        obj.__init__.__wrapped__(obj, now, *args, **kwargs)
-        obj._saver_id = saver_id
-        cls.instance_index[saver_id] = obj
-      else:
-        getattr(klass, name).__wrapped__(cls.instance_index[saver_id], now, *args, **kwargs)
-
-    cls.log.seek(0, 2)
+        classname, num = saver_id.split(":")
+        num = int(num)
+        if cls.next_id <= num:
+          cls.next_id = num + 1
+        klass = cls.class_map[classname]
+        if name == "__init__":
+          obj = klass.__new__(klass)
+          obj.__init__.__wrapped__(obj, now, *args, **kwargs)
+          obj._saver_id = saver_id
+          cls.instance_index[saver_id] = obj
+        else:
+          getattr(klass, name).__wrapped__(cls.instance_index[saver_id], now, *args, **kwargs)
+      cls.log.seek(0, 2)
+    except Exception as e:
+      print(e)
+    finally:
+      cls.REPLAYING = False
 
 
 save_state = SaverClass()

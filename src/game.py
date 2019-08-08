@@ -185,6 +185,7 @@ class Team(login.LoginUser):
     self.pending_messages = []
 
   def achieve(self, ach):
+    if save_state.REPLAYING: return
     if ach not in self.achievements:
       self.record_achievement(ach.name)
 
@@ -192,6 +193,7 @@ class Team(login.LoginUser):
     """Like achieve(), but delayed slightly.  Useful for achievements
     triggered by page load, so the loaded page gets the
     notification."""
+    if save_state.REPLAYING: return
     async def future():
       await asyncio.sleep(delay)
       self.achieve(ach)
@@ -325,24 +327,35 @@ class Team(login.LoginUser):
             self.send_messages([{"method": "open", "title": html.escape(st.puzzle.land.title)}])
           self.open_lands[st.puzzle.land] = now
 
+class Subicon:
+  def __init__(self, d):
+    if d:
+      self.pos = tuple(d["pos"])
+      self.size = tuple(d["size"])
+      self.poly = d["poly"]
+      self.url = d["url"]
+    else:
+      self.pos = None
+      self.size = None
+      self.poly = None
+      self.url = None
+
+  def __repr__(self):
+    return f"<{self.size[0]}x{self.size[1]} @ {self.pos[0]}x{self.pos[1]}>"
+
 class Icon:
   def __init__(self, name, land, d):
     self.name = name
     self.land = land
-    self.pos = tuple(d["pos"])
-    self.size = tuple(d["size"])
-    self.poly = d.get("poly", None)
     self.puzzle = None
     self.to_land = None
-    self.thumb_size = d.get("thumb_size", self.size)
+    #self.thumb_size = d.get("thumb_size", self.size)
 
-    self.images = {
-      "locked": d.get("locked", None),
-      "unlocked": d.get("unlocked", None),
-      "solved": d.get("solved", None),
-      "unlocked_thumb": d.get("unlocked_thumb", d.get("unlocked")),
-      "solved_thumb": d.get("solved_thumb", d.get("solved")),
-      }
+    self.locked = Subicon(d.get("locked"))
+    self.unlocked = Subicon(d.get("unlocked"))
+    self.solved = Subicon(d.get("solved"))
+    self.unlocked_thumb = Subicon(d.get("unlocked_thumb"))
+    self.solved_thumb = Subicon(d.get("solved_thumb"))
 
 
 class Land:

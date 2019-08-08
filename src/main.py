@@ -78,7 +78,7 @@ def main_server(options):
     team.open_lands[start_map] = 0
     team.discard_messages()
 
-  if options.start_event:
+  if options.start_event and not game.Global.STATE.event_start_time:
     game.Global.STATE.start_event()
 
   if options.root_password:

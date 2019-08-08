@@ -47,20 +47,26 @@ class LandMapPage(util.TeamPageHandler):
           if "answer" in d: d["answer"] += ", \u2026"
 
           d["solved"] = False
-          d["icon_url"] = i.images["unlocked"]
+          if i.unlocked.url:
+            d["icon_url"] = i.unlocked.url
+            d["pos_x"], d["pos_y"] = i.unlocked.pos
+            d["width"], d["height"] = i.unlocked.size
+            if i.unlocked.poly: d["poly"] = i.unlocked.poly
 
         elif st.state == game.PuzzleState.SOLVED:
           d["solved"] = True
-          d["icon_url"] = i.images["solved"]
+          if i.solved.url:
+            d["icon_url"] = i.solved.url
+            d["pos_x"], d["pos_y"] = i.solved.pos
+            d["width"], d["height"] = i.solved.size
+            if i.solved.poly: d["poly"] = i.solved.poly
+
       else:
         if i.to_land not in self.team.open_lands: continue
         d = { "name": i.to_land.title,
               "url": i.to_land.url,
-              "icon_url": i.images["unlocked"] }
+              "icon_url": i.unlocked.url }
 
-      d["pos_x"], d["pos_y"] = i.pos
-      d["width"], d["height"] = i.size
-      if i.poly: d["poly"] = i.poly
       items.append(d)
 
     json_data = "<script>var mapdata = """ + json.dumps(mapdata) + ";</script>"
@@ -101,9 +107,9 @@ class PuzzlePage(util.TeamPageHandler):
 
     if (state.state == game.PuzzleState.SOLVED and
         not state.recent_solve()):
-      thumb = "solved_thumb"
+      thumb = puzzle.icon.solved_thumb
     else:
-      thumb = "unlocked_thumb"
+      thumb = puzzle.icon.unlocked_thumb
 
     self.puzzle = puzzle
     self.render("puzzle_frame.html", thumb=thumb)
@@ -178,9 +184,8 @@ class SubmitHistoryHandler(util.TeamHandler):
       d["total"] = len(state.puzzle.answers)
 
     if state.recent_solve():
-      d["overlay"] = state.puzzle.icon.images["solved_thumb"]
-      d["width"] = state.puzzle.icon.size[0]
-      d["height"] = state.puzzle.icon.size[1]
+      d["overlay"] = state.puzzle.icon.solved_thumb.url
+      d["width"], d["height"] = state.puzzle.icon.solved_thumb.size
 
     self.write(json.dumps(d))
 

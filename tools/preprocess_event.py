@@ -59,8 +59,8 @@ def convert_map(shortname, d, options):
     out_icons = []
     out["icons"] = out_icons
     for ic in icons:
-      oic = {"name": ic["name"],
-             "pos": ic["pos"]}
+      oic = {"name": ic["name"]}
+      #"pos": ic["pos"]}
 
       if "puzzle" in ic: oic["puzzle"] = ic["puzzle"]
 
@@ -70,20 +70,15 @@ def convert_map(shortname, d, options):
                                   ic["name"] + "_" + variant + ".png")
         if not os.path.exists(icon_image): continue
 
-        if "size" not in oic:
-          oic["size"] = get_image_size(icon_image)
-        if variant.endswith("_thumb") and "thumb_size" not in oic:
-          oic["thumb_size"] = get_image_size(icon_image)
+        voic = dict(ic[variant])
+        oic[variant] = voic
+        voic["url"] = upload_file(icon_image, options)
 
-        oic[variant] = upload_file(icon_image, options)
-
-      # If poly isn't specified, make a rectangle covering the whole icon.
-      if "poly" in ic:
-        oic["poly"] = ic["poly"]
-      else:
-        x, y = oic["pos"]
-        w, h = oic["size"]
-        oic["poly"] = f"{x},{y},{x+w},{y},{x+w},{y+h},{x},{y+h}"
+        # If poly isn't specified, make a rectangle covering the whole icon.
+        if "poly" not in voic:
+          x, y = voic["pos"]
+          w, h = voic["size"]
+          voic["poly"] = f"{x},{y},{x+w},{y},{x+w},{y+h},{x},{y+h}"
 
       out_icons.append(oic)
 
