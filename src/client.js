@@ -6,7 +6,7 @@ goog.require("goog.ui.ModalPopup");
 goog.require("goog.json.Serializer");
 goog.require("goog.i18n.DateTimeFormat");
 
-class Waiter {
+class H2020_Waiter {
     constructor(dispatcher) {
 	/** @type{goog.net.XhrIo} */
 	this.xhr = new goog.net.XhrIo();
@@ -15,7 +15,7 @@ class Waiter {
 	/** @type{number} */
 	this.backoff = 250;
 
-	/** @type(Dispatcher) */
+	/** @type(H2020_Dispatcher) */
 	this.dispatcher = dispatcher;
     }
 
@@ -60,7 +60,7 @@ class Waiter {
     }
 }
 
-class Dispatcher {
+class H2020_Dispatcher {
     constructor() {
 	this.methods = {
 	    "history_change": this.history_change,
@@ -78,30 +78,30 @@ class Dispatcher {
     /** @param{Message} msg */
     history_change(msg) {
 	if (msg.puzzle_id == puzzle_id) {
-	    submit_panel.update_history();
+	    hunt2020.submit_panel.update_history();
 	}
     }
 
     /** @param{Message} msg */
     solve(msg) {
 	if (msg.audio) {
-	    audio_manager.start(msg.audio);
+	    hunt2020.audio_manager.start(msg.audio);
 	}
-	toast_manager.add_toast("<b>" + msg.title + "</b> was solved!", 6000, true);
+	hunt2020.toast_manager.add_toast("<b>" + msg.title + "</b> was solved!", 6000, true);
     }
 
     /** @param{Message} msg */
     open(msg) {
-	toast_manager.add_toast("<b>" + msg.title + "</b> is now open!", 6000);
+	hunt2020.toast_manager.add_toast("<b>" + msg.title + "</b> is now open!", 6000);
     }
 
     /** @param{Message} msg */
     achieve(msg) {
-	toast_manager.add_toast("You received the <b>" + msg.title + "</b> pin!", 6000, null, "gold");
+	hunt2020.toast_manager.add_toast("You received the <b>" + msg.title + "</b> pin!", 6000, null, "gold");
     }
 }
 
-class TimeFormatter {
+class H2020_TimeFormatter {
     constructor() {
 	this.formatter = new goog.i18n.DateTimeFormat("EEE h:mm:ss aa");
     }
@@ -118,7 +118,7 @@ class TimeFormatter {
     }
 }
 
-class SubmitPanel {
+class H2020_SubmitPanel {
     constructor() {
 	/** @type{boolean} */
 	this.built = false;
@@ -256,7 +256,7 @@ class SubmitPanel {
 	    var tr = goog.dom.createDom(
 		"TR", null,
 		goog.dom.createDom("TD", {className: "submit-time"},
-				   time_formatter.format(sub.submit_time)),
+				   hunt2020.time_formatter.format(sub.submit_time)),
 		goog.dom.createDom("TD", {className: "submit-state"},
 				   el,
 				   goog.dom.createDom("SPAN", {className: "submit-" + sub.state},
@@ -319,7 +319,7 @@ class SubmitPanel {
 	    var el = this.counters[i][1];
 	    var remain = null;
 	    if (check_time > now) {
-		remain = time_formatter.duration(check_time - now);
+		remain = hunt2020.time_formatter.duration(check_time - now);
 	    } else {
 		remain = "0:00";
 	    }
@@ -383,7 +383,7 @@ class SubmitPanel {
     }
 }
 
-class ToastManager {
+class H2020_ToastManager {
     constructor() {
 	/** @type{Element} */
 	this.toasts_div = goog.dom.createDom("DIV", {className: "toasts"});
@@ -411,7 +411,7 @@ class ToastManager {
 		 className: localStorage.getItem("mute") ? "mute" : "mute muteoff"});
 
 	    goog.events.listen(icon, goog.events.EventType.CLICK,
-			       goog.bind(audio_manager.toggle_mute, audio_manager));
+			       goog.bind(hunt2020.audio_manager.toggle_mute, hunt2020.audio_manager));
 	}
 
 	var t = goog.dom.createDom("DIV", {className: "toast toast"+color}, icon, tt);
@@ -440,7 +440,7 @@ class ToastManager {
     }
 }
 
-class MapDraw {
+class H2020_MapDraw {
     constructor() {
 	/** @type{Element} */
 	this.map_el = goog.dom.getElement("map");
@@ -524,7 +524,7 @@ class MapDraw {
     }
 }
 
-class AudioManager {
+class H2020_AudioManager {
     constructor() {
 	this.current = null;
 	this.current_url = null;
@@ -578,35 +578,37 @@ class AudioManager {
     }
 }
 
-var waiter = null;
-var submit_panel = null;
-var time_formatter = null;
-var toast_manager = null;
-var audio_manager = null;
-var map_draw = null;
+var hunt2020 = {
+    waiter: null,
+    submit_panel: null,
+    time_formatter: null,
+    toast_manager: null,
+    audio_manager: null,
+    map_draw: null,
+}
 
-function initPage() {
-    time_formatter = new TimeFormatter();
-    toast_manager = new ToastManager();
-    audio_manager = new AudioManager();
+window.onload = function() {
+    hunt2020.time_formatter = new H2020_TimeFormatter();
+    hunt2020.toast_manager = new H2020_ToastManager();
+    hunt2020.audio_manager = new H2020_AudioManager();
 
-    waiter = new Waiter(new Dispatcher());
-    waiter.start();
+    hunt2020.waiter = new H2020_Waiter(new H2020_Dispatcher());
+    hunt2020.waiter.start();
 
     // Only present on the puzzle pages.
     var a = goog.dom.getElement("submit");
     if (a) {
-	submit_panel = new SubmitPanel();
+	hunt2020.submit_panel = new H2020_SubmitPanel();
 	goog.events.listen(a, goog.events.EventType.CLICK,
-			   goog.bind(submit_panel.toggle, submit_panel));
+			   goog.bind(hunt2020.submit_panel.toggle, hunt2020.submit_panel));
 	if (puzzle_id && puzzle_init) puzzle_init();
     }
 
     // Only present on the map pages.
     var m = goog.dom.getElement("map");
     if (m) {
-	map_draw = new MapDraw();
-	map_draw.draw_map(mapdata);
+	hunt2020.map_draw = new H2020_MapDraw();
+	hunt2020.map_draw.draw_map(mapdata);
     }
 
     // Only present on the activity log page.
@@ -617,13 +619,11 @@ function initPage() {
 	    var html = log_entries[i][1];
 
 	    var span = goog.dom.createDom("SPAN");
-	    span.innerHTML = time_formatter.format(t) + " &mdash; " + html;
+	    span.innerHTML = hunt2020.time_formatter.format(t) + " &mdash; " + html;
 	    var li = goog.dom.createDom("LI", null, span);
 	    log.appendChild(li);
 	}
     }
 
 }
-
-window.onload = initPage;
 
