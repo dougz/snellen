@@ -1,5 +1,13 @@
 {
   "maps": {
+    "bigtop": {
+      "base_img": "https://snellen-preview.storage.googleapis.com/assets/OBX56f9QWfVmuVHk.png",
+      "base_size": [
+        1000,
+        800
+      ],
+      "title": "Big Top"
+    },
     "castle": {
       "base_img": "https://snellen-preview.storage.googleapis.com/assets/8-h5V7FkTFBtK_8R.png",
       "base_size": [
@@ -431,6 +439,96 @@
       "base_size": [
         962,
         635
+      ],
+      "icons": [
+        {
+          "name": "castle",
+          "unlocked": {
+            "poly": [
+              452,
+              244,
+              359,
+              273,
+              387,
+              339,
+              414,
+              343,
+              322,
+              401,
+              265,
+              452,
+              231,
+              566,
+              687,
+              573,
+              692,
+              485,
+              704,
+              443,
+              667,
+              383,
+              559,
+              349,
+              559,
+              325,
+              622,
+              292,
+              613,
+              267,
+              580,
+              267,
+              518,
+              235
+            ],
+            "pos": [
+              206,
+              187
+            ],
+            "size": [
+              517,
+              448
+            ],
+            "url": "https://snellen-preview.storage.googleapis.com/assets/jtzPqMr3RVNU9t7p.png"
+          }
+        },
+        {
+          "name": "bigtop",
+          "unlocked": {
+            "poly": [
+              569,
+              342,
+              626,
+              296,
+              738,
+              338,
+              740,
+              307,
+              861,
+              334,
+              910,
+              425,
+              900,
+              503,
+              828,
+              528,
+              728,
+              531,
+              712,
+              440,
+              667,
+              379
+            ],
+            "pos": [
+              558,
+              270
+            ],
+            "size": [
+              352,
+              266
+            ],
+            "url": "https://snellen-preview.storage.googleapis.com/assets/js5k14_VflYwIFPz.png"
+          }
+        }
       ],
       "title": "Penny Park"
     }

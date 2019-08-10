@@ -66,6 +66,10 @@ class LandMapPage(util.TeamPageHandler):
         d = { "name": i.to_land.title,
               "url": i.to_land.url,
               "icon_url": i.unlocked.url }
+        d["pos_x"], d["pos_y"] = i.unlocked.pos
+        d["width"], d["height"] = i.unlocked.size
+        if i.unlocked.poly: d["poly"] = i.unlocked.poly
+
 
       items.append(d)
 
