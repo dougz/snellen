@@ -8,6 +8,10 @@ body {
     margin: 0;
 }
 
+input, button {
+    font-family: 'Merriweather Sans', sans-serif;
+}
+
 .disclaimer {
     text-align: center;
     font-style: italic;

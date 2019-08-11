@@ -9,193 +9,6 @@ import tornado.httpclient
 import tornado.httpserver
 import tornado.netutil
 
-import login
-
-# Reply to wait proxies at least this often, even if we have no
-# messages to send.
-PROXY_WAIT_TIMEOUT = 30 # seconds
-
-
-##
-## server side
-##
-
-
-class Server:
-  PROXIES = []
-  NEXT_WID = 1
-
-  def __init__(self, wpid):
-    self.cv = asyncio.Condition()
-    self.q = []
-
-  @classmethod
-  def init_proxies(cls, count):
-    for i in range(count):
-      cls.PROXIES.append(Server(i))
-
-  @classmethod
-  async def send_message(cls, team, serial, strs):
-    if not isinstance(team, str):
-      team = team.username
-    x = (team,  tuple((serial+i, s) for (i, s) in enumerate(strs)))
-    for p in cls.PROXIES:
-      async with p.cv:
-        p.q.append(x)
-        p.cv.notify_all()
-
-  @classmethod
-  def new_waiter_id(cls):
-    wid, cls.NEXT_WID = cls.NEXT_WID, cls.NEXT_WID+1
-    return wid
-
-  @classmethod
-  async def exit(cls):
-    await cls.send_message("__EXIT", 0, [""])
-
-
-class ProxyWaitHandler(tornado.web.RequestHandler):
-  async def get(self, wpid):
-    wpid = int(wpid)
-    proxy = Server.PROXIES[wpid]
-
-    async with proxy.cv:
-      try:
-        await asyncio.wait_for(proxy.cv.wait(), PROXY_WAIT_TIMEOUT)
-      except asyncio.TimeoutError:
-        pass
-
-      content, proxy.q = proxy.q, []
-
-    content = json.dumps(content)
-    self.set_header("Content-Type", "application/json")
-    self.set_header("Cache-Control", "no-store")
-    self.write(content)
-
-
-class CheckSessionHandler(tornado.web.RequestHandler):
-  def get(self, key):
-    key = key.encode("ascii")
-    session = login.Session.from_key(key)
-    self.set_header("Content-Type", "text/plain")
-    if session is not None and hasattr(session, "team") and session.team:
-      self.write(session.team.username)
-
-
-def GetHandlers():
-  return [
-    (r"/proxywait/(\d+)", ProxyWaitHandler),
-    (r"/checksession/(\S+)", CheckSessionHandler),
-  ]
-
-
-##
-## client side
-##
-
-
-class Client:
-  def __init__(self, wpid, options):
-    self.wpid = wpid
-    self.options = options
-
-    self.session_cache = {}
-
-    tornado.httpclient.AsyncHTTPClient.configure(
-      "tornado.curl_httpclient.CurlAsyncHTTPClient", max_clients=10000)
-    self.client = tornado.httpclient.AsyncHTTPClient()
-
-    app = tornado.web.Application(
-      [(r"/wait/(\d+)/(\d+)", WaitHandler, {"proxy_client": self})],
-      cookie_secret=options.cookie_secret)
-
-    self.server = tornado.httpserver.HTTPServer(app)
-    socket = tornado.netutil.bind_unix_socket(f"{options.socket_path}_p{wpid}", mode=0o666, backlog=3072)
-    self.server.add_socket(socket)
-
-  def start(self):
-    ioloop = tornado.ioloop.IOLoop.current()
-    ioloop.spawn_callback(self.fetch)
-    ioloop.spawn_callback(self.purge)
-    #ioloop.spawn_callback(self.print_stats)
-    try:
-      print(f"proxy waiter #{self.wpid} listening")
-      ioloop.start()
-    except KeyboardInterrupt:
-      pass
-
-  async def print_stats(self):
-    while True:
-      out = {}
-      for t in ProxyTeam.all_teams():
-        out[t.team] = len(t.waiters)
-      print(f"proxy #{self.wpid}: {out}")
-
-      await asyncio.sleep(2.5)
-
-  async def fetch(self):
-    # Give main server time to start up.
-    await asyncio.sleep(2.0)
-
-    while True:
-      msgs = await self.get_messages()
-      for team, items in msgs:
-        if team == "__EXIT":
-          print(f"proxy waiter #{self.wpid} exiting")
-          asyncio.get_running_loop().stop()
-          return
-        team = ProxyTeam.get_team(team)
-        await team.send_messages(items)
-
-  async def purge(self):
-    while True:
-      await asyncio.sleep(Waiter.WAITER_TIMEOUT)
-      now = time.time()
-      for t in ProxyTeam.all_teams():
-        to_delete = set()
-        for w in t.waiters:
-          if w.purgeable(now):
-            to_delete.add(w)
-        if to_delete:
-          t.waiters -= to_delete
-
-  async def get_messages(self):
-    while True:
-      req = tornado.httpclient.HTTPRequest(
-        f"http://localhost:{self.options.wait_proxy_port}/proxywait/{self.wpid}",
-        connect_timeout=5.0,
-        request_timeout=PROXY_WAIT_TIMEOUT+10)
-      try:
-        response = await self.client.fetch(req)
-        return json.loads(response.body)
-      except tornado.httpclient.HTTPClientError as e:
-        print(f"proxy {self.wpid} got {e.code}; retrying")
-        await asyncio.sleep(1.0)
-
-  async def check_session(self, key):
-    if not key:
-      raise tornado.web.HTTPError(http.client.UNAUTHORIZED)
-
-    key = key.decode("ascii")
-    team = self.session_cache.get(key)
-    if team: return team
-
-    req = tornado.httpclient.HTTPRequest(
-      f"http://localhost:{self.options.wait_proxy_port}/checksession/{key}",
-      connect_timeout=5.0,
-      request_timeout=10.0)
-    try:
-      response = await self.client.fetch(req)
-      team = response.body.decode("ascii")
-      if team:
-        self.session_cache[key] = team
-        return team
-    except tornado.httpclient.HTTPClientError as e:
-      pass
-
-    raise tornado.web.HTTPError(http.client.UNAUTHORIZED)
-
-
 class ProxyTeam:
   BY_TEAM = {}
 
@@ -215,20 +28,113 @@ class ProxyTeam:
     self.team = team
     self.cv = asyncio.Condition()
     self.waiters = set()
+    self.serial = 1
+    self.sticky_messages = None
 
   def __str__(self):
     return f"<ProxyTeam {self.team}>"
 
-  async def send_messages(self, msgs):
+  async def send_messages(self, msgs, sticky=None):
     if not msgs: return
     if not self.waiters: return
     async with self.cv:
+      msgs = [(self.serial+i, json.dumps(m)) for (i, m) in enumerate(msgs)]
+      self.serial += len(msgs)
+
+      if sticky:
+        self.sticky_messages = msgs[-sticky:]
+
       for w in self.waiters:
         w.q.extend(msgs)
       self.cv.notify_all()
 
   def add_waiter(self, waiter):
     self.waiters.add(waiter)
+    return self.sticky_messages
+
+
+class ScrumApp:
+  def __init__(self, options, handlers):
+    self.options = options
+
+    self.session_cache = {}
+
+    tornado.httpclient.AsyncHTTPClient.configure(
+      "tornado.curl_httpclient.CurlAsyncHTTPClient", max_clients=10000)
+    self.client = tornado.httpclient.AsyncHTTPClient()
+
+    r = f"/{options.wait_url}/(\\d+)/(\\d+)"
+    handlers = [(r, WaitHandler, {"scrum_app": self})] + handlers
+    app = tornado.web.Application(
+      handlers,
+      cookie_secret=options.cookie_secret,
+      scrum_app=self)
+
+    self.server = tornado.httpserver.HTTPServer(app)
+    socket = tornado.netutil.bind_unix_socket(options.socket_path, mode=0o666, backlog=3072)
+    self.server.add_socket(socket)
+
+  def start(self):
+    ioloop = tornado.ioloop.IOLoop.current()
+    ioloop.spawn_callback(self.purge)
+    #ioloop.spawn_callback(self.print_stats)
+    try:
+      print(f"scrum app listening")
+      ioloop.start()
+    except KeyboardInterrupt:
+      pass
+
+  def add_callback(self, callback):
+    ioloop = tornado.ioloop.IOLoop.current()
+    ioloop.spawn_callback(callback)
+
+  async def print_stats(self):
+    while True:
+      out = {}
+      for t in ProxyTeam.all_teams():
+        out[t.team] = len(t.waiters)
+      print(f"proxy #{self.wpid}: {out}")
+
+      await asyncio.sleep(2.5)
+
+  async def purge(self):
+    while True:
+      await asyncio.sleep(Waiter.WAITER_TIMEOUT)
+      now = time.time()
+      for t in ProxyTeam.all_teams():
+        to_delete = set()
+        for w in t.waiters:
+          if w.purgeable(now):
+            to_delete.add(w)
+        if to_delete:
+          t.waiters -= to_delete
+
+  async def check_session(self, key):
+    key = key.decode("ascii")
+    team = self.session_cache.get(key)
+    if team: return team
+
+    req = tornado.httpclient.HTTPRequest(
+      f"http://localhost:{self.options.main_server_port}/checksession/{key}",
+      connect_timeout=5.0,
+      request_timeout=10.0)
+    try:
+      response = await self.client.fetch(req)
+      team = response.body.decode("ascii")
+      if team:
+        self.session_cache[key] = team
+        return team
+    except tornado.httpclient.HTTPClientError as e:
+      pass
+
+    raise tornado.web.HTTPError(http.client.UNAUTHORIZED)
+
+  async def check_cookie(self, req):
+    key = req.get_secure_cookie("SESSION") # login.Session.COOKIE_NAME
+    if not key:
+      raise tornado.web.HTTPError(http.client.UNAUTHORIZED)
+    team = await self.check_session(key)
+    return ProxyTeam.get_team(team), key
 
 
 class Waiter:
@@ -246,10 +152,11 @@ class Waiter:
 
   def __init__(self, wid, team):
     self.team = team
-    team.add_waiter(self)
+    initial_msgs = team.add_waiter(self)
     self.last_acked = 0
     self.wid = wid
     self.q = collections.deque()
+    if initial_msgs: self.q.extend(initial_msgs)
 
     self.wait_in_progress = False
     self.last_return = time.time()
@@ -281,18 +188,20 @@ class Waiter:
         except asyncio.TimeoutError:
           pass
 
+  async def on_wait(self, team, session):
+    pass
+
+
 
 class WaitHandler(tornado.web.RequestHandler):
   WAIT_TIMEOUT = 600
   WAIT_SMEAR = 60
 
-  def initialize(self, proxy_client):
-    self.proxy_client = proxy_client
+  def initialize(self, scrum_app):
+    self.scrum_app = scrum_app
 
   async def get(self, wid, received_serial):
-    key = self.get_secure_cookie(login.Session.COOKIE_NAME)
-    team = await self.proxy_client.check_session(key)
-    team = ProxyTeam.get_team(team)
+    team, session = await self.scrum_app.check_cookie(self)
 
     wid = int(wid)
     received_serial = int(received_serial)
@@ -305,6 +214,8 @@ class WaitHandler(tornado.web.RequestHandler):
       timeout = random.random() * (self.WAIT_TIMEOUT + self.WAIT_SMEAR)
     else:
       timeout = self.WAIT_TIMEOUT + random.random() * self.WAIT_SMEAR
+
+    await self.scrum_app.on_wait(team, session)
 
     msgs = await waiter.wait(received_serial, timeout)
 

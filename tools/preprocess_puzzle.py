@@ -114,7 +114,10 @@ class Puzzle:
 
   def save(self, output_dir):
     with open(os.path.join(output_dir, self.shortname + ".json"), "w") as f:
-      json.dump(self.json_dict(), f, sort_keys=True)
+      json.dump(self.json_dict(), f, sort_keys=True, indent=2)
+    with open(os.path.join(output_dir, self.shortname + ".assets.json"), "w") as f:
+      json.dump(self.asset_map, f, sort_keys=True, indent=2)
+
 
 
 def main():
