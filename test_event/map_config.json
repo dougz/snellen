@@ -17,7 +17,7 @@
       "icons": [
         {
           "name": "pentagon",
-          "puzzle": "_",
+          "puzzle": "tug_of_war",
           "solved": {
             "poly": "112,59,67,133,126,194,201,158,195,71",
             "pos": [
@@ -69,7 +69,7 @@
         },
         {
           "name": "square",
-          "puzzle": "_",
+          "puzzle": "bad_art",
           "solved": {
             "poly": "410,49,381,151,486,187,515,84",
             "pos": [
@@ -543,8 +543,8 @@
     "admin-compiled.js": "https://snellen-preview.storage.googleapis.com/assets/sIkoeh4heD2Qp4Lv.js",
     "admin.css": "https://snellen-preview.storage.googleapis.com/assets/gmsbPwv_lYHJ8t36.css",
     "castle/land.css": "https://snellen-preview.storage.googleapis.com/assets/gg0bHvM4ByRyXl-p.css",
-    "client-compiled.js": "https://snellen-preview.storage.googleapis.com/assets/ssR-PqDRx1N1s60y.js",
-    "event.css": "https://snellen-preview.storage.googleapis.com/assets/6U_s__4Z-uVox7N1.css",
+    "client-compiled.js": "https://snellen-preview.storage.googleapis.com/assets/ojgbWS7q7sWXWQQ5.js",
+    "event.css": "https://snellen-preview.storage.googleapis.com/assets/Y2ki4ei4Fik5UiGJ.css",
     "mute.png": "https://snellen-preview.storage.googleapis.com/assets/SBTeirgb1CBwnCHE.png"
   }
 }

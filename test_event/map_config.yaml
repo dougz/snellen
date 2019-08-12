@@ -34,7 +34,7 @@ castle:
   title: Castle
   icons:
   - name: pentagon
-    puzzle: _
+    puzzle: tug_of_war
     solved:
       poly: 112,59,67,133,126,194,201,158,195,71
       pos: [66, 58]
@@ -50,7 +50,7 @@ castle:
       pos: [53, 48]
       size: [159, 157]
   - name: square
-    puzzle: _
+    puzzle: bad_art
     solved:
       poly: 410,49,381,151,486,187,515,84
       pos: [380, 48]

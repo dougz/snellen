@@ -206,7 +206,7 @@ def GetHandlers():
     (r"/log", ActivityLogPage),
     (r"/pins", AchievementPage),
     (r"/land/([a-z0-9_]+)", LandMapPage),
-    (r"/puzzle/([^/]+)/?", PuzzlePage),
+    (r"/puzzle/([a-z0-9_]+)/?", PuzzlePage),
     (r"/submit", SubmitHandler),
     (r"/submit_history/([a-z][a-z0-9_]*)", SubmitHistoryHandler),
     (r"/submit_cancel/([a-z][a-z0-9_]*)/(\d+)", SubmitCancelHandler),

@@ -1,0 +1,12 @@
+{
+  "answers": [
+    "FINGERPAINTS"
+  ],
+  "html_body": "\n    <div id=\"top\">\n      <div id=\"identify\">\n\tEnter your name: <input id=\"who\" maxlength=\"30\" type=\"text\"/><br/><br/>\n\t<span id=\"countdown\"></span>\n      </div>\n      <div id=\"chat\">\n\t<p></p><p></p><p></p><p></p>\n      </div>\n    </div>\n    <div id=\"message\"></div>\n    <div id=\"gallery\">\n      <img id=\"art\"/>\n      <div id=\"caption\">\n\t<p>L. Out (b. 2005)</p>\n\t<p id=\"titleline\"><span id=\"title\"></span>, 2020</p>\n\t<p>Pixels on tablet</p>\n      </div>\n    </div>\n    <div id=\"entry\">\n      <input id=\"text\" maxlength=\"80\" type=\"text\"/>\n      <button id=\"artsubmit\">Submit</button>\n    </div>\n    <img id=\"preload\"/>\n  \n\n",
+  "html_head": "\n    <link href=\"/artdebug/badart.css\" rel=\"stylesheet\"/>\n    <script src=\"/closure/goog/base.js\"></script>\n    <script src=\"/artdebug/badart.js\"></script>\n  ",
+  "incorrect_responses": {},
+  "oncall": "dougz@isotropic.org",
+  "puzzletron_id": 136,
+  "shortname": "bad_art",
+  "title": "Bad Art"
+}
