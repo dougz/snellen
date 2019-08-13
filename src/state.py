@@ -36,7 +36,7 @@ class SaverClass:
         now = time.time()
         cname = self.__class__.__name__
         new_id = cname + ":" + str(cls.next_id)
-        record = (fn.__name__, new_id, now, args, kwargs)
+        record = (new_id, fn.__name__, now, args, kwargs)
         json.dump(record, cls.log)
         cls.log.write("\n")
         cls.log.flush()
@@ -51,7 +51,7 @@ class SaverClass:
       @functools.wraps(fn)
       def wrapped_fn(self, *args, **kwargs):
         now = time.time()
-        record = (fn.__name__, self._saver_id, now, args, kwargs)
+        record = (self._saver_id, fn.__name__, now, args, kwargs)
         json.dump(record, cls.log)
         cls.log.write("\n")
         cls.log.flush()
@@ -60,20 +60,29 @@ class SaverClass:
       return wrapped_fn
 
   @classmethod
+  def add_instance(cls, saver_id, instance):
+    instance._saver_id = saver_id
+    cls.instance_index[saver_id] = instance
+
+  @classmethod
   def replay(cls, advance_time=None):
+    skipped = set()
     cls.REPLAYING = True
     try:
       cls.log.seek(0, 0)
       for line in cls.log:
         record = json.loads(line)
-        name, saver_id, now, args, kwargs = record
+        saver_id, name, now, args, kwargs = record
         if advance_time:
           advance_time(now)
 
         classname, num = saver_id.split(":")
-        num = int(num)
-        if cls.next_id <= num:
-          cls.next_id = num + 1
+        try:
+          num = int(num)
+          if cls.next_id <= num:
+            cls.next_id = num + 1
+        except ValueError:
+          pass
         klass = cls.class_map[classname]
         if name == "__init__":
           obj = klass.__new__(klass)
@@ -81,12 +90,20 @@ class SaverClass:
           obj._saver_id = saver_id
           cls.instance_index[saver_id] = obj
         else:
-          getattr(klass, name).__wrapped__(cls.instance_index[saver_id], now, *args, **kwargs)
+          instance = cls.instance_index.get(saver_id, None)
+          if instance:
+            getattr(klass, name).__wrapped__(instance, now, *args, **kwargs)
+          else:
+            skipped.add(saver_id)
       cls.log.seek(0, 2)
     except Exception as e:
-      print(e)
+      print("whoops", e)
+      raise
     finally:
       cls.REPLAYING = False
+
+    if skipped:
+      print("Replay skipped references to: " + ", ".join(saver_id))
 
 
 save_state = SaverClass()

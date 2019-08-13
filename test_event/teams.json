@@ -1,0 +1,818 @@
+{
+  "galactic": {
+    "attrs": {
+      "location": "Building 2"
+    },
+    "name": "\u2708\u2708\u2708 Galactic Trendsetters \u2708\u2708\u2708",
+    "pwhash": "$2b$12$appLCeF9ZJ03FxRqhQv8CuWrUfJQdYLaoZaPHizAHKH/wmg9CzRcq",
+    "size": 60
+  },
+  "leftout": {
+    "attrs": {
+      "location": "Building 1"
+    },
+    "name": "Left Out",
+    "pwhash": "$2b$12$jwSbxyASQw4C5JbsGbi08uqzkTOyADPHLwP2oplWOvXfI7/3Eny8m",
+    "size": 60
+  },
+  "team1": {
+    "attrs": {
+      "location": "Someone's apartment"
+    },
+    "name": "Team #1",
+    "pwhash": "$2b$12$sIkoz4g0.bxLP71D4M28LOZqTTd9HnWORgN6Nu/J9YWn1l7Y6kWEW",
+    "size": 5
+  },
+  "team10": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #10",
+    "pwhash": "$2b$12$z6tGSkRO7sA1BKkG18uvq.7VHsuBOVGYM.lpkXUqISVHwUZbkVG1S",
+    "size": 10
+  },
+  "team100": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #100",
+    "pwhash": "$2b$12$oFJx2N3SU9FSzoOfaEDAU.jgm/jOol9FutTMUqchbo7krlbZhw6Pm",
+    "size": 10
+  },
+  "team11": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #11",
+    "pwhash": "$2b$12$uyytGZWZk66WVB5lG7meLeBH/n5mXWMywVvXNC9xPMXfTGSIcFs4y",
+    "size": 10
+  },
+  "team12": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #12",
+    "pwhash": "$2b$12$JcX.Ew2.KJXRIF1OBcnbSeLjpMdZ1rHW8iT8LVowGzLmensQLqlcK",
+    "size": 10
+  },
+  "team13": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #13",
+    "pwhash": "$2b$12$p8VBb58.1w/H0zQ1zxvycOQCECX7xGnNnQ11o3Qids7YB6/KJVwO6",
+    "size": 10
+  },
+  "team14": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #14",
+    "pwhash": "$2b$12$4ZIJ47GCLlYsPChy9FuUauCNUAq9DGjPoaZuGGyoYUw81hvIAKNey",
+    "size": 10
+  },
+  "team15": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #15",
+    "pwhash": "$2b$12$wPemvSPXEPFF4ZMM32nCL.8rBXCApxvhxitOBqIsB.RLrS6yM6UvG",
+    "size": 10
+  },
+  "team16": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #16",
+    "pwhash": "$2b$12$2HvEPIlANVrtLBiyK9UKm.tWgkOln0ivws447kX5zGbclxv0uWtlO",
+    "size": 10
+  },
+  "team17": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #17",
+    "pwhash": "$2b$12$sKS0Kv88ihptPPJ8we21U.eHhyQH9eM/v73J9uSKXyIG5gVBwXYOK",
+    "size": 10
+  },
+  "team18": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #18",
+    "pwhash": "$2b$12$siY8OWG4Tmxjqq0F8yc/fOKr2/NfqTzfAQFLbS5R5c1agZKA8MJqu",
+    "size": 10
+  },
+  "team19": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #19",
+    "pwhash": "$2b$12$LBx7/zu1wmz3UnM/xHT/muw2V6bblIKE9MyqqXYwSNwZmbryhIoLe",
+    "size": 10
+  },
+  "team2": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #2",
+    "pwhash": "$2b$12$Iz2ejoOzViN8QtQqxsMqK.0TTGM9pmLtWNf4t4WN7wwQqCngY8BWy",
+    "size": 10
+  },
+  "team20": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #20",
+    "pwhash": "$2b$12$Ln5muzAm2PXYlTqU4/Tjne7ELSLjMn0zZABTN0xmTZa5gZmE3omgi",
+    "size": 10
+  },
+  "team21": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #21",
+    "pwhash": "$2b$12$udhmgweoC65oFvUa9xrcB.jg9ImpflIc5MCeZZCQKTd2pPUlGClue",
+    "size": 10
+  },
+  "team22": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #22",
+    "pwhash": "$2b$12$LSrGYQiBIHHhrbrq1Zp/v.ynIzGgm3mwi6/wGGtU/bx26pqcAwQQO",
+    "size": 10
+  },
+  "team23": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #23",
+    "pwhash": "$2b$12$dwENlt0ZOcAor9YnooJw6uKnBjVLBJu8xABYCNbWRYh0uAX6Tf0DW",
+    "size": 10
+  },
+  "team24": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #24",
+    "pwhash": "$2b$12$8W3cCu8CHPz37iGUywC.FuPw5NaVkFWE4.LEEB6xdDqDMbh09FzUe",
+    "size": 10
+  },
+  "team25": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #25",
+    "pwhash": "$2b$12$V6p80OgyCwnwqMW38BtzbeBon7nAttaQ3STMTwtwEIfGxIMbFZOee",
+    "size": 10
+  },
+  "team26": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #26",
+    "pwhash": "$2b$12$Al8t5UR/NoPwkZzvv1fdFe5B2N4vJ7X2vRQ3A01/2BcIblxK/8T6G",
+    "size": 10
+  },
+  "team27": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #27",
+    "pwhash": "$2b$12$o77DrwvTOlZ82/zUeflvTeVhX9zfjxgFTT3Xq8nHCK04nfA76x2WC",
+    "size": 10
+  },
+  "team28": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #28",
+    "pwhash": "$2b$12$8YBHx5CUZFVKCMrNmGbTSOMEwgNVkqXi/K.kC5NIZ4MYoAEqc4fdi",
+    "size": 10
+  },
+  "team29": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #29",
+    "pwhash": "$2b$12$uBb9fatgDDEqFo6bxCszpuQIVbQgLJ.cusXi2QYAyuGjlHBtg.Rvi",
+    "size": 10
+  },
+  "team3": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #3",
+    "pwhash": "$2b$12$tM7qTNPow/xP6BzwI0m7SuEwXHdjJYNZKyQMMHN3bJGWi2YL8/L.u",
+    "size": 10
+  },
+  "team30": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #30",
+    "pwhash": "$2b$12$BLqbEwjbTaKHadxTRRzEnOUiwrd5Gps7ppsCrpZ.Rog.QerCZhc8q",
+    "size": 10
+  },
+  "team31": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #31",
+    "pwhash": "$2b$12$oLWeaPx0gjzM0JLYehUrOesHEm6ZfD.Jw/5axLKDs5bipvujWRT.K",
+    "size": 10
+  },
+  "team32": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #32",
+    "pwhash": "$2b$12$lvnRY5IOkGjtwAoksIfqJOlRmR2AG9Tr7ji4e4BCfZ58l0UL.eHNm",
+    "size": 10
+  },
+  "team33": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #33",
+    "pwhash": "$2b$12$agi9OqkWA.BJBXFA4OEkhOKJG8R7DtstGtMHROQ1ss7W5zN6mUanS",
+    "size": 10
+  },
+  "team34": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #34",
+    "pwhash": "$2b$12$bP3Lng45I5z5rU1MUn8HDeOtMIwBM0WbM43Cd7eHeduqR31CD240i",
+    "size": 10
+  },
+  "team35": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #35",
+    "pwhash": "$2b$12$/c815kQLX3xjDNwy9wP9Ju817/H9ZRK1pP.f1vVBUbu/8paO4VSai",
+    "size": 10
+  },
+  "team36": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #36",
+    "pwhash": "$2b$12$uLAnONUROIg9G1H1t3/mk.euC.GCt09d166mK0kZfgnoMcee2liJ6",
+    "size": 10
+  },
+  "team37": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #37",
+    "pwhash": "$2b$12$sEto7kPovNlG7/r7y8Ux9O.L5MLXS6j7mtPgBVkbArDAtJ8A2y5bO",
+    "size": 10
+  },
+  "team38": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #38",
+    "pwhash": "$2b$12$b/sd0T.uHj2.azpgrQGQ1OweRGsVGsJ/lQkTgADlbfThfubPHNNpC",
+    "size": 10
+  },
+  "team39": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #39",
+    "pwhash": "$2b$12$2vpBOqa3Cl3x1DbpF/FZxeZnfzW14ci4tkw6DSW/ju9vn1SePRB2q",
+    "size": 10
+  },
+  "team4": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #4",
+    "pwhash": "$2b$12$V0fAyesysKNgqA4rjYZb3uvp7Ta39R.M2GIEl9bGgrXZX8oAQZV0q",
+    "size": 10
+  },
+  "team40": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #40",
+    "pwhash": "$2b$12$yj0Yv1rPJYt2Aw3ITbq3MeA7JJLZ33ow3uhKs2yNWWcuxb8eU8W8G",
+    "size": 10
+  },
+  "team41": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #41",
+    "pwhash": "$2b$12$W/zG7iJtHLZ.gyw9mx52QOEqLyrS75.riwUPg/OR35DSKmfFVUkiG",
+    "size": 10
+  },
+  "team42": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #42",
+    "pwhash": "$2b$12$AiHzecQ4vXYdX0utsm1Ctu9KdUAWWDFsNXK0S1IOsEDz0Sd1W68le",
+    "size": 10
+  },
+  "team43": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #43",
+    "pwhash": "$2b$12$kE7TqZsSkC9DVaqKHBCEX.KWX/4wbPUEqeJnl9JNbrpoedAAwCUYm",
+    "size": 10
+  },
+  "team44": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #44",
+    "pwhash": "$2b$12$StO9lhbzEVvRT8GZ8aIPH.YhBPiPKRmQOOM879aVbFWl9sf2mrHbC",
+    "size": 10
+  },
+  "team45": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #45",
+    "pwhash": "$2b$12$wzFiqkFRf7u2.Y4gaPSxqukGQlmnMFXBvqefw76dDUTqyvnJ3KEKK",
+    "size": 10
+  },
+  "team46": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #46",
+    "pwhash": "$2b$12$7gdQKtKXokb83GrSYH8kkOQ5mE.cZtn6LFp6FTZ1m9ux9EEtlGhOi",
+    "size": 10
+  },
+  "team47": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #47",
+    "pwhash": "$2b$12$toKLCRG1ob3rU3Nesbba2..3emQPfKBnyf0G8MygFFGvVccnX//XW",
+    "size": 10
+  },
+  "team48": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #48",
+    "pwhash": "$2b$12$fSMkDyp3GN69hnESfoiD.ummKmfbbaLFv/ZHC2d72sG8ekqL3SOJu",
+    "size": 10
+  },
+  "team49": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #49",
+    "pwhash": "$2b$12$7pssv0tY0gPoBMTgNJaNQOMnCJaRmDPSKDWTjv2pbjY5oD8SaLFky",
+    "size": 10
+  },
+  "team5": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #5",
+    "pwhash": "$2b$12$J3vk/F6SPS5XIzSY0Zo4mOXnpAV16omEhFMzzsLTdF14VqN2Q1MTa",
+    "size": 10
+  },
+  "team50": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #50",
+    "pwhash": "$2b$12$uvHVPTNtahAd2EfQDG6HQ.Zh9JF.i4WH9Bwc9I.3bIMBnBAr3U8T.",
+    "size": 10
+  },
+  "team51": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #51",
+    "pwhash": "$2b$12$dLU/l0Rs60pe6DKkKpRyruqG7ObDNLjzsavnOys4PxqS5necKyfyy",
+    "size": 10
+  },
+  "team52": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #52",
+    "pwhash": "$2b$12$8fztjZgi4eIMpUQ.ZoZwXuTqu2CTRCqOhNpZ6WfFUsF8nLHaBYvhu",
+    "size": 10
+  },
+  "team53": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #53",
+    "pwhash": "$2b$12$scCdhr9nK/httwYNWoQESOl9pO/LXogGa7ruchRhzi0mFWyctPBki",
+    "size": 10
+  },
+  "team54": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #54",
+    "pwhash": "$2b$12$ZbuPvlKF8Q62qaQGZep2eeKWi61GTtxYv37ulUl86Kn7NgJGXZk.a",
+    "size": 10
+  },
+  "team55": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #55",
+    "pwhash": "$2b$12$4PCdGHQAmLxyk.URzg8tW.wEglAXWRcDAtozFCd3v7OyCJTYYvx3O",
+    "size": 10
+  },
+  "team56": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #56",
+    "pwhash": "$2b$12$uMZiuc2.qq6gdl.dKMLd4eYJdNflVgdfvTC0bky.WZiDfD1TlhG6y",
+    "size": 10
+  },
+  "team57": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #57",
+    "pwhash": "$2b$12$lms/a8FEGBy7gBMneWM0Lezk7jKZTcIydoBKQE4Uih3IHJeuFwq8C",
+    "size": 10
+  },
+  "team58": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #58",
+    "pwhash": "$2b$12$3LuUAec2o1ISjMCEHeYzAOCmxyGRJDMkIR/c.wdgklnbnXNy20FBa",
+    "size": 10
+  },
+  "team59": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #59",
+    "pwhash": "$2b$12$IOV7lg8oAYwz5XqY34ept.dlvTexffaJeIL1p4d./HTT8apdhxZwm",
+    "size": 10
+  },
+  "team6": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #6",
+    "pwhash": "$2b$12$1vz3uTc3HSADu3mVdIKcj.usFP5eKBufo8KrjI.z5SemG1jOeM4aS",
+    "size": 10
+  },
+  "team60": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #60",
+    "pwhash": "$2b$12$0i4VByVVc/UiAkdWBfiJKOkO4HuC.6nSMjKKQ.sHC6dRmREs2uodu",
+    "size": 10
+  },
+  "team61": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #61",
+    "pwhash": "$2b$12$gFsuDbkMSAJwfqlwpUNRu.rORxNJ8kvesosRKx4laaq0FG/6xOBxG",
+    "size": 10
+  },
+  "team62": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #62",
+    "pwhash": "$2b$12$SEFXfNprNKKKWtD4h/dFZOO8zfyHJAw8yct1fjusjRM6iZlePYAaG",
+    "size": 10
+  },
+  "team63": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #63",
+    "pwhash": "$2b$12$TJDXPL6hu6N1wh8MxYXMVekrahJP5GNm/um6S.OfPX9oBkMKqcQr6",
+    "size": 10
+  },
+  "team64": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #64",
+    "pwhash": "$2b$12$ra4EGjwqiSphEz7nQTmMIenlvU4Dag1RZBdrTGxhe1Gzm4nRxPLIy",
+    "size": 10
+  },
+  "team65": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #65",
+    "pwhash": "$2b$12$UBJT88VHWmdCJuhGruWgXeioNV6ieSBGVeb297KCse.LRxxiiLXxu",
+    "size": 10
+  },
+  "team66": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #66",
+    "pwhash": "$2b$12$34VTDZsJrJ4ShV3AxrWFUu51UJHg5MwBzWHn8QR2FblEAUC7OOlXq",
+    "size": 10
+  },
+  "team67": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #67",
+    "pwhash": "$2b$12$uz9TQSSNWblMkQ4EBQO.1ujLf6nJR4ZjFI87KLARTdiGCDtztj4au",
+    "size": 10
+  },
+  "team68": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #68",
+    "pwhash": "$2b$12$P/9umuTmr2.dPHL7bIqCseq0PwfPxJino7NvbAnGtNe4Z8f7l.83G",
+    "size": 10
+  },
+  "team69": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #69",
+    "pwhash": "$2b$12$PlBk/1p5q7TcIOTQUueGCeYLAL/iRbZmaoy.MRhD860riT84wXZmO",
+    "size": 10
+  },
+  "team7": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #7",
+    "pwhash": "$2b$12$TKTatqqlCMt17GgH.Yu5ROa2Rmvea3auoIcARh/1LfZYUXmViOK5m",
+    "size": 10
+  },
+  "team70": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #70",
+    "pwhash": "$2b$12$7muClSu2gUOuWF9wkFyuie/wr0HzVvzDWZD4GlJ.6RG8s.n0Cb75G",
+    "size": 10
+  },
+  "team71": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #71",
+    "pwhash": "$2b$12$i8IjPTL10exhL9Ao4nqwwOxZ/zlWiDobyzMtiuMpKZos9pUwk.5am",
+    "size": 10
+  },
+  "team72": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #72",
+    "pwhash": "$2b$12$5TsRs9biA/H7mMF3ZdyWr.I68c2rzFlTjCzIGH/FTWNikvNe9OWWO",
+    "size": 10
+  },
+  "team73": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #73",
+    "pwhash": "$2b$12$OBJzcl.oD5cvF8ePW8l8xuDEZFJM9gHuSD9HCxDIc4u6dQG1BI4hm",
+    "size": 10
+  },
+  "team74": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #74",
+    "pwhash": "$2b$12$.a/lSDHYrBrCGSRgfQ1aGunBC4r28DHUkUoqN5kGAOxbrIGnLQEIS",
+    "size": 10
+  },
+  "team75": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #75",
+    "pwhash": "$2b$12$ffPrWmk6rIUFws1aUG7LruFQ6NEXlHV/Enlc6OreEX6TRXZUoKEmq",
+    "size": 10
+  },
+  "team76": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #76",
+    "pwhash": "$2b$12$d5IV5AHGTvlzlXDYVxKvwukTf0KDA8o1nfcg7Ouu/caJ8zFNwDWY6",
+    "size": 10
+  },
+  "team77": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #77",
+    "pwhash": "$2b$12$wmXOMZCCOQorf5wQM/x.SOnPIHdpnS6lCz3lVvMJYav/oa6H/fd5O",
+    "size": 10
+  },
+  "team78": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #78",
+    "pwhash": "$2b$12$K5B7/fU7FkK3iRJ4iUXYveHKPIEn8/iCtwAmE8zBBtnGnzUj9XHk6",
+    "size": 10
+  },
+  "team79": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #79",
+    "pwhash": "$2b$12$XmI2/slcPABCu5.ww6mMquDejMbx1yOhvim4m0T94fnhtxPoJRTOe",
+    "size": 10
+  },
+  "team8": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #8",
+    "pwhash": "$2b$12$No1Lh/5EGBQKOq7f9eEIQ.FTGqPw4ewm/yHq.UI8pCqGWGVCCRk1S",
+    "size": 10
+  },
+  "team80": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #80",
+    "pwhash": "$2b$12$NrUcL6eEbeiAhPwDe6z.Z.y9gYw1afRCfkVVYfoiEqvbRbFQMhdXO",
+    "size": 10
+  },
+  "team81": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #81",
+    "pwhash": "$2b$12$2V7B3bluKmDOcslCsTjBF.anLzTht1XKvYi3peuKfGWcBlN.LhVcu",
+    "size": 10
+  },
+  "team82": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #82",
+    "pwhash": "$2b$12$GvvnAch8X4z4a/Fzyd4awunVJojVDvDAzxU.uXSQ9Py7ryVZRC0N.",
+    "size": 10
+  },
+  "team83": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #83",
+    "pwhash": "$2b$12$QwZEhlrARbfzObLGd6GpaeofULm6EgsdEa43pI0T7nWVPHsXtjrky",
+    "size": 10
+  },
+  "team84": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #84",
+    "pwhash": "$2b$12$2CpGxv7HD6QUdDbtWCFv2OyjefESnQ0oIL0RF9BPrN1Z9yUMxYo6G",
+    "size": 10
+  },
+  "team85": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #85",
+    "pwhash": "$2b$12$XfganI0uFzkD.Y0r7Q2tqu8HpmpRA3n6mH85ePFqWJJVNjU.oyRLK",
+    "size": 10
+  },
+  "team86": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #86",
+    "pwhash": "$2b$12$Ux6qDQKBajUiew/wlQJxIO72qWuovhxH6TvEJigOCM9vlmo.tQaIG",
+    "size": 10
+  },
+  "team87": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #87",
+    "pwhash": "$2b$12$0gyWMBL4xwwRUA41hn8dw.W4lgPGV8LTW2eDNhSQHllOYQbQAD94e",
+    "size": 10
+  },
+  "team88": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #88",
+    "pwhash": "$2b$12$e2bttcxZsufWwHF8Hk1DTuYt1ZbKVETZt1uh2jN/LSK89rO9gatN.",
+    "size": 10
+  },
+  "team89": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #89",
+    "pwhash": "$2b$12$NHOVuNI4OVKMH9ka15mJzONMTVcKcJ56t.GCTZqfGcOVnv8SGgTA.",
+    "size": 10
+  },
+  "team9": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #9",
+    "pwhash": "$2b$12$fH2U0xDLhaLlLWG0L1KUDepfn3idfwBfDlyBOMltUlXXQhAeOD6Z.",
+    "size": 10
+  },
+  "team90": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #90",
+    "pwhash": "$2b$12$OqdQ6SN0.eTlSJQNqckOK.KxC1/ticDcqbozkBST41gh3ayK5dfXC",
+    "size": 10
+  },
+  "team91": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #91",
+    "pwhash": "$2b$12$MRZ2y5aSXZ38mhNjnRfnl.cH9chEkFoBPpelORcbgKLil8HB7Hp2O",
+    "size": 10
+  },
+  "team92": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #92",
+    "pwhash": "$2b$12$TisEKfG6J.kc3.4hhPrTt.SomZuN5upthcCwYGrudGbByvmhw6efS",
+    "size": 10
+  },
+  "team93": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #93",
+    "pwhash": "$2b$12$TDSAqDGt2AF8nblyjQrjpuuhzhzbGrFYYF6m7DM9X4h0hefWC4/Qa",
+    "size": 10
+  },
+  "team94": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #94",
+    "pwhash": "$2b$12$TZIP8QM7a17McEBRal92UeHtQ68W8Ujjk9ZTFp4dWmSe1kOSdHDeu",
+    "size": 10
+  },
+  "team95": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #95",
+    "pwhash": "$2b$12$0egQq6YA3ZPvC0cEACZlxOmereYLl7xVDOpL/UOTNYW8s/Sf4CJHK",
+    "size": 10
+  },
+  "team96": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #96",
+    "pwhash": "$2b$12$15QjYTJryC5BFDlB0SrATeaJKEbEL8T5JF0Vwt4b7mu.jwdGYMrSq",
+    "size": 10
+  },
+  "team97": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #97",
+    "pwhash": "$2b$12$C8VlH.BXcdS4YHt870LT3O0bFTlxod4JVmAitC5rxPH8fv7AHY3du",
+    "size": 10
+  },
+  "team98": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #98",
+    "pwhash": "$2b$12$KZH8R6b1V.fgV5K61n6ih.lR9oohhxdNPsXMf4Nf7Dw.7vrV4fB.m",
+    "size": 10
+  },
+  "team99": {
+    "attrs": {
+      "location": "Someone's dorm room"
+    },
+    "name": "Team #99",
+    "pwhash": "$2b$12$Bcaqk8lTw5zzheBqhINzgeeTg8jiQkPVC5SZ82TbVdHuVkEf1qqXe",
+    "size": 10
+  }
+}

@@ -127,22 +127,19 @@ class Team(login.LoginUser):
 
   NEXT_SUBMIT_ID = 1
 
-  @save_state
-  def __init__(self,
-               now,
-               username,
-               password_hash,
-               team_name,
-               location):
+  def __init__(self, username, info):
     assert username not in self.BY_USERNAME
     self.BY_USERNAME[username] = self
 
     self.active_sessions = set()
 
     self.username = username
-    self.password_hash = password_hash.encode("ascii")
-    self.team_name = team_name
-    self.location = location
+    self.password_hash = info["pwhash"].encode("ascii")
+    self.team_name = info["name"]
+    self.size = info["size"]
+    self.attrs = info.get("attrs", {})
+
+    save_state.add_instance("Team:" + username, self)
 
     # Create a PuzzleState object for all puzzles that exist.
     self.puzzle_state = {}
@@ -536,6 +533,9 @@ class Achievement:
     setattr(Achievement, name, self)
     Achievement.BY_NAME[name] = self
     Achievement.ALL.append(self)
+
+  def __repr__(self):
+    return f"<Achievement {self.name}>"
 
   @classmethod
   def by_name(cls, aname):

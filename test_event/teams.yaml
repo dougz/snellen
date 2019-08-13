@@ -1,0 +1,616 @@
+teams:
+  leftout:
+    name: Left Out
+    password: thou
+    size: 60
+    location: Building 1
+
+  galactic:
+    name: ✈✈✈ Galactic Trendsetters ✈✈✈
+    password: trend
+    size: 60
+    location: Building 2
+
+  team1:
+    name: "Team #1"
+    password: team1
+    size: 5
+    location: "Someone's apartment"
+
+  team2:
+    name: "Team #2"
+    password: team2
+    size: 10
+    location: "Someone's dorm room"
+
+  team3:
+    name: "Team #3"
+    password: team3
+    size: 10
+    location: "Someone's dorm room"
+
+  team4:
+    name: "Team #4"
+    password: team4
+    size: 10
+    location: "Someone's dorm room"
+
+  team5:
+    name: "Team #5"
+    password: team5
+    size: 10
+    location: "Someone's dorm room"
+
+  team6:
+    name: "Team #6"
+    password: team6
+    size: 10
+    location: "Someone's dorm room"
+
+  team7:
+    name: "Team #7"
+    password: team7
+    size: 10
+    location: "Someone's dorm room"
+
+  team8:
+    name: "Team #8"
+    password: team8
+    size: 10
+    location: "Someone's dorm room"
+
+  team9:
+    name: "Team #9"
+    password: team9
+    size: 10
+    location: "Someone's dorm room"
+
+  team10:
+    name: "Team #10"
+    password: team10
+    size: 10
+    location: "Someone's dorm room"
+
+  team11:
+    name: "Team #11"
+    password: team11
+    size: 10
+    location: "Someone's dorm room"
+
+  team12:
+    name: "Team #12"
+    password: team12
+    size: 10
+    location: "Someone's dorm room"
+
+  team13:
+    name: "Team #13"
+    password: team13
+    size: 10
+    location: "Someone's dorm room"
+
+  team14:
+    name: "Team #14"
+    password: team14
+    size: 10
+    location: "Someone's dorm room"
+
+  team15:
+    name: "Team #15"
+    password: team15
+    size: 10
+    location: "Someone's dorm room"
+
+  team16:
+    name: "Team #16"
+    password: team16
+    size: 10
+    location: "Someone's dorm room"
+
+  team17:
+    name: "Team #17"
+    password: team17
+    size: 10
+    location: "Someone's dorm room"
+
+  team18:
+    name: "Team #18"
+    password: team18
+    size: 10
+    location: "Someone's dorm room"
+
+  team19:
+    name: "Team #19"
+    password: team19
+    size: 10
+    location: "Someone's dorm room"
+
+  team20:
+    name: "Team #20"
+    password: team20
+    size: 10
+    location: "Someone's dorm room"
+
+  team21:
+    name: "Team #21"
+    password: team21
+    size: 10
+    location: "Someone's dorm room"
+
+  team22:
+    name: "Team #22"
+    password: team22
+    size: 10
+    location: "Someone's dorm room"
+
+  team23:
+    name: "Team #23"
+    password: team23
+    size: 10
+    location: "Someone's dorm room"
+
+  team24:
+    name: "Team #24"
+    password: team24
+    size: 10
+    location: "Someone's dorm room"
+
+  team25:
+    name: "Team #25"
+    password: team25
+    size: 10
+    location: "Someone's dorm room"
+
+  team26:
+    name: "Team #26"
+    password: team26
+    size: 10
+    location: "Someone's dorm room"
+
+  team27:
+    name: "Team #27"
+    password: team27
+    size: 10
+    location: "Someone's dorm room"
+
+  team28:
+    name: "Team #28"
+    password: team28
+    size: 10
+    location: "Someone's dorm room"
+
+  team29:
+    name: "Team #29"
+    password: team29
+    size: 10
+    location: "Someone's dorm room"
+
+  team30:
+    name: "Team #30"
+    password: team30
+    size: 10
+    location: "Someone's dorm room"
+
+  team31:
+    name: "Team #31"
+    password: team31
+    size: 10
+    location: "Someone's dorm room"
+
+  team32:
+    name: "Team #32"
+    password: team32
+    size: 10
+    location: "Someone's dorm room"
+
+  team33:
+    name: "Team #33"
+    password: team33
+    size: 10
+    location: "Someone's dorm room"
+
+  team34:
+    name: "Team #34"
+    password: team34
+    size: 10
+    location: "Someone's dorm room"
+
+  team35:
+    name: "Team #35"
+    password: team35
+    size: 10
+    location: "Someone's dorm room"
+
+  team36:
+    name: "Team #36"
+    password: team36
+    size: 10
+    location: "Someone's dorm room"
+
+  team37:
+    name: "Team #37"
+    password: team37
+    size: 10
+    location: "Someone's dorm room"
+
+  team38:
+    name: "Team #38"
+    password: team38
+    size: 10
+    location: "Someone's dorm room"
+
+  team39:
+    name: "Team #39"
+    password: team39
+    size: 10
+    location: "Someone's dorm room"
+
+  team40:
+    name: "Team #40"
+    password: team40
+    size: 10
+    location: "Someone's dorm room"
+
+  team41:
+    name: "Team #41"
+    password: team41
+    size: 10
+    location: "Someone's dorm room"
+
+  team42:
+    name: "Team #42"
+    password: team42
+    size: 10
+    location: "Someone's dorm room"
+
+  team43:
+    name: "Team #43"
+    password: team43
+    size: 10
+    location: "Someone's dorm room"
+
+  team44:
+    name: "Team #44"
+    password: team44
+    size: 10
+    location: "Someone's dorm room"
+
+  team45:
+    name: "Team #45"
+    password: team45
+    size: 10
+    location: "Someone's dorm room"
+
+  team46:
+    name: "Team #46"
+    password: team46
+    size: 10
+    location: "Someone's dorm room"
+
+  team47:
+    name: "Team #47"
+    password: team47
+    size: 10
+    location: "Someone's dorm room"
+
+  team48:
+    name: "Team #48"
+    password: team48
+    size: 10
+    location: "Someone's dorm room"
+
+  team49:
+    name: "Team #49"
+    password: team49
+    size: 10
+    location: "Someone's dorm room"
+
+  team50:
+    name: "Team #50"
+    password: team50
+    size: 10
+    location: "Someone's dorm room"
+
+  team51:
+    name: "Team #51"
+    password: team51
+    size: 10
+    location: "Someone's dorm room"
+
+  team52:
+    name: "Team #52"
+    password: team52
+    size: 10
+    location: "Someone's dorm room"
+
+  team53:
+    name: "Team #53"
+    password: team53
+    size: 10
+    location: "Someone's dorm room"
+
+  team54:
+    name: "Team #54"
+    password: team54
+    size: 10
+    location: "Someone's dorm room"
+
+  team55:
+    name: "Team #55"
+    password: team55
+    size: 10
+    location: "Someone's dorm room"
+
+  team56:
+    name: "Team #56"
+    password: team56
+    size: 10
+    location: "Someone's dorm room"
+
+  team57:
+    name: "Team #57"
+    password: team57
+    size: 10
+    location: "Someone's dorm room"
+
+  team58:
+    name: "Team #58"
+    password: team58
+    size: 10
+    location: "Someone's dorm room"
+
+  team59:
+    name: "Team #59"
+    password: team59
+    size: 10
+    location: "Someone's dorm room"
+
+  team60:
+    name: "Team #60"
+    password: team60
+    size: 10
+    location: "Someone's dorm room"
+
+  team61:
+    name: "Team #61"
+    password: team61
+    size: 10
+    location: "Someone's dorm room"
+
+  team62:
+    name: "Team #62"
+    password: team62
+    size: 10
+    location: "Someone's dorm room"
+
+  team63:
+    name: "Team #63"
+    password: team63
+    size: 10
+    location: "Someone's dorm room"
+
+  team64:
+    name: "Team #64"
+    password: team64
+    size: 10
+    location: "Someone's dorm room"
+
+  team65:
+    name: "Team #65"
+    password: team65
+    size: 10
+    location: "Someone's dorm room"
+
+  team66:
+    name: "Team #66"
+    password: team66
+    size: 10
+    location: "Someone's dorm room"
+
+  team67:
+    name: "Team #67"
+    password: team67
+    size: 10
+    location: "Someone's dorm room"
+
+  team68:
+    name: "Team #68"
+    password: team68
+    size: 10
+    location: "Someone's dorm room"
+
+  team69:
+    name: "Team #69"
+    password: team69
+    size: 10
+    location: "Someone's dorm room"
+
+  team70:
+    name: "Team #70"
+    password: team70
+    size: 10
+    location: "Someone's dorm room"
+
+  team71:
+    name: "Team #71"
+    password: team71
+    size: 10
+    location: "Someone's dorm room"
+
+  team72:
+    name: "Team #72"
+    password: team72
+    size: 10
+    location: "Someone's dorm room"
+
+  team73:
+    name: "Team #73"
+    password: team73
+    size: 10
+    location: "Someone's dorm room"
+
+  team74:
+    name: "Team #74"
+    password: team74
+    size: 10
+    location: "Someone's dorm room"
+
+  team75:
+    name: "Team #75"
+    password: team75
+    size: 10
+    location: "Someone's dorm room"
+
+  team76:
+    name: "Team #76"
+    password: team76
+    size: 10
+    location: "Someone's dorm room"
+
+  team77:
+    name: "Team #77"
+    password: team77
+    size: 10
+    location: "Someone's dorm room"
+
+  team78:
+    name: "Team #78"
+    password: team78
+    size: 10
+    location: "Someone's dorm room"
+
+  team79:
+    name: "Team #79"
+    password: team79
+    size: 10
+    location: "Someone's dorm room"
+
+  team80:
+    name: "Team #80"
+    password: team80
+    size: 10
+    location: "Someone's dorm room"
+
+  team81:
+    name: "Team #81"
+    password: team81
+    size: 10
+    location: "Someone's dorm room"
+
+  team82:
+    name: "Team #82"
+    password: team82
+    size: 10
+    location: "Someone's dorm room"
+
+  team83:
+    name: "Team #83"
+    password: team83
+    size: 10
+    location: "Someone's dorm room"
+
+  team84:
+    name: "Team #84"
+    password: team84
+    size: 10
+    location: "Someone's dorm room"
+
+  team85:
+    name: "Team #85"
+    password: team85
+    size: 10
+    location: "Someone's dorm room"
+
+  team86:
+    name: "Team #86"
+    password: team86
+    size: 10
+    location: "Someone's dorm room"
+
+  team87:
+    name: "Team #87"
+    password: team87
+    size: 10
+    location: "Someone's dorm room"
+
+  team88:
+    name: "Team #88"
+    password: team88
+    size: 10
+    location: "Someone's dorm room"
+
+  team89:
+    name: "Team #89"
+    password: team89
+    size: 10
+    location: "Someone's dorm room"
+
+  team90:
+    name: "Team #90"
+    password: team90
+    size: 10
+    location: "Someone's dorm room"
+
+  team91:
+    name: "Team #91"
+    password: team91
+    size: 10
+    location: "Someone's dorm room"
+
+  team92:
+    name: "Team #92"
+    password: team92
+    size: 10
+    location: "Someone's dorm room"
+
+  team93:
+    name: "Team #93"
+    password: team93
+    size: 10
+    location: "Someone's dorm room"
+
+  team94:
+    name: "Team #94"
+    password: team94
+    size: 10
+    location: "Someone's dorm room"
+
+  team95:
+    name: "Team #95"
+    password: team95
+    size: 10
+    location: "Someone's dorm room"
+
+  team96:
+    name: "Team #96"
+    password: team96
+    size: 10
+    location: "Someone's dorm room"
+
+  team97:
+    name: "Team #97"
+    password: team97
+    size: 10
+    location: "Someone's dorm room"
+
+  team98:
+    name: "Team #98"
+    password: team98
+    size: 10
+    location: "Someone's dorm room"
+
+  team99:
+    name: "Team #99"
+    password: team99
+    size: 10
+    location: "Someone's dorm room"
+
+  team100:
+    name: "Team #100"
+    password: team100
+    size: 10
+    location: "Someone's dorm room"
+
+
+
+
