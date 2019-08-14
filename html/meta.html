@@ -29,6 +29,16 @@
     <table>
       <tr><th>shortname</th><td class=mono>{{puzzle.shortname}}</td></tr>
       <tr><th>title</th><td class=imp>{{puzzle.title}}</td></tr>
+
+      <tr>
+	<th class=top>author(s)</th>
+	<td>
+	  {% for i, a in enumerate(puzzle.authors) %}
+	  {% if i %}<br>{% end %}{{a}}
+	  {% end %}
+	</td>
+      </tr>
+
       <tr><th>oncall</th><td>{{puzzle.oncall}}</td></tr>
       <tr>
 	<th>puzzletron</th>

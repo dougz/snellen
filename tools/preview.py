@@ -2,6 +2,8 @@
 
 import argparse
 import asyncio
+import base64
+import hashlib
 import json
 import os
 import tornado.ioloop
@@ -36,6 +38,10 @@ class Puzzle:
     Puzzle.BY_PID[self.pid] = self
 
   def process(self, zip_data):
+    h = hashlib.sha256()
+    h.update(zip_data)
+    self.prefix = base64.urlsafe_b64encode(h.digest()).decode("ascii")[:ppp.SECRET_KEY_LENGTH]
+
     self.pp = ppp.Puzzle(zip_data, self.options, include_solutions=True)
     self.pp.land = Land
 
@@ -43,6 +49,7 @@ class Puzzle:
 class PreviewPage(tornado.web.RequestHandler):
   def get(self):
     self.render("preview.html")
+
 
 class UploadHandler(tornado.web.RequestHandler):
   def initialize(self, options):
@@ -54,10 +61,19 @@ class UploadHandler(tornado.web.RequestHandler):
     try:
       p.process(self.request.files["zip"][0]["body"])
 
-      path = f"html/{p.pp.prefix}/solution.html"
+      authors = p.pp.authors
+      if len(authors) == 1:
+        authors = authors[0]
+      elif len(authors) == 2:
+        authors = f"{authors[0]} and {authors[1]}"
+      else:
+        authors = ", ".join(authors[:-1] + ["and " + authors[-1]])
+
+      path = f"html/{p.prefix}/solution.html"
       puzzle_html = self.render_string("solution_frame.html",
                                        solution_url=None,
                                        puzzle=p.pp,
+                                       authors=authors,
                                        team=Team,
                                        css=[self.static_content["event.css"]],
                                        script=None,
@@ -69,10 +85,11 @@ class UploadHandler(tornado.web.RequestHandler):
 
       p.solution_url = f"https://{self.options.public_host}/{path}"
 
-      path = f"html/{p.pp.prefix}/puzzle.html"
+      path = f"html/{p.prefix}/puzzle.html"
       puzzle_html = self.render_string("solution_frame.html",
                                        solution_url=p.solution_url,
                                        puzzle=p.pp,
+                                       authors=None,
                                        team=Team,
                                        css=[self.static_content["event.css"]],
                                        script=None,
@@ -84,7 +101,7 @@ class UploadHandler(tornado.web.RequestHandler):
 
       p.puzzle_url = f"https://{self.options.public_host}/{path}"
 
-      path = f"html/{p.pp.prefix}/meta.html"
+      path = f"html/{p.prefix}/meta.html"
       meta_html = self.render_string("meta.html",
                                      puzzle_url=p.puzzle_url,
                                      solution_url=p.solution_url,
@@ -97,7 +114,24 @@ class UploadHandler(tornado.web.RequestHandler):
       p.meta_url = f"https://{self.options.public_host}/{path}"
 
       self.redirect(p.meta_url)
+    except ppp.PuzzleErrors as e:
+      print("hello")
+      path = f"html/{p.prefix}/error.html"
+      data = [f"{len(e.errors)} error(s) were encountered:"]
+      for i, err in enumerate(e.errors):
+        data.append(f"{i+1}: {err}")
+      data = "\n".join(data)
+
+      common.upload_object("errors",
+                           self.options.bucket, path,
+                           common.CONTENT_TYPES[".txt"],
+                           data, self.options.credentials)
+
+      error_url = f"https://{self.options.public_host}/{path}"
+
+      self.redirect(error_url)
     except Exception as e:
+      print("world")
       p.error_msg = traceback.format_exc()
       self.redirect(f"/error/{p.pid}")
 
