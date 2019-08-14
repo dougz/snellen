@@ -14,6 +14,7 @@ def main():
     description=("Turn a directory into a zip and upload it to "
                  "the preview server."))
   parser.add_argument("--preview_server", default="preview.isotropic.org")
+  parser.add_argument("--local_zip", default=None)
   parser.add_argument("input_dir")
   options = parser.parse_args()
 
@@ -21,10 +22,17 @@ def main():
   with zipfile.ZipFile(temp, mode="w") as z:
     for dirpath, dirnames, filenames in os.walk(options.input_dir):
       relpath = dirpath[len(options.input_dir):].lstrip("/")
+      d = os.path.basename(relpath)
+      if d == ".git": continue
+      if d.startswith("__OSX"): continue
       for fn in filenames:
         with open(os.path.join(dirpath, fn), "rb") as f:
           z.writestr(os.path.join(relpath, fn), f.read())
   temp = temp.getbuffer()
+
+  if options.local_zip:
+    with open(options.local_zip, "wb") as f:
+      f.write(temp)
 
   r = requests.post(f"https://{options.preview_server}/upload",
                     headers={"Authorization": BASIC_AUTH},
