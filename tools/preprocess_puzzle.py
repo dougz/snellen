@@ -61,7 +61,7 @@ class Puzzle:
 
     if metadata == self.METADATA_FILE:
       strip_shortname = None
-    if metadata == os.path.join(shortname, self.METADATA_FILE):
+    elif metadata == os.path.join(shortname, self.METADATA_FILE):
       for n in z.namelist():
         if not n.startswith(shortname+"/"):
           errors.append(f"If shortname directory is used, everything must be in it.")
@@ -185,6 +185,8 @@ class Puzzle:
         assert n.startswith(strip_shortname)
         nn = n[len(strip_shortname):]
         if not nn: continue
+      else:
+        nn = n
 
       if nn in self.SPECIAL_FILES: continue
       if nn.endswith("/"): continue

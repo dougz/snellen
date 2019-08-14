@@ -40,7 +40,6 @@ install -m 0644 misc/preview-htpasswd "${base}/misc/preview-htpasswd"
 
 install -m 0755 -d "$base"/test_event
 install -m 0644 test_event/map_config.json "$base"/test_event/map_config.json
-install -m 0644 test_event/teams_big.py "$base"/test_event/teams.py
 install -m 0755 -d "$base"/test_event/puzzles
 for i in test_event/puzzles/*.json; do
     install -m 0655 $i "${base}/${i}"

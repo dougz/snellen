@@ -116,7 +116,7 @@ class UploadHandler(tornado.web.RequestHandler):
       self.redirect(p.meta_url)
     except ppp.PuzzleErrors as e:
       print("hello")
-      path = f"html/{p.prefix}/error.html"
+      path = f"html/{p.prefix}/error.txt"
       data = [f"{len(e.errors)} error(s) were encountered:"]
       for i, err in enumerate(e.errors):
         data.append(f"{i+1}: {err}")
