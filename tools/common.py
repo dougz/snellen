@@ -5,6 +5,7 @@ CONTENT_TYPES = {
   ".png": "image/png",
   ".svg": "image/svg+xml",
   ".webp": "image/webp",
+  ".gif": "image/gif",
 
   ".wav": "audio/wav",
   ".mp3": "audio/mpeg",
