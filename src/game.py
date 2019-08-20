@@ -1,4 +1,5 @@
 import asyncio
+import datetime
 import heapq
 import html
 import json
@@ -293,7 +294,18 @@ class Team(login.LoginUser):
           "title": html.escape(puzzle.title),
           "audio": "https://snellen.storage.googleapis.com/applause.mp3"}])
       self.activity_log.append((now, f'<a href="{puzzle.url}">{html.escape(puzzle.title)}</a> solved.'))
+
       self.achieve(Achievement.solve_puzzle)
+      if state.solve_time - state.open_time < 60:
+        self.achieve(Achievement.speed_demon)
+      if state.solve_time - state.open_time >= 24*60*60:
+        self.achieve(Achievement.better_late_than_never)
+      st = datetime.datetime.fromtimestamp(now)
+      if 0 <= st.hour < 3:
+        self.achieve(Achievement.night_owl)
+      elif 3 <= st.hour < 6:
+        self.achieve(Achievement.early_bird)
+
       self.compute_puzzle_beam(now)
 
   def get_puzzle_state(self, puzzle):
@@ -528,8 +540,7 @@ class Achievement:
     self.name = name
     self.title = title
     self.subtitle = subtitle
-    self.yes_url = Achievement.static_dir["achievements/" + name + "_yes.png"]
-    self.no_url = Achievement.static_dir["achievements/" + name + "_no.png"]
+    self.url = Achievement.static_dir["achievements/" + name + ".png"]
     setattr(Achievement, name, self)
     Achievement.BY_NAME[name] = self
     Achievement.ALL.append(self)
@@ -549,10 +560,91 @@ class Achievement:
                 "That's how this works",
                 "Solve a puzzle.")
 
-    Achievement("log_out",
+    Achievement("speed_demon",
+                "Speed Demon",
+                "Solve a puzzle in under a minute.")
+
+    Achievement("flawless",
+                "Flawless",
+                "Submit no incorrect answers for six hours.")
+
+    Achievement("hot_streak",
+                "Hot streak",
+                "Submit three correct answers in a row within ten minutes.")
+
+    Achievement("better_late_than_never",
+                "Better late than never",
+                "Solve a puzzle 24 hours after opening it.")
+
+    Achievement("night_owl",
+                "Night owl",
+                "Solve a puzzle between midnight and 3am.")
+
+    Achievement("early_bird",
+                "Early bird",
+                "Solve a puzzle between 3am and 6am.")
+
+    Achievement("champion",
+                "Champion!",
+                "Set a new record time in solving a puzzle.")
+
+    Achievement("ex_champion",
+                "Ex-champion!",
+                "Lose the record time for solving a puzzle.")
+
+    Achievement("social_media_superstar",
+                "Social Media Superstar",
+                "Create enough buzz to save the park.")
+
+    Achievement("take_a_shortcut",
+                "Take a shortcut",
+                "Solve a meta before solving all feeders.")
+
+    Achievement("completionist",
+                "Completionist",
+                "Solve every single puzzle.")
+
+    Achievement("weekend_pass",
+                "Weekend pass",
+                "Solve a puzzle on each of Friday, Saturday, and Sunday.")
+
+    Achievement("digital_explorer",
+                "Digital explorer",
+                "Navigate to every page on the website.")
+
+    Achievement("scattershot",
+                "Scattershot",
+                "Trigger answer throttling with incorrect gueses.")
+
+    Achievement("protective_measures",
+                "Protective measures",
+                "Visit the Health and Safety page.")
+
+    Achievement("almost_there",
+                "Almost there",
+                "Submit an intermediate message.")
+
+    Achievement("youre_all_wrong",
+                "You're all wrong!",
+                "Submit the same wrong answer as ten other teams.")
+
+    Achievement("mea_culpa",
+                "Mea culpa",
+                "View the errata page.")
+
+    Achievement("bug_catcher",
+                "Bug catcher",
+                "Submit a valid errata entry to HQ.  Thanks!")
+
+    Achievement("penny_pincher",
+                "Penny pincher",
+                "Collect your first pressed penny.")
+
+    Achievement("parade_goer",
+                "Parade-goer",
+                "Attend a parade")
+
+    Achievement("come_back",
                 "Come back!",
                 "Log out of the hunt server before the coin is found.")
 
-    Achievement("visit_log",
-                "Reminisce",
-                "Visit the Activity Log page during the hunt.")

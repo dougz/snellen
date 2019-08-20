@@ -29,6 +29,10 @@ input, button {
 #pins { font-size: 120%; }
 #pins .no { color: #999; }
 
+#pins .no img { filter: grayscale(80%);
+		opacity: 0.4;
+	      }
+
 #topnav {
     font-family: 'Merriweather', sans-serif;
 

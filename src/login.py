@@ -229,7 +229,7 @@ class Logout(tornado.web.RequestHandler):
   def get(self):
     session = Session.from_request(self)
     if session and session.team:
-      session.team.achieve(game.Achievement.log_out)
+      session.team.achieve(game.Achievement.come_back)
       asyncio.create_task(session.team.flush_messages())
 
     # Uncookie the browser, delete the session, send them back to the

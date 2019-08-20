@@ -75,10 +75,6 @@ def main_server(options):
 
   if not game.Global.STATE: game.Global()
 
-  print("Adding new teams...")
-  with open(os.path.join(options.event_dir, "teams.py")) as f:
-    exec(f.read(), {"add_team": game.Team.add_team})
-
   start_map = game.Land.BY_SHORTNAME["inner_only"]
   for team in game.Team.BY_USERNAME.values():
     team.open_lands[start_map] = 0
