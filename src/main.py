@@ -95,6 +95,7 @@ def main_server(options):
   server.add_sockets(sockets)
 
   loop = asyncio.get_event_loop()
+  if options.debug: loop.set_debug(True)
   loop.set_default_executor(concurrent.futures.ThreadPoolExecutor(max_workers=4))
   loop.create_task(game.Submission.realtime_process_submit_queue())
 

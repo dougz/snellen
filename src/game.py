@@ -64,6 +64,7 @@ class Submission:
       self.check_answer(self.submit_time)
     else:
       heapq.heappush(self.GLOBAL_SUBMIT_QUEUE, (self.check_time, self))
+      self.team.achieve(Achievement.scattershot)
 
   def compute_check_time(self):
     # Note that self is already in the submissions list (at the end)
@@ -83,10 +84,14 @@ class Submission:
         self.puzzle.incorrect_responses[answer] or "Keep going\u2026")
     else:
       self.state = self.INCORRECT
+      self.team.streak = []
     if self.state == self.CORRECT:
       self.puzzle_state.answers_found.add(answer)
       if self.puzzle_state.answers_found == self.puzzle.answers:
-        self.team.solve_puzzle(self.puzzle, now)
+        try:
+          self.team.solve_puzzle(self.puzzle, now)
+        except Exception as e:
+          print(e)
 
   def json_dict(self):
     return {"submit_time": self.submit_time,
@@ -155,6 +160,8 @@ class Team(login.LoginUser):
     self.pending_messages = []
 
     self.achievements = {}
+    self.streak = []
+    self.solve_days = set()
 
   def __repr__(self):
     return f"<Team {self.username}>"
@@ -296,15 +303,33 @@ class Team(login.LoginUser):
       self.activity_log.append((now, f'<a href="{puzzle.url}">{html.escape(puzzle.title)}</a> solved.'))
 
       self.achieve(Achievement.solve_puzzle)
-      if state.solve_time - state.open_time < 60:
+
+      solve_duration = state.solve_time - state.open_time
+      puzzle.solve_durations[self] = solve_duration
+      if (puzzle.fastest_solver is None or
+          puzzle.solve_durations[puzzle.fastest_solver] > solve_duration):
+        # a new record
+        if puzzle.fastest_solver:
+          puzzle.fastest_solver.achieve(Achievement.ex_champion)
+          asyncio.create_task(puzzle.fastest_solver.flush_messages())
+        puzzle.fastest_solver = self
+        self.achieve(Achievement.champion)
+
+      if solve_duration < 60:
         self.achieve(Achievement.speed_demon)
-      if state.solve_time - state.open_time >= 24*60*60:
+      if solve_duration >= 24*60*60:
         self.achieve(Achievement.better_late_than_never)
       st = datetime.datetime.fromtimestamp(now)
       if 0 <= st.hour < 3:
         self.achieve(Achievement.night_owl)
       elif 3 <= st.hour < 6:
         self.achieve(Achievement.early_bird)
+      self.solve_days.add(st.weekday())
+      if self.solve_days.issuperset({4,5,6}):
+        self.achieve(Achievement.weekend_pass)
+      self.streak.append(now)
+      if len(self.streak) >= 3 and now - self.streak[-3] <= 600:
+        self.achieve(Achievement.hot_streak)
 
       self.compute_puzzle_beam(now)
 
@@ -432,6 +457,9 @@ class Puzzle:
     self.BY_SHORTNAME[shortname] = self
     self.shortname = shortname
     self.url = "/puzzle/" + shortname
+
+    self.solve_durations = {}
+    self.fastest_solver = None
 
   @classmethod
   def filler_puzzle(cls):
@@ -615,14 +643,6 @@ class Achievement:
     Achievement("scattershot",
                 "Scattershot",
                 "Trigger answer throttling with incorrect gueses.")
-
-    Achievement("protective_measures",
-                "Protective measures",
-                "Visit the Health and Safety page.")
-
-    Achievement("almost_there",
-                "Almost there",
-                "Submit an intermediate message.")
 
     Achievement("youre_all_wrong",
                 "You're all wrong!",
