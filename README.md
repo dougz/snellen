@@ -86,7 +86,7 @@
 
 ```
 cd $SNELLEN_BASE/..
-scripts/run.sh
+./snellen/scripts/run.sh
 ```
 
 
