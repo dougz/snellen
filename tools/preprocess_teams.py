@@ -15,11 +15,13 @@ def main():
   parser = argparse.ArgumentParser(
     description="Process the team data file for use by the server.")
 
-  parser.add_argument("--event_dir",
-                      help="Event directory with teams.yaml to process.")
+  parser.add_argument("--input_dir",
+                      help="Input directory with teams.yaml to process.")
+  parser.add_argument("--output_dir",
+                      help="Directory to write output to.")
   options = parser.parse_args()
 
-  with open(os.path.join(options.event_dir, "teams.yaml")) as f:
+  with open(os.path.join(options.input_dir, "teams.yaml")) as f:
     y = yaml.load(f)
 
   out = {}
@@ -50,7 +52,7 @@ def main():
 
     out[username] = od
 
-  with open(os.path.join(options.event_dir, "teams.json"), "w") as f:
+  with open(os.path.join(options.output_dir, "teams.json"), "w") as f:
     json.dump(out, f, sort_keys=True, indent=2)
 
 

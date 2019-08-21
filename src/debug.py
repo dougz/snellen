@@ -1,4 +1,5 @@
 import re
+import os
 import tornado.web
 
 import login
@@ -8,14 +9,16 @@ import login
 class ClientJS(tornado.web.RequestHandler):
   def get(self):
     self.set_header("Content-Type", "text/javascript; charset=utf-8")
-    with open("src/client.js", "rb") as f:
+    base = os.getenv("SNELLEN_BASE")
+    with open(f"{base}/src/client.js", "rb") as f:
       self.write(f.read())
 
 class EventCSS(tornado.web.RequestHandler):
   def get(self):
     self.set_header("Content-Type", "text/css; charset=utf-8")
     static_dir = self.application.settings["static_dir"]
-    with open("static/event.css", "r") as f:
+    base = os.getenv("SNELLEN_BASE")
+    with open(f"{base}/static/event.css", "r") as f:
       text = f.read()
       def replacer(m):
         return static_dir.get(m.group(1), m.group(1))
@@ -26,7 +29,8 @@ class AdminJS(tornado.web.RequestHandler):
   @login.required("admin")
   def get(self):
     self.set_header("Content-Type", "text/javascript; charset=utf-8")
-    with open("src/admin.js", "rb") as f:
+    base = os.getenv("SNELLEN_BASE")
+    with open(f"{base}/src/admin.js", "rb") as f:
       self.write(f.read())
 
 class AdminCSS(tornado.web.RequestHandler):
@@ -34,7 +38,8 @@ class AdminCSS(tornado.web.RequestHandler):
   def get(self):
     self.set_header("Content-Type", "text/css; charset=utf-8")
     static_dir = self.application.settings["static_dir"]
-    with open("static/admin.css", "r") as f:
+    base = os.getenv("SNELLEN_BASE")
+    with open(f"{base}/static/admin.css", "r") as f:
       text = f.read()
       def replacer(m):
         return static_dir.get(m.group(1), m.group(1))

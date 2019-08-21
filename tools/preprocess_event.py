@@ -95,11 +95,13 @@ def convert_static_files(out, options, lands):
     text = re.sub(r"@@STATIC:([^@]+)@@", replacer, text)
     return text.encode("utf-8")
 
-  to_convert = [("mute.png", "static/mute.png"),
-                ("admin-compiled.js", "bin/admin-compiled.js"),
-                ("client-compiled.js", "bin/client-compiled.js"),
-                ("admin.css", "static/admin.css"),
-                ("event.css", "static/event.css"),
+  base = os.getenv("SNELLEN_BASE")
+
+  to_convert = [("mute.png", f"{base}/static/mute.png"),
+                ("admin-compiled.js", f"{base}/bin/admin-compiled.js"),
+                ("client-compiled.js", f"{base}/bin/client-compiled.js"),
+                ("admin.css", f"{base}/static/admin.css"),
+                ("event.css", f"{base}/static/event.css"),
                 ]
 
   for land in lands:
@@ -107,12 +109,11 @@ def convert_static_files(out, options, lands):
     if os.path.exists(fn):
       to_convert.append((os.path.join(land, "land.css"), fn))
 
-  for fn in os.listdir(os.path.join(options.event_dir, "assets/achievements")):
+  for fn in os.listdir(os.path.join(options.input_assets, "achievements")):
     if not fn.endswith(".png"): continue
     base = os.path.basename(fn)
     to_convert.append((os.path.join("achievements", base),
-                       os.path.join(options.event_dir, "assets/achievements", fn)))
-
+                       os.path.join(options.input_assets, "achievements", fn)))
 
   for key, fn in to_convert:
     processor = css_processor if fn.endswith(".css") else None
@@ -123,25 +124,29 @@ def main():
   parser = argparse.ArgumentParser(
     description="Process an event yaml file and upload assets to GCS.")
 
-  parser.add_argument("--event_dir", help="Event directory with inputs to process.")
-  parser.add_argument("--output_file", help="Output json file.")
+  parser.add_argument("--input_dir", help="Directory with inputs to process.")
+  parser.add_argument("--output_dir", help="Directory to receive output.")
   parser.add_argument("--credentials", help="Private key for google cloud service account.")
   parser.add_argument("--bucket", help="Google cloud bucket to use.")
   parser.add_argument("--public_host", help="Hostname for assets in urls.")
   parser.add_argument("--skip_upload", action="store_true",
                       help="Don't actually upload to GCS.")
-  parser.add_argument("--input_assets", help="The directory of input assets")
   parser.add_argument("--static_only", action="store_true",
                       help="Don't process map; just upload static assets.")
   options = parser.parse_args()
+  options.input_assets = os.path.join(options.input_dir, "assets")
+  if not options.public_host:
+    options.public_host = options.bucket + ".storage.googleapis.com"
 
   options.credentials = oauth2.Oauth2Token(options.credentials)
 
-  with open(os.path.join(options.event_dir, "map_config.yaml")) as f:
+  with open(os.path.join(options.input_dir, "map_config.yaml")) as f:
     y = yaml.load(f)
 
+  output_file = os.path.join(options.output_dir, "map_config.json")
+
   if options.static_only:
-    with open(options.output_file) as f:
+    with open(output_file) as f:
       output = json.load(f)
   else:
     output = {}
@@ -154,7 +159,7 @@ def main():
   output["static"] = {}
   convert_static_files(output["static"], options, output["maps"].keys())
 
-  with open(options.output_file, "w") as f:
+  with open(output_file, "w") as f:
     json.dump(output, f, sort_keys=True, indent=2)
 
 

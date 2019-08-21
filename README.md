@@ -57,6 +57,23 @@
     match your environment.  Also, if you already have nginx installed for other purposes, remove
     the "default server" from the "listen" lines and uncomment the server_name directive.
 
+- Clone the test_event_src and test_event repos.  This should go into
+  directories parallel to the snellen source directory:
+
+    ```
+    /some/path/to/snellen            <-- $SNELLEN_BASE points here
+    /some/path/to/test_event
+    /some/path/to/test_event_src
+    ```
+
+  `test_event` is created from `test_event_src` by running the
+  preprocess_* scripts in snellen/tools on the source config files and
+  puzzle zips in test_event_src.  For convenience you can just clone
+  the prebuild `test_event' repo instead.
+
+  TODO(dougz): document how to build test_event from test_event_src
+
+
 
 # Running the tests
 
@@ -67,6 +84,9 @@
 
 `sudo nginx`  (sudo needed to listen on port 80)
 
-`scripts/run.sh`
+```
+cd $SNELLEN_BASE/..
+scripts/run.sh
+```
 
 

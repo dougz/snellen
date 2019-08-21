@@ -29,9 +29,9 @@
 #      log in a lot.
 
 
-exec python3.7 src/main.py \
+exec python3.7 "${SNELLEN_BASE}/src/main.py" \
      --event_dir test_event \
-     --template_path html \
+     --template_path "${SNELLEN_BASE}/html" \
      --root_password joshua \
      "$@"
 

@@ -268,13 +268,18 @@ def main():
   options = parser.parse_args()
 
   options.credentials = oauth2.Oauth2Token(options.credentials)
+  if not options.public_host:
+    options.public_host = options.bucket + ".storage.googleapis.com"
+
+  puzzle_dir = os.path.join(options.output_dir, "puzzles")
+  os.makedirs(puzzle_dir, exist_ok=True)
 
   for zipfn in options.input_files:
     with open(zipfn, "rb") as f:
       zip_data = f.read()
       try:
         p = Puzzle(zip_data, options)
-        p.save(options.output_dir)
+        p.save(puzzle_dir)
       except PuzzleErrors as e:
         print(f"{zipfn} had {len(e.errors)} error(s):")
         for i, err in enumerate(e.errors):
