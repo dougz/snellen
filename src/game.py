@@ -85,6 +85,16 @@ class Submission:
     else:
       self.state = self.INCORRECT
       self.team.streak = []
+      self.team.last_incorrect_answer = now
+
+      same_answer = self.puzzle.incorrect_answers.setdefault(answer, set())
+      same_answer.add(self.team)
+      if len(same_answer) > 10:
+        for t in same_answer:
+          if t.achieve(Achievement.youre_all_wrong):
+            if t is not self.team:
+              asyncio.create_task(t.flush_messages())
+
     if self.state == self.CORRECT:
       self.puzzle_state.answers_found.add(answer)
       if self.puzzle_state.answers_found == self.puzzle.answers:
@@ -162,6 +172,8 @@ class Team(login.LoginUser):
     self.achievements = {}
     self.streak = []
     self.solve_days = set()
+    self.last_incorrect_answer = None
+    self.pages_visited = set()
 
   def __repr__(self):
     return f"<Team {self.username}>"
@@ -171,6 +183,10 @@ class Team(login.LoginUser):
     self.active_sessions.add(session)
   def detach_session(self, session):
     self.active_sessions.remove(session)
+
+  @classmethod
+  def all_teams(cls):
+    return cls.BY_USERNAME.values()
 
   def send_messages(self, objs):
     """Send a list of messages to all browsers for this team."""
@@ -189,16 +205,23 @@ class Team(login.LoginUser):
   def discard_messages(self):
     self.pending_messages = []
 
+  def visit_page(self, page):
+    self.pages_visited.add(page)
+    if self.pages_visited == {"pins", "activity"}:
+      self.delayed_achieve(Achievement.digital_explorer)
+
   def achieve(self, ach):
     if save_state.REPLAYING: return
     if ach not in self.achievements:
       self.record_achievement(ach.name)
+      return True
 
   def delayed_achieve(self, ach, delay=1.0):
     """Like achieve(), but delayed slightly.  Useful for achievements
     triggered by page load, so the loaded page gets the
     notification."""
     if save_state.REPLAYING: return
+    if ach in self.achievements: return
     async def future():
       await asyncio.sleep(delay)
       self.achieve(ach)
@@ -460,6 +483,7 @@ class Puzzle:
 
     self.solve_durations = {}
     self.fastest_solver = None
+    self.incorrect_answers = {}
 
   @classmethod
   def filler_puzzle(cls):
@@ -558,6 +582,21 @@ class Global:
       team.compute_puzzle_beam(now)
 
     # TODO trigger team reload
+
+  async def flawless_check(self):
+    while True:
+      now = time.time()
+      for team in Team.all_teams():
+        if team.last_incorrect_answer:
+          start = team.last_incorrect_answer
+        elif self.event_start_time:
+          start = self.event_start_time
+        else:
+          continue
+        if now - start >= 6 * 60 * 60:
+          if team.achieve(Achievement.flawless):
+            asyncio.create_task(team.flush_messages())
+      await asyncio.sleep(15)
 
 
 class Achievement:

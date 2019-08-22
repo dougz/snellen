@@ -98,6 +98,7 @@ def main_server(options):
   if options.debug: loop.set_debug(True)
   loop.set_default_executor(concurrent.futures.ThreadPoolExecutor(max_workers=4))
   loop.create_task(game.Submission.realtime_process_submit_queue())
+  loop.create_task(game.Global.STATE.flawless_check())
 
   try:
     print("Serving...")

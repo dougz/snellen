@@ -133,13 +133,14 @@ class PuzzlePage(util.TeamPageHandler):
 class ActivityLogPage(util.TeamPageHandler):
   @login.required("team")
   def get(self):
-    #self.team.delayed_achieve(game.Achievement.visit_log)
+    self.team.visit_page("activity")
     json_data = """<script>var log_entries = """ + json.dumps(self.team.activity_log) + ";</script>"
     self.render("activity_log.html", json_data=json_data)
 
 class AchievementPage(util.TeamPageHandler):
   @login.required("team")
   def get(self):
+    self.team.visit_page("pins")
     self.render("achievements.html", achievements=game.Achievement.ALL)
 
 class SubmitHandler(util.TeamHandler):
