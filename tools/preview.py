@@ -6,6 +6,8 @@ import base64
 import hashlib
 import json
 import os
+import re
+import time
 import tornado.ioloop
 import tornado.httpserver
 import tornado.netutil
@@ -58,8 +60,23 @@ class UploadHandler(tornado.web.RequestHandler):
   def post(self):
     p = Puzzle()
 
+    save = self.get_body_argument("save", False)
+    who = self.get_body_argument("who", "")
+
+    who = who.lower()
+    who = re.sub(r"[^a-z0-9_]+", "", who)
+
+    if save and not who:
+      p.error_msg = "Must enter your name if saving for the hunt server."
+      self.redirect(f"/error/{p.pid}")
+      return
+
+    if save:
+      timestamp = time.strftime("%Y%m%d_%H%M%S")
+
     try:
-      p.process(self.request.files["zip"][0]["body"])
+      zip_data = self.request.files["zip"][0]["body"]
+      p.process(zip_data)
 
       authors = p.pp.authors
       if len(authors) == 1:
@@ -128,6 +145,13 @@ class UploadHandler(tornado.web.RequestHandler):
 
       p.meta_url = f"https://{self.options.public_host}/{path}"
 
+      if save:
+        path = f"saved/{p.pp.shortname}/{timestamp}.{who}.{p.prefix}.zip"
+        common.upload_object("puzzle zip",
+                             self.options.save_bucket, path,
+                             "appliction/zip",
+                             zip_data, self.options.credentials)
+
       self.redirect(p.meta_url)
     except ppp.PuzzleErrors as e:
       path = f"html/{p.prefix}/error.txt"
@@ -145,7 +169,6 @@ class UploadHandler(tornado.web.RequestHandler):
 
       self.redirect(error_url)
     except Exception as e:
-      print("world")
       p.error_msg = traceback.format_exc()
       self.redirect(f"/error/{p.pid}")
 
@@ -161,8 +184,10 @@ class ErrorPage(tornado.web.RequestHandler):
 def main():
   parser = argparse.ArgumentParser(description="Live puzzle zip previewer")
   parser.add_argument("--credentials", help="Private key for google cloud service account.")
+  parser.add_argument("--save_bucket", default="snellen-prod-zip",
+                      help="Google cloud bucket to use for saved zips.")
   parser.add_argument("--bucket", default="snellen-preview",
-                      help="Google cloud bucket to use.")
+                      help="Google cloud bucket to use for preview content.")
   parser.add_argument("--public_host", help="Hostname for assets in urls.")
   parser.add_argument("--template_path")
   parser.add_argument("--skip_upload", action="store_true",
