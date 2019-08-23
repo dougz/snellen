@@ -26,8 +26,9 @@ class Puzzle:
   PUZZLE_HTML = "puzzle.html"
   STATIC_PUZZLE_HTML = "static_puzzle.html"
   SOLUTION_HTML = "solution.html"
+  FOR_OPS_HTML = "for_ops.html"
 
-  SPECIAL_FILES = {METADATA_FILE, PUZZLE_HTML, SOLUTION_HTML, STATIC_PUZZLE_HTML}
+  SPECIAL_FILES = {METADATA_FILE, PUZZLE_HTML, SOLUTION_HTML, STATIC_PUZZLE_HTML, FOR_OPS_HTML}
 
   def __init__(self, zip_data, options, include_solutions=False):
     h = hashlib.sha256()
@@ -157,9 +158,27 @@ class Puzzle:
     if errors: raise PuzzleErrors(errors)
 
     self.upload_assets(z, options, include_solutions, strip_shortname)
-    self.parse_puzzle_html(z, strip_shortname)
+
+    restricted_asset_map = self.asset_map.copy()
+    for k, v in self.asset_map.items():
+      if k.startswith("solution/"):
+        restricted_asset_map[k] = None
+
+    self.for_ops_head, self.for_ops_body = self.parse_html(
+      z, strip_shortname, errors, Puzzle.FOR_OPS_HTML, restricted_asset_map)
+
+    for k, v in self.asset_map.items():
+      if k.startswith("ops/"):
+        restricted_asset_map[k] = None
+
+    self.html_head, self.html_body = self.parse_html(
+      z, strip_shortname, errors, Puzzle.PUZZLE_HTML, restricted_asset_map)
+
     if include_solutions:
-      self.parse_solution_html(z, strip_shortname)
+      self.solution_head, self.solution_body = self.parse_html(
+        z, strip_shortname, errors, Puzzle.SOLUTION_HTML, self.asset_map)
+
+    if errors: raise PuzzleErrors(errors)
 
   @staticmethod
   def get_plural(y, name, errors):
@@ -203,45 +222,43 @@ class Puzzle:
 
       self.asset_map[nn] = f"https://{options.public_host}/{path}"
 
-  def rewrite_html(self, soup):
+  def rewrite_html(self, soup, asset_map, fn, errors):
     for i in soup.find_all():
       for attr in ("src", "href"):
         if attr in i.attrs:
           v = i[attr]
-          vv = self.asset_map.get(v)
-          if vv:
-            print(f"  Rewriting <{i.name} {attr}=\"{v}\"> to {vv}")
-            i[attr] = vv
+          if v in asset_map:
+            vv = asset_map[v]
+            if vv:
+              print(f"  Rewriting <{i.name} {attr}=\"{v}\"> to {vv}")
+              i[attr] = vv
+            else:
+              errors.append(f"{fn} can't refer to {v}")
 
-  def parse_puzzle_html(self, z, strip_shortname):
-    fn = Puzzle.PUZZLE_HTML
-    if strip_shortname:
-      fn = strip_shortname + fn
-    soup = bs4.BeautifulSoup(z.read(fn).decode("utf-8"), features="html5lib")
-    self.rewrite_html(soup)
-    if soup.head:
-      self.html_head = "".join(str(i) for i in soup.head.contents)
-    else:
-      self.html_head = None
-    self.html_body = "".join(str(i) for i in soup.body.contents)
 
-  def parse_solution_html(self, z, strip_shortname):
-    fn = Puzzle.SOLUTION_HTML
+  def parse_html(self, z, strip_shortname, errors, fn, asset_map):
     if strip_shortname:
-      fn = strip_shortname + fn
-    soup = bs4.BeautifulSoup(z.open(fn), features="html5lib")
-    self.rewrite_html(soup)
-    if soup.head:
-      self.solution_head = "".join(str(i) for i in soup.head.contents)
+      zfn = strip_shortname + fn
     else:
-      self.solution_head = None
-    self.solution_body = "".join(str(i) for i in soup.body.contents)
+      zfn = fn
+    try:
+      soup = bs4.BeautifulSoup(z.read(zfn).decode("utf-8"), features="html5lib")
+    except KeyError:
+      errors.append(f"Required file {fn} is missing.")
+      return None, None
+    self.rewrite_html(soup, asset_map, fn, errors)
+    if soup.head:
+      head = "".join(str(i) for i in soup.head.contents)
+    else:
+      head = None
+    body = "".join(str(i) for i in soup.body.contents)
+    return head, body
 
   def json_dict(self):
     d = {}
     for n in ("shortname title oncall puzzletron_id max_queued "
               "answers incorrect_responses "
-              "html_head html_body ").split():
+              "html_head html_body for_ops_head for_ops_body").split():
       v = getattr(self, n)
       if v is not None: d[n] = v
     return d

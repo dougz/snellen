@@ -101,10 +101,25 @@ class UploadHandler(tornado.web.RequestHandler):
 
       p.puzzle_url = f"https://{self.options.public_host}/{path}"
 
+      path = f"html/{p.prefix}/for_ops.html"
+      puzzle_html = self.render_string("preview_for_ops.html",
+                                       puzzle=p.pp,
+                                       team=Team,
+                                       css=[self.static_content["event.css"]],
+                                       script=None,
+                                       json_data=None)
+      common.upload_object("for_ops.html",
+                           self.options.bucket, path,
+                           common.CONTENT_TYPES[".html"],
+                           puzzle_html, self.options.credentials)
+
+      p.for_ops_url = f"https://{self.options.public_host}/{path}"
+
       path = f"html/{p.prefix}/meta.html"
       meta_html = self.render_string("meta.html",
                                      puzzle_url=p.puzzle_url,
                                      solution_url=p.solution_url,
+                                     for_ops_url=p.for_ops_url,
                                      puzzle=p.pp)
       common.upload_object("meta.html",
                            self.options.bucket, path,
@@ -115,7 +130,6 @@ class UploadHandler(tornado.web.RequestHandler):
 
       self.redirect(p.meta_url)
     except ppp.PuzzleErrors as e:
-      print("hello")
       path = f"html/{p.prefix}/error.txt"
       data = [f"{len(e.errors)} error(s) were encountered:"]
       for i, err in enumerate(e.errors):
