@@ -48,7 +48,7 @@ def make_app(options, static_dir, **kwargs):
     **kwargs)
 
 
-def main_server(options):
+async def main_server(options):
   print("Load map config...")
   with open(os.path.join(options.event_dir, "map_config.json")) as f:
     cfg = json.load(f)
@@ -80,7 +80,7 @@ def main_server(options):
     team.open_lands[start_map] = 0
     team.discard_messages()
 
-  if options.start_event and not game.Global.STATE.event_start_time:
+  if options.start_event:
     game.Global.STATE.start_event()
 
   if options.root_password:
@@ -95,18 +95,14 @@ def main_server(options):
   server.add_sockets(sockets)
 
   loop = asyncio.get_event_loop()
-  if options.debug: loop.set_debug(True)
   loop.set_default_executor(concurrent.futures.ThreadPoolExecutor(max_workers=4))
   loop.create_task(game.Submission.realtime_process_submit_queue())
   loop.create_task(game.Global.STATE.flawless_check())
 
-  try:
-    print("Serving...")
-    tornado.ioloop.IOLoop.current().start()
-  except KeyboardInterrupt:
-    pass
-
-  save_state.close()
+  print("Serving...")
+  async with game.Global.STATE.stop_cv:
+    while not game.Global.STATE.stopping:
+      await game.Global.STATE.stop_cv.wait()
 
 
 def wait_server(n, options):
@@ -156,7 +152,12 @@ def main():
       wait_server(i, options)
       return
 
-  main_server(options)
+  try:
+    asyncio.run(main_server(options), debug=options.debug)
+  except KeyboardInterrupt:
+    pass
+
+  save_state.close()
 
 
 

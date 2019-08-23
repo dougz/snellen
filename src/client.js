@@ -67,6 +67,8 @@ class H2020_Dispatcher {
 	    "solve": this.solve,
 	    "open": this.open,
 	    "achieve": this.achieve,
+	    "update_start": this.update_start,
+	    "to_page": this.to_page,
 	}
     }
 
@@ -87,17 +89,30 @@ class H2020_Dispatcher {
 	if (msg.audio) {
 	    hunt2020.audio_manager.start(msg.audio);
 	}
-	hunt2020.toast_manager.add_toast("<b>" + msg.title + "</b> was solved!", 6000, true);
+	hunt2020.toast_manager.add_toast(
+	    "<b>" + msg.title + "</b> was solved!", 6000, true);
     }
 
     /** @param{Message} msg */
     open(msg) {
-	hunt2020.toast_manager.add_toast("<b>" + msg.title + "</b> is now open!", 6000);
+	hunt2020.toast_manager.add_toast(
+	    "<b>" + msg.title + "</b> is now open!", 6000);
     }
 
     /** @param{Message} msg */
     achieve(msg) {
-	hunt2020.toast_manager.add_toast("You received the <b>" + msg.title + "</b> pin!", 6000, null, "gold");
+	hunt2020.toast_manager.add_toast(
+	    "You received the <b>" + msg.title + "</b> pin!", 6000, null, "gold");
+    }
+
+    /** @param{Message} msg */
+    update_start(msg) {
+	open_time = msg.new_start;
+    }
+
+    /** @param{Message} msg */
+    to_page(msg) {
+	window.location = msg.url;
     }
 }
 
@@ -524,6 +539,23 @@ class H2020_MapDraw {
     }
 }
 
+class H2020_OpeningCountdown {
+    constructor() {
+	this.el = goog.dom.getElement("opencountdown");
+	this.timer = setInterval(goog.bind(this.update_timer, this), 1000);
+    }
+
+    update_timer() {
+	var now = (new Date()).getTime() / 1000.0;
+	var s = open_time - now;
+	if (s < 0) s = 0;
+	var min = Math.trunc(s/60);
+	var sec = Math.trunc(s%60);
+	var text = "" + min + ":" + (""+sec).padStart(2, "0");
+	this.el.innerHTML = text;
+    }
+}
+
 class H2020_AudioManager {
     constructor() {
 	this.current = null;
@@ -578,6 +610,8 @@ class H2020_AudioManager {
     }
 }
 
+
+
 var hunt2020 = {
     waiter: null,
     submit_panel: null,
@@ -585,6 +619,7 @@ var hunt2020 = {
     toast_manager: null,
     audio_manager: null,
     map_draw: null,
+    open_countdown: null,
 }
 
 window.onload = function() {
@@ -625,5 +660,8 @@ window.onload = function() {
 	}
     }
 
+    if (goog.dom.getElement("opencountdown")) {
+	hunt2020.open_countdown = new H2020_OpeningCountdown();
+    }
 }
 

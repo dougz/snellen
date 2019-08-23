@@ -1,4 +1,6 @@
 import asyncio
+import game
+import time
 import tornado.web
 
 import wait_proxy
@@ -59,7 +61,15 @@ class AdminPageHandler(tornado.web.RequestHandler):
     cls.static_content = static_content
 
   def get_template_namespace(self):
-    d = {}
+    d = {"user": self.user}
+
+    st = game.Global.STATE
+    if st.event_start_time:
+      d["launched"] = time.time() - st.event_start_time
+    else:
+      d["launched"] = None
+      d["until_launch"] = st.expected_start_time - time.time()
+    d["format_duration"] = format_duration
 
     if self.application.settings.get("debug"):
       d["script"] = ("""<script src="/closure/goog/base.js"></script>\n"""
@@ -71,3 +81,17 @@ class AdminPageHandler(tornado.web.RequestHandler):
 
     return d
 
+def format_duration(sec):
+  sec = int(sec)
+  hours = sec // 3600
+  sec = sec % 3600
+  mins = sec // 60
+  sec = sec % 60
+
+  out = []
+  if hours:
+    out.append(f"{hours}h ")
+  if hours or mins:
+    out.append(f"{mins}m ")
+  out.append(f"{sec}s")
+  return "".join(out)

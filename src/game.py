@@ -571,17 +571,49 @@ class Global:
   @save_state
   def __init__(self, now):
     self.event_start_time = None
+    self.expected_start_time = int(now + 30)
     Global.STATE = self
+    asyncio.create_task(self.future_start())
+
+    self.stopping = False
+    self.stop_cv = asyncio.Condition()
+
+  async def stop_server(self):
+    async with self.stop_cv:
+      self.stopping = True
+      self.stop_cv.notify_all()
+
+  @save_state
+  def update_event_start(self, now, when):
+    if self.event_start_time: return
+    self.expected_start_time = when
+    asyncio.create_task(self.future_start())
+    asyncio.create_task(self.update_event_start_teams())
+
+  async def future_start(self):
+    delay = self.expected_start_time - time.time()
+    if delay > 0:
+      await asyncio.sleep(delay)
+    now = time.time()
+    if not self.event_start_time and now >= self.expected_start_time:
+      self.start_event()
 
   @save_state
   def start_event(self, now):
-    if self.event_start_time: return
-
+    if self.event_start_time is not None: return
     self.event_start_time = now
-    for team in Team.BY_USERNAME.values():
-      team.compute_puzzle_beam(now)
+    asyncio.create_task(self.notify_event_start())
 
-    # TODO trigger team reload
+  async def notify_event_start(self):
+    for team in Team.BY_USERNAME.values():
+      team.compute_puzzle_beam(self.event_start_time)
+      team.send_messages([{"method": "to_page", "url": "/"}])
+      await team.flush_messages()
+
+  async def update_event_start_teams(self):
+    for team in Team.BY_USERNAME.values():
+      team.send_messages([{"method": "update_start", "new_start": self.expected_start_time}])
+      await team.flush_messages()
 
   async def flawless_check(self):
     while True:

@@ -1,8 +1,11 @@
 import http.client
 import tornado.web
 
+import datetime
+import dateutil.parser
 import game
 import login
+import time
 import util
 import wait_proxy
 
@@ -10,10 +13,15 @@ class AdminHomePage(util.AdminPageHandler):
   @login.required("admin")
   def get(self):
 
-    self.render("admin_home.html",
-                user=self.user,
-                game_state=game.Global.STATE,
-                sessions=len(login.Session.BY_KEY))
+    st = game.Global.STATE
+    args = {"user": self.user,
+            "game_state": st}
+
+    if not st.event_start_time:
+      d = datetime.datetime.fromtimestamp(st.expected_start_time)
+      args["expected_start_time_text"] = d.ctime()
+
+    self.render("admin_home.html", **args)
 
 
 class AdminUsersPage(util.AdminPageHandler):
@@ -39,14 +47,14 @@ class UpdateAdminRole(tornado.web.RequestHandler):
 class ShowTeamsPage(util.AdminPageHandler):
   @login.required("admin")
   def get(self):
-    self.render("teams.html", user=self.user,
+    self.render("teams.html",
                 teams=game.Team.BY_USERNAME)
 
 
 class ShowPuzzlesPage(util.AdminPageHandler):
   @login.required("admin")
   def get(self):
-    self.render("puzzles.html", user=self.user,
+    self.render("puzzles.html",
                 puzzles=game.Puzzle.BY_SHORTNAME)
 
 
@@ -70,10 +78,43 @@ class CreateUser(tornado.web.RequestHandler):
 class StopServerPage(util.AdminPageHandler):
   @login.required(login.AdminRoles.CONTROL_EVENT)
   async def get(self):
-    await wait_proxy.Server.exit()
-    loop = tornado.ioloop.IOLoop.current()
-    loop.call_later(1.5, loop.stop)
     self.write("Stopping server\u2026")
+    await wait_proxy.Server.exit()
+    await game.Global.STATE.stop_server()
+
+
+class ChangeStartPage(util.AdminPageHandler):
+  @login.required(login.AdminRoles.CONTROL_EVENT)
+  def get(self):
+    new_time_text = self.get_argument("start_time", None)
+    if not new_time_text:
+      raise tornado.web.HTTPError(http.client.BAD_REQUEST,
+                                  "No new time given")
+    new_time = dateutil.parser.parse(new_time_text)
+    new_timestamp = int(new_time.timestamp())
+    from_now = new_timestamp - time.time()
+    if from_now < 60:
+      self.render("admin_change_start.html",
+                  error="Time is in the past (or not far enough in the future).")
+      return
+
+    confirm_text = new_time.ctime()
+
+    self.render("admin_change_start.html",
+                confirm_text=confirm_text,
+                new_timestamp=new_timestamp,
+                error=None)
+
+class ConfirmChangeStartPage(util.AdminPageHandler):
+  @login.required(login.AdminRoles.CONTROL_EVENT)
+  def get(self):
+    new_timestamp = self.get_argument("new_start", None)
+    if not new_timestamp:
+      raise tornado.web.HTTPError(http.client.BAD_REQUEST,
+                                  "No new time given")
+    new_timestamp = int(new_timestamp)
+    game.Global.STATE.update_event_start(new_timestamp)
+    self.redirect("/admin")
 
 
 class StartEvent(tornado.web.RequestHandler):
@@ -91,7 +132,8 @@ def GetHandlers():
     (r"/admin_users", AdminUsersPage),
     (r"/(set|clear)_admin_role/([^/]+)/([^/]+)", UpdateAdminRole),
     (r"/create_user", CreateUser),
-    (r"/start_event", StartEvent),
+    (r"/change_start", ChangeStartPage),
+    (r"/confirm_change_start", ConfirmChangeStartPage),
     (r"/stop_server", StopServerPage),
     (r"/teams", ShowTeamsPage),
     (r"/puzzles", ShowPuzzlesPage),

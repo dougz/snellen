@@ -79,12 +79,13 @@ class LandMapPage(util.TeamPageHandler):
 
   def get_template_namespace(self):
     d = super().get_template_namespace()
-    if self.application.settings.get("debug"):
-      d["css"].append(f"/assets/{self.land.shortname}/land.css")
-    else:
-      css = f"{self.land.shortname}/land.css"
-      if css in self.static_content:
-        d["css"].append(self.static_content[css])
+    if hasattr(self, "land"):
+      if self.application.settings.get("debug"):
+        d["css"].append(f"/assets/{self.land.shortname}/land.css")
+      else:
+        css = f"{self.land.shortname}/land.css"
+        if css in self.static_content:
+          d["css"].append(self.static_content[css])
     return d
 
 
@@ -92,7 +93,8 @@ class EventHomePage(LandMapPage):
   @login.required("team", require_start=False)
   def get(self):
     if not game.Global.STATE.event_start_time:
-      self.render("not_started.html")
+      json_data = "<script>var open_time = """ + str(game.Global.STATE.expected_start_time) + ";</script>"
+      self.render("not_started.html", json_data=json_data)
       return
     self.show_map("inner_only")
 

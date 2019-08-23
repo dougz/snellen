@@ -1,15 +1,83 @@
 body {
     font-family: sans-serif;
+    margin: 0;
 }
+
+/* #5d5c61  #379683  #7395ae  #557a95  #b1a296 */
+
+#topnav {
+    min-width: 1060px;
+    height: 24px;
+    font-size: 18px;
+    background: #7395ae;
+    color: white;
+    border-bottom: 1px solid #557a95;
+    padding: 8px 20px;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    z-index: 1000;
+    position: relative;
+
+    user-select: none;
+}
+
+/* The spacer should take up all the extra space, forcing the items
+   before it to the left and those after it to the right. */
+#topnav .spacer {
+    flex-grow: 100;
+}
+
+#topnav > span, #topnav > a {
+    margin: 0 20px;
+}
+
+#topnav #title {
+    font-weight: bold;
+    font-size: 120%;
+}
+
+li { line-height: 30px; }
+
 
 .admin-role {
     text-align: center;
 }
 
-span.username {
-    float: right;
-    font-size: 84%;
+
+div#confirm {
+    margin: 20px;
+    font-size: 120%;
 }
+
+div.buttons {
+    padding: 20px;
+}
+
+div.buttons > a {
+    color: white;
+    padding: 15px 32px;
+    border-radius: 8px;
+    width: 180px;
+    margin: 20px 12px;
+    font-size: 120%;
+    font-weight: bold;
+    outline: none;
+    text-decoration: none;
+}
+
+div.buttons > a.green {
+    background-color: #4caf50;
+}
+
+div.buttons > a.red {
+    background-color: #af4c50;
+}
+
+
+
 
 hr {
     color: #999;

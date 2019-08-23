@@ -7,13 +7,20 @@
     {% block head %}{% end %}
   </head>
   <body>
-    <span class=username>
-      {{user.fullname}} &bull; <a href="/logout">logout</a>
-    </span>
-    <h1>{% block title %}{% end %}</h1>
-    &bull;
-    <a href="/admin">home</a>
-    <hr>
+    <div id="topnav">
+      <span id="title">{% block title %}{% end %}</span>
+      <span id="time">
+	{% if launched %}
+	Hunt launched {{ format_duration(launched) }} ago.
+	{% else %}
+	Hunt launches in {{ format_duration(until_launch) }}.
+	{% end %}
+      </span>
+      <span class="spacer"></span>
+      <span class=username>{{user.fullname}}</span>
+      <a href="/logout">logout</a>
+    </div>
+
     {% block content %}{% end %}
   </body>
 </html>

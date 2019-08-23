@@ -1,4 +1,4 @@
-/** @type{string} */
+/** @type{?string} */
 var puzzle_id;
 
 /** @type{MapData} */
@@ -16,16 +16,23 @@ var waiter_id;
 /** @type{Storage} */
 var localStorage;
 
+/** @type{?number} */
+var open_time;
+
 class Message {
     constructor() {
 	/** @type{string} */
 	this.method;
-	/** @type{string} */
+	/** @type{?string} */
 	this.puzzle_id;
-	/** @type{string} */
+	/** @type{?string} */
 	this.title;
 	/** @type{?string} */
 	this.audio;
+	/** @type{?number} */
+	this.new_start;
+	/** @type{?string} */
+	this.url;
     }
 }
 

@@ -14,15 +14,19 @@
   <body>
     <div id="topnav">
       <span id="teamname">{{team.team_name}}</span>
+      {% block topnav_startedleft %}
       <span>
 	<a href="/">Penny Park</a>
 	{% block crumbs %}{% end %}
       </span>
+      {% end %}
       {% block topnav_extraleft %}{% end %}
       <span class="spacer"></span>
       {% block topnav_extraright %}{% end %}
+      {% block topnav_startedright %}
       <a href="/pins">Pins</a>
       <a href="/log">Activity Log</a>
+      {% end %}
       <a href="/logout">Logout</a>
     </div>
 
