@@ -659,8 +659,8 @@ class Achievement:
                 "Ex-champion!",
                 "Lose the record time for solving a puzzle.")
 
-    Achievement("social_media_superstar",
-                "Social Media Superstar",
+    Achievement("influencer",
+                "Influencer",
                 "Create enough buzz to save the park.")
 
     Achievement("take_a_shortcut",
