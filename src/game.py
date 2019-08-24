@@ -477,6 +477,13 @@ class Puzzle:
     self.fastest_solver = None
     self.incorrect_answers = {}
 
+  def __hash__(self):
+    return id(self)
+  def __eq__(self, other):
+    return self is other
+  def __lt__(self, other):
+    return self.title < other.title
+
   @classmethod
   def filler_puzzle(cls):
     cls.FILLER_COUNT += 1
@@ -569,7 +576,7 @@ class Global:
   @save_state
   def __init__(self, now):
     self.event_start_time = None
-    self.expected_start_time = int(now + 30)
+    self.expected_start_time = int(now + 5)
     Global.STATE = self
     asyncio.create_task(self.future_start())
 

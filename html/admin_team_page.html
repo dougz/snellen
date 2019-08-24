@@ -8,6 +8,17 @@
 <table class=info>
   <tr><th>username</th><td class=mono>{{team.username}}</td></tr>
   <tr><th>location</th><td>{{team.attrs.get("location", "Unknown")}}</td></tr>
+  <tr><th class=top>open puzzles ({{len(open_list)}})</th>
+    <td>
+      {% for i, (_, p, d, a) in enumerate(open_list) %}
+      {% if i > 0 %}<br>{% end %}
+      <a href="/admin/puzzle/{{p.shortname}}">{{p.title}}</a> ({{d}})
+      {% if a %}&mdash;
+      {% for aa in a %} <span class=answer>{{aa}}</span>{% end %}
+      {% end %}
+      {% end %}
+    </td>
+  </tr>
 </table>
 
 {% end %}

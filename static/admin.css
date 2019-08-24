@@ -9,6 +9,8 @@ body {
 .answer { font-weight: bold; text-transform: uppercase; }
 .b { font-weight: bold; }
 
+a { text-decoration: none; }
+
 table.info th {
     text-align: right;
     padding-right: 20px;

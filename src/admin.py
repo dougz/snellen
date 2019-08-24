@@ -57,7 +57,15 @@ class AdminTeamPage(util.AdminPageHandler):
     team = game.Team.get_by_username(username)
     if not team:
       raise tornado.web.HTTPError(http.client.NOT_FOUND)
-    self.render("admin_team_page.html", team=team)
+
+    now = time.time()
+    open_list = []
+    for s in team.puzzle_state.values():
+      if s.state == s.OPEN:
+        open_list.append((s.open_time, s.puzzle, util.format_duration(now-s.open_time), s.answers_found))
+    open_list.sort()
+
+    self.render("admin_team_page.html", team=team, open_list=open_list)
 
 class ListPuzzlesPage(util.AdminPageHandler):
   @login.required("admin")
