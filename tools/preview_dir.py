@@ -23,9 +23,11 @@ def main():
     for dirpath, dirnames, filenames in os.walk(options.input_dir):
       relpath = dirpath[len(options.input_dir):].lstrip("/")
       d = os.path.basename(relpath)
-      if d == ".git": continue
-      if d.startswith("__OSX"): continue
+      if d.startswith("."): continue
+      if d.startswith("__MACOSX"): continue
       for fn in filenames:
+        if fn.startswith("."): continue
+        if fn.endswith("~"): continue
         with open(os.path.join(dirpath, fn), "rb") as f:
           z.writestr(os.path.join(relpath, fn), f.read())
   temp = temp.getbuffer()
