@@ -576,7 +576,7 @@ class Global:
   @save_state
   def __init__(self, now):
     self.event_start_time = None
-    self.expected_start_time = int(now + 5)
+    self.expected_start_time = int(now + 10)
     Global.STATE = self
     asyncio.create_task(self.future_start())
 

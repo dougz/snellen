@@ -112,6 +112,7 @@ class H2020_Dispatcher {
 
     /** @param{Message} msg */
     to_page(msg) {
+	console.log("got a to_page message");
 	window.location = msg.url;
     }
 }

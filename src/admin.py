@@ -80,7 +80,13 @@ class AdminPuzzlePage(util.AdminPageHandler):
     puzzle = game.Puzzle.get_by_shortname(shortname)
     if not puzzle:
       raise tornado.web.HTTPError(http.client.NOT_FOUND)
-    self.render("admin_puzzle_page.html", puzzle=puzzle)
+
+    solve_list = []
+    for t, d in puzzle.solve_durations.items():
+      solve_list.append((d, t, util.format_duration(d)))
+    solve_list.sort()
+
+    self.render("admin_puzzle_page.html", puzzle=puzzle, solve_list=solve_list)
 
 
 class CreateUser(tornado.web.RequestHandler):

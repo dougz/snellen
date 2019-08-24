@@ -14,7 +14,7 @@
       {% if i > 0 %}<br>{% end %}
       <a href="/admin/puzzle/{{p.shortname}}">{{p.title}}</a> ({{d}})
       {% if a %}&mdash;
-      {% for aa in a %} <span class=answer>{{aa}}</span>{% end %}
+      {% for aa in a %} <span class=answer>{{aa}}</span>{% end %} &hellip;
       {% end %}
       {% end %}
     </td>
