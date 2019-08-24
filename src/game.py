@@ -151,7 +151,7 @@ class Team(login.LoginUser):
 
     self.username = username
     self.password_hash = info["pwhash"].encode("ascii")
-    self.team_name = info["name"]
+    self.name = info["name"]
     self.size = info["size"]
     self.attrs = info.get("attrs", {})
 
@@ -234,14 +234,6 @@ class Team(login.LoginUser):
     self.achievements[ach] = now
     self.activity_log.append((now, f'Received the <b>{html.escape(ach.title)}</b> pin.'))
     self.send_messages([{"method": "achieve", "title": ach.title}])
-
-  # This method is exported into the file that's used to create all
-  # the teams.
-  @classmethod
-  def add_team(cls, username, password, team_name, location):
-    if username not in cls.BY_USERNAME:
-      print(f"  Adding team {username} \"{team_name}\"")
-      t = Team(username, login.make_hash(password), team_name, location)
 
   @classmethod
   def get_by_username(cls, username):

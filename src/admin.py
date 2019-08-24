@@ -51,6 +51,14 @@ class ListTeamsPage(util.AdminPageHandler):
                 teams=game.Team.BY_USERNAME)
 
 
+class AdminTeamPage(util.AdminPageHandler):
+  @login.required("admin")
+  def get(self, username):
+    team = game.Team.get_by_username(username)
+    if not team:
+      raise tornado.web.HTTPError(http.client.NOT_FOUND)
+    self.render("admin_team_page.html", team=team)
+
 class ListPuzzlesPage(util.AdminPageHandler):
   @login.required("admin")
   def get(self):
@@ -64,7 +72,6 @@ class AdminPuzzlePage(util.AdminPageHandler):
     puzzle = game.Puzzle.get_by_shortname(shortname)
     if not puzzle:
       raise tornado.web.HTTPError(http.client.NOT_FOUND)
-
     self.render("admin_puzzle_page.html", puzzle=puzzle)
 
 
@@ -146,6 +153,7 @@ def GetHandlers():
     (r"/confirm_change_start", ConfirmChangeStartPage),
     (r"/stop_server", StopServerPage),
     (r"/admin/teams", ListTeamsPage),
+    (r"/admin/team/([a-z0-9_]+)", AdminTeamPage),
     (r"/admin/puzzles", ListPuzzlesPage),
     (r"/admin/puzzle/([a-z0-9_]+)", AdminPuzzlePage),
     ]

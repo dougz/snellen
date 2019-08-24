@@ -1,0 +1,13 @@
+{% extends "admin_base.html" %}
+{% block colorscheme %}darkblue{% end %}
+
+{% block title %}Team "{{team.name}}"{% end %}
+
+{% block content %}
+
+<table class=info>
+  <tr><th>username</th><td class=mono>{{team.username}}</td></tr>
+  <tr><th>location</th><td>{{team.attrs.get("location", "Unknown")}}</td></tr>
+</table>
+
+{% end %}

@@ -24,13 +24,18 @@ table.info td p { margin-block-start: 0; }
 
 /* #5d5c61  #379683  #7395ae  #557a95  #b1a296 */
 
+.lightblue { background-color: #7395ae; }
+.darkblue { background-color: #557a95; }
+.accentgreen { background-color: #379683; }
+.darkergray { background-color: #5d5c61; }
+.lightergray { background-color: #b1a296; }
+
 #topnav {
     min-width: 1060px;
     height: 24px;
     font-size: 18px;
-    background: #7395ae;
     color: white;
-    border-bottom: 1px solid #557a95;
+    border-bottom: 1px solid black;
     padding: 8px 20px;
 
     display: flex;

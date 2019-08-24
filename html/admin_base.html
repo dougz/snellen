@@ -7,8 +7,9 @@
     {% block head %}{% end %}
   </head>
   <body>
-    <div id="topnav">
+    <div id="topnav" class="{% block colorscheme %}{% end %}">
       <span id="title">{% block title %}{% end %}</span>
+      <span class="spacer"></span>
       <span id="time">
 	{% if launched %}
 	Hunt launched {{ format_duration(launched) }} ago.
@@ -16,7 +17,6 @@
 	Hunt launches in {{ format_duration(until_launch) }}.
 	{% end %}
       </span>
-      <span class="spacer"></span>
       <span class=username>{{user.fullname}}</span>
       <a href="/logout">logout</a>
     </div>

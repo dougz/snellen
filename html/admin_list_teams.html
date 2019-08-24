@@ -1,4 +1,5 @@
 {% extends "admin_base.html" %}
+{% block colorscheme %}darkblue{% end %}
 
 {% block title %}Teams{% end %}
 
@@ -6,7 +7,7 @@
 
 <ul>
   {% for t in teams.values() %}
-  <li>{{t.username}}: {{t.team_name}}</li>
+  <li>{{t.username}}: <a href="/admin/team/{{t.username}}">{{t.name}}</a></li>
   {% end %}
 </ul>
 
