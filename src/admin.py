@@ -65,7 +65,12 @@ class AdminTeamPage(util.AdminPageHandler):
         open_list.append((s.open_time, s.puzzle, util.format_duration(now-s.open_time), s.answers_found))
     open_list.sort()
 
-    self.render("admin_team_page.html", team=team, open_list=open_list)
+    log = []
+    for t, e in team.activity_log[-100:]:
+      d = datetime.datetime.fromtimestamp(t)
+      log.append((d.strftime("%a %H:%M:%S"), e))
+
+    self.render("admin_team_page.html", team=team, open_list=open_list, log=log)
 
 class ListPuzzlesPage(util.AdminPageHandler):
   @login.required("admin")

@@ -58,13 +58,13 @@ class Submission:
   def __lt__(self, other):
     return self.submit_id < other.submit_id
 
-  def check_or_queue(self):
+  def check_or_queue(self, now):
     self.check_time = self.compute_check_time()
     if self.check_time <= self.submit_time:
       self.check_answer(self.submit_time)
     else:
       heapq.heappush(self.GLOBAL_SUBMIT_QUEUE, (self.check_time, self))
-      self.team.achieve(Achievement.scattershot)
+      self.team.achieve(Achievement.scattershot, now)
 
   def compute_check_time(self):
     # Note that self is already in the submissions list (at the end)
@@ -91,7 +91,7 @@ class Submission:
       same_answer.add(self.team)
       if len(same_answer) > 10:
         for t in same_answer:
-          if t.achieve(Achievement.youre_all_wrong):
+          if t.achieve(Achievement.youre_all_wrong, now):
             if t is not self.team:
               asyncio.create_task(t.flush_messages())
 
@@ -208,32 +208,32 @@ class Team(login.LoginUser):
   def visit_page(self, page):
     self.pages_visited.add(page)
     if self.pages_visited == {"pins", "activity"}:
-      self.delayed_achieve(Achievement.digital_explorer)
+      self.achieve_now(Achievement.digital_explorer, delay=1.5)
 
-  def achieve(self, ach):
-    if save_state.REPLAYING: return
+  def achieve_now(self, ach, delay=None):
     if ach not in self.achievements:
-      self.record_achievement(ach.name)
+      self.record_achievement(ach.name, delay)
       return True
 
-  def delayed_achieve(self, ach, delay=1.0):
-    """Like achieve(), but delayed slightly.  Useful for achievements
-    triggered by page load, so the loaded page gets the
-    notification."""
-    if save_state.REPLAYING: return
-    if ach in self.achievements: return
-    async def future():
-      await asyncio.sleep(delay)
-      self.achieve(ach)
-      await self.flush_messages()
-    asyncio.create_task(future())
-
   @save_state
-  def record_achievement(self, now, aname):
+  def record_achievement(self, now, aname, delay):
     ach = Achievement.by_name(aname)
-    self.achievements[ach] = now
-    self.activity_log.append((now, f'Received the <b>{html.escape(ach.title)}</b> pin.'))
-    self.send_messages([{"method": "achieve", "title": ach.title}])
+    self.achieve(ach, now, delay=None if save_state.REPLAYING else delay)
+
+  def achieve(self, ach, now, delay=None):
+    if ach not in self.achievements:
+      self.achievements[ach] = now
+      self.activity_log.append((now, f'Received the <b>{html.escape(ach.title)}</b> pin.'))
+      msg = [{"method": "achieve", "title": ach.title}]
+      if delay:
+        async def future():
+          await asyncio.sleep(delay)
+          self.send_messages(msg)
+          await self.flush_messages()
+        asyncio.create_task(future())
+      else:
+        self.send_messages(msg)
+      return True
 
   @classmethod
   def get_by_username(cls, username):
@@ -266,7 +266,7 @@ class Team(login.LoginUser):
     sub = Submission(now, submit_id, self, puzzle, answer)
     state.submissions.append(sub)
     self.send_messages([{"method": "history_change", "puzzle_id": shortname}])
-    sub.check_or_queue()
+    sub.check_or_queue(now)
 
   @save_state
   def cancel_submission(self, now, submit_id, shortname):
@@ -289,7 +289,7 @@ class Team(login.LoginUser):
         for sub in after:
           state.submissions.append(sub)
           if sub.state == sub.PENDING:
-            sub.check_or_queue()
+            sub.check_or_queue(now)
         break
     else:
       print(f"failed to cancel submit {submit_id} puzzle {shortname} for {self.username}")
@@ -317,7 +317,7 @@ class Team(login.LoginUser):
           "audio": "https://snellen.storage.googleapis.com/applause.mp3"}])
       self.activity_log.append((now, f'<a href="{puzzle.url}">{html.escape(puzzle.title)}</a> solved.'))
 
-      self.achieve(Achievement.solve_puzzle)
+      self.achieve(Achievement.solve_puzzle, now)
 
       solve_duration = state.solve_time - state.open_time
       puzzle.solve_durations[self] = solve_duration
@@ -325,26 +325,26 @@ class Team(login.LoginUser):
           puzzle.solve_durations[puzzle.fastest_solver] > solve_duration):
         # a new record
         if puzzle.fastest_solver:
-          puzzle.fastest_solver.achieve(Achievement.ex_champion)
+          puzzle.fastest_solver.achieve(Achievement.ex_champion, now)
           asyncio.create_task(puzzle.fastest_solver.flush_messages())
         puzzle.fastest_solver = self
-        self.achieve(Achievement.champion)
+        self.achieve(Achievement.champion, now)
 
       if solve_duration < 60:
-        self.achieve(Achievement.speed_demon)
+        self.achieve(Achievement.speed_demon, now)
       if solve_duration >= 24*60*60:
-        self.achieve(Achievement.better_late_than_never)
+        self.achieve(Achievement.better_late_than_never, now)
       st = datetime.datetime.fromtimestamp(now)
       if 0 <= st.hour < 3:
-        self.achieve(Achievement.night_owl)
+        self.achieve(Achievement.night_owl, now)
       elif 3 <= st.hour < 6:
-        self.achieve(Achievement.early_bird)
+        self.achieve(Achievement.early_bird, now)
       self.solve_days.add(st.weekday())
       if self.solve_days.issuperset({4,5,6}):
-        self.achieve(Achievement.weekend_pass)
+        self.achieve(Achievement.weekend_pass, now)
       self.streak.append(now)
       if len(self.streak) >= 3 and now - self.streak[-3] <= 600:
-        self.achieve(Achievement.hot_streak)
+        self.achieve(Achievement.hot_streak, now)
 
       self.compute_puzzle_beam(now)
 
@@ -372,7 +372,7 @@ class Team(login.LoginUser):
     for st in self.puzzle_state.values():
       if st.state != PuzzleState.CLOSED:
         if st.puzzle.land not in self.open_lands:
-          if st.puzzle.land.shortname != "mainstreet":
+          if st.puzzle.land.shortname != "castle":
             self.send_messages([{"method": "open", "title": html.escape(st.puzzle.land.title)}])
           self.open_lands[st.puzzle.land] = now
 
@@ -607,11 +607,13 @@ class Global:
   def start_event(self, now):
     if self.event_start_time is not None: return
     self.event_start_time = now
-    asyncio.create_task(self.notify_event_start())
+    for team in Team.BY_USERNAME.values():
+      team.compute_puzzle_beam(self.event_start_time)
+    if not save_state.REPLAYING:
+      asyncio.create_task(self.notify_event_start())
 
   async def notify_event_start(self):
     for team in Team.BY_USERNAME.values():
-      team.compute_puzzle_beam(self.event_start_time)
       team.send_messages([{"method": "to_page", "url": "/"}])
       await team.flush_messages()
 
@@ -631,7 +633,7 @@ class Global:
         else:
           continue
         if now - start >= 6 * 60 * 60:
-          if team.achieve(Achievement.flawless):
+          if team.achieve_now(Achievement.flawless):
             asyncio.create_task(team.flush_messages())
       await asyncio.sleep(15)
 

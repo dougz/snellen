@@ -21,4 +21,13 @@
   </tr>
 </table>
 
+<h2>Activity log</h2>
+<div id="teamlog">
+  <ul>
+    {% for t, e in log %}
+    <li>{{t}} &mdash; {% raw e %}</li>
+    {% end %}
+  </ul>
+</div>
+
 {% end %}

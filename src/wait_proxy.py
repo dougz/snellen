@@ -1,5 +1,6 @@
 import asyncio
 import collections
+import concurrent
 import http.client
 import json
 import random
@@ -52,6 +53,7 @@ class Server:
   @classmethod
   async def exit(cls):
     await cls.send_message("__EXIT", 0, [""])
+    await asyncio.sleep(1.0)
 
 
 class ProxyWaitHandler(tornado.web.RequestHandler):
@@ -101,28 +103,24 @@ class Client:
 
     self.session_cache = {}
 
-    tornado.httpclient.AsyncHTTPClient.configure(
-      "tornado.curl_httpclient.CurlAsyncHTTPClient", max_clients=10000)
+  async def start(self):
+    #tornado.httpclient.AsyncHTTPClient.configure(
+    #"tornado.curl_httpclient.CurlAsyncHTTPClient", max_clients=10000)
     self.client = tornado.httpclient.AsyncHTTPClient()
 
     app = tornado.web.Application(
       [(r"/wait/(\d+)/(\d+)", WaitHandler, {"proxy_client": self})],
-      cookie_secret=options.cookie_secret)
+      cookie_secret=self.options.cookie_secret)
 
     self.server = tornado.httpserver.HTTPServer(app)
-    socket = tornado.netutil.bind_unix_socket(f"{options.socket_path}_p{wpid}", mode=0o666, backlog=3072)
+    socket = tornado.netutil.bind_unix_socket(f"{self.options.socket_path}_p{self.wpid}", mode=0o666, backlog=3072)
     self.server.add_socket(socket)
 
-  def start(self):
-    ioloop = tornado.ioloop.IOLoop.current()
-    ioloop.spawn_callback(self.fetch)
-    ioloop.spawn_callback(self.purge)
-    #ioloop.spawn_callback(self.print_stats)
-    try:
-      print(f"proxy waiter #{self.wpid} listening")
-      ioloop.start()
-    except KeyboardInterrupt:
-      pass
+    asyncio.create_task(self.purge())
+    #asyncio.create_task(self.print_stats())
+
+    print(f"proxy waiter #{self.wpid} listening")
+    await self.fetch()
 
   async def print_stats(self):
     while True:
@@ -142,7 +140,6 @@ class Client:
       for team, items in msgs:
         if team == "__EXIT":
           print(f"proxy waiter #{self.wpid} exiting")
-          asyncio.get_running_loop().stop()
           return
         team = ProxyTeam.get_team(team)
         await team.send_messages(items)
@@ -171,6 +168,10 @@ class Client:
       except tornado.httpclient.HTTPClientError as e:
         print(f"proxy {self.wpid} got {e.code}; retrying")
         await asyncio.sleep(1.0)
+      except concurrent.futures.CancelledError:
+        pass
+      except Exception as e:
+        print(e)
 
   async def check_session(self, key):
     if not key:

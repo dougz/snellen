@@ -6,7 +6,9 @@ import concurrent
 import json
 import os
 import resource
+import signal
 import sys
+import time
 
 import tornado.ioloop
 import tornado.httpserver
@@ -83,10 +85,6 @@ async def main_server(options):
   if options.start_event:
     game.Global.STATE.start_event()
 
-  if options.root_password:
-    print("Enabling root user...")
-    login.AdminUser.enable_root(login.make_hash(options.root_password))
-
   app = make_app(options, cfg["static"], autoreload=False)
 
   server = tornado.httpserver.HTTPServer(app)
@@ -106,7 +104,10 @@ async def main_server(options):
 
 
 def wait_server(n, options):
-  wait_proxy.Client(n, options).start()
+  try:
+    asyncio.run(wait_proxy.Client(n, options).start(), debug=options.debug)
+  except KeyboardInterrupt:
+    pass
 
 
 def main():
@@ -147,10 +148,19 @@ def main():
   resource.setrlimit(resource.RLIMIT_NOFILE, (hard, hard))
   print(f"Raised limit to {hard} file descriptors.")
 
+  original_handler = signal.signal(signal.SIGINT, signal.SIG_IGN)
+  proxy_pids = []
   for i in range(options.wait_proxies):
-    if os.fork() == 0:
+    pid = os.fork()
+    if pid == 0:
       wait_server(i, options)
       return
+    proxy_pids.append(pid)
+  signal.signal(signal.SIGINT, original_handler)
+
+  if options.root_password:
+    print("Enabling root user...")
+    login.AdminUser.enable_root(login.make_hash(options.root_password))
 
   try:
     asyncio.run(main_server(options), debug=options.debug)
@@ -158,6 +168,9 @@ def main():
     pass
 
   save_state.close()
+
+  for pid in proxy_pids:
+    os.kill(pid, signal.SIGKILL)
 
 
 
