@@ -20,8 +20,15 @@ CONTENT_TYPES = {
 }
 
 def upload_object(source, bucket, path, content_type, data, creds):
-  r = requests.head(f"https://{bucket}.storage.googleapis.com/{path}",
-                    headers={"Authorization": creds.get()})
+  for retry in range(2):
+    r = requests.head(f"https://{bucket}.storage.googleapis.com/{path}",
+                      headers={"Authorization": creds.get()})
+    if r.status_code == 401:
+      creds.invalidate()
+      continue
+    else:
+      break
+
   if r.status_code in (200, 204):
     print(f"    Already have {source} as {path}...")
     return
