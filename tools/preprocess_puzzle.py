@@ -257,7 +257,7 @@ class Puzzle:
   def json_dict(self):
     d = {}
     for n in ("shortname title oncall puzzletron_id max_queued "
-              "answers incorrect_responses "
+              "answers incorrect_responses authors "
               "html_head html_body for_ops_head for_ops_body").split():
       v = getattr(self, n)
       if v is not None: d[n] = v

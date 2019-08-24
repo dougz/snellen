@@ -15,8 +15,8 @@
 	     value="{{expected_start_time_text}}" required>
   </li>
   {% end %}
-  <li><a href="/teams">Team list</a></li>
-  <li><a href="/puzzles">Puzzle list</a></li>
+  <li><a href="/admin/teams">Team list</a></li>
+  <li><a href="/admin/puzzles">Puzzle list</a></li>
   <li><a href="/admin_users">Admin users</a></li>
   {% if user.has_role("control_event") %}
   <li><a href="/stop_server">Stop server</a></li>

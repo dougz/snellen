@@ -44,18 +44,28 @@ class UpdateAdminRole(tornado.web.RequestHandler):
     self.set_status(http.client.NO_CONTENT.value)
 
 
-class ShowTeamsPage(util.AdminPageHandler):
+class ListTeamsPage(util.AdminPageHandler):
   @login.required("admin")
   def get(self):
-    self.render("teams.html",
+    self.render("admin_list_teams.html",
                 teams=game.Team.BY_USERNAME)
 
 
-class ShowPuzzlesPage(util.AdminPageHandler):
+class ListPuzzlesPage(util.AdminPageHandler):
   @login.required("admin")
   def get(self):
-    self.render("puzzles.html",
+    self.render("admin_list_puzzles.html",
                 puzzles=game.Puzzle.BY_SHORTNAME)
+
+
+class AdminPuzzlePage(util.AdminPageHandler):
+  @login.required("admin")
+  def get(self, shortname):
+    puzzle = game.Puzzle.get_by_shortname(shortname)
+    if not puzzle:
+      raise tornado.web.HTTPError(http.client.NOT_FOUND)
+
+    self.render("admin_puzzle_page.html", puzzle=puzzle)
 
 
 class CreateUser(tornado.web.RequestHandler):
@@ -135,8 +145,9 @@ def GetHandlers():
     (r"/change_start", ChangeStartPage),
     (r"/confirm_change_start", ConfirmChangeStartPage),
     (r"/stop_server", StopServerPage),
-    (r"/teams", ShowTeamsPage),
-    (r"/puzzles", ShowPuzzlesPage),
+    (r"/admin/teams", ListTeamsPage),
+    (r"/admin/puzzles", ListPuzzlesPage),
+    (r"/admin/puzzle/([a-z0-9_]+)", AdminPuzzlePage),
     ]
   return handlers
 

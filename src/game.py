@@ -497,6 +497,7 @@ class Puzzle:
     self.oncall = "nobody@example.org"
     self.puzzletron_id = -1
     self.version = 0
+    self.authors = ["A. Computer"]
 
     self.max_queued = self.DEFAULT_MAX_QUEUED
     self.answers = {"FILLER"}
@@ -505,6 +506,8 @@ class Puzzle:
 
     self.html_head = None
     self.html_body = "<p>The answer to this filler puzzle is <b>FILLER</b>.</p>"
+    self.for_ops_head = None
+    self.for_ops_body = "<p>Teams should not need hints on this one.</p>"
 
     return self
 
@@ -519,6 +522,7 @@ class Puzzle:
 
     self.title = j["title"]
     self.oncall = j["oncall"]
+    self.authors = j["authors"]
     self.puzzletron_id = j["puzzletron_id"]
     self.max_queued = j.get("max_queued", self.DEFAULT_MAX_QUEUED)
 
@@ -536,6 +540,8 @@ class Puzzle:
 
     self.html_head = j.get("html_head")
     self.html_body = j["html_body"]
+    self.for_ops_head = j.get("for_ops_head")
+    self.for_ops_body = j.get("for_ops_body")
 
     return self
 

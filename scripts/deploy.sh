@@ -34,16 +34,16 @@ for i in scripts/run*.sh; do
 done
 install -m 0644 misc/preview-htpasswd "${base}/misc/preview-htpasswd"
 
-##
-## test_event
-##
+# ##
+# ## test_event
+# ##
 
-install -m 0755 -d "$base"/test_event
-install -m 0644 test_event/map_config.json "$base"/test_event/map_config.json
-install -m 0755 -d "$base"/test_event/puzzles
-for i in test_event/puzzles/*.json; do
-    install -m 0655 $i "${base}/${i}"
-done
+# install -m 0755 -d "$base"/test_event
+# install -m 0644 test_event/map_config.json "$base"/test_event/map_config.json
+# install -m 0755 -d "$base"/test_event/puzzles
+# for i in test_event/puzzles/*.json; do
+#     install -m 0655 $i "${base}/${i}"
+# done
 
 ##
 ## .deb control files

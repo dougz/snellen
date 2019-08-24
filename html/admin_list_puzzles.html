@@ -6,7 +6,7 @@
 
 <ul>
   {% for p in puzzles.values() %}
-  <li>{{p.shortname}}: {{p.title}}</li>
+  <li>{{p.shortname}}: <a href="/admin/puzzle/{{p.shortname}}">{{p.title}}</a></li>
   {% end %}
 </ul>
 
