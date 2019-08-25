@@ -403,10 +403,6 @@ div#map div.p {
     text-shadow: 2px 2px 5px black;
 }
 
-.right {
-    float: right;
-}
-
 .itemlist {
     width: 600px;
     margin-left: auto;

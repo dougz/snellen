@@ -13,8 +13,6 @@ import zipfile
 import common
 import oauth2
 
-SECRET_KEY_LENGTH = 16
-
 
 class PuzzleErrors(ValueError):
   def __init__(self, errors):
@@ -31,10 +29,7 @@ class Puzzle:
   SPECIAL_FILES = {METADATA_FILE, PUZZLE_HTML, SOLUTION_HTML, STATIC_PUZZLE_HTML, FOR_OPS_HTML}
 
   def __init__(self, zip_data, options, include_solutions=False):
-    h = hashlib.sha256()
-    h.update(zip_data)
-    self.prefix = base64.urlsafe_b64encode(h.digest()).decode("ascii")[:SECRET_KEY_LENGTH]
-
+    self.prefix = common.hash_name(zip_data)
     z = zipfile.ZipFile(io.BytesIO(zip_data))
 
     errors = []
@@ -157,7 +152,8 @@ class Puzzle:
 
     if errors: raise PuzzleErrors(errors)
 
-    self.upload_assets(z, options, include_solutions, strip_shortname)
+    self.upload_assets(z, options, include_solutions, strip_shortname,
+                       y.get("obfuscate_assets", False))
 
     restricted_asset_map = self.asset_map.copy()
     for k, v in self.asset_map.items():
@@ -195,7 +191,8 @@ class Puzzle:
     return value
 
 
-  def upload_assets(self, z, options, include_solutions, strip_shortname):
+  def upload_assets(self, z, options, include_solutions, strip_shortname,
+                    obfuscate):
     self.asset_map = {}
     bucket = options.bucket
 
@@ -215,7 +212,12 @@ class Puzzle:
       if ext not in common.CONTENT_TYPES:
         raise ValueError(f"Don't know Content-Type for '{nn}'.")
 
-      path = f"puzzle/{self.prefix}/{self.shortname}/{nn}"
+      data = z.read(n)
+      if obfuscate:
+        on = common.hash_name(data) + ext
+        path = f"puzzle/{self.prefix}/{self.shortname}/{on}"
+      else:
+        path = f"puzzle/{self.prefix}/{self.shortname}/{nn}"
 
       if not options.skip_upload:
         common.upload_object(nn, bucket, path, common.CONTENT_TYPES[ext], z.read(n), options.credentials)

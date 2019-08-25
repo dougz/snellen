@@ -1,4 +1,8 @@
+import base64
+import hashlib
 import requests
+
+SECRET_KEY_LENGTH = 16
 
 CONTENT_TYPES = {
   ".jpg": "image/jpeg",
@@ -49,5 +53,10 @@ def upload_object(source, bucket, path, content_type, data, creds):
     r.raise_for_status()
     break
 
+
+def hash_name(data):
+  h = hashlib.sha256(data).digest()
+  n = base64.urlsafe_b64encode(h).decode("ascii")[:SECRET_KEY_LENGTH]
+  return n
 
 
