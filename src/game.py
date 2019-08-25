@@ -389,7 +389,7 @@ class Team(login.LoginUser):
           open_count += 1
         elif self.puzzle_state[p].state == PuzzleState.CLOSED:
           locked.append(p)
-      while open_count < 2 and locked:
+      while open_count < 3 and locked:
         self.open_puzzle(locked.pop(0), now)
         open_count += 1
 

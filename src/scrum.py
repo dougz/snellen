@@ -63,8 +63,9 @@ class ScrumApp:
       "tornado.curl_httpclient.CurlAsyncHTTPClient", max_clients=10000)
     self.client = tornado.httpclient.AsyncHTTPClient()
 
-    r = f"/{options.wait_url}/(\\d+)/(\\d+)"
-    handlers = [(r, WaitHandler, {"scrum_app": self})] + handlers
+    if hasattr(options, "wait_url"):
+      r = f"/{options.wait_url}/(\\d+)/(\\d+)"
+      handlers = [(r, WaitHandler, {"scrum_app": self})] + handlers
     app = tornado.web.Application(
       handlers,
       cookie_secret=options.cookie_secret,

@@ -2,8 +2,6 @@
 
 import argparse
 import asyncio
-import base64
-import hashlib
 import json
 import os
 import re
@@ -22,7 +20,8 @@ import preprocess_puzzle as ppp
 
 
 class Team:
-  team_name = "Team Name Here"
+  name = "Team Name Here"
+  score = 0
 
 
 class Land:
@@ -40,10 +39,7 @@ class Puzzle:
     Puzzle.BY_PID[self.pid] = self
 
   def process(self, zip_data):
-    h = hashlib.sha256()
-    h.update(zip_data)
-    self.prefix = base64.urlsafe_b64encode(h.digest()).decode("ascii")[:ppp.SECRET_KEY_LENGTH]
-
+    self.prefix = common.hash_name(zip_data)
     self.pp = ppp.Puzzle(zip_data, self.options, include_solutions=True)
     self.pp.land = Land
 

@@ -1,13 +1,13 @@
 #!/bin/bash
 
-INSTALL_DIR=/sites/snellen
+INSTALL_DIR=/sites/hunt2020
 
-if [[ -z "$SNELLEN_BASE" ]]; then
-    echo "SNELLEN_BASE is unset."
+if [[ -z "$HUNT2020_BASE" ]]; then
+    echo "HUNT2020_BASE is unset."
     exit 1
 fi
 
-cd "$SNELLEN_BASE"
+cd "$HUNT2020_BASE"
 version="$(date +"%Y%m%d-%H%M%S")-1"
 
 t=$(mktemp -d /run/shm/deploy.XXXXXX)
@@ -23,27 +23,50 @@ debdir="${t}/${version}/DEBIAN"
 ## base server
 ##
 
-for d in src tools html misc scripts; do
-    install -m 0755 -d "${base}/${d}"
-done
-for i in src/*.py tools/*.py html/*.html misc/hunt2020-*.json; do
-    install -m 0644 $i "${base}/${i}"
-done
-for i in scripts/run*.sh; do
-    install -m 0755 $i "${base}/${i}"
-done
-install -m 0644 misc/preview-htpasswd "${base}/misc/preview-htpasswd"
+(
+    cd snellen
+    base="${base}/snellen"
+    install -m 0755 -d "${base}"
 
-# ##
-# ## test_event
-# ##
+    for d in src tools html misc scripts; do
+	install -m 0755 -d "${base}/${d}"
+    done
+    for i in src/*.py tools/*.py html/*.html misc/hunt2020-*.json; do
+	install -m 0644 $i "${base}/${i}"
+    done
+    for i in scripts/run*.sh; do
+	install -m 0755 $i "${base}/${i}"
+    done
+    install -m 0644 misc/preview-htpasswd "${base}/misc/preview-htpasswd"
+)
 
-# install -m 0755 -d "$base"/test_event
-# install -m 0644 test_event/map_config.json "$base"/test_event/map_config.json
-# install -m 0755 -d "$base"/test_event/puzzles
-# for i in test_event/puzzles/*.json; do
-#     install -m 0655 $i "${base}/${i}"
-# done
+##
+## test_event
+##
+
+(
+    cd test_event
+    base="${base}/test_event"
+    install -m 0755 -d "${base}"
+
+    for i in map_config.json teams.json admins.json; do
+	install -m 0644 $i "${base}/${i}"
+    done
+
+    install -m 0755 -d "${base}/puzzles"
+    for i in puzzles/*.json; do
+	install -m 0644 $i "${base}/${i}"
+    done
+)
+
+##
+## puzzles w/servers
+##
+
+for i in badart tugofwar tunnel_of_love; do
+    install -m 0755 -d "${base}/${i}"
+    install -m 0755 "${i}/${i}.py" "${base}/${i}/${i}.py"
+done
 
 ##
 ## .deb control files

@@ -170,8 +170,11 @@ class Client:
         await asyncio.sleep(1.0)
       except concurrent.futures.CancelledError:
         pass
+      except ConnectionRefusedError:
+        print(f"proxy {self.wpid} got cennection refused; retrying")
+        await asyncio.sleep(1.0)
       except Exception as e:
-        print(e)
+        print(repr(e), e)
 
   async def check_session(self, key):
     if not key:
