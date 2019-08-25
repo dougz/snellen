@@ -33,6 +33,8 @@ class Message {
 	this.new_start;
 	/** @type{?string} */
 	this.url;
+	/** @type{?number} */
+	this.score;
     }
 }
 

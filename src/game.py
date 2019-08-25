@@ -169,6 +169,7 @@ class Team(login.LoginUser):
 
     self.open_lands = {}
     self.activity_log = []
+    self.score = 0
 
     self.message_mu = asyncio.Lock()
     self.message_serial = 1
@@ -331,10 +332,12 @@ class Team(login.LoginUser):
       for sub in state.submissions:
         if sub.state == sub.PENDING:
           sub.state = sub.MOOT
+      self.score += puzzle.points
       self.send_messages(
         [{"method": "solve",
           "title": html.escape(puzzle.title),
-          "audio": "https://snellen.storage.googleapis.com/applause.mp3"}])
+          "audio": "https://snellen.storage.googleapis.com/applause.mp3",
+          "score": self.score}])
       self.log_activity(now, for_team=f'<a href="{puzzle.url}">{html.escape(puzzle.title)}</a> solved.',
                         for_admin=f'<a href="{puzzle.admin_url}">{html.escape(puzzle.title)}</a> solved.')
 
@@ -494,6 +497,7 @@ class Puzzle:
     self.shortname = shortname
     self.url = f"/puzzle/{shortname}"
     self.admin_url = f"/admin/puzzle/{shortname}"
+    self.points = 1
 
     self.solve_durations = {}
     self.fastest_solver = None

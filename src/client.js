@@ -91,6 +91,10 @@ class H2020_Dispatcher {
 	}
 	hunt2020.toast_manager.add_toast(
 	    "<b>" + msg.title + "</b> was solved!", 6000, true);
+
+	if (msg.score) {
+	    goog.dom.getElement("score").innerHTML = "" + msg.score;
+	}
     }
 
     /** @param{Message} msg */
