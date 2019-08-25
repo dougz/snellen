@@ -9,7 +9,8 @@ mkdir -p "$SNELLEN_BASE/bin"
     -o compiled \
     -c "$SNELLEN_BASE/external/closure-compiler.jar" \
     -f '--compilation_level' -f 'ADVANCED_OPTIMIZATIONS' \
-    -f '--externs' -f "$SNELLEN_BASE/src/externs.js"
+    -f '--externs' -f "$SNELLEN_BASE/src/externs.js" \
+    -f '--rename_variable_prefix' -f 'H'
 
 
 "$SNELLEN_BASE/external/closure/bin/calcdeps.py" \
