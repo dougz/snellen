@@ -73,7 +73,8 @@ table.info td p {
     font-size: 120%;
 }
 
-li { line-height: 30px; }
+li { line-height: 20px; }
+ul#mainmenu li { line-height: 30px; }
 
 
 .admin-role {
@@ -146,7 +147,7 @@ div.box button {
     margin-top: 8px;
 }
 
-div#for_ops {
+div#for_ops, div#teamlog {
     margin: 20px;
     padding: 20px;
     border: 1px solid #999;

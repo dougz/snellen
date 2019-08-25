@@ -136,6 +136,11 @@ class Submission:
         teams.add(sub.team)
     return teams
 
+class LogEntry:
+  def __init__(self, when, for_team, for_admin):
+    self.when = when
+    self.for_team = for_team
+    self.for_admin = for_admin
 
 
 class Team(login.LoginUser):
@@ -205,6 +210,20 @@ class Team(login.LoginUser):
   def discard_messages(self):
     self.pending_messages = []
 
+  def log_activity(self, now, *, for_admin=None, for_team=None):
+    # Only for_team: append to both.
+    # Only for_admin: append to admin only.
+    if for_admin:
+      if for_team:
+        self.activity_log.append(LogEntry(now, for_team, for_admin))
+      else:
+        self.activity_log.append(LogEntry(now, None, for_admin))
+    else:
+      if for_team:
+        self.activity_log.append(LogEntry(now, for_team, for_team))
+      else:
+        raise ValueError("Can't log empty activity.")
+
   def visit_page(self, page):
     self.pages_visited.add(page)
     if self.pages_visited == {"pins", "activity"}:
@@ -223,7 +242,7 @@ class Team(login.LoginUser):
   def achieve(self, ach, now, delay=None):
     if ach not in self.achievements:
       self.achievements[ach] = now
-      self.activity_log.append((now, f'Received the <b>{html.escape(ach.title)}</b> pin.'))
+      self.log_activity(now, for_team=f'Received the <b>{html.escape(ach.title)}</b> pin.')
       msg = [{"method": "achieve", "title": ach.title}]
       if delay:
         async def future():
@@ -300,7 +319,8 @@ class Team(login.LoginUser):
     if state.state == state.CLOSED:
       state.state = state.OPEN
       state.open_time = now
-      self.activity_log.append((now, f'<a href="{puzzle.url}">{html.escape(puzzle.title)}</a> opened.'))
+      self.log_activity(now, for_team=f'<a href="{puzzle.url}">{html.escape(puzzle.title)}</a> opened.',
+                        for_admin=f'<a href="{puzzle.admin_url}">{html.escape(puzzle.title)}</a> opened.')
 
   def solve_puzzle(self, puzzle, now):
     state = self.puzzle_state[puzzle]
@@ -315,7 +335,8 @@ class Team(login.LoginUser):
         [{"method": "solve",
           "title": html.escape(puzzle.title),
           "audio": "https://snellen.storage.googleapis.com/applause.mp3"}])
-      self.activity_log.append((now, f'<a href="{puzzle.url}">{html.escape(puzzle.title)}</a> solved.'))
+      self.log_activity(now, for_team=f'<a href="{puzzle.url}">{html.escape(puzzle.title)}</a> solved.',
+                        for_admin=f'<a href="{puzzle.admin_url}">{html.escape(puzzle.title)}</a> solved.')
 
       self.achieve(Achievement.solve_puzzle, now)
 
@@ -471,7 +492,8 @@ class Puzzle:
     print(f"    Adding puzzle \"{shortname}\"...")
     self.BY_SHORTNAME[shortname] = self
     self.shortname = shortname
-    self.url = "/puzzle/" + shortname
+    self.url = f"/puzzle/{shortname}"
+    self.admin_url = f"/admin/puzzle/{shortname}"
 
     self.solve_durations = {}
     self.fastest_solver = None

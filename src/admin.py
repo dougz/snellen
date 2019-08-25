@@ -66,9 +66,9 @@ class AdminTeamPage(util.AdminPageHandler):
     open_list.sort()
 
     log = []
-    for t, e in team.activity_log[-100:]:
-      d = datetime.datetime.fromtimestamp(t)
-      log.append((d.strftime("%a %H:%M:%S"), e))
+    for e in team.activity_log[-100:]:
+      d = datetime.datetime.fromtimestamp(e.when)
+      log.append((d.strftime("%a %H:%M:%S"), e.for_admin))
 
     self.render("admin_team_page.html", team=team, open_list=open_list, log=log)
 

@@ -6,7 +6,7 @@
 
 
 {% block content %}
-<ul>
+<ul id="mainmenu">
   {% if not game_state.event_start_time and user.has_role("control_event") %}
   <li>
     <form action="/change_start" method="get">
