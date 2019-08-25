@@ -1,6 +1,8 @@
 {% extends "admin_base.html" %}
+{% block colorscheme %}darkergray{% end %}
 
-{% block title %}Admin Users{% end %}
+
+{% block title %}Users{% end %}
 
 {% block head %}
 <script>window.onload = activateRoleCheckboxes;</script>
@@ -8,16 +10,16 @@
 
 {% block content %}
 <table id="user-roles">
-  <tr>
-    <th>username</th>
-    <th>full name</th>
+  <tr class=darkblue>
+    <th class=left>Username</th>
+    <th class=left>Full Name</th>
     {% for role in roles %}
-    <th>{{role}}</th>
+    <th class=mono>{{role}}</th>
     {% end %}
   </tr>
-  {% for u in users %}
-  <tr>
-    <td>{{u.username}}</td>
+  {% for i, u in enumerate(users) %}
+  <tr {% if i%3 == 2 %}class=h{% end %}>
+    <td class=mono>{{u.username}}</td>
     <td>{{u.fullname}}</td>
     {% for role in roles %}
     <td class="admin-role">
@@ -43,7 +45,7 @@
     </tr>
     <tr>
       <td><label for="fullname"><b>Full Name</b></label></td>
-      <td><input type="text" placeholder="Fullname" name="fullname" required></td>
+      <td><input type="text" placeholder="Full Name" name="fullname" required></td>
     </tr>
     <tr>
       <td><label for="password"><b>Password</b></label></td>

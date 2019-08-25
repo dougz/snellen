@@ -65,10 +65,16 @@ async def main_server(options):
                          Team=game.Team,
                          Global=game.Global)
 
+  with open(os.path.join(options.event_dir, "admins.json")) as f:
+    admins = json.load(f)
+    for username, d in admins.items():
+      login.AdminUser(username, d["pwhash"], d["name"], d.get("roles", ()))
+
   with open(os.path.join(options.event_dir, "teams.json")) as f:
     teams = json.load(f)
     for username, d in teams.items():
       game.Team(username, d)
+
 
   save_state.open(os.path.join(options.event_dir, "state.log"))
   save_state.replay(advance_time=game.Submission.process_submit_queue)
@@ -118,8 +124,6 @@ def main():
   parser.add_argument("-c", "--cookie_secret",
                       default="snellen2020",
                       help="Secret used to create session cookies.")
-  parser.add_argument("-r", "--root_password",
-                      help="Password for root admin user.")
   parser.add_argument("-e", "--event_dir",
                       help="Path to event content.")
   parser.add_argument("-s", "--socket_path",
@@ -157,10 +161,6 @@ def main():
       return
     proxy_pids.append(pid)
   signal.signal(signal.SIGINT, original_handler)
-
-  if options.root_password:
-    print("Enabling root user...")
-    login.AdminUser.enable_root(login.make_hash(options.root_password))
 
   try:
     asyncio.run(main_server(options), debug=options.debug)

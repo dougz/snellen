@@ -103,7 +103,7 @@ class SaverClass:
       cls.REPLAYING = False
 
     if skipped:
-      print("Replay skipped references to: " + ", ".join(saver_id))
+      print("Replay skipped references to: " + ", ".join(skipped))
 
 
 save_state = SaverClass()

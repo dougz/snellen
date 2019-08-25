@@ -35,12 +35,15 @@ class LoginUser:
       return False
     return await asyncio.get_running_loop().run_in_executor(None, check)
 
+  @classmethod
+  async def hash_password(cls, password):
+    return await asyncio.get_running_loop().run_in_executor(None, make_hash, password)
+
 
 class AdminUser(LoginUser):
   BY_USERNAME = {}
 
-  @save_state
-  def __init__(self, now, username, password_hash, fullname, roles):
+  def __init__(self, username, password_hash, fullname, roles):
     self.username = username
     self.password_hash = password_hash.encode("ascii")
     self.fullname = fullname
@@ -48,18 +51,15 @@ class AdminUser(LoginUser):
     self.roles.add(AdminRoles.ADMIN)
     self.BY_USERNAME[username] = self
 
+    save_state.add_instance("AdminUser:" + username, self)
+
+  @classmethod
+  def create_new_user(cls, username, password_hash, fullname):
+    cls(username, password_hash, fullname, ())
+
   @classmethod
   def get_by_username(cls, username):
     return cls.BY_USERNAME.get(username)
-
-  @classmethod
-  def enable_root(cls, password_hash):
-    obj = AdminUser.__new__(AdminUser)
-    obj.username = "root"
-    obj.password_hash = password_hash.encode("ascii")
-    obj.fullname = "Root"
-    obj.roles = set((AdminRoles.ADMIN, AdminRoles.CREATE_USERS, AdminRoles.CONTROL_EVENT))
-    cls.BY_USERNAME["root"] = obj
 
   def has_role(self, role):
     return role in self.roles

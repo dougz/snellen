@@ -96,19 +96,15 @@ class AdminPuzzlePage(util.AdminPageHandler):
 
 class CreateUser(tornado.web.RequestHandler):
   @login.required(login.AdminRoles.CREATE_USERS)
-  def post(self):
+  async def post(self):
     username = self.get_argument("username")
     fullname = self.get_argument("fullname")
     password = self.get_argument("password")
-
     if login.AdminUser.get_by_username(username) is not None:
-      # error
-      raise tornado.web.HTTPError(http.client.BAD_REQUEST,
-                                  "User already exists")
-
-
-    login.AdminUser(username, login.make_hash(password), fullname, ())
-    self.redirect("/admin_users")
+      raise tornado.web.HTTPError(http.client.BAD_REQUEST, "User already exists")
+    pwhash = await login.AdminUser.hash_password(password)
+    login.AdminUser.create_new_user(username, pwhash, fullname)
+    self.redirect("/admin/users")
 
 
 class StopServerPage(util.AdminPageHandler):
@@ -165,7 +161,7 @@ class StartEvent(tornado.web.RequestHandler):
 def GetHandlers():
   handlers = [
     (r"/admin", AdminHomePage),
-    (r"/admin_users", AdminUsersPage),
+    (r"/admin/users", AdminUsersPage),
     (r"/(set|clear)_admin_role/([^/]+)/([^/]+)", UpdateAdminRole),
     (r"/create_user", CreateUser),
     (r"/change_start", ChangeStartPage),

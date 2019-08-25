@@ -76,8 +76,13 @@ table.info td p {
 li { line-height: 20px; }
 ul#mainmenu li { line-height: 30px; }
 
+table#user-roles tr.h { background-color: #f0f0f8; }
+table#user-roles { margin: 20px; border-collapse: collapse; }
+table#user-roles th { padding: 8px 20px 8px; color: white; }
+table#user-roles td { padding: 4px 20px 4px; }
+table#user-roles th.left { text-align: left; }
 
-.admin-role {
+table#user-roles .admin-role {
     text-align: center;
 }
 
@@ -129,7 +134,7 @@ div.box {
     background-color: #eee;
     border: 1px solid black;
     padding: 16px;
-    margin: 16px;
+    margin: 20px;
 }
 
 div.box h2 {
