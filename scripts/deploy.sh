@@ -80,7 +80,7 @@ Section: misc
 Priority: optional
 Architecture: all
 Depends: python3 (>= 3.7), python3-bs4, python3-bcrypt, python3-pycurl,
-  python3-tornado (>= 5.1), python3-html5lib
+  python3-tornado (>= 5.1), python3-html5lib, python3-dateutil
 Maintainer: Doug Zongker <dougz@isotropic.org>
 Description: MIT Mystery Hunt 2020 server
 EOF
