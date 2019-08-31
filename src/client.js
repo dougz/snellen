@@ -146,7 +146,7 @@ class H2020_SubmitPanel {
 	this.serializer = null;
 
 	/** @type{Element|null} */
-	this.panel = null;
+	this.submitpanel = null;
 
 	/** @type{Element|null} */
 	this.input = null;
@@ -170,7 +170,7 @@ class H2020_SubmitPanel {
     build() {
 	this.serializer = new goog.json.Serializer();
 
-	this.panel = goog.dom.getElement("panel");
+	this.submitpanel = goog.dom.getElement("submitpanel");
 
 	var content =  goog.dom.getElement("submit_table");
 
@@ -204,7 +204,7 @@ class H2020_SubmitPanel {
 
     update_history() {
 	if (!this.built) return;
-	if (this.panel.style == "none") return;
+	if (this.submitpanel.style == "none") return;
 	goog.net.XhrIo.send("/submit_history/" + puzzle_id, goog.bind(function(e) {
 	    var code = e.target.getStatus();
 	    if (code == 200) {
@@ -372,7 +372,7 @@ class H2020_SubmitPanel {
 
     toggle() {
 	if (!this.built) this.build();
-	if (goog.dom.classlist.contains(this.panel, "submit-panel-visible")) {
+	if (goog.dom.classlist.contains(this.submitpanel, "panel-visible")) {
 	    this.close();
 	} else {
 	    this.show();
@@ -381,8 +381,8 @@ class H2020_SubmitPanel {
 
     show() {
 	if (!this.built) this.build();
-	goog.dom.classlist.addRemove(this.panel, "submit-panel-invisible",
-				     "submit-panel-visible");
+	goog.dom.classlist.addRemove(this.submitpanel, "panel-invisible",
+				     "panel-visible");
 	this.update_history();
 	// focus on input field, once slide-out animation is complete.
 	setTimeout(goog.bind(this.focus_input, this), 200);
@@ -394,12 +394,79 @@ class H2020_SubmitPanel {
     }
 
     close() {
-	goog.dom.classlist.addRemove(this.panel, "submit-panel-visible",
-				     "submit-panel-invisible");
+	goog.dom.classlist.addRemove(this.submitpanel, "panel-visible",
+				     "panel-invisible");
 	if (this.timer) {
 	    clearInterval(this.timer);
 	    this.timer = null;
 	}
+    }
+}
+
+class H2020_HintPanel {
+    constructor() {
+	/** @type{boolean} */
+	this.built = false;
+	/** @type{Object|null} */
+	this.serializer = null;
+
+	/** @type{Element|null} */
+	this.hintpanel = null;
+    }
+
+    build() {
+	this.serializer = new goog.json.Serializer();
+	this.hintpanel = goog.dom.getElement("hintpanel");
+	this.built = true;
+    }
+
+    // submit() {
+    // 	var answer = this.input.value;
+    // 	if (answer == "") return;
+    // 	this.input.value = "";
+    // 	goog.net.XhrIo.send("/submit", function(e) {
+    // 	    var code = e.target.getStatus();
+    // 	    if (code != 204) {
+    // 		alert(e.target.getResponseText());
+    // 	    }
+    // 	}, "POST", this.serializer.serialize({"puzzle_id": puzzle_id, "answer": answer}));
+    // }
+
+    // onkeydown(e) {
+    // 	if (e.keyCode == goog.events.KeyCodes.ENTER) {
+    // 	    this.submit();
+    // 	    e.preventDefault();
+    // 	} else if (e.keyCode == goog.events.KeyCodes.ESC) {
+    // 	    this.close();
+    // 	    e.preventDefault();
+    // 	}
+    // }
+
+    toggle() {
+	if (!this.built) this.build();
+	if (goog.dom.classlist.contains(this.hintpanel, "panel-visible")) {
+	    this.close();
+	} else {
+	    this.show();
+	}
+    }
+
+    show() {
+	if (!this.built) this.build();
+	goog.dom.classlist.addRemove(this.hintpanel, "panel-invisible",
+				     "panel-visible");
+	// focus on input field, once slide-out animation is complete.
+	//setTimeout(goog.bind(this.focus_input, this), 200);
+	return false;
+    }
+
+    close() {
+	goog.dom.classlist.addRemove(this.hintpanel, "panel-visible",
+				     "panel-invisible");
+	// if (this.timer) {
+	//     clearInterval(this.timer);
+	//     this.timer = null;
+	// }
     }
 }
 
@@ -620,6 +687,7 @@ class H2020_AudioManager {
 var hunt2020 = {
     waiter: null,
     submit_panel: null,
+    hint_panel: null,
     time_formatter: null,
     toast_manager: null,
     audio_manager: null,
@@ -641,6 +709,12 @@ window.onload = function() {
 	hunt2020.submit_panel = new H2020_SubmitPanel();
 	goog.events.listen(a, goog.events.EventType.CLICK,
 			   goog.bind(hunt2020.submit_panel.toggle, hunt2020.submit_panel));
+
+	a = goog.dom.getElement("hints");
+	hunt2020.hint_panel = new H2020_HintPanel();
+	goog.events.listen(a, goog.events.EventType.CLICK,
+			   goog.bind(hunt2020.hint_panel.toggle, hunt2020.hint_panel));
+
 	if (puzzle_id && puzzle_init) puzzle_init();
     }
 

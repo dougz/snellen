@@ -8,10 +8,14 @@
 
 {% block topnav_extraright %}
 <a id="submit">Submit</a>
+<a id="hints">Hints</a>
 {% end %}
 
 {% block midnav %}
-<div id="panel" class="submit-panel">
+<div id="hintpanel">
+  <p>Here is hint content.</p>
+</div>
+<div id="submitpanel">
   <div id="thumb" style="width: {{thumb.size[0]}}px; height: {{thumb.size[1]}}px;">
     <img class="base" src="{{thumb.url}}"></img>
   </div>

@@ -41,7 +41,7 @@ input, button {
     font-size: 18px;
     background: #666;
     color: #eee;
-    border-bottom: 1px solid black;
+    border-bottom: 2px solid black;
     padding: 8px 20px;
 
     display: flex;
@@ -101,9 +101,25 @@ a#submit:hover {
 
 /** submit panel **/
 
-.submit-panel {
+#submitpanel {
     background-color: #888888ee;
-    border-bottom: 2px solid black;
+    border-bottom: 0px solid black;
+
+    height: 0;
+    visibility: hidden;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+
+    z-index: 999;
+    position: static;
+    overflow: hidden;
+}
+
+#hintpanel {
+    background-color: #888888ee;
+    border-bottom: 0px solid black;
 
     height: 0;
     visibility: hidden;
@@ -123,21 +139,21 @@ a#submit:hover {
 }
 
 @keyframes slide {
-    0% { height: 0px; visibility: hidden; }
+    0% { height: 0px; visibility: hidden; border-bottom-width: 0px; }
     1% { visibility: visible; }
-    100% { height: 300px; visibility: visible; }
+    100% { height: 300px; visibility: visible; border-bottom-width: 2px; }
 }
 
 @keyframes slide2 {
-    0% { height: 0px; visibility: hidden; }
+    0% { height: 0px; visibility: hidden; border-bottom-width: 0px; }
     1% { visibility: visible; }
-    100% { height: 300px; visibility: visible; }
+    100% { height: 300px; visibility: visible; border-bottom-width: 2px; }
 }
 
-.submit-panel-visible {
+.panel-visible {
     animation: slide 150ms ease-out forwards;
 }
-.submit-panel-invisible {
+.panel-invisible {
     animation: slide2 150ms ease-in reverse;
 }
 
