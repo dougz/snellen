@@ -4,6 +4,7 @@ import concurrent
 import http.client
 import json
 import random
+import sys
 import time
 import tornado.web
 import tornado.httpclient
@@ -171,7 +172,10 @@ class Client:
       except concurrent.futures.CancelledError:
         pass
       except ConnectionRefusedError:
-        print(f"proxy {self.wpid} got cennection refused; retrying")
+        if self.options.debug:
+          print(f"proxy {self.wpid} got connection refused; exiting")
+          sys.exit(1)
+        print(f"proxy {self.wpid} got connection refused; retrying")
         await asyncio.sleep(1.0)
       except Exception as e:
         print(repr(e), e)

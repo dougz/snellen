@@ -427,10 +427,14 @@ class Team(login.LoginUser):
 
 class Subicon:
   def __init__(self, d):
+    def tuplize(x):
+      if x is None: return None
+      return tuple(x)
+
     if d:
-      self.pos = tuple(d["pos"])
-      self.size = tuple(d["size"])
-      self.poly = d["poly"]
+      self.pos = tuplize(d.get("pos"))
+      self.size = tuplize(d["size"])
+      self.poly = d.get("poly")
       self.url = d["url"]
     else:
       self.pos = None

@@ -66,6 +66,9 @@ def main():
   parser.add_argument("--output_dir",
                       default=".",
                       help="Directory for output icons")
+  parser.add_argument("--max_thumb_height",
+                      type=int, default=260,
+                      help="Max height of thumb images")
 
   parser.add_argument("bg_image",
                       help="Background without any attractions")
@@ -138,21 +141,25 @@ def main():
     temp = bg_image.copy()
     temp.paste(bad_patch.image, tuple(bad_patch.origin), bad_patch.image)
     bad_thumb = temp.crop((tx0, ty0, tx1, ty1))
+    if bad_thumb.size[1] > options.max_thumb_height:
+      bad_thumb = bad_thumb.resize((bad_thumb.size[0] * options.max_thumb_height // bad_thumb.size[1],
+                                    options.max_thumb_height), Image.LANCZOS)
 
     od = {}
     out["unlocked_thumb"] = od
-    od["pos"] = [tx0, ty0]
-    od["size"] = [tx1-tx0, ty1-ty0]
+    od["size"] = list(bad_thumb.size)
     bad_thumb.save(os.path.join(options.output_dir, f"{name}_unlocked_thumb.png"))
 
     temp = bg_image.copy()
     temp.paste(good_patch.image, tuple(good_patch.origin), good_patch.image)
     good_thumb = temp.crop((tx0, ty0, tx1, ty1))
+    if good_thumb.size[1] > options.max_thumb_height:
+      good_thumb = good_thumb.resize((good_thumb.size[0] * options.max_thumb_height // good_thumb.size[1],
+                                    options.max_thumb_height), Image.LANCZOS)
 
     od = {}
     out["solved_thumb"] = od
-    od["pos"] = [tx0, ty0]
-    od["size"] = [tx1-tx0, ty1-ty0]
+    od["size"] = list(good_thumb.size)
     good_thumb.save(os.path.join(options.output_dir, f"{name}_solved_thumb.png"))
 
 
