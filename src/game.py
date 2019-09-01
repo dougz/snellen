@@ -379,6 +379,10 @@ class Team(login.LoginUser):
     return self.puzzle_state[puzzle]
 
   def compute_puzzle_beam(self, now):
+    start_map = Land.BY_SHORTNAME["inner_only"]
+    if start_map not in self.open_lands:
+      self.open_lands[start_map] = now
+
     # Always have two open puzzles in each land.
     for land in Land.BY_SHORTNAME.values():
       if not land.puzzles: continue
@@ -606,7 +610,7 @@ class Global:
   @save_state
   def __init__(self, now):
     self.event_start_time = None
-    self.expected_start_time = int(now + 10)
+    self.expected_start_time = int(now + 30)
     Global.STATE = self
     asyncio.create_task(self.future_start())
 
@@ -631,21 +635,24 @@ class Global:
       await asyncio.sleep(delay)
     now = time.time()
     if not self.event_start_time and now >= self.expected_start_time:
-      self.start_event()
+      self.start_event(True)
 
   @save_state
-  def start_event(self, now):
+  def start_event(self, now, timed):
     if self.event_start_time is not None: return
     self.event_start_time = now
+    print(f"starting event at {now}")
     for team in Team.BY_USERNAME.values():
       team.compute_puzzle_beam(self.event_start_time)
-    if not save_state.REPLAYING:
+    if timed and not save_state.REPLAYING:
       asyncio.create_task(self.notify_event_start())
 
   async def notify_event_start(self):
     for team in Team.BY_USERNAME.values():
+      print(f"sending to_page to {team}")
       team.send_messages([{"method": "to_page", "url": "/"}])
       await team.flush_messages()
+      print(f"flushed to_page to {team}")
 
   async def update_event_start_teams(self):
     for team in Team.BY_USERNAME.values():

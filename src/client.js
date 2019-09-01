@@ -116,7 +116,6 @@ class H2020_Dispatcher {
 
     /** @param{Message} msg */
     to_page(msg) {
-	console.log("got a to_page message");
 	window.location = msg.url;
     }
 }
@@ -307,6 +306,7 @@ class H2020_SubmitPanel {
 		className: "icon"});
 	    thumb.appendChild(el);
 
+	    console.log("adding " + response.width + " x " + response.height + " sparkle");
 	    this.add_sparkle(thumb, response.width, response.height);
 	}
     }

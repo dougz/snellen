@@ -83,13 +83,12 @@ async def main_server(options):
 
   if not game.Global.STATE: game.Global()
 
-  start_map = game.Land.BY_SHORTNAME["inner_only"]
-  for team in game.Team.BY_USERNAME.values():
-    team.open_lands[start_map] = 0
-    team.discard_messages()
-
   if options.start_event:
-    game.Global.STATE.start_event()
+    game.Global.STATE.start_event(False)
+
+  for team in game.Team.BY_USERNAME.values():
+    print(f"discarding messages for {team}")
+    team.discard_messages()
 
   app = make_app(options, cfg["static"], autoreload=False)
 

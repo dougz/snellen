@@ -134,7 +134,10 @@ class required:
       raise tornado.web.HTTPError(self.on_fail)
     session = Session(None)
     session.set_cookie(req)
-    req.redirect("/login?" + urllib.parse.urlencode({"redirect_to": req.request.uri}))
+    if req.request.uri == "/":
+      req.redirect("/login")
+    else:
+      req.redirect("/login?" + urllib.parse.urlencode({"redirect_to": req.request.uri}))
 
   def __call__(self, func):
     @functools.wraps(func)

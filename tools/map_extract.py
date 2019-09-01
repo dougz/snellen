@@ -69,6 +69,9 @@ def main():
   parser.add_argument("--max_thumb_height",
                       type=int, default=260,
                       help="Max height of thumb images")
+  parser.add_argument("--background_color",
+                      default="#f8f8f8",
+                      help="Background color for map")
 
   parser.add_argument("bg_image",
                       help="Background without any attractions")
@@ -82,6 +85,9 @@ def main():
                       help="Image map HTML")
   options = parser.parse_args()
 
+  assert options.background_color[0] == "#" and len(options.background_color) == 7
+  options.background_color = tuple(int(options.background_color[i*2+1:i*2+3], 16) for i in range(3))
+
   bg_image = Image.open(options.bg_image)
   bad_map = get_polys(options.bad_html)
   bad_image = Image.open(options.bad_image)
@@ -92,6 +98,16 @@ def main():
   assert bg_image.size == good_image.size
   assert set(bad_map.keys()) == set(good_map.keys())
   size = bg_image.size
+
+  temp = Image.new("RGB", size, options.background_color)
+  temp.paste(bg_image, (0,0), bg_image)
+  bg_image = temp
+  temp = Image.new("RGB", size, options.background_color)
+  temp.paste(bad_image, (0,0), bad_image)
+  bad_image = temp
+  temp = Image.new("RGB", size, options.background_color)
+  temp.paste(good_image, (0,0), good_image)
+  good_image = temp
 
   icons = []
 
