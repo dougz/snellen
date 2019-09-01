@@ -60,7 +60,6 @@ def convert_map(shortname, d, options):
     out["icons"] = out_icons
     for ic in icons:
       oic = {"name": ic["name"]}
-      #"pos": ic["pos"]}
 
       if "puzzle" in ic: oic["puzzle"] = ic["puzzle"]
 
@@ -75,7 +74,7 @@ def convert_map(shortname, d, options):
         voic["url"] = upload_file(icon_image, options)
 
         # If poly isn't specified, make a rectangle covering the whole icon.
-        if "poly" not in voic:
+        if "poly" not in voic and "pos" in voic:
           x, y = voic["pos"]
           w, h = voic["size"]
           voic["poly"] = f"{x},{y},{x+w},{y},{x+w},{y+h},{x},{y+h}"
