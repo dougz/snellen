@@ -72,6 +72,20 @@ class AdminTeamPage(util.AdminPageHandler):
 
     self.render("admin_team_page.html", team=team, open_list=open_list, log=log)
 
+class AdminTeamPuzzlePage(util.AdminPageHandler):
+  @login.required("admin")
+  def get(self, username, shortname):
+    team = game.Team.get_by_username(username)
+    if not team:
+      raise tornado.web.HTTPError(http.client.NOT_FOUND)
+    puzzle = game.Puzzle.get_by_shortname(shortname)
+    if not puzzle:
+      raise tornado.web.HTTPError(http.client.NOT_FOUND)
+
+    self.render("admin_team_puzzle_page.html",
+                team=team, puzzle=puzzle, state=team.puzzle_state[puzzle])
+
+
 class ListPuzzlesPage(util.AdminPageHandler):
   @login.required("admin")
   def get(self):
@@ -155,22 +169,21 @@ class StartEvent(tornado.web.RequestHandler):
     game.Global.STATE.start_event()
     self.redirect("/admin")
 
-# Debug-only handlers that reread the source file each time.
-
 
 def GetHandlers():
   handlers = [
-    (r"/admin", AdminHomePage),
-    (r"/admin/users", AdminUsersPage),
-    (r"/(set|clear)_admin_role/([^/]+)/([^/]+)", UpdateAdminRole),
-    (r"/create_user", CreateUser),
-    (r"/change_start", ChangeStartPage),
-    (r"/confirm_change_start", ConfirmChangeStartPage),
-    (r"/stop_server", StopServerPage),
-    (r"/admin/teams", ListTeamsPage),
-    (r"/admin/team/([a-z0-9_]+)", AdminTeamPage),
-    (r"/admin/puzzles", ListPuzzlesPage),
-    (r"/admin/puzzle/([a-z0-9_]+)", AdminPuzzlePage),
+    (r"/admin$", AdminHomePage),
+    (r"/admin/users$", AdminUsersPage),
+    (r"/(set|clear)_admin_role/([^/]+)/([^/]+)$", UpdateAdminRole),
+    (r"/create_user$", CreateUser),
+    (r"/change_start$", ChangeStartPage),
+    (r"/confirm_change_start$", ConfirmChangeStartPage),
+    (r"/stop_server$", StopServerPage),
+    (r"/admin/teams$", ListTeamsPage),
+    (r"/admin/team/([a-z0-9_]+)$", AdminTeamPage),
+    (r"/admin/teampuzzle/([a-z0-9_]+)/([a-z0-9_]+)$", AdminTeamPuzzlePage),
+    (r"/admin/puzzles$", ListPuzzlesPage),
+    (r"/admin/puzzle/([a-z0-9_]+)$", AdminPuzzlePage),
     ]
   return handlers
 

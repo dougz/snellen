@@ -204,6 +204,18 @@ class SubmitCancelHandler(util.TeamHandler):
     self.team.cancel_submission(submit_id, shortname)
     self.team.send_messages([{"method": "history_change", "puzzle_id": shortname}])
 
+class HintRequestHandler(util.TeamHandler):
+  def prepare(self):
+    self.args = json.loads(self.request.body)
+
+  @login.required("team", on_fail=http.client.UNAUTHORIZED)
+  def post(self):
+    text = self.args["text"]
+    shortname = self.args["puzzle_id"]
+    self.team.add_hint_text(shortname, None, text)
+    self.set_status(http.client.NO_CONTENT.value)
+
+
 def GetHandlers():
   handlers = [
     (r"/", EventHomePage),
@@ -214,6 +226,8 @@ def GetHandlers():
     (r"/submit", SubmitHandler),
     (r"/submit_history/([a-z][a-z0-9_]*)", SubmitHistoryHandler),
     (r"/submit_cancel/([a-z][a-z0-9_]*)/(\d+)", SubmitCancelHandler),
-    ]
+    (r"/hintrequest", HintRequestHandler),
+  ]
+
   return handlers
 

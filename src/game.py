@@ -12,6 +12,15 @@ import login
 from state import save_state
 import wait_proxy
 
+class HintMessage:
+  def __init__(self, parent, when, sender, text):
+    self.parent = parent
+    self.when = when
+    # sender is either a Team or an AdminUser
+    self.sender = sender
+    self.text = text
+
+
 class PuzzleState:
   CLOSED = "closed"
   OPEN = "open"
@@ -27,6 +36,7 @@ class PuzzleState:
     self.open_time = None
     self.solve_time = None
     self.answers_found = set()
+    self.hints = []
 
   def recent_solve(self, now=None):
     if now is None:
@@ -377,6 +387,21 @@ class Team(login.LoginUser):
       puzzle = Puzzle.get_by_shortname(puzzle)
       if not puzzle: return None
     return self.puzzle_state[puzzle]
+
+  @save_state
+  def add_hint_text(self, now, puzzle, sender, text):
+    puzzle = Puzzle.get_by_shortname(puzzle)
+    if not puzzle: return
+    state = self.puzzle_state[puzzle]
+
+    if sender is None:
+      sender = self
+    else:
+      self = login.AdminUser.get_by_username(sender)
+
+    msg = HintMessage(state, now, sender, text)
+    state.hints.append(msg)
+
 
   def compute_puzzle_beam(self, now):
     # Always have two open puzzles in each land.

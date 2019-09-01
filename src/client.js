@@ -412,25 +412,33 @@ class H2020_HintPanel {
 
 	/** @type{Element|null} */
 	this.hintpanel = null;
+
+	/** @type{Element|null} */
+	this.textarea = null;
     }
 
     build() {
 	this.serializer = new goog.json.Serializer();
 	this.hintpanel = goog.dom.getElement("hintpanel");
+	this.textarea = goog.dom.getElement("hinttext");
+
+	var b = goog.dom.getElement("hintrequest");
+	goog.events.listen(b, goog.events.EventType.CLICK, goog.bind(this.submit, this));
+
 	this.built = true;
     }
 
-    // submit() {
-    // 	var answer = this.input.value;
-    // 	if (answer == "") return;
-    // 	this.input.value = "";
-    // 	goog.net.XhrIo.send("/submit", function(e) {
-    // 	    var code = e.target.getStatus();
-    // 	    if (code != 204) {
-    // 		alert(e.target.getResponseText());
-    // 	    }
-    // 	}, "POST", this.serializer.serialize({"puzzle_id": puzzle_id, "answer": answer}));
-    // }
+    submit() {
+    	var text = this.textarea.value;
+    	if (text == "") return;
+    	this.textarea.value = "";
+    	goog.net.XhrIo.send("/hintrequest", function(e) {
+    	    var code = e.target.getStatus();
+    	    if (code != 204) {
+    		alert(e.target.getResponseText());
+    	    }
+    	}, "POST", this.serializer.serialize({"puzzle_id": puzzle_id, "text": text}));
+    }
 
     // onkeydown(e) {
     // 	if (e.keyCode == goog.events.KeyCodes.ENTER) {

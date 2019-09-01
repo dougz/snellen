@@ -1,0 +1,19 @@
+{% extends "admin_base.html" %}
+{% block colorscheme %}darkblue{% end %}
+
+{% block title %}Team "{{team.name}}" &nbsp;&#x25b8;&nbsp; Puzzle "{{puzzle.title}}"{% end %}
+
+{% block content %}
+
+state: {{state.state}}<br>
+open time: {{state.open_time}}<br>
+solve time: {{state.solve_time}}
+
+<div>
+  {% for h in state.hints %}
+  {{h.when}} {{h.text}}
+  {% end %}
+</div>
+
+
+{% end %}
