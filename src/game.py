@@ -430,7 +430,7 @@ class Icon:
     self.land = land
     self.puzzle = None
     self.to_land = None
-    #self.thumb_size = d.get("thumb_size", self.size)
+    self.headerimage = d.get("headerimage")
 
     self.locked = Subicon(d.get("locked"))
     self.unlocked = Subicon(d.get("unlocked"))

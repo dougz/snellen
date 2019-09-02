@@ -63,6 +63,11 @@ def convert_map(shortname, d, options):
 
       if "puzzle" in ic: oic["puzzle"] = ic["puzzle"]
 
+      if "headerimage" in ic:
+        src = os.path.join(options.input_assets, shortname,
+                           ic["headerimage"])
+        oic["headerimage"] = upload_file(src, options)
+
       for variant in ("locked", "unlocked", "solved",
                       "unlocked_thumb", "solved_thumb"):
         icon_image = os.path.join(options.input_assets, shortname,

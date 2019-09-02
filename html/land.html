@@ -3,14 +3,16 @@
 {% block title %}{{land.title}}{% end %}
 
 {% block content %}
-<h1>{{land.title}}</h1>
+<div id="content">
+  <h1>{{land.title}}</h1>
 
-<div id="map" style="width: {{land.base_size[0]}}px; height: {{land.base_size[1]}}px">
+  <div id="map" style="width: {{land.base_size[0]}}px; height: {{land.base_size[1]}}px">
+  </div>
+
+  <map id="mapmap" name="mapmap">
+  </map>
+
+  <ul id="list" class=itemlist>
+  </ul>
 </div>
-
-<map id="mapmap" name="mapmap">
-</map>
-
-<ul id="list" class=itemlist>
-</ul>
 {% end %}

@@ -2,6 +2,8 @@
 @import url('https://fonts.googleapis.com/css?family=Merriweather&display=block');
 @import url('https://fonts.googleapis.com/css?family=Inconsolata&display=block');
 
+/*html { margin-left: calc(100vw - 100%); }*/
+
 body {
     font-family: 'Merriweather Sans', sans-serif;
     background-image: url("https://snellen.storage.googleapis.com/grass.jpg");
@@ -35,6 +37,7 @@ input, button {
 
 #topnav {
     font-family: 'Merriweather', sans-serif;
+    margin-left: calc(100vw - 100%);
 
     min-width: 1060px;
     height: 24px;
@@ -94,7 +97,7 @@ a#submit:hover {
     margin-bottom: 30px;
     margin-left: auto;
     margin-right: auto;
-    padding: 30px 60px 40px 60px;
+    /*padding: 30px 60px 40px 60px;*/
     background-color: #f8f8f8;
     box-shadow: 0 0 10px black;
 }

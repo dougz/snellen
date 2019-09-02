@@ -33,9 +33,7 @@
 
     {% block midnav %}{% end %}
 
-    <div id="content">
-      {% block content %}{% end %}
-    </div>
+    {% block content %}<div id="content"></div>{% end %}
   </body>
 </html>
 
