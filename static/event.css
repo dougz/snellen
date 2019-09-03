@@ -97,7 +97,7 @@ a#submit:hover {
     margin-bottom: 30px;
     margin-left: auto;
     margin-right: auto;
-    /*padding: 30px 60px 40px 60px;*/
+    padding: 30px 60px 40px 60px;
     background-color: #f8f8f8;
     box-shadow: 0 0 10px black;
 }

@@ -467,7 +467,7 @@ class Land:
       if "puzzle" in d:
         p = d["puzzle"]
         if p == "_":
-          p = Puzzle.filler_puzzle()
+          p = Puzzle.placeholder_puzzle()
         else:
           p = Puzzle.from_json(os.path.join(event_dir, "puzzles", p + ".json"))
         p.land = self
@@ -492,7 +492,7 @@ class Puzzle:
 
   DEFAULT_MAX_QUEUED = 3
 
-  FILLER_COUNT = 0
+  PLACEHOLDER_COUNT = 0
 
   def __init__(self, shortname):
     if not re.match(r"^[a-z][a-z0-9_]*$", shortname):
@@ -519,26 +519,26 @@ class Puzzle:
     return self.title < other.title
 
   @classmethod
-  def filler_puzzle(cls):
-    cls.FILLER_COUNT += 1
-    number = cls.FILLER_COUNT
+  def placeholder_puzzle(cls):
+    cls.PLACEHOLDER_COUNT += 1
+    number = cls.PLACEHOLDER_COUNT
 
-    shortname = f"filler_{number}"
+    shortname = f"placeholder_{number}"
     self = cls(shortname)
 
-    self.title = f"Filler #{number}"
+    self.title = f"Placeholder #{number}"
     self.oncall = "nobody@example.org"
     self.puzzletron_id = -1
     self.version = 0
     self.authors = ["A. Computer"]
 
     self.max_queued = self.DEFAULT_MAX_QUEUED
-    self.answers = {"FILLER"}
-    self.display_answers = {"FILLER": "FILLER"}
+    self.answers = {"PLACEHOLDER"}
+    self.display_answers = {"PLACEHOLDER": "PLACEHOLDER"}
     self.incorrect_responses = {}
 
     self.html_head = None
-    self.html_body = "<p>The answer to this filler puzzle is <b>FILLER</b>.</p>"
+    self.html_body = "<p>The answer to this placeholder puzzle is <b>PLACEHOLDER</b>.</p>"
     self.for_ops_head = None
     self.for_ops_body = "<p>Teams should not need hints on this one.</p>"
 
