@@ -37,15 +37,16 @@ input, button {
 
 #topnav {
     font-family: 'Merriweather', sans-serif;
-    margin-left: calc(100vw - 100%);
+    /*margin-left: calc(100vw - 100%);*/
 
     min-width: 1060px;
-    height: 24px;
+    height: 40px;
     font-size: 18px;
     background: #666;
     color: #eee;
     border-bottom: 1px solid black;
-    padding: 8px 20px;
+    /*padding: 8px 20px;*/
+    padding: 0 20px;
 
     display: flex;
     flex-direction: row;
@@ -58,7 +59,9 @@ input, button {
 }
 
 #topnav > span, #topnav > a {
+    display: inline-block;
     margin: 0 20px;
+    padding: 8px 0;
 }
 
 #teamname {
@@ -101,6 +104,54 @@ a#submit:hover {
     background-color: #f8f8f8;
     box-shadow: 0 0 10px black;
 }
+
+#dropdown {
+    position: relative;
+    display: inline-block;
+    height: 40px;
+    padding: 0 20px;
+}
+
+#dropbtn {
+    font-family: 'Merriweather', sans-serif;
+    font-size: 18px;
+    min-width: 160px;
+    background-color: #666;
+    color: #eee;
+    height: 40px;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    margin-left: 1px;
+}
+
+#dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #666;
+    border: 1px solid black;
+    border-top: none;
+    min-width: 160px;
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+    z-index: 1001;
+}
+
+#dropdown-content a {
+    padding: 12px 16px;
+    display: block;
+}
+#dropdown-content a:hover {
+    background-color: #999;
+}
+
+#dropdown:hover #dropdown-content {
+    display: block;
+}
+
+#dropdown:hover #dropbtn {
+    background-color: #999;
+}
+
 
 /** submit panel **/
 

@@ -19,16 +19,21 @@
 	<a href="/">Penny Park</a>
 	{% block crumbs %}{% end %}
       </span>
+      <div id="dropdown">
+	<button id="dropbtn">Useful links</button>
+	<div id="dropdown-content">
+	  <a href="/pins">Pins</a>
+	  <a href="/log">Activity Log</a>
+	  <a href="/logout">Logout</a>
+	</div>
+      </div>
       {% end %}
       {% block topnav_extraleft %}{% end %}
       <span class="spacer"></span>
       {% block topnav_extraright %}{% end %}
       {% block topnav_startedright %}
       <span class=buzz>Buzz: <span id=score>{{team.score}}</span></span>
-      <a href="/pins">Pins</a>
-      <a href="/log">Activity Log</a>
       {% end %}
-      <a href="/logout">Logout</a>
     </div>
 
     {% block midnav %}{% end %}
