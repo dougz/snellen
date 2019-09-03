@@ -404,6 +404,10 @@ class Team(login.LoginUser):
 
 
   def compute_puzzle_beam(self, now):
+    start_map = Land.BY_SHORTNAME["inner_only"]
+    if start_map not in self.open_lands:
+      self.open_lands[start_map] = now
+
     # Always have two open puzzles in each land.
     for land in Land.BY_SHORTNAME.values():
       if not land.puzzles: continue
@@ -451,7 +455,7 @@ class Icon:
     self.land = land
     self.puzzle = None
     self.to_land = None
-    #self.thumb_size = d.get("thumb_size", self.size)
+    self.headerimage = d.get("headerimage")
 
     self.locked = Subicon(d.get("locked"))
     self.unlocked = Subicon(d.get("unlocked"))
@@ -488,7 +492,7 @@ class Land:
       if "puzzle" in d:
         p = d["puzzle"]
         if p == "_":
-          p = Puzzle.filler_puzzle()
+          p = Puzzle.placeholder_puzzle()
         else:
           p = Puzzle.from_json(os.path.join(event_dir, "puzzles", p + ".json"))
         p.land = self
@@ -513,7 +517,7 @@ class Puzzle:
 
   DEFAULT_MAX_QUEUED = 3
 
-  FILLER_COUNT = 0
+  PLACEHOLDER_COUNT = 0
 
   def __init__(self, shortname):
     if not re.match(r"^[a-z][a-z0-9_]*$", shortname):
@@ -540,26 +544,26 @@ class Puzzle:
     return self.title < other.title
 
   @classmethod
-  def filler_puzzle(cls):
-    cls.FILLER_COUNT += 1
-    number = cls.FILLER_COUNT
+  def placeholder_puzzle(cls):
+    cls.PLACEHOLDER_COUNT += 1
+    number = cls.PLACEHOLDER_COUNT
 
-    shortname = f"filler_{number}"
+    shortname = f"placeholder_{number}"
     self = cls(shortname)
 
-    self.title = f"Filler #{number}"
+    self.title = f"Placeholder #{number}"
     self.oncall = "nobody@example.org"
     self.puzzletron_id = -1
     self.version = 0
     self.authors = ["A. Computer"]
 
     self.max_queued = self.DEFAULT_MAX_QUEUED
-    self.answers = {"FILLER"}
-    self.display_answers = {"FILLER": "FILLER"}
+    self.answers = {"PLACEHOLDER"}
+    self.display_answers = {"PLACEHOLDER": "PLACEHOLDER"}
     self.incorrect_responses = {}
 
     self.html_head = None
-    self.html_body = "<p>The answer to this filler puzzle is <b>FILLER</b>.</p>"
+    self.html_body = "<p>The answer to this placeholder puzzle is <b>PLACEHOLDER</b>.</p>"
     self.for_ops_head = None
     self.for_ops_body = "<p>Teams should not need hints on this one.</p>"
 
@@ -631,7 +635,7 @@ class Global:
   @save_state
   def __init__(self, now):
     self.event_start_time = None
-    self.expected_start_time = int(now + 10)
+    self.expected_start_time = int(now + 30)
     Global.STATE = self
     asyncio.create_task(self.future_start())
 
@@ -656,21 +660,24 @@ class Global:
       await asyncio.sleep(delay)
     now = time.time()
     if not self.event_start_time and now >= self.expected_start_time:
-      self.start_event()
+      self.start_event(True)
 
   @save_state
-  def start_event(self, now):
+  def start_event(self, now, timed):
     if self.event_start_time is not None: return
     self.event_start_time = now
+    print(f"starting event at {now}")
     for team in Team.BY_USERNAME.values():
       team.compute_puzzle_beam(self.event_start_time)
-    if not save_state.REPLAYING:
+    if timed and not save_state.REPLAYING:
       asyncio.create_task(self.notify_event_start())
 
   async def notify_event_start(self):
     for team in Team.BY_USERNAME.values():
+      print(f"sending to_page to {team}")
       team.send_messages([{"method": "to_page", "url": "/"}])
       await team.flush_messages()
+      print(f"flushed to_page to {team}")
 
   async def update_event_start_teams(self):
     for team in Team.BY_USERNAME.values():

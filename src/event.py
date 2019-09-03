@@ -117,8 +117,13 @@ class PuzzlePage(util.TeamPageHandler):
     else:
       thumb = puzzle.icon.unlocked_thumb
 
+    if puzzle.icon.headerimage:
+      supertitle=f'<img src="{puzzle.icon.headerimage}"><br>'
+    else:
+      supertitle=""
+
     self.puzzle = puzzle
-    self.render("puzzle_frame.html", thumb=thumb)
+    self.render("puzzle_frame.html", thumb=thumb, supertitle=supertitle)
 
   def get_template_namespace(self):
     land = self.puzzle.land

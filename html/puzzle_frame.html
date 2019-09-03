@@ -31,8 +31,14 @@
 
 
 {% block content %}
-<h1>{{puzzle.title}}</h1>
-<div id="puzz">
-  {% raw puzzle.html_body %}
+<h1>{{puzzle.land.title}}</h1>
+
+<div id="content">
+
+  <h2><div id=vspace></div>{% raw supertitle %}{{puzzle.title}}</h2>
+  <div id="puzz">
+    {% raw puzzle.html_body %}
+  </div>
 </div>
+
 {% end %}
