@@ -19,7 +19,7 @@ function alter_role(e) {
 }
 
 
-function activateRoleCheckboxes() {
+function activate_role_checkboxes() {
     var cbs = document.querySelectorAll("table#user-roles input[type='checkbox']");
     for (var i = 0; i < cbs.length; ++i) {
 	var cb = cbs[i];
@@ -27,7 +27,29 @@ function activateRoleCheckboxes() {
     }
 }
 
-goog.exportSymbol("activateRoleCheckboxes", activateRoleCheckboxes);
+function send_hint_reply() {
+    var serializer = new goog.json.Serializer();
+    var text = goog.dom.getElement("replytext");
+    console.log(text);
+    text = text.value;
+    console.log(text);
+    if (!text) return;
+    goog.net.XhrIo.send("/hintreply", function(e) {
+    	var code = e.target.getStatus();
+    	if (code != 204) {
+    	    alert(e.target.getResponseText());
+    	}
+    }, "POST", serializer.serialize({"team_username": team_username, "puzzle_id": puzzle_id, "text": text}));
+}
+
+
+function enable_hint_reply() {
+    var b = goog.dom.getElement("hintreply");
+    goog.events.listen(b, goog.events.EventType.CLICK, send_hint_reply);
+}
+
+goog.exportSymbol("activate_role_checkboxes", activate_role_checkboxes);
+goog.exportSymbol("enable_hint_reply", enable_hint_reply)
 
 
 

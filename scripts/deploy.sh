@@ -41,12 +41,12 @@ debdir="${t}/${version}/DEBIAN"
 )
 
 ##
-## test_event
+## bts
 ##
 
 (
-    cd test_event
-    base="${base}/test_event"
+    cd bts
+    base="${base}/bts"
     install -m 0755 -d "${base}"
 
     for i in map_config.json teams.json admins.json; do

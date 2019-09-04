@@ -3,6 +3,15 @@
 
 {% block title %}Team "{{team.name}}" &nbsp;&#x25b8;&nbsp; Puzzle "{{puzzle.title}}"{% end %}
 
+{% block head %}
+<script>
+  var team_username = "{{team.username}}";
+  var puzzle_id = "{{puzzle.shortname}}";
+  window.onload = enable_hint_reply;
+</script>
+{% end %}
+
+
 {% block content %}
 
 state: {{state.state}}<br>
@@ -13,6 +22,9 @@ solve time: {{state.solve_time}}
   {% for h in state.hints %}
   {{h.when}} {{h.text}}
   {% end %}
+
+  <textarea rows=10 id="replytext"></textarea>
+  <button id="hintreply">Send reply</button>
 </div>
 
 

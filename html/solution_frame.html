@@ -11,7 +11,13 @@
 
 {% block head %}
 {% if solution_url %}
+<script>
+  var puzzle_init = null;
+</script>
 {% if puzzle.html_head %}{% raw puzzle.html_head %}{% end %}
+<script>
+  window.onload = puzzle_init;
+</script>
 {% else %}
 {% if puzzle.solution_head %}{% raw puzzle.solution_head %}{% end %}
 {% end %}
@@ -19,13 +25,16 @@
 
 
 {% block content %}
-<h1>{{puzzle.title}}</h1>
-{% if authors %}<p class=flavor>by {{authors}}</p>{% end %}
-<div id="puzz">
-  {% if solution_url %}
-  {% raw puzzle.html_body %}
-  {% else %}
-  {% raw puzzle.solution_body %}
-  {% end %}
+<h1>{{puzzle.land.title}}</h1>
+<div id="content">
+  <h2>{{puzzle.title}}</h2>
+  {% if authors %}<p class=flavor>by {{authors}}</p>{% end %}
+  <div id="puzz">
+    {% if solution_url %}
+    {% raw puzzle.html_body %}
+    {% else %}
+    {% raw puzzle.solution_body %}
+    {% end %}
+  </div>
 </div>
 {% end %}

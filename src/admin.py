@@ -4,6 +4,7 @@ import tornado.web
 import datetime
 import dateutil.parser
 import game
+import json
 import login
 import time
 import util
@@ -84,6 +85,29 @@ class AdminTeamPuzzlePage(util.AdminPageHandler):
 
     self.render("admin_team_puzzle_page.html",
                 team=team, puzzle=puzzle, state=team.puzzle_state[puzzle])
+
+class HintReplyHandler(tornado.web.RequestHandler):
+  def prepare(self):
+    self.args = json.loads(self.request.body)
+
+  @login.required("admin")
+  def post(self):
+    team_username = self.args.get("team_username")
+    team = game.Team.get_by_username(team_username)
+    if not team:
+      raise tornado.web.HTTPError(http.client.NOT_FOUND)
+
+    shortname = self.args.get("puzzle_id");
+    puzzle = game.Puzzle.get_by_shortname(shortname)
+    if not puzzle:
+      raise tornado.web.HTTPError(http.client.NOT_FOUND)
+
+    text = self.args.get("text", "").strip()
+    if not text:
+      raise tornado.web.HTTPError(http.client.BAD_REQUEST)
+
+    team.add_hint_text(shortname, self.session.user.username, text)
+    self.set_status(http.client.NO_CONTENT.value)
 
 
 class ListPuzzlesPage(util.AdminPageHandler):
@@ -184,6 +208,7 @@ def GetHandlers():
     (r"/admin/teampuzzle/([a-z0-9_]+)/([a-z0-9_]+)$", AdminTeamPuzzlePage),
     (r"/admin/puzzles$", ListPuzzlesPage),
     (r"/admin/puzzle/([a-z0-9_]+)$", AdminPuzzlePage),
+    (r"/hintreply", HintReplyHandler),
     ]
   return handlers
 
