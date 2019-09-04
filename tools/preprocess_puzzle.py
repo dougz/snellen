@@ -290,6 +290,8 @@ def main():
   if not options.public_host:
     options.public_host = options.bucket + ".storage.googleapis.com"
 
+  common.load_object_cache(options.bucket, options.credentials)
+
   puzzle_dir = os.path.join(options.output_dir, "puzzles")
   os.makedirs(puzzle_dir, exist_ok=True)
 

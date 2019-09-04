@@ -1,5 +1,6 @@
 import base64
 import hashlib
+import json
 import requests
 
 SECRET_KEY_LENGTH = 16
@@ -24,7 +25,36 @@ CONTENT_TYPES = {
   ".pdf": "application/pdf",
 }
 
+object_cache = set()
+
+def load_object_cache(bucket, creds):
+  page_token = None
+  while True:
+    url = f"https://www.googleapis.com/storage/v1/b/{bucket}/o"
+    if page_token:
+      url += f"?pageToken={page_token}"
+    print(url)
+
+    r = requests.get(url, headers={"Authorization": creds.get()})
+    if r.status_code == 401:
+      creds.invaliate()
+      continue
+    if r.status_code != 200:
+      r.raise_for_status()
+
+    d = json.loads(r.content)
+    for i in d["items"]:
+      object_cache.add(i["name"])
+
+    page_token = d.get("nextPageToken")
+    if not page_token: break
+
+
 def upload_object(source, bucket, path, content_type, data, creds):
+  if path in object_cache:
+    print(f"    Already have {source} as {path} (cached)...")
+    return
+
   for retry in range(2):
     r = requests.head(f"https://{bucket}.storage.googleapis.com/{path}",
                       headers={"Authorization": creds.get()})

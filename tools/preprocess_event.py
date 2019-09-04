@@ -144,6 +144,8 @@ def main():
 
   options.credentials = oauth2.Oauth2Token(options.credentials)
 
+  common.load_object_cache(options.bucket, options.credentials)
+
   with open(os.path.join(options.input_dir, "map_config.yaml")) as f:
     y = yaml.load(f)
 
