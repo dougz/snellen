@@ -176,14 +176,12 @@ a#submit:hover {
 
     height: 0;
     visibility: hidden;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-
 
     z-index: 999;
     position: static;
-    overflow: hidden;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    padding: 20px;
 }
 
 #submit_table {

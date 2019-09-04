@@ -74,6 +74,24 @@ class SubmissionHistory {
     }
 }
 
+class HintMessage {
+    constructor() {
+	/** @type{string} */
+	this.sender;
+	/** @type{number} */
+	this.when;
+	/** @type{string} */
+	this.text;
+    }
+}
+
+class HintHistory {
+    constructor() {
+	/** @type{Array<HintMessage>} */
+	this.history;
+    }
+}
+
 class MapItem {
     constructor() {
 	/** @type{string} */

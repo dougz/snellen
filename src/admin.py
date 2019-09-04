@@ -91,7 +91,7 @@ class HintReplyHandler(tornado.web.RequestHandler):
     self.args = json.loads(self.request.body)
 
   @login.required("admin")
-  def post(self):
+  async def post(self):
     team_username = self.args.get("team_username")
     team = game.Team.get_by_username(team_username)
     if not team:
@@ -107,6 +107,7 @@ class HintReplyHandler(tornado.web.RequestHandler):
       raise tornado.web.HTTPError(http.client.BAD_REQUEST)
 
     team.add_hint_text(shortname, self.session.user.username, text)
+    await team.flush_messages()
     self.set_status(http.client.NO_CONTENT.value)
 
 

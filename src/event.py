@@ -220,6 +220,16 @@ class HintRequestHandler(util.TeamHandler):
     self.team.add_hint_text(shortname, None, text)
     self.set_status(http.client.NO_CONTENT.value)
 
+class HintHistoryHandler(util.TeamHandler):
+  @login.required("team", on_fail=http.client.UNAUTHORIZED)
+  def get(self, shortname):
+    state = self.team.get_puzzle_state(shortname)
+    if not state:
+      raise tornado.web.HTTPError(http.client.NOT_FOUND)
+
+    d = {"history": [msg.json_dict() for msg in state.hints]}
+    self.write(json.dumps(d))
+
 
 def GetHandlers():
   handlers = [
@@ -232,6 +242,7 @@ def GetHandlers():
     (r"/submit_history/([a-z][a-z0-9_]*)", SubmitHistoryHandler),
     (r"/submit_cancel/([a-z][a-z0-9_]*)/(\d+)", SubmitCancelHandler),
     (r"/hintrequest", HintRequestHandler),
+    (r"/hinthistory/([a-z][a-z0-9_]*)", HintHistoryHandler),
   ]
 
   return handlers

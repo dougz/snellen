@@ -20,6 +20,11 @@ class HintMessage:
     self.sender = sender
     self.text = text
 
+  def json_dict(self):
+    return {"sender": "Hunt HQ" if isinstance(self.sender, login.AdminUser) else self.parent.team.name,
+            "when": self.when,
+            "text": self.text}
+
 
 class PuzzleState:
   CLOSED = "closed"
@@ -397,11 +402,13 @@ class Team(login.LoginUser):
     if sender is None:
       sender = self
     else:
-      self = login.AdminUser.get_by_username(sender)
+      sender = login.AdminUser.get_by_username(sender)
 
     msg = HintMessage(state, now, sender, text)
     state.hints.append(msg)
 
+    self.send_messages([{"method": "hint_history",
+                         "puzzle_id": puzzle.shortname}])
 
   def compute_puzzle_beam(self, now):
     start_map = Land.BY_SHORTNAME["inner_only"]

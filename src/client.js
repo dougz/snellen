@@ -69,6 +69,7 @@ class H2020_Dispatcher {
 	    "achieve": this.achieve,
 	    "update_start": this.update_start,
 	    "to_page": this.to_page,
+	    "hint_history": this.hint_history,
 	}
     }
 
@@ -81,6 +82,13 @@ class H2020_Dispatcher {
     history_change(msg) {
 	if (msg.puzzle_id == puzzle_id) {
 	    hunt2020.submit_panel.update_history();
+	}
+    }
+
+    /** @param{Message} msg */
+    hint_history(msg) {
+	if (msg.puzzle_id == puzzle_id) {
+	    hunt2020.hint_panel.update_history();
 	}
     }
 
@@ -207,7 +215,7 @@ class H2020_SubmitPanel {
 	goog.net.XhrIo.send("/submit_history/" + puzzle_id, goog.bind(function(e) {
 	    var code = e.target.getStatus();
 	    if (code == 200) {
-		var response = /** type{SubmissionHistory} */ (e.target.getResponseJson());
+		var response = /** @type{SubmissionHistory} */ (e.target.getResponseJson());
 		this.render_history(response);
 		if (response.allowed) {
 		    this.submit_div.style.display = "block";
@@ -415,12 +423,16 @@ class H2020_HintPanel {
 
 	/** @type{Element|null} */
 	this.textarea = null;
+
+	/** @type{Element|null} */
+	this.history = null;
     }
 
     build() {
 	this.serializer = new goog.json.Serializer();
 	this.hintpanel = goog.dom.getElement("hintpanel");
 	this.textarea = goog.dom.getElement("hinttext");
+	this.history = goog.dom.getElement("hinthistory");
 
 	var b = goog.dom.getElement("hintrequest");
 	goog.events.listen(b, goog.events.EventType.CLICK, goog.bind(this.submit, this));
@@ -438,6 +450,39 @@ class H2020_HintPanel {
     		alert(e.target.getResponseText());
     	    }
     	}, "POST", this.serializer.serialize({"puzzle_id": puzzle_id, "text": text}));
+    }
+
+    update_history() {
+	if (!this.built) return;
+	if (this.hintpanel.style == "none") return;
+	goog.net.XhrIo.send("/hinthistory/" + puzzle_id, goog.bind(function(e) {
+	    var code = e.target.getStatus();
+	    if (code == 200) {
+		var response = /** @type{HintHistory} */ (e.target.getResponseJson());
+		this.render_history(response);
+	    }
+	}, this));
+    }
+
+    /** @param{HintHistory} response */
+    render_history(response) {
+	if (response.history.length == 0) {
+	    this.history.innerHTML = "You have not requested any hints.";
+	    return;
+	}
+	this.history.innerHTML = "";
+	var dl = goog.dom.createDom("DL");
+	for (var i = 0; i < response.history.length; ++i) {
+	    var msg = response.history[i];
+	    console.log(msg);
+	    var dt = goog.dom.createDom(
+		"DT", null,
+		"At " + hunt2020.time_formatter.format(msg.when) + ", " + msg.sender + " wrote:");
+	    var dd = goog.dom.createDom("DD", null, msg.text);
+	    dl.appendChild(dt);
+	    dl.appendChild(dd);
+	}
+	this.history.appendChild(dl);
     }
 
     // onkeydown(e) {
@@ -463,6 +508,7 @@ class H2020_HintPanel {
 	if (!this.built) this.build();
 	goog.dom.classlist.addRemove(this.hintpanel, "panel-invisible",
 				     "panel-visible");
+	this.update_history();
 	// focus on input field, once slide-out animation is complete.
 	//setTimeout(goog.bind(this.focus_input, this), 200);
 	return false;

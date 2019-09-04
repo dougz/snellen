@@ -29,8 +29,8 @@
 #      log in a lot.
 
 
-exec python3.7 "${SNELLEN_BASE}/src/main.py" \
-     --event_dir test_event \
-     --template_path "${SNELLEN_BASE}/html" \
+exec python3.7 "${HUNT2020_BASE}/snellen/src/main.py" \
+     --event_dir bts \
+     --template_path "${HUNT2020_BASE}/snellen/html" \
      "$@"
 
