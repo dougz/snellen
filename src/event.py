@@ -219,6 +219,7 @@ class HintRequestHandler(util.TeamHandler):
     shortname = self.args["puzzle_id"]
     self.team.add_hint_text(shortname, None, text)
     self.set_status(http.client.NO_CONTENT.value)
+    asyncio.create_task(login.AdminUser.flush_messages())
 
 class HintHistoryHandler(util.TeamHandler):
   @login.required("team", on_fail=http.client.UNAUTHORIZED)

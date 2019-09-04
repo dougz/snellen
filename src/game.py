@@ -20,10 +20,17 @@ class HintMessage:
     self.sender = sender
     self.text = text
 
-  def json_dict(self):
-    return {"sender": "Hunt HQ" if isinstance(self.sender, login.AdminUser) else self.parent.team.name,
-            "when": self.when,
-            "text": self.text}
+  def json_dict(self, for_admin=False):
+    d = {"when": self.when, "text": self.text}
+    if isinstance(self.sender, login.AdminUser):
+      if for_admin:
+        d["sender"] = self.sender.fullname
+      else:
+        d["sender"] = "Hunt HQ"
+    else:
+      d["sender"] = self.parent.team.name
+    return d
+
 
 
 class PuzzleState:
@@ -409,6 +416,9 @@ class Team(login.LoginUser):
 
     self.send_messages([{"method": "hint_history",
                          "puzzle_id": puzzle.shortname}])
+    login.AdminUser.send_messages([{"method": "hint_history",
+                                    "team_username": self.username,
+                                    "puzzle_id": puzzle.shortname}])
 
   def compute_puzzle_beam(self, now):
     start_map = Land.BY_SHORTNAME["inner_only"]

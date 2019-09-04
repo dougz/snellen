@@ -63,6 +63,8 @@ class AdminPageHandler(tornado.web.RequestHandler):
   def get_template_namespace(self):
     d = {"user": self.user}
 
+    wid = wait_proxy.Server.new_waiter_id()
+
     st = game.Global.STATE
     if st.event_start_time:
       d["launched"] = time.time() - st.event_start_time
@@ -78,6 +80,8 @@ class AdminPageHandler(tornado.web.RequestHandler):
     else:
       d["script"] = f"""<script src="{self.static_content["admin-compiled.js"]}"></script>"""
       d["css"] = self.static_content["admin.css"]
+
+    d["script"] += f"<script>var waiter_id = {wid};</script>"
 
     return d
 

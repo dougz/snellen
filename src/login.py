@@ -15,6 +15,7 @@ import tornado.ioloop
 
 import game
 from state import save_state
+import wait_proxy
 
 def make_hash(password):
   return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("ascii")
@@ -42,6 +43,10 @@ class LoginUser:
 
 class AdminUser(LoginUser):
   BY_USERNAME = {}
+
+  message_mu = asyncio.Lock()
+  message_serial = 1
+  pending_messages = []
 
   def __init__(self, username, password_hash, fullname, roles):
     self.username = username
@@ -74,6 +79,22 @@ class AdminUser(LoginUser):
   @classmethod
   def all_users(cls):
     return cls.BY_USERNAME.values()
+
+  @classmethod
+  def send_messages(cls, objs):
+    cls.pending_messages.extend(objs)
+
+  @classmethod
+  async def flush_messages(cls):
+    if not cls.pending_messages: return
+    objs, cls.pending_messages = cls.pending_messages, []
+    if isinstance(objs, list):
+      strs = [json.dumps(o) for o in objs]
+    async with cls.message_mu:
+      await wait_proxy.Server.send_message("__ADMIN", cls.message_serial, strs)
+      cls.message_serial += len(strs)
+
+
 
 
 class Session:

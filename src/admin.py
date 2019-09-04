@@ -86,6 +86,20 @@ class AdminTeamPuzzlePage(util.AdminPageHandler):
     self.render("admin_team_puzzle_page.html",
                 team=team, puzzle=puzzle, state=team.puzzle_state[puzzle])
 
+class AdminHintHistoryHandler(tornado.web.RequestHandler):
+  @login.required("admin")
+  def get(self, team_username, shortname):
+    team = game.Team.get_by_username(team_username)
+    if not team:
+      raise tornado.web.HTTPError(http.client.NOT_FOUND)
+    state = team.get_puzzle_state(shortname)
+    if not state:
+      raise tornado.web.HTTPError(http.client.NOT_FOUND)
+
+    d = {"history": [msg.json_dict(for_admin=True) for msg in state.hints]}
+    self.write(json.dumps(d))
+
+
 class HintReplyHandler(tornado.web.RequestHandler):
   def prepare(self):
     self.args = json.loads(self.request.body)
@@ -108,6 +122,7 @@ class HintReplyHandler(tornado.web.RequestHandler):
 
     team.add_hint_text(shortname, self.session.user.username, text)
     await team.flush_messages()
+    await login.AdminUser.flush_messages()
     self.set_status(http.client.NO_CONTENT.value)
 
 
@@ -209,7 +224,8 @@ def GetHandlers():
     (r"/admin/teampuzzle/([a-z0-9_]+)/([a-z0-9_]+)$", AdminTeamPuzzlePage),
     (r"/admin/puzzles$", ListPuzzlesPage),
     (r"/admin/puzzle/([a-z0-9_]+)$", AdminPuzzlePage),
-    (r"/hintreply", HintReplyHandler),
+    (r"/admin/hintreply", HintReplyHandler),
+    (r"/admin/hinthistory/([a-z0-9_]+)/([a-z0-9_]+)$", AdminHintHistoryHandler),
     ]
   return handlers
 

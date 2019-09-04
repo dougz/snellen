@@ -7,7 +7,6 @@
 <script>
   var team_username = "{{team.username}}";
   var puzzle_id = "{{puzzle.shortname}}";
-  window.onload = enable_hint_reply;
 </script>
 {% end %}
 
@@ -18,14 +17,9 @@ state: {{state.state}}<br>
 open time: {{state.open_time}}<br>
 solve time: {{state.solve_time}}
 
-<div>
-  {% for h in state.hints %}
-  {{h.when}} {{h.text}}
-  {% end %}
-
-  <textarea rows=10 id="replytext"></textarea>
-  <button id="hintreply">Send reply</button>
-</div>
+<div id="hinthistory"></div>
+<textarea rows=10 id="replytext"></textarea>
+<button id="hintreply">Send reply</button>
 
 
 {% end %}

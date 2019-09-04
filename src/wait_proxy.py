@@ -81,8 +81,11 @@ class CheckSessionHandler(tornado.web.RequestHandler):
     key = key.encode("ascii")
     session = login.Session.from_key(key)
     self.set_header("Content-Type", "text/plain")
-    if session is not None and hasattr(session, "team") and session.team:
-      self.write(session.team.username)
+    if session is not None:
+      if hasattr(session, "team") and session.team:
+        self.write(session.team.username)
+      elif hasattr(session, "user") and session.user:
+        self.write("__ADMIN")
 
 
 def GetHandlers():

@@ -314,7 +314,6 @@ class H2020_SubmitPanel {
 		className: "icon"});
 	    thumb.appendChild(el);
 
-	    console.log("adding " + response.width + " x " + response.height + " sparkle");
 	    this.add_sparkle(thumb, response.width, response.height);
 	}
     }
@@ -474,7 +473,6 @@ class H2020_HintPanel {
 	var dl = goog.dom.createDom("DL");
 	for (var i = 0; i < response.history.length; ++i) {
 	    var msg = response.history[i];
-	    console.log(msg);
 	    var dt = goog.dom.createDom(
 		"DT", null,
 		"At " + hunt2020.time_formatter.format(msg.when) + ", " + msg.sender + " wrote:");
@@ -720,7 +718,6 @@ class H2020_AudioManager {
 
     mute_changed() {
 	var els = document.querySelectorAll(".mute");
-	console.log("found " + els.length + " mute icons");
 
 	if (localStorage.getItem("mute")) {
 	    if (this.current) this.current.muted = true;
