@@ -160,18 +160,16 @@ class H2020_SubmitPanel {
 	/** @type{Object|null} */
 	this.serializer = null;
 
-	/** @type{Element|null} */
+	/** @type{?Element} */
 	this.submitpanel = null;
-
-	/** @type{Element|null} */
+	/** @type{?Element} */
 	this.input = null;
-	/** @type{Element|null} */
-	this.submit_div = null;
+	/** @type{?Element} */
+	this.table = null;
 	/** @type{?Element} */
 	this.top_note = null;
-
 	/** @type{?Element} */
-	this.history = null;
+	this.entry = null;
 
 	/** @type{number|null} */
 	this.timer = null;
@@ -180,40 +178,24 @@ class H2020_SubmitPanel {
 
 	/** @type{boolean} */
 	this.has_overlay = false;
+
+	this.cancel = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/><path d="M0 0h24v24H0z" fill="none"/></svg>';
     }
 
     build() {
 	this.serializer = new goog.json.Serializer();
 
 	this.submitpanel = goog.dom.getElement("submitpanel");
-
-	var content =  goog.dom.getElement("submit_table");
-
-	this.top_note = goog.dom.createDom("SPAN");
-	this.top_note.style.display = "none";
-	content.appendChild(this.top_note);
-
-	this.history = goog.dom.createDom("TABLE", {"class": "submissions"});
-	content.appendChild(this.history);
-
-	this.submit_div = goog.dom.createDom("DIV");
-
-	this.input = goog.dom.createDom("INPUT", {id: "answer", name: "answer", maxLength: 40}, "");
-	this.submit_div.appendChild(this.input);
+	this.input = goog.dom.getElement("answer");
+	this.table = goog.dom.getElement("submit_table_body");
+	this.top_note = goog.dom.getElement("top_note");
+	this.entry = goog.dom.getElement("entry");
 	goog.events.listen(this.input, goog.events.EventType.KEYDOWN, goog.bind(this.onkeydown, this));
 
-	var b = goog.dom.createDom("BUTTON", null, "Submit");
+	var b = goog.dom.getElement("submitsubmit");
 	goog.events.listen(b, goog.events.EventType.CLICK, goog.bind(this.submit, this));
-	this.submit_div.appendChild(b);
-
-	content.appendChild(this.submit_div);
-
-	b = goog.dom.createDom("BUTTON", null, "Close");
-	content.appendChild(b);
-	goog.events.listen(b, goog.events.EventType.CLICK, goog.bind(this.close, this));
 
 	this.built = true;
-
 	this.update_history();
     }
 
@@ -226,9 +208,9 @@ class H2020_SubmitPanel {
 		var response = /** @type{SubmissionHistory} */ (e.target.getResponseJson());
 		this.render_history(response);
 		if (response.allowed) {
-		    this.submit_div.style.display = "block";
+		    this.entry.style.display = "flex";
 		} else {
-		    this.submit_div.style.display = "none";
+		    this.entry.style.display = "none";
 		}
 	    }
 	}, this));
@@ -249,17 +231,10 @@ class H2020_SubmitPanel {
 	    this.top_note.style.display = "none";
 	}
 
-	this.history.innerHTML = "";
-
-	this.history.appendChild(
-	    goog.dom.createDom("TR", null,
-			       goog.dom.createDom("TH", {className: "submit-time"}, "time"),
-			       goog.dom.createDom("TH", {className: "submit-state"}, "result"),
-			       goog.dom.createDom("TH", {className: "submit-answer"}, "submission")));
-
+	this.table.innerHTML = "";
 
 	if (response.history.length == 0) {
-	    this.history.appendChild(
+	    this.table.appendChild(
 		goog.dom.createDom("TR", null,
 				   goog.dom.createDom("TD", {className: "submit-empty", colSpan: 3},
 						      "No submissions for this puzzle.")));
@@ -271,6 +246,7 @@ class H2020_SubmitPanel {
 	    };
 	};
 
+	var tr;
 	for (var i = 0; i < response.history.length; ++i) {
 	    var sub = response.history[i];
 	    var el = null;
@@ -281,32 +257,33 @@ class H2020_SubmitPanel {
 
 	    var answer = null;
 	    if (sub.state == "pending") {
-		var link = goog.dom.createDom("A", {className: "submit-cancel"}, "\u00d7");
+		var link = goog.dom.createDom("A", {className: "submit-cancel"});
+		link.innerHTML = this.cancel;
 		goog.events.listen(link, goog.events.EventType.CLICK, cancelsub(sub));
-		answer = [link, sub.answer];
+		answer = [sub.answer, link, el];
 	    } else {
 		answer = sub.answer;
 	    }
 
-	    var tr = goog.dom.createDom(
-		"TR", null,
+	    tr = goog.dom.createDom(
+		"TR", {className: "submit-" + sub.state},
+		goog.dom.createDom("TD", {className: "submit-answer"},
+				   answer),
 		goog.dom.createDom("TD", {className: "submit-time"},
 				   hunt2020.time_formatter.format(sub.submit_time)),
 		goog.dom.createDom("TD", {className: "submit-state"},
-				   el,
-				   goog.dom.createDom("SPAN", {className: "submit-" + sub.state},
-						      sub.state)),
-		goog.dom.createDom("TD", {className: "submit-answer"},
-				   answer));
-	    this.history.appendChild(tr);
+				   goog.dom.createDom("SPAN", null,
+						      sub.state)));
+	    this.table.appendChild(tr);
 
 	    if (sub.response) {
-		var td = goog.dom.createDom("TD", {className: "submit-extra",
-						   colSpan: 3});
+		var td = goog.dom.createDom("TD", {colSpan: 3});
 		td.innerHTML = sub.response;
-		this.history.appendChild(goog.dom.createDom("TR", null, td));
+		tr = goog.dom.createDom("TR", {className: "submit-extra"}, td);
+		this.table.appendChild(tr);
 	    }
 	}
+	tr.scrollIntoView();
 
 	if (this.counters.length > 0) {
 	    this.update_counters();

@@ -25,7 +25,20 @@
   <div id="thumb" style="width: {{thumb.size[0]}}px; height: {{thumb.size[1]}}px;">
     <a href="{{puzzle.land.url}}"><img class="base" src="{{thumb.url}}"></img></a>
   </div>
-  <div id="submit_table"></div>
+  <div id="submitdata">
+    <div id="submit_table_scroll">
+      <table id="submit_table">
+	<tr><th id="st_answer">Answer</th><th id="st_time">Submit time</th><th id="st_result">Result</th></tr>
+	<tbody id="submit_table_body">
+	</tbody>
+      </table>
+    </div>
+    <div id="entry">
+      <input type=text maxlength=40 id="answer" name="answer">
+      <button id="submitsubmit">Submit</button>
+      <span id="top_note"></span>
+    </div>
+  </div>
 </div>
 {% end %}
 

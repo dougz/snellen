@@ -160,24 +160,6 @@ a#submit:hover {
 }
 
 
-/** submit panel **/
-
-#submitpanel {
-    background-color: #888888ee;
-    border-bottom: 0px solid black;
-
-    height: 0;
-    visibility: hidden;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-
-
-    z-index: 999;
-    position: static;
-    overflow: hidden;
-}
-
 #hintpanel {
     background-color: #888888ee;
     border-bottom: 0px solid black;
@@ -189,11 +171,6 @@ a#submit:hover {
     position: static;
     overflow-y: scroll;
     overflow-x: hidden;
-}
-
-#submit_table {
-    overflow: auto;
-    max-height: 260px;
 }
 
 @keyframes slide {
@@ -235,112 +212,122 @@ div#thumb .icon {
 }
 
 
+/** submit panel **/
+
+#submitpanel {
+    background-color: #888888ee;
+    border-bottom: 0px solid black;
+
+    height: 0;
+    visibility: hidden;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    z-index: 999;
+    position: static;
+    overflow: hidden;
+}
+
+#submitdata {
+    height: 260px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+#submit_table {
+    border-collapse: collapse;
+}
+
+#submit_table_scroll {
+    overflow-y: auto;
+    flex-grow: 1000;
+}
+
+#st_answer {
+    width: 60ex;
+}
+#st_time {
+    width: 20ex;
+}
+#st_result {
+    width: 16ex;
+}
 
 
-
-table.submissions {
-    padding: 20px;
+#submit_table td {
+    vertical-align: middle;
+    padding: 4px 8px;
 }
-table.submissions td { vertical-align: middle; }
-table.submissions th { text-align: left; }
-
-.submit-empty {
-    padding-top: 8px;
-    font-style: italic;
-    text-align: center;
-}
-
-.submit-time {
-    width: 140px;
-}
-td.submit-time {
-    padding-top: 8px;
-}
-.submit-state {
-    width: 120px;
-}
-td.submit-state {
-    padding-right: 8px;
-}
-.submit-answer {
-    width: 400px;
-}
-td.submit-answer {
+#submit_table th {
+    color: white;
     font-weight: bold;
+    background-color: #666;
+    text-align: left;
+    padding: 8px;
+}
+#submit_table tr {
+    border-top: 1px solid #999;
+}
+#submit_table tr.submit-extra {
+    border-top: none;
+}
+
+td.submit-answer {
     font-family: 'Inconsolata', monospace;
+    font-weight: bold;
+}
+
+tr.submit-correct {
+    background-color: #ddffdd;
+}
+
+tr.submit-incorrect {
+    background-color: #fee;
+}
+
+tr.submit-partial, tr.submit-extra {
+    background-color: #fdfd96;
+}
+
+tr.submit-pending {
+    background-color: #dddddd;
+}
+
+.submit-state { text-transform: uppercase; }
+tr.submit-correct .submit-state { color: #090 }
+tr.submit-incorrect .submit-state { color: #c00 }
+tr.submit-partial .submit-state { color: #990 }
+tr.submit-pending .submit-state { color: #666 }
+
+#submit_table tr.submit-extra td {
+    padding-left: 32px;
+}
+
+
+div#entry {
+    padding-top: 8px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
 }
 
 .submit-cancel {
-    color: #999999;
-    padding-right: 8px;
-}
-
-.submit-correct {
-    padding: 0px 4px;
-    font-weight: bold;
-    font-size: 70%;
-    border: 1px solid #006600;
-    border-radius: 4px;
-    color: #003300;
-    background-color: #ddffdd;
-    text-transform: uppercase;
-}
-
-.submit-partial {
-    padding: 0px 4px;
-    font-weight: bold;
-    font-size: 70%;
-    border: 1px solid #666600;
-    border-radius: 4px;
-    color: #333300;
-    background-color: #ffffdd;
-    text-transform: uppercase;
-}
-
-.submit-incorrect {
-    padding: 0px 4px;
-    font-weight: bold;
-    font-size: 70%;
-    border: 1px solid #990000;
-    border-radius: 4px;
-    color: #660000;
-    background-color: #ffdddd;
-    text-transform: uppercase;
-}
-
-.submit-pending {
-    padding: 0px 4px;
-    margin-left: 8px;
-    font-weight: bold;
-    font-size: 70%;
-    border: 1px solid #666666;
-    border-radius: 4px;
-    color: #666666;
-    background-color: #dddddd;
-    text-transform: uppercase;
-}
-
-.submit-moot {
-    padding: 0px 4px;
-    font-weight: bold;
-    font-size: 70%;
-    border: 1px solid #666666;
-    border-radius: 4px;
-    color: #666666;
-    background-color: #dddddd;
-    text-transform: uppercase;
+    margin: 0 8px;
+    vertical-align: -0.1em;
 }
 
 .submit-timer {
-    font-weight: bold;
-    font-size: 84%;
+    font-family: sans-serif;
+    font-weight: normal;
 }
 
-.submit-extra {
-    padding-left: 16px;
-}
 
 input#answer {
+    width: 50ex;
+    font-weight: bold;
+    font-size: 144%;
     font-family: 'Inconsolata', monospace;
 }
 
