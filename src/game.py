@@ -510,6 +510,8 @@ class Land:
         p = d["puzzle"]
         if p == "_":
           p = Puzzle.placeholder_puzzle()
+        elif p.startswith("_"):
+          p = Puzzle.placeholder_puzzle(int(p[1:]))
         else:
           p = Puzzle.from_json(os.path.join(event_dir, "puzzles", p + ".json"))
         p.land = self
@@ -560,8 +562,11 @@ class Puzzle:
   def __lt__(self, other):
     return self.title < other.title
 
+  PLACEHOLDER_MULTI_ANSWERS = ("ALFA BRAVO CHARLIE DELTA ECHO "
+                               "FOXTROT GOLF HOTEL INDIA JULIETT").split()
+
   @classmethod
-  def placeholder_puzzle(cls):
+  def placeholder_puzzle(cls, count=None):
     cls.PLACEHOLDER_COUNT += 1
     number = cls.PLACEHOLDER_COUNT
 
@@ -575,12 +580,26 @@ class Puzzle:
     self.authors = ["A. Computer"]
 
     self.max_queued = self.DEFAULT_MAX_QUEUED
-    self.answers = {"PLACEHOLDER"}
-    self.display_answers = {"PLACEHOLDER": "PLACEHOLDER"}
-    self.incorrect_responses = {}
+    if count is None:
+      self.answers = {"PLACEHOLDER"}
+      self.display_answers = {"PLACEHOLDER": "PLACEHOLDER"}
+      self.incorrect_responses = {}
+      self.html_body = "<p>The answer to this placeholder puzzle is <b>PLACEHOLDER</b>.</p>"
+    else:
+      self.answers = set()
+      self.display_answers = {}
+      self.incorrect_responses = {}
+      for i in cls.PLACEHOLDER_MULTI_ANSWERS[:count]:
+        self.answers.add(i)
+        self.display_answers[i] = i
+        # har de har har.
+        if i == "ALFA":
+          self.incorrect_responses["ALPHA"] = "With the <i>correct</i> spelling, please."
+        if i == "JULIETT":
+          self.incorrect_responses["JULIET"] = "With the <i>correct</i> spelling, please."
+      self.html_body = f"<p>The answers to this placeholder puzzle are the first {count} letters of the NATO phonetic alphabet.</p>"
 
     self.html_head = None
-    self.html_body = "<p>The answer to this placeholder puzzle is <b>PLACEHOLDER</b>.</p>"
     self.for_ops_head = None
     self.for_ops_body = "<p>Teams should not need hints on this one.</p>"
 

@@ -33,7 +33,6 @@ def load_object_cache(bucket, creds):
     url = f"https://www.googleapis.com/storage/v1/b/{bucket}/o"
     if page_token:
       url += f"?pageToken={page_token}"
-    print(url)
 
     r = requests.get(url, headers={"Authorization": creds.get()})
     if r.status_code == 401:
