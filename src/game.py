@@ -357,6 +357,7 @@ class Team(login.LoginUser):
       self.score += puzzle.points
       self.send_messages(
         [{"method": "solve",
+          "puzzle_id": puzzle.shortname,
           "title": html.escape(puzzle.title),
           "audio": "https://snellen.storage.googleapis.com/applause.mp3",
           "score": self.score}])

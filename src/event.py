@@ -123,7 +123,8 @@ class PuzzlePage(util.TeamPageHandler):
       supertitle=""
 
     self.puzzle = puzzle
-    self.render("puzzle_frame.html", thumb=thumb, supertitle=supertitle)
+    self.render("puzzle_frame.html", thumb=thumb, supertitle=supertitle,
+                solved=(state.state == state.SOLVED))
 
   def get_template_namespace(self):
     land = self.puzzle.land

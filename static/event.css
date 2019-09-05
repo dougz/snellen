@@ -81,10 +81,18 @@ input, button {
 a#submit {
     font-weight: bold;
     cursor: pointer;
-    padding: 2px 8px;
+    padding: 0 8px;
+    height: 40px;
+    line-height: 40px;
+    vertical-align: center;
     background-color: #eee;
     color: black;
     text-transform: uppercase;
+}
+
+a#submit.submitsolved {
+    background-color: #c00;
+    color: white;
 }
 
 a#submit:hover {
@@ -181,7 +189,6 @@ a#submit:hover {
     position: static;
     overflow-y: scroll;
     overflow-x: hidden;
-    padding: 20px;
 }
 
 #submit_table {

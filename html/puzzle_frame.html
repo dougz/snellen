@@ -7,7 +7,11 @@
 {% end %}
 
 {% block topnav_extraright %}
+{% if solved %}
+<a id="submit" class="submitsolved">Solved</a>
+{% else %}
 <a id="submit">Submit</a>
+{% end %}
 <a id="hints">Hints</a>
 {% end %}
 
@@ -19,7 +23,7 @@
 </div>
 <div id="submitpanel">
   <div id="thumb" style="width: {{thumb.size[0]}}px; height: {{thumb.size[1]}}px;">
-    <img class="base" src="{{thumb.url}}"></img>
+    <a href="{{puzzle.land.url}}"><img class="base" src="{{thumb.url}}"></img></a>
   </div>
   <div id="submit_table"></div>
 </div>

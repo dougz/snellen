@@ -103,6 +103,14 @@ class H2020_Dispatcher {
 	if (msg.score) {
 	    goog.dom.getElement("score").innerHTML = "" + msg.score;
 	}
+
+	if (puzzle_id == msg.puzzle_id) {
+	    var el = goog.dom.getElement("submit");
+	    if (el) {
+		goog.dom.classlist.add(el, "submitsolved");
+		el.innerHTML = "Solved";
+	    }
+	}
     }
 
     /** @param{Message} msg */
