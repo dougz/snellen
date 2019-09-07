@@ -23,6 +23,12 @@ CONTENT_TYPES = {
 
   ".zip": "application/zip",
   ".pdf": "application/pdf",
+
+  ".eot": "application/vnd.ms-fontobject",
+  ".otf": "application/font-sfnt",
+  ".ttf": "application/font-sfnt",
+  ".woff": "application/font-woff",
+  ".woff2": "font/woff2",
 }
 
 object_cache = set()
