@@ -54,6 +54,12 @@ def convert_map(shortname, d, options):
   out["base_size"] = get_image_size(base_img)
   out["base_img"] = upload_file(base_img, options)
 
+  if "logo" in d:
+    src_image = os.path.join(options.input_assets, shortname,
+                             d["logo"])
+    url = upload_file(src_image, options)
+    out["logo"] = url
+
   icons = d.get("icons", None)
   if icons:
     out_icons = []

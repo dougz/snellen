@@ -491,6 +491,7 @@ class Land:
     self.BY_SHORTNAME[shortname] = self
     self.shortname = shortname
     self.title = cfg["title"]
+    self.logo = cfg.get("logo")
 
     self.base_img = cfg["base_img"]
     self.base_size = cfg["base_size"]
