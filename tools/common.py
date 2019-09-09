@@ -29,6 +29,8 @@ CONTENT_TYPES = {
   ".ttf": "application/font-sfnt",
   ".woff": "application/font-woff",
   ".woff2": "font/woff2",
+
+  ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 }
 
 object_cache = set()

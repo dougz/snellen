@@ -246,7 +246,7 @@ class H2020_SubmitPanel {
 	    };
 	};
 
-	var tr;
+	var tr = null;
 	for (var i = 0; i < response.history.length; ++i) {
 	    var sub = response.history[i];
 	    var el = null;
@@ -283,7 +283,6 @@ class H2020_SubmitPanel {
 		this.table.appendChild(tr);
 	    }
 	}
-	tr.scrollIntoView();
 
 	if (this.counters.length > 0) {
 	    this.update_counters();

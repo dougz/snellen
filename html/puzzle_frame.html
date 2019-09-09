@@ -49,6 +49,7 @@
 
 
 {% block content %}
+<div id="nonnav">
 <h1>{{puzzle.land.title}}</h1>
 
 <div id="content">
@@ -57,6 +58,7 @@
   <div id="puzz">
     {% raw puzzle.html_body %}
   </div>
+</div>
 </div>
 
 {% end %}

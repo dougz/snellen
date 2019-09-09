@@ -9,7 +9,7 @@ import login
 class ClientJS(tornado.web.RequestHandler):
   def get(self):
     self.set_header("Content-Type", "text/javascript; charset=utf-8")
-    base = os.getenv("SNELLEN_BASE")
+    base = os.path.join(os.getenv("HUNT2020_BASE"), "snellen")
     with open(f"{base}/src/client.js", "rb") as f:
       self.write(f.read())
 
@@ -17,7 +17,7 @@ class EventCSS(tornado.web.RequestHandler):
   def get(self):
     self.set_header("Content-Type", "text/css; charset=utf-8")
     static_dir = self.application.settings["static_dir"]
-    base = os.getenv("SNELLEN_BASE")
+    base = os.path.join(os.getenv("HUNT2020_BASE"), "snellen")
     with open(f"{base}/static/event.css", "r") as f:
       text = f.read()
       def replacer(m):
@@ -29,7 +29,7 @@ class AdminJS(tornado.web.RequestHandler):
   @login.required("admin")
   def get(self):
     self.set_header("Content-Type", "text/javascript; charset=utf-8")
-    base = os.getenv("SNELLEN_BASE")
+    base = os.path.join(os.getenv("HUNT2020_BASE"), "snellen")
     with open(f"{base}/src/admin.js", "rb") as f:
       self.write(f.read())
 
@@ -38,7 +38,7 @@ class AdminCSS(tornado.web.RequestHandler):
   def get(self):
     self.set_header("Content-Type", "text/css; charset=utf-8")
     static_dir = self.application.settings["static_dir"]
-    base = os.getenv("SNELLEN_BASE")
+    base = os.path.join(os.getenv("HUNT2020_BASE"), "snellen")
     with open(f"{base}/static/admin.css", "r") as f:
       text = f.read()
       def replacer(m):

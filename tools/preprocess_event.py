@@ -99,7 +99,7 @@ def convert_static_files(out, options, lands):
     text = re.sub(r"@@STATIC:([^@]+)@@", replacer, text)
     return text.encode("utf-8")
 
-  base = os.getenv("SNELLEN_BASE")
+  base = os.path.join(os.getenv("HUNT2020_BASE"), "snellen")
 
   to_convert = [("mute.png", f"{base}/static/mute.png"),
                 ("admin-compiled.js", f"{base}/bin/admin-compiled.js"),
@@ -109,6 +109,10 @@ def convert_static_files(out, options, lands):
                 ]
 
   for land in lands:
+    land_dir = os.path.join(options.input_assets, land)
+    for fn in os.listdir(land_dir):
+      if fn.startswith("land_") and fn.endswith(".png"):
+        to_convert.append((os.path.join(land, fn), os.path.join(land_dir, fn)))
     fn = os.path.join(options.input_assets, land, "land.css")
     if os.path.exists(fn):
       to_convert.append((os.path.join(land, "land.css"), fn))
