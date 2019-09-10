@@ -32,10 +32,10 @@ def main():
     od = {}
 
     # No duplicate usernames
-    assert username not in out
+    assert username not in out, f"Duplicate username {username}!"
 
     # No duplicate full names
-    assert d["name"] not in names
+    assert d["name"] not in names, f"Duplicate full name {d['name']}!"
     names.add(d["name"])
     od["name"] = d.pop("name")
 
