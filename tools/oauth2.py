@@ -1,5 +1,6 @@
 import base64
 import json
+import os
 import requests
 import time
 
@@ -9,6 +10,9 @@ from cryptography.hazmat.primitives import serialization, hashes
 
 class Oauth2Token:
   def __init__(self, creds_file):
+    if creds_file is None:
+      creds_file = os.path.join(os.getenv("HUNT2020_BASE"),
+                                "snellen/misc/upload-credentials.json")
     self.creds_file = creds_file
     self.cached = None
 

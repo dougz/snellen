@@ -32,7 +32,7 @@ def upload_file(path, options, processor=None):
   h.update(data)
   name = base64.urlsafe_b64encode(h.digest()).decode("ascii")[:SECRET_KEY_LENGTH]
 
-  target_path = f"assets/{name}{ext}"
+  target_path = f"{name}{ext}"
   url = f"https://{options.public_host}/{target_path}"
 
   common.upload_object(path, options.bucket, target_path, common.CONTENT_TYPES[ext],
@@ -148,6 +148,9 @@ def main():
   parser.add_argument("--static_only", action="store_true",
                       help="Don't process map; just upload static assets.")
   options = parser.parse_args()
+
+  assert os.getenv("HUNT2020_BASE")
+
   options.input_assets = os.path.join(options.input_dir, "assets")
   if not options.public_host:
     options.public_host = options.bucket + ".storage.googleapis.com"

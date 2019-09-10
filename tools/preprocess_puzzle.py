@@ -214,10 +214,9 @@ class Puzzle:
 
       data = z.read(n)
       if obfuscate:
-        on = common.hash_name(data) + ext
-        path = f"puzzle/{self.prefix}/{self.shortname}/{on}"
+        path = common.hash_name(data) + ext
       else:
-        path = f"puzzle/{self.prefix}/{self.shortname}/{nn}"
+        path = f"{self.prefix}/{self.shortname}/{nn}"
 
       if not options.skip_upload:
         common.upload_object(nn, bucket, path, common.CONTENT_TYPES[ext], z.read(n), options.credentials)
@@ -285,6 +284,8 @@ def main():
   parser.add_argument("input_files", nargs="*",
                       help="The input .zip to process")
   options = parser.parse_args()
+
+  assert os.getenv("HUNT2020_BASE")
 
   options.credentials = oauth2.Oauth2Token(options.credentials)
   if not options.public_host:

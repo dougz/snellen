@@ -50,6 +50,7 @@ def load_object_cache(bucket, creds):
       r.raise_for_status()
 
     d = json.loads(r.content)
+    if "items" not in d: break
     for i in d["items"]:
       object_cache.add(i["name"])
 
