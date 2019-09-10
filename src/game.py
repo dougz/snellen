@@ -443,6 +443,8 @@ class Team(login.LoginUser):
     if start_map not in self.open_lands:
       self.open_lands[start_map] = now
 
+    min_open = 100 if Global.STATE.options.open_all else 2
+
     # Always have two open puzzles in each land.
     for land in Land.BY_SHORTNAME.values():
       if not land.puzzles: continue
@@ -453,7 +455,7 @@ class Team(login.LoginUser):
           open_count += 1
         elif self.puzzle_state[p].state == PuzzleState.CLOSED:
           locked.append(p)
-      while open_count < 3 and locked:
+      while open_count < min_open and locked:
         self.open_puzzle(locked.pop(0), now)
         open_count += 1
 
@@ -694,6 +696,7 @@ class Global:
 
   @save_state
   def __init__(self, now):
+    self.options = None
     self.event_start_time = None
     self.expected_start_time = int(now + 30)
     Global.STATE = self
@@ -701,6 +704,9 @@ class Global:
 
     self.stopping = False
     self.stop_cv = asyncio.Condition()
+
+  def set_options(self, options):
+    self.options = options
 
   async def stop_server(self):
     async with self.stop_cv:

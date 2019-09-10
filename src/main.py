@@ -86,6 +86,7 @@ async def main_server(options):
 
   if not game.Global.STATE: game.Global()
 
+  game.Global.STATE.set_options(options)
   if options.start_event:
     game.Global.STATE.start_event(False)
 
@@ -131,12 +132,18 @@ def main():
   parser.add_argument("-s", "--socket_path",
                       default="/tmp/snellen",
                       help="Socket for proxy to reach this server.")
+
+  # debugging flags
   parser.add_argument("--start_event", action="store_true",
-                      help="Start event for all teams.")
+                      help="Immediately start event.")
   parser.add_argument("--debug", action="store_true",
                       help="Serve debug javascript.")
+  parser.add_argument("--open_all", action="store_true",
+                      help="Open all puzzles immediately.")
   parser.add_argument("--default_credentials",
                       help="Fill username/password field automatically.")
+
+  # wait proxy configuration
   parser.add_argument("-w", "--wait_proxies",
                       type=int, default=2,
                       help="Number of wait proxy servers to start.")
