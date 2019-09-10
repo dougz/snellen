@@ -44,7 +44,7 @@ def load_object_cache(bucket, creds):
 
     r = requests.get(url, headers={"Authorization": creds.get()})
     if r.status_code == 401:
-      creds.invaliate()
+      creds.invalidate()
       continue
     if r.status_code != 200:
       r.raise_for_status()
