@@ -509,12 +509,13 @@ div#map div.p b {
     margin-right: auto;
 }
 
-h1 {
+#landtitle {
     font-size: 60px;
     text-align: center;
+    font-weight: 400;
 }
 
-h2 {
+#puzzletitle {
     font-size: 40px;
     text-align: center;
 }
