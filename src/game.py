@@ -57,6 +57,18 @@ class PuzzleState:
     return (self.state == PuzzleState.SOLVED and
             0 <= now - self.solve_time <= PuzzleState.RECENT_TIME)
 
+  def requeue_pending(self, now):
+    for count, sub in enumerate(reversed(self.submissions)):
+      if sub.state != sub.PENDING:
+        break
+    if not count: return
+
+    after = self.submissions[-count:]
+    del self.submissions[-count:]
+    for sub in after:
+      self.submissions.append(sub)
+      sub.check_or_queue(now)
+
 
 class Submission:
   PENDING = "pending"
@@ -118,6 +130,7 @@ class Submission:
           if t.achieve(Achievement.youre_all_wrong, now):
             if t is not self.team:
               asyncio.create_task(t.flush_messages())
+    self.puzzle_state.requeue_pending(now)
 
     if self.state == self.CORRECT:
       self.puzzle_state.answers_found.add(answer)
@@ -330,14 +343,9 @@ class Team(login.LoginUser):
 
     for i, sub in enumerate(state.submissions):
       if sub.submit_id == submit_id and sub.state == sub.PENDING:
-        after = state.submissions[i+1:]
         sub.state = sub.CANCELLED
-        del state.submissions[i:]
-
-        for sub in after:
-          state.submissions.append(sub)
-          if sub.state == sub.PENDING:
-            sub.check_or_queue(now)
+        state.submissions.pop(i)
+        state.requeue_pending(now)
         break
     else:
       print(f"failed to cancel submit {submit_id} puzzle {shortname} for {self.username}")
