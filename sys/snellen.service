@@ -1,0 +1,17 @@
+[Unit]
+Description=Hunt 2020 Main Server (snellen)
+
+[Service]
+Type=simple
+Environment=HUNT2020_BASE=/sites/hunt2020
+WorkingDirectory=/sites/hunt2020/snellen
+ExecStartPre=mkdir -p /run/sites
+ExecStart=/sites/hunt2020/snellen/src/main.py \
+  --socket_path /run/sites/snellen \
+  --event_dir "${HUNT2020_BASE}/bts" \
+  --template_path "${HUNT2020_BASE}/snellen/html" \
+  --wait_proxies 5
+
+[Install]
+WantedBy=hunt2020.target
+

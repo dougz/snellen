@@ -1,0 +1,16 @@
+[Unit]
+Description=Hunt2020 tunnel_of_love
+
+[Service]
+Type=simple
+Environment=HUNT2020_BASE=/sites/hunt2020
+Environment=PYTHONPATH=/sites/hunt2020/snellen/src
+WorkingDirectory=/sites/hunt2020/tunnel_of_love
+ExecStartPre=mkdir -p /run/sites
+ExecStart=/sites/hunt2020/tunnel_of_love/tunnel_of_love.py \
+  --socket_path /run/sites/tunnel_of_love \
+  --assets_json="${HUNT2020_BASE}/bts/puzzles/tunnel_of_love.assets.json"
+
+[Install]
+WantedBy=hunt2020.target
+
