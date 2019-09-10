@@ -4,8 +4,11 @@
 
 {% block content %}
 <div id="nonnav">
+  {% if land.logo %}
+  <img src="{{land.logo}}" id="logo">
+  {% else %}
   <h1 id="title">{{land.title}}</h1>
-  {% if land.logo %}<img src="{{land.logo}}" id="logo">{% end %}
+  {% end %}
   <div id="content" class="map">
 
   <div id="map" style="width: {{land.base_size[0]}}px; height: {{land.base_size[1]}}px">

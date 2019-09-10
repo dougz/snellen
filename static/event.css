@@ -116,7 +116,6 @@ a#submit:hover {
     margin-right: auto;
     padding: 30px 60px 40px 60px;
     background-color: #f8f8f8;
-    box-shadow: 0 0 10px black;
 }
 
 #dropdown {
@@ -230,6 +229,7 @@ div#thumb .icon {
     display: flex;
     flex-direction: row;
     align-items: center;
+    justify-content: center;
 
     z-index: 999;
     position: static;
@@ -240,7 +240,7 @@ div#thumb .icon {
     height: 260px;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
 }
 
 #submit_table {
@@ -261,6 +261,12 @@ div#thumb .icon {
 #st_result {
     width: 16ex;
 }
+#top_note {
+    flex-grow: 1;
+    text-align: center;
+    color: white;
+
+}
 
 
 #submit_table td {
@@ -274,9 +280,6 @@ div#thumb .icon {
     text-align: left;
     padding: 8px;
 }
-#submit_table tr {
-    border-top: 1px solid #999;
-}
 #submit_table tr.submit-extra {
     border-top: none;
 }
@@ -284,22 +287,34 @@ div#thumb .icon {
 td.submit-answer {
     font-family: 'Inconsolata', monospace;
     font-weight: bold;
+    color: black;
+}
+td.submit-time {
+    color: black;
 }
 
 tr.submit-correct {
     background-color: #ddffdd;
+    border-top: 1px solid #999;
 }
 
 tr.submit-incorrect {
     background-color: #fee;
+    border-top: 1px solid #999;
 }
 
 tr.submit-partial, tr.submit-extra {
+    background-color: #fdfd96;
+    border-top: 1px solid #999;
+}
+
+tr.submit-extra {
     background-color: #fdfd96;
 }
 
 tr.submit-pending {
     background-color: #dddddd;
+    border-top: 1px solid #999;
 }
 
 .submit-state { text-transform: uppercase; }
@@ -478,6 +493,12 @@ div#map div.p {
 }
 
 h1 {
+    font-size: 60px;
+    text-align: center;
+}
+
+h2 {
+    font-size: 40px;
     text-align: center;
 }
 

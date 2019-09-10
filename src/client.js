@@ -225,7 +225,7 @@ class H2020_SubmitPanel {
 	this.counters = [];
 
 	if (response.total) {
-	    this.top_note.innerHTML = response.correct + "/" + response.total + " correct answer(s) found";
+	    this.top_note.innerHTML = response.correct + "/" + response.total + " correct answers found";
 	    this.top_note.style.display = "inline";
 	} else {
 	    this.top_note.style.display = "none";
@@ -300,6 +300,9 @@ class H2020_SubmitPanel {
 
 	    this.add_sparkle(thumb, response.width, response.height);
 	}
+
+	var t = goog.dom.getElement("submit_table_scroll");
+	t.scrollTop = t.scrollHeight;
     }
 
     add_sparkle(parent, width, height) {
@@ -345,7 +348,11 @@ class H2020_SubmitPanel {
 	this.input.value = "";
 	goog.net.XhrIo.send("/submit", function(e) {
 	    var code = e.target.getStatus();
-	    if (code != 204) {
+	    if (code == 409) {
+		var text = e.target.getResponseText();
+		hunt2020.toast_manager.add_toast("You've already submitted <b>" + text + "</b>.",
+						 7000, null, "salmon");
+	    } else if (code != 204) {
 		alert(e.target.getResponseText());
 	    }
 	}, "POST", this.serializer.serialize({"puzzle_id": puzzle_id, "answer": answer}));

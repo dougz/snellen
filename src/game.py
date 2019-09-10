@@ -49,6 +49,7 @@ class PuzzleState:
     self.solve_time = None
     self.answers_found = set()
     self.hints = []
+    self.submitted = set()
 
   def recent_solve(self, now=None):
     if now is None:
@@ -73,7 +74,8 @@ class Submission:
     self.team = team
     self.puzzle = puzzle
     self.puzzle_state = team.get_puzzle_state(puzzle)
-    self.answer = answer
+    self.answer = Puzzle.canonicalize_answer(answer)
+    self.raw_answer = answer
     self.submit_time = now
     self.extra_response = None
 
@@ -96,7 +98,7 @@ class Submission:
     return self.puzzle_state.open_time + (count-1) * 30
 
   def check_answer(self, now):
-    answer = Puzzle.canonicalize_answer(self.answer)
+    answer = self.answer
     if answer in self.puzzle.answers:
       self.state = self.CORRECT
       self.extra_response = None
@@ -306,9 +308,13 @@ class Team(login.LoginUser):
       return
 
     sub = Submission(now, submit_id, self, puzzle, answer)
-    state.submissions.append(sub)
-    self.send_messages([{"method": "history_change", "puzzle_id": shortname}])
-    sub.check_or_queue(now)
+    if sub.answer in state.submitted:
+      return sub.answer
+    else:
+      state.submissions.append(sub)
+      state.submitted.add(sub.answer)
+      self.send_messages([{"method": "history_change", "puzzle_id": shortname}])
+      sub.check_or_queue(now)
 
   @save_state
   def cancel_submission(self, now, submit_id, shortname):
@@ -536,7 +542,7 @@ class Land:
 class Puzzle:
   BY_SHORTNAME = {}
 
-  DEFAULT_MAX_QUEUED = 3
+  DEFAULT_MAX_QUEUED = 30
 
   PLACEHOLDER_COUNT = 0
 

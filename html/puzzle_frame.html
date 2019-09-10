@@ -2,10 +2,6 @@
 
 {% block title %}{{puzzle.title}}{% end %}
 
-{% block crumbs %}
-&gt; <a href="{{puzzle.land.url}}">{{puzzle.land.title}}</a>
-{% end %}
-
 {% block topnav_extraright %}
 {% if solved %}
 <a id="submit" class="submitsolved">Solved</a>

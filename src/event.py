@@ -171,8 +171,12 @@ class SubmitHandler(util.TeamHandler):
 
     submit_id = self.team.next_submit_id()
 
-    self.team.submit_answer(submit_id, shortname, answer)
-    self.set_status(http.client.NO_CONTENT.value)
+    result = self.team.submit_answer(submit_id, shortname, answer)
+    if result:
+      self.write(result)
+      self.set_status(http.client.CONFLICT.value)
+    else:
+      self.set_status(http.client.NO_CONTENT.value)
 
 class SubmitHistoryHandler(util.TeamHandler):
   @login.required("team", on_fail=http.client.UNAUTHORIZED)
