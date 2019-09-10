@@ -351,7 +351,7 @@ class H2020_SubmitPanel {
 	    if (code == 409) {
 		var text = e.target.getResponseText();
 		hunt2020.toast_manager.add_toast("You've already submitted <b>" + text + "</b>.",
-						 7000, null, "salmon");
+						 5000, null, "salmon");
 	    } else if (code != 204) {
 		alert(e.target.getResponseText());
 	    }

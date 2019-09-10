@@ -49,7 +49,6 @@ class PuzzleState:
     self.solve_time = None
     self.answers_found = set()
     self.hints = []
-    self.submitted = set()
 
   def recent_solve(self, now=None):
     if now is None:
@@ -321,13 +320,13 @@ class Team(login.LoginUser):
       return
 
     sub = Submission(now, submit_id, self, puzzle, answer)
-    if sub.answer in state.submitted:
-      return sub.answer
-    else:
-      state.submissions.append(sub)
-      state.submitted.add(sub.answer)
-      self.send_messages([{"method": "history_change", "puzzle_id": shortname}])
-      sub.check_or_queue(now)
+    for s in state.submissions:
+      if s.answer == sub.answer:
+        return sub.answer
+
+    state.submissions.append(sub)
+    self.send_messages([{"method": "history_change", "puzzle_id": shortname}])
+    sub.check_or_queue(now)
 
   @save_state
   def cancel_submission(self, now, submit_id, shortname):
