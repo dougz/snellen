@@ -636,7 +636,12 @@ class H2020_MapDraw {
     item_enter(it) {
 	this.item_leave(null);
 
-	var h = goog.dom.createDom("DIV", {className: "p"}, it.name);
+	var ch = [it.name];
+	if (it.answer) {
+	    ch.push(goog.dom.createDom("B", null, goog.dom.createTextNode(it.answer)));
+	}
+
+	var h = goog.dom.createDom("DIV", {className: "p"}, ch);
 	h.style.left = "" + it.pos_x + "px";
 	h.style.top = "" + it.pos_y + "px";
 	h.style.width = "" + it.width + "px";

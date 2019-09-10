@@ -473,10 +473,10 @@ div#map div.p {
     position: absolute;
     pointer-events: none;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
 
-    font-weight: bold;
     font-size: 144%;
     color: white;
     pointer-events: none;
