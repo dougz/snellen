@@ -9,6 +9,8 @@ body {
     margin: 0;
 }
 
+a { text-decoration: none; }
+
 input, button {
     font-family: 'Merriweather Sans', sans-serif;
 }
@@ -478,10 +480,27 @@ div#map div.p {
     align-items: center;
 
     font-size: 144%;
-    color: white;
+    color: #eeeeee;
     pointer-events: none;
     text-align: center;
     text-shadow: 2px 2px 5px black;
+}
+
+div#map div.p b {
+    font-family: 'Merriweather Sans', sans-serif;
+    font-weight: bold;
+    color: white;
+}
+
+.newopen {
+    display: inline-block;
+    background-color: #c00;
+    color: white;
+    font-size: 80%;
+    padding: 0 8px;
+    font-weight: bold;
+    margin-right: 8px;
+    border-radius: 6px;
 }
 
 .itemlist {

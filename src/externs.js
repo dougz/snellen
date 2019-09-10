@@ -116,6 +116,8 @@ class MapItem {
 	this.poly;
 	/** @type{?string} */
 	this.animate;
+	/** @type{?boolean} */
+	this.new_open;
     }
 }
 

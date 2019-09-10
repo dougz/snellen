@@ -1,10 +1,12 @@
 import asyncio
 import datetime
+import hashlib
 import heapq
 import html
 import json
 import os
 import re
+import string
 import time
 import unicodedata
 
@@ -587,10 +589,15 @@ class Puzzle:
     cls.PLACEHOLDER_COUNT += 1
     number = cls.PLACEHOLDER_COUNT
 
-    shortname = f"placeholder_{number}"
+    h = hashlib.sha256(str(number).encode("ascii")).digest()
+    tag = (string.ascii_uppercase[h[0] % 26] +
+           string.ascii_uppercase[h[1] % 26] +
+           string.ascii_uppercase[h[2] % 26])
+
+    shortname = f"{tag.lower()}_placeholder_{number}"
     self = cls(shortname)
 
-    self.title = f"Placeholder #{number}"
+    self.title = f"{tag} Placeholder #{number}"
     self.oncall = "nobody@example.org"
     self.puzzletron_id = -1
     self.version = 0
@@ -598,10 +605,10 @@ class Puzzle:
 
     self.max_queued = 10
     if count is None:
-      self.answers = {"PLACEHOLDER"}
-      self.display_answers = {"PLACEHOLDER": "PLACEHOLDER"}
+      self.answers = {tag}
+      self.display_answers = {tag: tag}
       self.incorrect_responses = {}
-      self.html_body = "<p>The answer to this placeholder puzzle is <b>PLACEHOLDER</b>.</p>"
+      self.html_body = f"<p>The answer to this placeholder puzzle is <b>{tag}</b>.</p>"
     else:
       self.answers = set()
       self.display_answers = {}
@@ -835,7 +842,7 @@ class Achievement:
 
     Achievement("scattershot",
                 "Scattershot",
-                "Trigger answer throttling with incorrect gueses.")
+                "Trigger answer throttling with incorrect guesses.")
 
     Achievement("youre_all_wrong",
                 "You're all wrong!",

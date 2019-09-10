@@ -14,6 +14,7 @@ import util
 
 class LandMapPage(util.TeamPageHandler):
   RECENT_SECONDS = 10.0
+  NEW_PUZZLE_SECONDS = 300  # 5 minutes
 
   @login.required("team")
   def get(self, shortname):
@@ -31,6 +32,7 @@ class LandMapPage(util.TeamPageHandler):
     items = []
     mapdata = {"base_url": land.base_img,
                "items": items}
+    now = time.time()
 
     for i in land.icons.values():
       if i.puzzle:
@@ -53,6 +55,10 @@ class LandMapPage(util.TeamPageHandler):
             d["width"], d["height"] = i.unlocked.size
             if i.unlocked.poly: d["poly"] = i.unlocked.poly
 
+          if (now - st.open_time < self.NEW_PUZZLE_SECONDS and
+              st.open_time != game.Global.STATE.event_start_time):
+            d["new_open"] = True
+
         elif st.state == game.PuzzleState.SOLVED:
           d["solved"] = True
           if i.solved.url:
@@ -70,8 +76,9 @@ class LandMapPage(util.TeamPageHandler):
         d["width"], d["height"] = i.unlocked.size
         if i.unlocked.poly: d["poly"] = i.unlocked.poly
 
-
       items.append(d)
+
+    items.sort(key=lambda it: it["url"])
 
     json_data = "<script>var mapdata = """ + json.dumps(mapdata) + ";</script>"
 

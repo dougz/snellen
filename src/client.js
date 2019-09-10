@@ -622,13 +622,17 @@ class H2020_MapDraw {
 	}
 
 	if (it.name) {
-	    var a = goog.dom.createDom("A", {href: it.url}, it.name)
-	    el = goog.dom.createDom("LI", null, a);
-	    if (it.answer) {
-		el.append(" \u2014 ");
-		el.append(goog.dom.createDom("SPAN", {className: it.solved ? "solved" : "unsolved"},
-					     it.answer));
+	    var a = [];
+	    if (it.new_open) {
+		a.push(goog.dom.createDom("SPAN", {className: "newopen"}, "NEW"));
 	    }
+	    a.push(goog.dom.createDom("A", {href: it.url}, it.name));
+	    if (it.answer) {
+		a.push(" \u2014 ");
+		a.push(goog.dom.createDom("SPAN", {className: it.solved ? "solved" : "unsolved"},
+					  it.answer));
+	    }
+	    el = goog.dom.createDom("LI", null, a);
 	    this.list_el.appendChild(el);
 	}
     }
@@ -638,7 +642,8 @@ class H2020_MapDraw {
 
 	var ch = [it.name];
 	if (it.answer) {
-	    ch.push(goog.dom.createDom("B", null, goog.dom.createTextNode(it.answer)));
+	    ch.push(goog.dom.createDom("B", null,
+				       goog.dom.createTextNode(it.answer)));
 	}
 
 	var h = goog.dom.createDom("DIV", {className: "p"}, ch);
