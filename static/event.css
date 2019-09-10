@@ -6,7 +6,6 @@
 
 body {
     font-family: 'Merriweather Sans', sans-serif;
-    background-image: url("https://snellen.storage.googleapis.com/grass.jpg");
     margin: 0;
 }
 
@@ -103,7 +102,6 @@ a#submit:hover {
 #nonnav {
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
 }
 
