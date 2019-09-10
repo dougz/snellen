@@ -79,6 +79,8 @@ class Submission:
 
   GLOBAL_SUBMIT_QUEUE = []
 
+  PER_ANSWER_DELAY = 360
+
   def __init__(self, now, submit_id, team, puzzle, answer):
     self.state = self.PENDING
     self.submit_id = submit_id
@@ -106,7 +108,7 @@ class Submission:
     # when this is called.
     count = sum(1 for i in self.puzzle_state.submissions
                 if i.state in (self.PENDING, self.INCORRECT))
-    return self.puzzle_state.open_time + (count-1) * 30
+    return self.puzzle_state.open_time + (count-1) * self.PER_ANSWER_DELAY
 
   def check_answer(self, now):
     answer = self.answer
@@ -549,7 +551,7 @@ class Land:
 class Puzzle:
   BY_SHORTNAME = {}
 
-  DEFAULT_MAX_QUEUED = 30
+  DEFAULT_MAX_QUEUED = 3
 
   PLACEHOLDER_COUNT = 0
 
@@ -594,7 +596,7 @@ class Puzzle:
     self.version = 0
     self.authors = ["A. Computer"]
 
-    self.max_queued = self.DEFAULT_MAX_QUEUED
+    self.max_queued = 10
     if count is None:
       self.answers = {"PLACEHOLDER"}
       self.display_answers = {"PLACEHOLDER": "PLACEHOLDER"}
