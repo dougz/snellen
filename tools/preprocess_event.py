@@ -123,6 +123,8 @@ def convert_static_files(out, options, lands):
                      ("client-compiled.js", f"{base}/bin/client-compiled.js"),
                      ("admin.css", f"{base}/static/admin.css"),
                      ("event.css", f"{base}/static/event.css"),
+                     ("login.css", f"{base}/static/login.css"),
+                     ("logo.png", f"{base}/static/logo.png"),
                      ])
 
   for fn in os.listdir(os.path.join(options.input_assets, "achievements")):

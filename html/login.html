@@ -1,20 +1,27 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <meta name="viewport" content="width=1200, initial-scale=0">
+    <meta charset="utf-8">
+    <title>Penny Park</title>
+    <link rel=stylesheet href="{{c}}">
   </head>
   <body>
+    <img src="{{logo}}">
     <form action="/login_submit" method="post">
-      <label for="username"><b>Username</b></label>
-      <input type="text" placeholder="Username" name="username"
-	     {% if default_username %}value="{{default_username}}"{% end %}
-	     required>
-      <br/>
-      <label for="password"><b>Password</b></label>
-      <input type="password" placeholder="Password" name="password"
-	     {% if default_password %}value="{{default_password}}"{% end %}
-	     required>
-      <br/>
-      {% if bad_login %}<b>Bad login.</b><br/>{% end %}
+      <span>
+	<label for="username"><b>Username</b></label>
+	<input type="text" placeholder="Username" name="username"
+	       {% if default_username %}value="{{default_username}}"{% end %}
+	       required>
+      </span>
+      <span>
+	<label for="password"><b>Password</b></label>
+	<input type="password" placeholder="Password" name="password"
+	       {% if default_password %}value="{{default_password}}"{% end %}
+	       required>
+      </span>
+      {% if bad_login %}<b>Bad login.</b>{% end %}
       {% if target %}
       <input type="hidden" name="target" value="{{target}}"/>
       {% end %}

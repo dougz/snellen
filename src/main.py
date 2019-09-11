@@ -63,6 +63,7 @@ async def main_server(options):
     util.AdminPageHandler.set_static_content(cfg["static"])
   game.Land.resolve_lands()
   game.Achievement.define_achievements(cfg["static"])
+  login.Login.set_static_content(cfg["static"])
 
   save_state.set_classes(AdminUser=login.AdminUser,
                          Team=game.Team,

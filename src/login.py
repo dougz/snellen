@@ -191,6 +191,10 @@ class required:
 
 
 class Login(tornado.web.RequestHandler):
+  @classmethod
+  def set_static_content(cls, static_content):
+    cls.static_content = static_content
+
   def get(self):
     session = Session.from_request(self)
     target = self.get_argument("redirect_to", None)
@@ -207,7 +211,9 @@ class Login(tornado.web.RequestHandler):
                 bad_login=bad_login,
                 default_username=default_username,
                 default_password=default_password,
-                target=target)
+                target=target,
+                c=self.static_content["login.css"],
+                logo=self.static_content["logo.png"])
 
 
 class LoginSubmit(tornado.web.RequestHandler):
