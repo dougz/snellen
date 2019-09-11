@@ -107,12 +107,7 @@ def convert_static_files(out, options, lands):
 
   base = os.path.join(os.getenv("HUNT2020_BASE"), "snellen")
 
-  to_convert = [("mute.png", f"{base}/static/mute.png"),
-                ("admin-compiled.js", f"{base}/bin/admin-compiled.js"),
-                ("client-compiled.js", f"{base}/bin/client-compiled.js"),
-                ("admin.css", f"{base}/static/admin.css"),
-                ("event.css", f"{base}/static/event.css"),
-                ]
+  to_convert = []
 
   for land in lands:
     land_dir = os.path.join(options.input_assets, land)
@@ -122,6 +117,13 @@ def convert_static_files(out, options, lands):
     fn = os.path.join(options.input_assets, land, "land.css")
     if os.path.exists(fn):
       to_convert.append((os.path.join(land, "land.css"), fn))
+
+  to_convert.extend([("mute.png", f"{base}/static/mute.png"),
+                     ("admin-compiled.js", f"{base}/bin/admin-compiled.js"),
+                     ("client-compiled.js", f"{base}/bin/client-compiled.js"),
+                     ("admin.css", f"{base}/static/admin.css"),
+                     ("event.css", f"{base}/static/event.css"),
+                     ])
 
   for fn in os.listdir(os.path.join(options.input_assets, "achievements")):
     if not fn.endswith(".png"): continue

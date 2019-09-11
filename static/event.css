@@ -105,6 +105,16 @@ a#submit:hover {
     display: flex;
     flex-direction: column;
     align-items: center;
+
+    min-height: 1000px;
+    background: url(@@STATIC:inner_only/land_clouds.png@@) top repeat-x,
+		url(@@STATIC:inner_only/land_tree.png@@) bottom repeat-x,
+		#c3dffb;
+    padding: 100px 0 260px 0;
+}
+
+#pagetitle {
+    text-align: center;
 }
 
 #content {
@@ -116,6 +126,8 @@ a#submit:hover {
     margin-right: auto;
     padding: 30px 60px 40px 60px;
     background-color: #f8f8f8;
+    border: 2px solid #999;
+    border-radius: 10px;
 }
 
 #dropdown {

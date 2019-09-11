@@ -18,11 +18,14 @@ def main():
   parser.add_argument("--output_dir",
                       help="Where to wriet latest zips.")
   parser.add_argument("--credentials", help="Private key for google cloud service account.")
+  parser.add_argument("puzzle_shortnames", nargs="*",
+                      help="The input .zip to process")
 
   options = parser.parse_args()
   assert options.output_dir
 
   options.credentials = oauth2.Oauth2Token(options.credentials)
+  options.puzzle_shortnames = set(options.puzzle_shortnames)
 
   latest = {}
 
@@ -46,6 +49,10 @@ def main():
       m = re.match(r"(?:.*/)?([a-z0-9_]+)/(\d{8}_\d{6})[.][^.]+[.][^.]+[.]zip$", name)
       if not m: continue
       shortname, timestamp = m.groups()
+
+      if options.puzzle_shortnames and shortname not in options.puzzle_shortnames:
+        continue
+
       if shortname not in latest or timestamp > latest[shortname][0]:
         latest[shortname] = (timestamp, name)
 
