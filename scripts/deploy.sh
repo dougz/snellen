@@ -94,6 +94,15 @@ install -m 0755 -d "${root}/var/www/ssl"
 install -m 0644 "snellen/sys/dhparam.pem" "${root}/var/www/ssl/dhparam.pem"
 
 ##
+## misc system tuning
+##
+
+install -m 0755 -d "${root}/etc/sysctl.d"
+install -m 0644 "snellen/sys/50-hunt2020.conf" "${root}/etc/sysctl.d/50-hunt2020.conf"
+install -m 0755 -d "${root}/lib/udev/rules.d"
+install -m 0644 "snellen/sys/99-hunt2020.rules" "${root}/lib/udev/rules.d/99-hunt2020.rules"
+
+##
 ## .deb control files
 ##
 
