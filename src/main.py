@@ -86,7 +86,6 @@ async def main_server(options):
 
   if not game.Global.STATE: game.Global()
 
-  game.Global.STATE.set_options(options)
   if options.start_event:
     game.Global.STATE.start_event(False)
 
@@ -140,6 +139,8 @@ def main():
                       help="Serve debug javascript.")
   parser.add_argument("--open_all", action="store_true",
                       help="Open all puzzles immediately.")
+  parser.add_argument("--placeholders", action="store_true",
+                      help="Replace all puzzles with placeholders.")
   parser.add_argument("--default_credentials",
                       help="Fill username/password field automatically.")
 
@@ -156,6 +157,8 @@ def main():
 
   assert options.template_path is not None, "Must specify --template_path."
   assert options.event_dir is not None, "Must specify --event_dir."
+
+  game.OPTIONS = options
 
   soft, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
   resource.setrlimit(resource.RLIMIT_NOFILE, (hard, hard))

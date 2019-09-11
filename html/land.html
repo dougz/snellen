@@ -3,13 +3,12 @@
 {% block title %}{{land.title}}{% end %}
 
 {% block content %}
-<div id="nonnav">
-  {% if land.logo %}
-  <img src="{{land.logo}}" id="logo">
-  {% else %}
-  <h1 id="landtitle">{{land.title}}</h1>
-  {% end %}
-  <div id="content" class="map">
+{% if land.logo %}
+<img src="{{land.logo}}" id="logo">
+{% else %}
+<h1 id="landtitle">{{land.title}}</h1>
+{% end %}
+<div id="content" class="map">
 
   <div id="map" style="width: {{land.base_size[0]}}px; height: {{land.base_size[1]}}px">
   </div>
@@ -19,6 +18,5 @@
 
   <ul id="list" class=itemlist>
   </ul>
-</div>
 </div>
 {% end %}

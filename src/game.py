@@ -14,6 +14,8 @@ import login
 from state import save_state
 import wait_proxy
 
+OPTIONS = None
+
 class HintMessage:
   def __init__(self, parent, when, sender, text):
     self.parent = parent
@@ -443,7 +445,7 @@ class Team(login.LoginUser):
     if start_map not in self.open_lands:
       self.open_lands[start_map] = now
 
-    min_open = 100 if Global.STATE.options.open_all else 2
+    min_open = 100 if OPTIONS.open_all else 2
 
     # Always have two open puzzles in each land.
     for land in Land.BY_SHORTNAME.values():
@@ -529,7 +531,9 @@ class Land:
       self.icons[name] = i
       if "puzzle" in d:
         p = d["puzzle"]
-        if p == "_":
+        if OPTIONS.placeholders:
+          p = Puzzle.placeholder_puzzle(-5)
+        elif p == "_":
           p = Puzzle.placeholder_puzzle()
         elif p.startswith("_"):
           p = Puzzle.placeholder_puzzle(int(p[1:]))
@@ -590,6 +594,12 @@ class Puzzle:
   def placeholder_puzzle(cls, count=None):
     cls.PLACEHOLDER_COUNT += 1
     number = cls.PLACEHOLDER_COUNT
+
+    if count < 0:
+      if number % -count == 0:
+        count = 3
+      else:
+        count = None
 
     h = hashlib.sha256(str(number).encode("ascii")).digest()
     tag = (string.ascii_uppercase[h[0] % 26] +
@@ -704,9 +714,6 @@ class Global:
 
     self.stopping = False
     self.stop_cv = asyncio.Condition()
-
-  def set_options(self, options):
-    self.options = options
 
   async def stop_server(self):
     async with self.stop_cv:
