@@ -2,11 +2,19 @@
 
 {% block title %}Penny Park{% end %}
 
-{% block topnav_startedleft %}{% end %}
+{% block topnav_startedleft %}
+      <div id="dropdown">
+	<button id="dropbtn">Useful links</button>
+	<div id="dropdown-content">
+	  <a href="/health_and_safety">Health & Safety</a>
+	  <a href="/logout">Logout</a>
+	</div>
+      </div>
+{% end %}
 {% block topnav_startedright %}{% end %}
 
 {% block content %}
 
-<p>Penny Park should open in <span id="opencountdown"></span>.</p>
+<p id="openwait">Penny Park should open in <span id="opencountdown"></span>.</p>
 
 {% end %}

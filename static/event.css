@@ -1,8 +1,7 @@
 @import url('https://fonts.googleapis.com/css?family=Merriweather+Sans&display=block');
 @import url('https://fonts.googleapis.com/css?family=Merriweather&display=block');
 @import url('https://fonts.googleapis.com/css?family=Inconsolata&display=block');
-
-/*html { margin-left: calc(100vw - 100%); }*/
+@import url('https://fonts.googleapis.com/css?family=Open+Sans:600,700&display=block&text=0123456789');
 
 body {
     font-family: 'Merriweather Sans', sans-serif;
@@ -38,7 +37,6 @@ input, button {
 
 #topnav {
     font-family: 'Merriweather', sans-serif;
-    /*margin-left: calc(100vw - 100%);*/
 
     min-width: 1060px;
     height: 40px;
@@ -140,7 +138,7 @@ a#submit:hover {
 #dropbtn {
     font-family: 'Merriweather', sans-serif;
     font-size: 18px;
-    min-width: 160px;
+    min-width: 200px;
     background-color: #666;
     color: #eee;
     height: 40px;
@@ -156,7 +154,7 @@ a#submit:hover {
     background-color: #666;
     border: 1px solid black;
     border-top: none;
-    min-width: 160px;
+    min-width: 200px;
     box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
     z-index: 1001;
 }
@@ -371,6 +369,7 @@ input#answer {
 .sans-serif { font-family: 'Merriweather Sans', sans-serif; }
 .serif { font-family: 'Merriweather', serif; }
 .mono { font-family: 'Inconsolata', monospace; }
+.tabular { font-family: 'Open Sans', 'Merriweather Sans', sans-serif; }
 .answer { font-weight: bold; text-transform: uppercase; }
 
 /** notifications **/

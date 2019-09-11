@@ -124,6 +124,7 @@ def convert_static_files(out, options, lands):
                      ("admin.css", f"{base}/static/admin.css"),
                      ("event.css", f"{base}/static/event.css"),
                      ("login.css", f"{base}/static/login.css"),
+                     ("notopen.css", f"{base}/static/notopen.css"),
                      ("logo.png", f"{base}/static/logo.png"),
                      ])
 

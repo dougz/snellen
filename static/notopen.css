@@ -1,0 +1,111 @@
+@import url('https://fonts.googleapis.com/css?family=Merriweather+Sans&display=block');
+@import url('https://fonts.googleapis.com/css?family=Merriweather&display=block');
+@import url('https://fonts.googleapis.com/css?family=Inconsolata&display=block');
+@import url('https://fonts.googleapis.com/css?family=Open+Sans:600,700&display=block&text=0123456789');
+
+body {
+    font-family: 'Merriweather Sans', sans-serif;
+    margin: 0;
+}
+
+#nonnav {
+    background: url(@@STATIC:inner_only/land_clouds.png@@) top repeat-x,
+		url(@@STATIC:inner_only/land_tree.png@@) bottom repeat-x,
+		#c3dffb;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: calc(100vh - 41px);
+    font-size: 144%;
+}
+
+a { text-decoration: none; }
+
+#topnav {
+    font-family: 'Merriweather', sans-serif;
+
+    min-width: 1060px;
+    height: 40px;
+    font-size: 18px;
+    background: #666;
+    color: #eee;
+    border-bottom: 1px solid black;
+    padding: 0 20px;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    z-index: 1000;
+    position: relative;
+
+    user-select: none;
+}
+
+#topnav > span, #topnav > a {
+    display: inline-block;
+    margin: 0 20px;
+    padding: 8px 0;
+}
+
+/* The spacer should take up all the extra space, forcing the items
+   before it to the left and those after it to the right. */
+#topnav .spacer {
+    flex-grow: 100;
+}
+
+#topnav a {
+    text-decoration: none;
+    color: #eee;
+}
+
+#dropdown {
+    position: relative;
+    display: inline-block;
+    height: 40px;
+    padding: 0 20px;
+}
+
+#dropbtn {
+    font-family: 'Merriweather', sans-serif;
+    font-size: 18px;
+    min-width: 200px;
+    background-color: #666;
+    color: #eee;
+    height: 40px;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    margin-left: 1px;
+}
+
+#dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #666;
+    border: 1px solid black;
+    border-top: none;
+    min-width: 200px;
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+    z-index: 1001;
+}
+
+#dropdown-content a {
+    padding: 12px 16px;
+    display: block;
+}
+#dropdown-content a:hover {
+    background-color: #999;
+}
+
+#dropdown:hover #dropdown-content {
+    display: block;
+}
+
+#dropdown:hover #dropbtn {
+    background-color: #999;
+}
+
+#opencountdown { font-family: 'Open Sans', 'Merriweather Sans', sans-serif; }
+
