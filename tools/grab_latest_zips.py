@@ -60,7 +60,7 @@ def main():
     if not page_token: break
 
   for shortname, (_, fn) in latest.items():
-    print(f"Downloading {shortname}...")
+    print(f"Downloading {fn} as {shortname}...")
     url = f"https://storage.googleapis.com/{options.input_bucket}/{fn}"
     r = requests.get(url, headers={"Authorization": options.credentials.get()})
     r.raise_for_status()

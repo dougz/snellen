@@ -62,8 +62,9 @@ def convert_map(shortname, d, options):
 
   if "order" in d:
     out["order"] = d["order"]
-  if "assignments" in d:
-    out["assignments"] = d["assignments"]
+  assignments = d.get("assignments", {})
+  if assignments:
+    out["assignments"] = assignments
 
   icons = d.get("icons", None)
   if icons:
@@ -73,10 +74,10 @@ def convert_map(shortname, d, options):
       oic = {}
       out_icons[name] = oic
 
-      # if "headerimage" in ic:
-      #   src = os.path.join(options.input_assets, shortname,
-      #                      ic["headerimage"])
-      #   oic["headerimage"] = upload_file(src, options)
+      if name in assignments and "headerimage" in assignments[name]:
+        src = os.path.join(options.input_assets, shortname,
+                           assignments[name]["headerimage"])
+        oic["headerimage"] = upload_file(src, options)
 
       for variant in ("locked", "unlocked", "solved",
                       "unlocked_thumb", "solved_thumb",
@@ -169,8 +170,14 @@ def main():
 
   common.load_object_cache(options.bucket, options.credentials)
 
+  print("Loading map_config.yaml...")
   with open(os.path.join(options.input_dir, "map_config.yaml")) as f:
-    y = yaml.load(f)
+    y = yaml.safe_load(f)
+
+  for land in y.keys():
+    print(f"Loading assets/{land}/land.yaml...")
+    with open(os.path.join(options.input_dir, "assets", land, "land.yaml")) as f:
+      y[land].update(yaml.safe_load(f))
 
   output_file = os.path.join(options.output_dir, "map_config.json")
 

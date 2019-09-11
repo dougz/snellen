@@ -34,8 +34,12 @@ class Patch:
   MARGIN = 5
 
   def __init__(self, image, coords):
-    d = ImageDraw.Draw(Image.new("L", image.size, 0))
+    mask = Image.new("L", image.size, 0)
+    d = ImageDraw.Draw(mask)
     d.polygon(coords, 255)
+
+    masked = Image.new("RGBA", image.size, (0,0,0,0))
+    masked.paste(image, (0,0), mask)
 
     min_x = min(p[0] for p in coords) - self.MARGIN
     max_x = max(p[0] for p in coords) + self.MARGIN
@@ -48,7 +52,7 @@ class Patch:
 
     self.origin = [min_x, min_y]
     self.size = [max_x - min_x, max_y - min_y]
-    self.image = image.crop((min_x, min_y, max_x, max_y))
+    self.image = masked.crop((min_x, min_y, max_x, max_y))
 
     t = []
     for x, y in coords:
@@ -56,8 +60,10 @@ class Patch:
       t.append(str(y))
     self.coords_str = ",".join(t)
 
-    self.mask = Image.new("RGBA", self.image.size, (255,255,255,0))
-    self.mask.paste((255,255,255,255), self.image)
+    self.highlight = Image.new("RGBA", self.image.size, (255,255,255,0))
+    for origin in ((0,0), (2,0), (-2,0), (0,2), (0,-2),
+                   (-1,-1), (-1,1), (1,1), (1,-1)):
+      self.highlight.paste((255,255,255,255), origin, self.image)
 
 
 
@@ -65,9 +71,6 @@ def main():
   parser = argparse.ArgumentParser(
     description="Extract icons from images and a map.")
 
-  parser.add_argument("--land",
-                      default="land",
-                      help="Land name for output yaml")
   parser.add_argument("--output_dir",
                       default=".",
                       help="Directory for output icons")
@@ -93,11 +96,11 @@ def main():
   assert options.background_color[0] == "#" and len(options.background_color) == 7
   options.background_color = tuple(int(options.background_color[i*2+1:i*2+3], 16) for i in range(3))
 
-  bg_image = Image.open(options.bg_image)
+  bg_image = Image.open(options.bg_image).convert("RGBA")
   bad_map = get_polys(options.bad_html)
-  bad_image = Image.open(options.bad_image)
+  bad_image = Image.open(options.bad_image).convert("RGBA")
   good_map = get_polys(options.good_html)
-  good_image = Image.open(options.good_image)
+  good_image = Image.open(options.good_image).convert("RGBA")
 
   assert bg_image.size == bad_image.size
   assert bg_image.size == good_image.size
@@ -128,7 +131,7 @@ def main():
     out["unlocked_mask"] = od
     od["pos"] = bad_patch.origin[:]
     od["size"] = bad_patch.size[:]
-    bad_patch.mask.save(os.path.join(options.output_dir, f"{name}_unlocked_mask.png"))
+    bad_patch.highlight.save(os.path.join(options.output_dir, f"{name}_unlocked_mask.png"))
 
     good_coords = good_map[name]
     good_patch = Patch(good_image, good_coords)
@@ -144,7 +147,7 @@ def main():
     out["solved_mask"] = od
     od["pos"] = good_patch.origin[:]
     od["size"] = good_patch.size[:]
-    good_patch.mask.save(os.path.join(options.output_dir, f"{name}_solved_mask.png"))
+    good_patch.highlight.save(os.path.join(options.output_dir, f"{name}_solved_mask.png"))
 
 
     tx0 = min(bad_patch.origin[0], good_patch.origin[0]) - THUMB_MARGIN
@@ -184,7 +187,7 @@ def main():
     good_thumb.save(os.path.join(options.output_dir, f"{name}_solved_thumb.png"))
 
 
-  y = { options.land: {"icons": icons} }
+  y = { "icons": icons }
   with open(os.path.join(options.output_dir, "land.yaml"), "w") as f:
     f.write(yaml.dump(y))
 

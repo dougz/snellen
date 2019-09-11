@@ -10,6 +10,11 @@ give "Storage Legacy Object Reader" access to "allUsers"
 important to not use "Storage Object Viewer"!
 
 
+configure CORS (gsutil cors set)
+[{"maxAgeSeconds": 3600, "method": ["GET", "HEAD"], "origin": ["https://pennypark.fun"], "responseHeader": ["Content-Type"]},
+ {"maxAgeSeconds": 3600, "method": ["GET", "HEAD"], "origin": ["http://snellen"], "responseHeader": ["Content-Type"]}]
+
+
 ## Set up CDN
 
 Network Services > Cloud CDN
