@@ -378,7 +378,7 @@ class Team(login.LoginUser):
         [{"method": "solve",
           "puzzle_id": puzzle.shortname,
           "title": html.escape(puzzle.title),
-          "audio": "https://snellen.storage.googleapis.com/applause.mp3",
+          "audio": OPTIONS.static_content.get(puzzle.land.shortname + "/solve.mp3"),
           "score": self.score}])
       self.log_activity(now, for_team=f'<a href="{puzzle.url}">{html.escape(puzzle.title)}</a> solved.',
                         for_admin=f'<a href="{puzzle.admin_url}">{html.escape(puzzle.title)}</a> solved.')
@@ -708,7 +708,7 @@ class Global:
   def __init__(self, now):
     self.options = None
     self.event_start_time = None
-    self.expected_start_time = int(now + 300)
+    self.expected_start_time = int(now + 30)
     Global.STATE = self
     asyncio.create_task(self.future_start())
 

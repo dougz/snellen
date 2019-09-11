@@ -114,9 +114,11 @@ def convert_static_files(out, options, lands):
     for fn in os.listdir(land_dir):
       if fn.startswith("land_") and fn.endswith(".png"):
         to_convert.append((os.path.join(land, fn), os.path.join(land_dir, fn)))
-    fn = os.path.join(options.input_assets, land, "land.css")
-    if os.path.exists(fn):
-      to_convert.append((os.path.join(land, "land.css"), fn))
+
+    for xfn in ("land.css", "solve.mp3"):
+      fn = os.path.join(options.input_assets, land, xfn)
+      if os.path.exists(fn):
+        to_convert.append((os.path.join(land, xfn), fn))
 
   to_convert.extend([("mute.png", f"{base}/static/mute.png"),
                      ("admin-compiled.js", f"{base}/bin/admin-compiled.js"),
