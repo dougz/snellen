@@ -51,6 +51,7 @@ class LandMapPage(util.TeamPageHandler):
           d["solved"] = False
           if i.unlocked.url:
             d["icon_url"] = i.unlocked.url
+            d["mask_url"] = i.unlocked_mask.url
             d["pos_x"], d["pos_y"] = i.unlocked.pos
             d["width"], d["height"] = i.unlocked.size
             if i.unlocked.poly: d["poly"] = i.unlocked.poly
@@ -63,6 +64,7 @@ class LandMapPage(util.TeamPageHandler):
           d["solved"] = True
           if i.solved.url:
             d["icon_url"] = i.solved.url
+            d["mask_url"] = i.solved_mask.url
             d["pos_x"], d["pos_y"] = i.solved.pos
             d["width"], d["height"] = i.solved.size
             if i.solved.poly: d["poly"] = i.solved.poly

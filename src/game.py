@@ -498,8 +498,10 @@ class Icon:
 
     self.locked = Subicon(d.get("locked"))
     self.unlocked = Subicon(d.get("unlocked"))
-    self.solved = Subicon(d.get("solved"))
+    self.unlocked_mask = Subicon(d.get("unlocked_mask"))
     self.unlocked_thumb = Subicon(d.get("unlocked_thumb"))
+    self.solved = Subicon(d.get("solved"))
+    self.solved_mask = Subicon(d.get("solved_mask"))
     self.solved_thumb = Subicon(d.get("solved_thumb"))
 
 
@@ -524,13 +526,16 @@ class Land:
 
     self.puzzles = []
 
+    assignments = cfg.get("assignments", {})
+
     self.icons = {}
-    for d in cfg.get("icons", ()):
-      name = d["name"]
+    for name, d in cfg.get("icons", {}).items():
       i = Icon(name, self, d)
       self.icons[name] = i
-      if "puzzle" in d:
-        p = d["puzzle"]
+
+      pd = assignments.get(name, {})
+      if "puzzle" in pd:
+        p = pd["puzzle"]
         if OPTIONS.placeholders:
           p = Puzzle.placeholder_puzzle(-5)
         elif p == "_":

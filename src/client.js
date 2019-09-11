@@ -579,8 +579,10 @@ class H2020_MapDraw {
 	/** @type{Element} */
 	this.list_el = goog.dom.getElement("list");
 
-	/** @type{Element} */
+	/** @type{?Element} */
 	this.highlight_el = null;
+	/** @type{?Element} */
+	this.mask_el = null;
     }
 
     draw_map(mapdata) {
@@ -601,7 +603,14 @@ class H2020_MapDraw {
     }
 
     draw_item(it) {
+	console.log(it);
 	if (it.icon_url) {
+	    var mask_el = goog.dom.createDom("IMG", {
+		src: it.mask_url, className: "mask"});
+	    mask_el.style.left = "" + it.pos_x + "px";
+	    mask_el.style.top = "" + it.pos_y + "px";
+	    this.map_el.appendChild(mask_el);
+
 	    var el = goog.dom.createDom("IMG", {
 		src: it.icon_url, className: "icon"});
 	    el.style.left = "" + it.pos_x + "px";
@@ -615,7 +624,7 @@ class H2020_MapDraw {
 		this.mapmap_el.appendChild(area);
 
 		goog.events.listen(area, goog.events.EventType.MOUSEENTER,
-				   goog.bind(this.item_enter, this, it));
+				   goog.bind(this.item_enter, this, it, mask_el));
 		goog.events.listen(area, goog.events.EventType.MOUSELEAVE,
 				   goog.bind(this.item_leave, this, it));
 	    }
@@ -637,8 +646,13 @@ class H2020_MapDraw {
 	}
     }
 
-    item_enter(it) {
+    item_enter(it, mask_el) {
 	this.item_leave(null);
+
+	if (mask_el) {
+	    mask_el.style.display = "inline";
+	    this.mask_el = mask_el;
+	}
 
 	var ch = [it.name];
 	if (it.answer) {
@@ -657,6 +671,10 @@ class H2020_MapDraw {
     }
 
     item_leave(it) {
+	if (this.mask_el) {
+	    this.mask_el.style.display = "none";
+	    this.mask_el = null;
+	}
 	if (this.highlight_el) {
 	    goog.dom.removeNode(this.highlight_el);
 	    this.highlight_el = null;

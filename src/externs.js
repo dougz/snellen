@@ -104,6 +104,8 @@ class MapItem {
 	this.answer;
 	/** @type{?string} */
 	this.icon_url;
+	/** @type{?string} */
+	this.mask_url;
 	/** @type{?number} */
 	this.pos_x;
 	/** @type{?number} */

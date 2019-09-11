@@ -60,24 +60,29 @@ def convert_map(shortname, d, options):
     url = upload_file(src_image, options)
     out["logo"] = url
 
+  if "order" in d:
+    out["order"] = d["order"]
+  if "assignments" in d:
+    out["assignments"] = d["assignments"]
+
   icons = d.get("icons", None)
   if icons:
-    out_icons = []
+    out_icons = {}
     out["icons"] = out_icons
-    for ic in icons:
-      oic = {"name": ic["name"]}
+    for name, ic in icons.items():
+      oic = {}
+      out_icons[name] = oic
 
-      if "puzzle" in ic: oic["puzzle"] = ic["puzzle"]
-
-      if "headerimage" in ic:
-        src = os.path.join(options.input_assets, shortname,
-                           ic["headerimage"])
-        oic["headerimage"] = upload_file(src, options)
+      # if "headerimage" in ic:
+      #   src = os.path.join(options.input_assets, shortname,
+      #                      ic["headerimage"])
+      #   oic["headerimage"] = upload_file(src, options)
 
       for variant in ("locked", "unlocked", "solved",
-                      "unlocked_thumb", "solved_thumb"):
+                      "unlocked_thumb", "solved_thumb",
+                      "unlocked_mask", "solved_mask"):
         icon_image = os.path.join(options.input_assets, shortname,
-                                  ic["name"] + "_" + variant + ".png")
+                                  name + "_" + variant + ".png")
         if not os.path.exists(icon_image): continue
 
         voic = dict(ic[variant])
@@ -89,8 +94,6 @@ def convert_map(shortname, d, options):
           x, y = voic["pos"]
           w, h = voic["size"]
           voic["poly"] = f"{x},{y},{x+w},{y},{x+w},{y+h},{x},{y+h}"
-
-      out_icons.append(oic)
 
   return out
 

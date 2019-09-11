@@ -31,30 +31,35 @@ def get_polys(html):
 
 
 class Patch:
-  def __init__(self, bg_image, fg_image, coords):
-    mask = Image.new("L", bg_image.size, 0)
-    d = ImageDraw.Draw(mask)
+  MARGIN = 5
+
+  def __init__(self, image, coords):
+    d = ImageDraw.Draw(Image.new("L", image.size, 0))
     d.polygon(coords, 255)
 
-    min_x = min(p[0] for p in coords) - 1
-    max_x = max(p[0] for p in coords) + 1
-    min_y = min(p[1] for p in coords) - 1
-    max_y = max(p[1] for p in coords) + 1
+    min_x = min(p[0] for p in coords) - self.MARGIN
+    max_x = max(p[0] for p in coords) + self.MARGIN
+    min_y = min(p[1] for p in coords) - self.MARGIN
+    max_y = max(p[1] for p in coords) + self.MARGIN
     if min_x < 0: min_x = 0
     if min_y < 0: min_y = 0
-    if max_x > bg_image.size[0]: max_x = bg_image.size[0]
-    if max_y > bg_image.size[1]: max_y = bg_image.size[1]
+    if max_x > image.size[0]: max_x = image.size[0]
+    if max_y > image.size[1]: max_y = image.size[1]
 
     self.origin = [min_x, min_y]
     self.size = [max_x - min_x, max_y - min_y]
+    self.image = image.crop((min_x, min_y, max_x, max_y))
 
-    self.image = Image.new("RGBA", self.size, (0,0,0,0))
-    for j in range(min_y, max_y):
-      for i in range(min_x, max_x):
-        if not mask.getpixel((i, j)): continue
-        k = fg_image.getpixel((i,j))
-        if k != bg_image.getpixel((i,j)):
-          self.image.putpixel((i-min_x, j-min_y), k)
+    t = []
+    for x, y in coords:
+      t.append(str(x))
+      t.append(str(y))
+    self.coords_str = ",".join(t)
+
+    self.mask = Image.new("RGBA", self.image.size, (255,255,255,0))
+    self.mask.paste((255,255,255,255), self.image)
+
+
 
 def main():
   parser = argparse.ArgumentParser(
@@ -76,11 +81,11 @@ def main():
   parser.add_argument("bg_image",
                       help="Background without any attractions")
   parser.add_argument("bad_image",
-                      help="Map with crappy attractions")
+                      help="Broken attractions")
   parser.add_argument("bad_html",
                       help="Image map HTML")
   parser.add_argument("good_image",
-                      help="Map with fixed attractions")
+                      help="Fixed attractions")
   parser.add_argument("good_html",
                       help="Image map HTML")
   options = parser.parse_args()
@@ -102,45 +107,45 @@ def main():
   temp = Image.new("RGB", size, options.background_color)
   temp.paste(bg_image, (0,0), bg_image)
   bg_image = temp
-  temp = Image.new("RGB", size, options.background_color)
-  temp.paste(bad_image, (0,0), bad_image)
-  bad_image = temp
-  temp = Image.new("RGB", size, options.background_color)
-  temp.paste(good_image, (0,0), good_image)
-  good_image = temp
 
-  icons = []
+  icons = {}
 
   for name, coords in bad_map.items():
-    out = {"name": name, "puzzle": "_"}
-    icons.append(out)
+    out = {}
+    icons[name] = out
+
+    bad_coords = coords
+    bad_patch = Patch(bad_image, bad_coords)
 
     od = {}
     out["unlocked"] = od
-    bad_patch = Patch(bg_image, bad_image, coords)
     od["pos"] = bad_patch.origin
-    merged = []
-    for x, y in coords:
-      merged.append(str(x))
-      merged.append(str(y))
-    od["poly"] = ",".join(merged)
+    od["poly"] = bad_patch.coords_str
     od["size"] = bad_patch.size
     bad_patch.image.save(os.path.join(options.output_dir, f"{name}_unlocked.png"))
 
     od = {}
+    out["unlocked_mask"] = od
+    od["pos"] = bad_patch.origin[:]
+    od["size"] = bad_patch.size[:]
+    bad_patch.mask.save(os.path.join(options.output_dir, f"{name}_unlocked_mask.png"))
+
+    good_coords = good_map[name]
+    good_patch = Patch(good_image, good_coords)
+
+    od = {}
     out["solved"] = od
-    coords = good_map[name]
-    good_patch = Patch(bg_image, good_image, coords)
     od["pos"] = good_patch.origin
-    merged = []
-    for x, y in coords:
-      merged.append(str(x))
-      merged.append(str(y))
-    od["poly"] = ",".join(merged)
+    od["poly"] = good_patch.coords_str
     od["size"] = good_patch.size
     good_patch.image.save(os.path.join(options.output_dir, f"{name}_solved.png"))
 
-    # find
+    od = {}
+    out["solved_mask"] = od
+    od["pos"] = good_patch.origin[:]
+    od["size"] = good_patch.size[:]
+    good_patch.mask.save(os.path.join(options.output_dir, f"{name}_solved_mask.png"))
+
 
     tx0 = min(bad_patch.origin[0], good_patch.origin[0]) - THUMB_MARGIN
     ty0 = min(bad_patch.origin[1], good_patch.origin[1]) - THUMB_MARGIN
