@@ -269,7 +269,7 @@ class Team(login.LoginUser):
 
   def visit_page(self, page):
     self.pages_visited.add(page)
-    if self.pages_visited == {"pins", "activity"}:
+    if self.pages_visited == {"pins", "activity", "health_safety"}:
       self.achieve_now(Achievement.digital_explorer, delay=1.5)
 
   def achieve_now(self, ach, delay=None):

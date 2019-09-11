@@ -160,6 +160,12 @@ class AchievementPage(util.TeamPageHandler):
     self.team.visit_page("pins")
     self.render("achievements.html", achievements=game.Achievement.ALL)
 
+class HealthAndSafetyPage(util.TeamPageHandler):
+  @login.required("team")
+  def get(self):
+    self.team.visit_page("health_safety")
+    self.render("health_safety.html")
+
 class SubmitHandler(util.TeamHandler):
   def prepare(self):
     self.args = json.loads(self.request.body)
@@ -250,6 +256,7 @@ def GetHandlers():
     (r"/", EventHomePage),
     (r"/log", ActivityLogPage),
     (r"/pins", AchievementPage),
+    (r"/health_and_safety", HealthAndSafetyPage),
     (r"/land/([a-z0-9_]+)", LandMapPage),
     (r"/puzzle/([a-z0-9_]+)/?", PuzzlePage),
     (r"/submit", SubmitHandler),
