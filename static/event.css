@@ -328,7 +328,7 @@ tr.submit-pending .submit-state { color: #666 }
 }
 
 
-div#entry {
+div#submitentry {
     padding-top: 8px;
     display: flex;
     flex-direction: row;

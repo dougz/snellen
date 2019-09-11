@@ -189,7 +189,7 @@ class H2020_SubmitPanel {
 	this.input = goog.dom.getElement("answer");
 	this.table = goog.dom.getElement("submit_table_body");
 	this.top_note = goog.dom.getElement("top_note");
-	this.entry = goog.dom.getElement("entry");
+	this.entry = goog.dom.getElement("submitentry");
 	goog.events.listen(this.input, goog.events.EventType.KEYDOWN, goog.bind(this.onkeydown, this));
 
 	var b = goog.dom.getElement("submitsubmit");
