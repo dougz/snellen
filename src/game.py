@@ -12,6 +12,7 @@ import unicodedata
 
 import login
 from state import save_state
+import util
 import wait_proxy
 
 OPTIONS = None
@@ -514,6 +515,7 @@ class Land:
     self.BY_SHORTNAME[shortname] = self
     self.shortname = shortname
     self.title = cfg["title"]
+    self.sortkey = util.make_sortkey(self.title)
     self.logo = cfg.get("logo")
 
     self.base_img = cfg["base_img"]
@@ -544,6 +546,7 @@ class Land:
           p = Puzzle.placeholder_puzzle(int(p[1:]))
         else:
           p = Puzzle.from_json(os.path.join(event_dir, "puzzles", p + ".json"))
+        p.sortkey = util.make_sortkey(p.title)
         p.land = self
         p.icon = i
         self.puzzles.append(p)
@@ -558,7 +561,6 @@ class Land:
       for i in land.icons.values():
         if not i.puzzle:
           i.to_land = cls.BY_SHORTNAME[i.name]
-
 
 
 class Puzzle:
@@ -614,7 +616,10 @@ class Puzzle:
     shortname = f"{tag.lower()}_placeholder_{number}"
     self = cls(shortname)
 
-    self.title = f"{tag} Placeholder #{number}"
+    if tag[0] in "AEIOU":
+      self.title = f"The {tag} Placeholder"
+    else:
+      self.title = f"{tag} Placeholder"
     self.oncall = "nobody@example.org"
     self.puzzletron_id = -1
     self.version = 0

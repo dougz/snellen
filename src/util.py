@@ -1,5 +1,6 @@
 import asyncio
 import game
+import string
 import time
 import tornado.web
 
@@ -99,3 +100,10 @@ def format_duration(sec):
     out.append(f"{mins}m ")
   out.append(f"{sec}s")
   return "".join(out)
+
+def make_sortkey(s):
+  s = [k for k in s.lower() if k in string.ascii_lowercase + " "]
+  s = "".join(s).split()
+  while len(s) > 1 and s[0] in ("the", "a", "an"):
+    s.pop(0)
+  return "".join(s)

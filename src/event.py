@@ -30,8 +30,7 @@ class LandMapPage(util.TeamPageHandler):
     self.land = land
 
     items = []
-    mapdata = {"base_url": land.base_img,
-               "items": items}
+    mapdata = {"base_url": land.base_img}
     now = time.time()
 
     for i in land.icons.values():
@@ -69,6 +68,7 @@ class LandMapPage(util.TeamPageHandler):
             d["width"], d["height"] = i.solved.size
             if i.solved.poly: d["poly"] = i.solved.poly
 
+        items.append((p.sortkey, d))
       else:
         if i.to_land not in self.team.open_lands: continue
         d = { "name": i.to_land.title,
@@ -77,10 +77,10 @@ class LandMapPage(util.TeamPageHandler):
         d["pos_x"], d["pos_y"] = i.unlocked.pos
         d["width"], d["height"] = i.unlocked.size
         if i.unlocked.poly: d["poly"] = i.unlocked.poly
+        items.append((i.to_land.sortkey, d))
 
-      items.append(d)
-
-    items.sort(key=lambda it: it["url"])
+    items.sort()
+    mapdata["items"] = [i[1] for i in items]
 
     json_data = "<script>var mapdata = """ + json.dumps(mapdata) + ";</script>"
 
