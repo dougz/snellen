@@ -6,6 +6,7 @@
 body {
     font-family: 'Merriweather Sans', sans-serif;
     margin: 0;
+    overscroll-behavior-y: none;
 }
 
 a { text-decoration: none; }
