@@ -56,6 +56,8 @@ input, button {
     user-select: none;
 }
 
+@media print { #topnav { display: none; } }
+
 #topnav > span, #topnav > a {
     display: inline-block;
     margin: 0 20px;
@@ -532,6 +534,8 @@ div#map div.p b {
     text-align: center;
     font-weight: 400;
 }
+
+@media print { #landtitle { display: none; } }
 
 #puzzletitle {
     font-size: 40px;
