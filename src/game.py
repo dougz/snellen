@@ -364,10 +364,10 @@ class Team(login.LoginUser):
     land = Land.BY_SHORTNAME.get(land_name)
     if not land or not land.puzzles: return
     self.fastpasses_used[land] = self.fastpasses_used.get(land, 0) + 1
-    self.compute_puzzle_beam(now)
     if not save_state.REPLAYING:
       self.send_messages([{"method": "apply_fastpass", "title": land.title}])
       asyncio.create_task(self.flush_messages())
+    self.compute_puzzle_beam(now)
     return True
 
   def open_puzzle(self, puzzle, now):
@@ -797,10 +797,8 @@ class Global:
 
   async def notify_event_start(self):
     for team in Team.BY_USERNAME.values():
-      print(f"sending to_page to {team}")
       team.send_messages([{"method": "to_page", "url": "/"}])
       await team.flush_messages()
-      print(f"flushed to_page to {team}")
 
   async def update_event_start_teams(self):
     for team in Team.BY_USERNAME.values():
