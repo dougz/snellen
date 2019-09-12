@@ -448,24 +448,47 @@ class Team(login.LoginUser):
 
     min_open = 100 if OPTIONS.open_all else 2
 
-    # Always have two open puzzles in each land.
-    for land in Land.BY_SHORTNAME.values():
+    # BTS hack
+    land_order = ("castle", "forest", "space")
+
+    locked = []
+
+    open_count = 0
+    leftover_count = 0
+    for land_name in land_order:
+      land = Land.BY_SHORTNAME[land_name]
       if not land.puzzles: continue
-      open_count = 0
-      locked = []
-      for p in land.puzzles:
+
+      if land_name in ("castle", "forest"):
+        open_count = 2
+      elif land_name == "space":
+        open_count = 2 if self.score >= 3 else 0
+      else:
+        print(f"DON'T KNOW WHEN TO OPEN {land_name}!")
+        continue
+
+      for i, p in enumerate(land.puzzles):
+        if open_count <= 0:
+          locked.extend(land.puzzles[i:])
+          break
+        if self.puzzle_state[p].state == PuzzleState.CLOSED:
+          self.open_puzzle(p, now)
         if self.puzzle_state[p].state == PuzzleState.OPEN:
-          open_count += 1
-        elif self.puzzle_state[p].state == PuzzleState.CLOSED:
-          locked.append(p)
-      while open_count < min_open and locked:
-        self.open_puzzle(locked.pop(0), now)
-        open_count += 1
+          if not p.meta:
+            open_count -= 1
+      leftover_count += open_count
+
+    if leftover_count:
+      for p in locked:
+        if leftover_count <= 0: break
+        self.open_puzzle(p, now)
+        if not p.meta:
+          leftover_count -= 1
 
     for st in self.puzzle_state.values():
       if st.state != PuzzleState.CLOSED:
         if st.puzzle.land not in self.open_lands:
-          if st.puzzle.land.shortname != "castle":
+          if now != Global.STATE.event_start_time:
             self.send_messages([{"method": "open", "title": html.escape(st.puzzle.land.title)}])
           self.open_lands[st.puzzle.land] = now
 
@@ -526,8 +549,6 @@ class Land:
     else:
       self.url = "/land/" + shortname
 
-    self.puzzles = []
-
     assignments = cfg.get("assignments", {})
 
     self.icons = {}
@@ -549,8 +570,10 @@ class Land:
         p.sortkey = util.make_sortkey(p.title)
         p.land = self
         p.icon = i
-        self.puzzles.append(p)
         i.puzzle = p
+        p.meta = not not pd.get("meta")
+
+    self.puzzles = tuple(self.icons[i].puzzle for i in cfg.get("order", ()))
 
   def __repr__(self):
     return f"<Land \"{self.title}\">"
@@ -593,6 +616,10 @@ class Puzzle:
     return self is other
   def __lt__(self, other):
     return self.title < other.title
+
+  def __repr__(self):
+    return f"<Puzzle {self.shortname}>"
+  __str__ = __repr__
 
   PLACEHOLDER_MULTI_ANSWERS = ("ALFA BRAVO CHARLIE DELTA ECHO "
                                "FOXTROT GOLF HOTEL INDIA JULIETT").split()
