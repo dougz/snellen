@@ -8,9 +8,23 @@ body {
     margin: 0;
 }
 
+#clouds {
+    width: 100%;
+    height: 315px;
+    background: url(@@STATIC:inner_only/land_clouds.png@@) top repeat-x;
+    position: absolute;
+    left: 0;
+    top: 41px;
+    animation: cloudy linear 90s forwards infinite;
+}
+
+@keyframes cloudy {
+    0% { background-position: 0 0; }
+    100% { background-position: 1733px 0; }
+}
+
 #nonnav {
-    background: url(@@STATIC:inner_only/land_clouds.png@@) top repeat-x,
-		url(@@STATIC:inner_only/land_tree.png@@) bottom repeat-x,
+    background: url(@@STATIC:inner_only/land_tree.png@@) bottom repeat-x,
 		#c3dffb;
     display: flex;
     flex-direction: column;

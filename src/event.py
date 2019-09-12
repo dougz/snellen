@@ -166,7 +166,7 @@ class AchievementPage(util.TeamPageHandler):
     self.render("achievements.html", achievements=game.Achievement.ALL)
 
 class HealthAndSafetyPage(util.TeamPageHandler):
-  @login.required("team")
+  @login.required("team", require_start=False)
   def get(self):
     self.team.visit_page("health_safety")
     self.render("health_safety.html")
