@@ -145,6 +145,9 @@ def main():
                       help="Replace all puzzles with placeholders.")
   parser.add_argument("--default_credentials",
                       help="Fill username/password field automatically.")
+  parser.add_argument("--start_delay",
+                      type=int, default=30,
+                      help=("Seconds to count down before starting event."))
 
   # wait proxy configuration
   parser.add_argument("-w", "--wait_proxies",

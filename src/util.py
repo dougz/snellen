@@ -50,6 +50,7 @@ class TeamPageHandler(TeamHandler):
 
     d["script"] = script
     d["json_data"] = None
+    d["park_open"] = (game.Global.STATE.event_start_time is not None)
 
     return d
 

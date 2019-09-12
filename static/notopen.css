@@ -15,7 +15,7 @@ body {
     position: absolute;
     left: 0;
     top: 41px;
-    animation: cloudy linear 90s forwards infinite;
+    animation: cloudy linear 150s forwards infinite;
 }
 
 @keyframes cloudy {

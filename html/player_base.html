@@ -14,14 +14,20 @@
   <body>
     <div id="topnav">
       {% block topnav_startedleft %}
+      {% if park_open %}
       <span>
 	<a href="/">Map</a>
       </span>
+      {% end %}
       <div id="dropdown">
 	<button id="dropbtn">Useful links</button>
 	<div id="dropdown-content">
+	  {% if park_open %}
 	  <a href="/pins">Pins</a>
 	  <a href="/log">Activity Log</a>
+	  {% else %}
+	  <a href="/">Home</a>
+	  {% end %}
 	  <a href="/health_and_safety">Health & Safety</a>
 	  <a href="/logout">Logout</a>
 	</div>
@@ -31,7 +37,7 @@
       <span class="spacer"></span>
       {% block topnav_extraright %}{% end %}
       {% block topnav_startedright %}
-      <span class=buzz>Buzz: <span id=score>{{team.score}}</span></span>
+      {% if park_open %}<span class=buzz>Buzz: <span id=score>{{team.score}}</span></span>{% end %}
       {% end %}
     </div>
 

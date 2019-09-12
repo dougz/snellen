@@ -758,7 +758,7 @@ class Global:
   def __init__(self, now):
     self.options = None
     self.event_start_time = None
-    self.expected_start_time = int(now + 300)
+    self.expected_start_time = int(now + OPTIONS.start_delay)
     Global.STATE = self
     asyncio.create_task(self.future_start())
 
