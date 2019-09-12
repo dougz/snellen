@@ -33,16 +33,37 @@ label {
 }
 
 input {
-    font-size: 120%;
-    font-family: 'Inconsolata', monospace;
-    margin: 4px 8px;
+    font-size: 100%;
+    font-family: 'Merriweather Sans', monospace;
+    margin: 8px 8px;
+    border: none;
+    border-radius: 15px;
+    padding: 8px 16px;
+    box-sizing: border-box;
+    width: 332px;
+    outline: none;
+}
+
+::placeholder {
+    color: #ddd;
 }
 
 button {
     font-family: 'Merriweather Sans', sans-serif;
-    font-size: 120%;
-    margin: 0 auto 0 auto;
+    color: white;
+    font-size: 100%;
+    padding: 8px 16px;
+    margin: 8px 8px;
+    box-sizing: border-box;
+    border: 1px solid #395483;
+    border-radius: 15px;
+    width: 332px;
+    background: linear-gradient(to bottom, #4c70af, #436299);
+    outline: none;
+}
+
+b {
     display: inline-block;
-    padding: 4px 16px;
-    margin: 4px 8px;
+    margin: 8px 8px;
+    color: #c00;
 }

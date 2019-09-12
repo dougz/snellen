@@ -9,23 +9,17 @@
   <body>
     <img src="{{logo}}">
     <form action="/login_submit" method="post">
-      <span>
-	<label for="username"><b>Username</b></label>
-	<input type="text" placeholder="Username" name="username"
-	       {% if default_username %}value="{{default_username}}"{% end %}
-	       required>
-      </span>
-      <span>
-	<label for="password"><b>Password</b></label>
-	<input type="password" placeholder="Password" name="password"
-	       {% if default_password %}value="{{default_password}}"{% end %}
-	       required>
-      </span>
-      {% if bad_login %}<b>Bad login.</b>{% end %}
+      <input type="text" placeholder="Username" name="username"
+	     {% if default_username %}value="{{default_username}}"{% end %}
+	     required>
+      <input type="password" placeholder="Password" name="password"
+	     {% if default_password %}value="{{default_password}}"{% end %}
+	     required>
       {% if target %}
       <input type="hidden" name="target" value="{{target}}"/>
       {% end %}
       <button type="submit">Login</button>
+      {% if bad_login %}<b>Bad login.</b>{% else %}<b>&nbsp;</b>{% end %}
     </form>
   </body>
 </html>
