@@ -100,6 +100,17 @@ class AdminHintHistoryHandler(tornado.web.RequestHandler):
     self.write(json.dumps(d))
 
 
+class AdminApplyFastpassHandler(tornado.web.RequestHandler):
+  @login.required("admin")
+  def get(self, team_username, land_name):
+    team = game.Team.get_by_username(team_username)
+    if not team:
+      raise tornado.web.HTTPError(http.client.NOT_FOUND)
+    if not team.apply_fastpass(land_name):
+      raise tornado.web.HTTPError(http.client.NOT_FOUND)
+    self.redirect(f"/admin/team/{team.username}")
+
+
 class HintReplyHandler(tornado.web.RequestHandler):
   def prepare(self):
     self.args = json.loads(self.request.body)
@@ -210,6 +221,8 @@ class StartEvent(tornado.web.RequestHandler):
     self.redirect("/admin")
 
 
+
+
 def GetHandlers():
   handlers = [
     (r"/admin$", AdminHomePage),
@@ -226,6 +239,8 @@ def GetHandlers():
     (r"/admin/puzzle/([a-z0-9_]+)$", AdminPuzzlePage),
     (r"/admin/hintreply", HintReplyHandler),
     (r"/admin/hinthistory/([a-z0-9_]+)/([a-z0-9_]+)$", AdminHintHistoryHandler),
+
+    (r"/admin/applyfastpass/([a-z0-9_]+)/([a-z0-9_]+)$", AdminApplyFastpassHandler),
     ]
   return handlers
 

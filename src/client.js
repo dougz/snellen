@@ -70,6 +70,7 @@ class H2020_Dispatcher {
 	    "update_start": this.update_start,
 	    "to_page": this.to_page,
 	    "hint_history": this.hint_history,
+	    "apply_fastpass": this.apply_fastpass,
 	}
     }
 
@@ -123,6 +124,12 @@ class H2020_Dispatcher {
     achieve(msg) {
 	hunt2020.toast_manager.add_toast(
 	    "You received the <b>" + msg.title + "</b> pin!", 6000, null, "gold");
+    }
+
+    /** @param{Message} msg */
+    apply_fastpass(msg) {
+	hunt2020.toast_manager.add_toast(
+	    "A FastPass has been applied to <b>" + msg.title + "</b>!", 6000, null);
     }
 
     /** @param{Message} msg */
@@ -603,13 +610,15 @@ class H2020_MapDraw {
     }
 
     draw_item(it) {
-	console.log(it);
 	if (it.icon_url) {
-	    var mask_el = goog.dom.createDom("IMG", {
-		src: it.mask_url, className: "mask"});
-	    mask_el.style.left = "" + it.pos_x + "px";
-	    mask_el.style.top = "" + it.pos_y + "px";
-	    this.map_el.appendChild(mask_el);
+	    var mask_el = null;
+	    if (it.mask_url) {
+		mask_el = goog.dom.createDom("IMG", {
+		    src: it.mask_url, className: "mask"});
+		mask_el.style.left = "" + it.pos_x + "px";
+		mask_el.style.top = "" + it.pos_y + "px";
+		this.map_el.appendChild(mask_el);
+	    }
 
 	    var el = goog.dom.createDom("IMG", {
 		src: it.icon_url, className: "icon"});

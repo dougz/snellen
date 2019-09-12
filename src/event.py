@@ -89,7 +89,7 @@ class LandMapPage(util.TeamPageHandler):
   def get_template_namespace(self):
     d = super().get_template_namespace()
     if hasattr(self, "land"):
-      if self.application.settings.get("debug"):
+      if False and self.application.settings.get("debug"):
         d["css"].append(f"/assets/{self.land.shortname}/land.css")
       else:
         css = f"{self.land.shortname}/land.css"
@@ -139,7 +139,7 @@ class PuzzlePage(util.TeamPageHandler):
   def get_template_namespace(self):
     land = self.puzzle.land
     d = super().get_template_namespace()
-    if self.application.settings.get("debug"):
+    if False and self.application.settings.get("debug"):
       d["css"].append(f"/assets/{land.shortname}/land.css")
     else:
       css = f"{land.shortname}/land.css"

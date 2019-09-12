@@ -160,4 +160,6 @@ div#for_ops, div#teamlog {
     box-shadow: 0 0 6px #ddd;
 }
 
-
+body > p {
+    margin: 20px;
+}

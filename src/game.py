@@ -224,6 +224,8 @@ class Team(login.LoginUser):
     self.last_incorrect_answer = None
     self.pages_visited = set()
 
+    self.fastpasses_used = {}
+
   def __repr__(self):
     return f"<Team {self.username}>"
   __str__ = __repr__
@@ -357,6 +359,17 @@ class Team(login.LoginUser):
       print(f"failed to cancel submit {submit_id} puzzle {shortname} for {self.username}")
       return
 
+  @save_state
+  def apply_fastpass(self, now, land_name):
+    land = Land.BY_SHORTNAME.get(land_name)
+    if not land or not land.puzzles: return
+    self.fastpasses_used[land] = self.fastpasses_used.get(land, 0) + 1
+    self.compute_puzzle_beam(now)
+    if not save_state.REPLAYING:
+      self.send_messages([{"method": "apply_fastpass", "title": land.title}])
+      asyncio.create_task(self.flush_messages())
+    return True
+
   def open_puzzle(self, puzzle, now):
     state = self.puzzle_state[puzzle]
     if state.state == state.CLOSED:
@@ -446,8 +459,6 @@ class Team(login.LoginUser):
     if start_map not in self.open_lands:
       self.open_lands[start_map] = now
 
-    min_open = 100 if OPTIONS.open_all else 2
-
     # BTS hack
     land_order = ("castle", "forest", "space")
 
@@ -460,12 +471,14 @@ class Team(login.LoginUser):
       if not land.puzzles: continue
 
       if land_name in ("castle", "forest"):
-        open_count = 2
+        open_count = 1000 if OPTIONS.open_all else 2
       elif land_name == "space":
         open_count = 2 if self.score >= 3 else 0
       else:
         print(f"DON'T KNOW WHEN TO OPEN {land_name}!")
         continue
+
+      open_count += self.fastpasses_used.get(land, 0)
 
       for i, p in enumerate(land.puzzles):
         if open_count <= 0:
