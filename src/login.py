@@ -170,7 +170,7 @@ class required:
       if now > session.expires:
         Session.delete_from_request(req)
         return self.bounce(req)
-      if self.cap not in session.capabilities:
+      if self.cap and self.cap not in session.capabilities:
         if AdminRoles.ADMIN in session.capabilities:
           req.redirect("/no_access")
           return

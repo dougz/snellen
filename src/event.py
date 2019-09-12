@@ -99,14 +99,17 @@ class LandMapPage(util.TeamPageHandler):
 
 
 class EventHomePage(LandMapPage):
-  @login.required("team", require_start=False)
+  @login.required()
   def get(self):
-    if not game.Global.STATE.event_start_time:
-      json_data = "<script>var open_time = """ + str(game.Global.STATE.expected_start_time) + ";</script>"
-      self.render("not_started.html", json_data=json_data,
-                  css=(self.static_content["notopen.css"],))
-      return
-    self.show_map("inner_only")
+    if self.team:
+      if not game.Global.STATE.event_start_time:
+        json_data = "<script>var open_time = """ + str(game.Global.STATE.expected_start_time) + ";</script>"
+        self.render("not_started.html", json_data=json_data,
+                    css=(self.static_content["notopen.css"],))
+        return
+      self.show_map("inner_only")
+    elif self.user:
+      self.redirect("/admin")
 
 
 class PuzzlePage(util.TeamPageHandler):
