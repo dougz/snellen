@@ -618,10 +618,14 @@ class Puzzle:
     self.url = f"/puzzle/{shortname}"
     self.admin_url = f"/admin/puzzle/{shortname}"
     self.points = 1
+    self.hints_available = False
 
     self.solve_durations = {}
     self.fastest_solver = None
     self.incorrect_answers = {}
+
+    save_state.add_instance("Puzzle:" + shortname, self)
+
 
   def __hash__(self):
     return id(self)
@@ -733,6 +737,11 @@ class Puzzle:
   @classmethod
   def all_puzzles(cls):
     return cls.BY_SHORTNAME.values()
+
+  @save_state
+  def open_hints(self, now):
+    self.hints_available = True
+
 
   @staticmethod
   def canonicalize_answer(text):

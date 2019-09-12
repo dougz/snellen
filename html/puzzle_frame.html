@@ -8,7 +8,7 @@
 {% else %}
 <a id="submit">Submit</a>
 {% end %}
-<a id="hints">Hints</a>
+<a id="hinttoggle" style="display: {{"inline" if puzzle.hints_available else "none"}}">Hints</a>
 {% end %}
 
 {% block midnav %}

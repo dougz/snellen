@@ -68,7 +68,8 @@ async def main_server(options):
 
   save_state.set_classes(AdminUser=login.AdminUser,
                          Team=game.Team,
-                         Global=game.Global)
+                         Global=game.Global,
+                         Puzzle=game.Puzzle)
 
   with open(os.path.join(options.event_dir, "admins.json")) as f:
     admins = json.load(f)

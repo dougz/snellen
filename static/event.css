@@ -65,10 +65,6 @@ input, button {
     padding: 8px 0;
 }
 
-#teamname {
-    font-weight: bold;
-}
-
 /* The spacer should take up all the extra space, forcing the items
    before it to the left and those after it to the right. */
 #topnav .spacer {

@@ -789,7 +789,7 @@ window.onload = function() {
 	goog.events.listen(a, goog.events.EventType.CLICK,
 			   goog.bind(hunt2020.submit_panel.toggle, hunt2020.submit_panel));
 
-	a = goog.dom.getElement("hints");
+	a = goog.dom.getElement("hinttoggle");
 	hunt2020.hint_panel = new H2020_HintPanel();
 	goog.events.listen(a, goog.events.EventType.CLICK,
 			   goog.bind(hunt2020.hint_panel.toggle, hunt2020.hint_panel));

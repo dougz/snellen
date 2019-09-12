@@ -50,7 +50,7 @@
     </td>
   </tr>
   {% end %}
-
+  <tr><th>hints open</th><td>{{"yes" if puzzle.hints_available else "no"}}</td></tr>
 
   <tr><th class=top>solves ({{len(solve_list)}})</th>
     <td>
@@ -64,6 +64,8 @@
       {% end %}
     </td>
 </table>
+
+<p><b>BTS hack:</b> <a href="/admin/openhints/{{puzzle.shortname}}">make hints available</a></p>
 
 <div id="for_ops">
   {% raw puzzle.for_ops_body %}
