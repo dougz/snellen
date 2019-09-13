@@ -759,6 +759,11 @@ class Puzzle:
   def open_hints(self, now):
     self.hints_available = True
 
+    msg = [{"method": "hints_open", "puzzle_id": self.shortname, "title": self.title}]
+    for t in Team.all_teams():
+      t.send_messages(msg)
+      asyncio.create_task(t.flush_messages())
+
 
   @staticmethod
   def canonicalize_answer(text):

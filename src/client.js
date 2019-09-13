@@ -71,6 +71,7 @@ class H2020_Dispatcher {
 	    "to_page": this.to_page,
 	    "hint_history": this.hint_history,
 	    "apply_fastpass": this.apply_fastpass,
+	    "hints_open": this.hints_open,
 	}
     }
 
@@ -90,6 +91,19 @@ class H2020_Dispatcher {
     hint_history(msg) {
 	if (msg.puzzle_id == puzzle_id) {
 	    hunt2020.hint_panel.update_history();
+	}
+    }
+
+    /** @param{Message} msg */
+    hints_open(msg) {
+	if (msg.puzzle_id == puzzle_id) {
+	    var el = goog.dom.getElement("hinttoggle");
+	    if (el) {
+		el.style.display = "inline";
+		hunt2020.toast_manager.add_toast(
+		    "Hints are now available for <b>" + msg.title + ".",
+		    6000, null, "salmon");
+	    }
 	}
     }
 
