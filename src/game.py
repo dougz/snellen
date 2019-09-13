@@ -54,6 +54,7 @@ class PuzzleState:
     self.solve_time = None
     self.answers_found = set()
     self.hints = []
+    self.admin_log = []
 
   def recent_solve(self, now=None):
     if now is None:
@@ -71,7 +72,10 @@ class PuzzleState:
     del self.submissions[-count:]
     for sub in after:
       self.submissions.append(sub)
-      sub.check_or_queue(now)
+      sub.check_or_queue(now, log_queue=False)
+
+  def log(self, now, msg):
+    self.admin_log.append((now, msg))
 
 
 class Submission:
@@ -100,11 +104,13 @@ class Submission:
   def __lt__(self, other):
     return self.submit_id < other.submit_id
 
-  def check_or_queue(self, now):
+  def check_or_queue(self, now, log_queue=True):
     self.check_time = self.compute_check_time()
     if self.check_time <= self.submit_time:
       self.check_answer(self.submit_time)
     else:
+      if log_queue:
+        self.puzzle_state.log(now, "Queued <b>" + html.escape(self.raw_answer) + "</b>")
       heapq.heappush(self.GLOBAL_SUBMIT_QUEUE, (self.check_time, self))
       self.team.achieve(Achievement.scattershot, now)
 
@@ -137,6 +143,8 @@ class Submission:
             if t is not self.team:
               asyncio.create_task(t.flush_messages())
     self.puzzle_state.requeue_pending(now)
+
+    self.puzzle_state.log(now, "Submitted <b>" + html.escape(self.raw_answer) + "</b>: " + self.state)
 
     if self.state == self.CORRECT:
       self.puzzle_state.answers_found.add(answer)
@@ -352,6 +360,7 @@ class Team(login.LoginUser):
     for i, sub in enumerate(state.submissions):
       if sub.submit_id == submit_id and sub.state == sub.PENDING:
         sub.state = sub.CANCELLED
+        state.log(now, "Canceled queued <b>" + html.escape(sub.raw_answer) + "</b>")
         state.submissions.pop(i)
         state.requeue_pending(now)
         break

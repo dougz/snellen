@@ -21,6 +21,16 @@
   <tr><th>solve time</th><td>{{format_timestamp(state.solve_time)}}</td></tr>
 </table>
 
+<h2>Submission log</h2>
+<div id="teamlog">
+  <ul>
+    {% for t, e in state.admin_log %}
+    <li>{{format_timestamp(t)}} &mdash; {% raw e %}</li>
+    {% end %}
+  </ul>
+</div>
+
+
 <div id="hinthistory"></div>
 <textarea rows=10 id="replytext"></textarea>
 <button id="hintreply">Send reply</button>
