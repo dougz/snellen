@@ -109,6 +109,7 @@ class Session:
     self.key = base64.urlsafe_b64encode(os.urandom(18))
     self.BY_KEY[self.key] = self
     self.user = user
+    self.pending_become = None
     self.team = None
     self.capabilities = set(caps)
     self.expires = time.time() + self.SESSION_TIMEOUT
@@ -145,10 +146,11 @@ class Session:
 # account with a given capability.  The browser is redirected to the
 # login or access-denied page as appropriate.
 class required:
-  def __init__(self, cap=None, on_fail=None, require_start=True):
+  def __init__(self, cap=None, on_fail=None, require_start=True, clear_become=True):
     self.cap = cap
     self.on_fail = on_fail
     self.require_start = require_start
+    self.clear_become = clear_become
 
   def bounce(self, req):
     if self.on_fail is not None:
@@ -170,6 +172,7 @@ class required:
       if now > session.expires:
         Session.delete_from_request(req)
         return self.bounce(req)
+      if self.clear_become: session.pending_become = None
       if self.cap and self.cap not in session.capabilities:
         if AdminRoles.ADMIN in session.capabilities:
           req.redirect("/no_access")
@@ -238,6 +241,7 @@ class LoginSubmit(tornado.web.RequestHandler):
       if allowed:
         session.team = team
         session.capabilities = {"team"}
+        session.was_admin = False
         team.attach_session(session)
         self.redirect(target or "/")
       else:
@@ -250,6 +254,7 @@ class LoginSubmit(tornado.web.RequestHandler):
       if allowed:
         session.user = user
         session.capabilities = user.roles
+        session.was_admin = True
         self.redirect("/admin")
         return
     self.redirect("/login?" + urllib.parse.urlencode(err_d))
@@ -258,7 +263,7 @@ class LoginSubmit(tornado.web.RequestHandler):
 class Logout(tornado.web.RequestHandler):
   def get(self):
     session = Session.from_request(self)
-    if session and session.team:
+    if session and session.team and not session.was_admin:
       session.team.achieve_now(game.Achievement.come_back, delay=1.0)
 
     # Uncookie the browser, delete the session, send them back to the

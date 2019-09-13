@@ -112,6 +112,27 @@ class AdminApplyFastpassHandler(tornado.web.RequestHandler):
     self.redirect(f"/admin/team/{team.username}")
 
 
+class AdminBecomeTeamHandler(util.AdminPageHandler):
+  @login.required("admin", clear_become=False)
+  def get(self, team_username):
+    team = game.Team.get_by_username(team_username)
+    if not team:
+      raise tornado.web.HTTPError(http.client.NOT_FOUND)
+
+    if self.session.pending_become == team:
+      self.session.team = team
+      self.session.user = None
+      self.session.capabilities = {"team"}
+      self.session.was_admin = True
+      self.session.next_msg_serial = 1
+      self.session.pending_become = None
+      team.attach_session(self.session)
+      self.redirect("/")
+    else:
+      self.session.pending_become = team
+      self.render("admin_become.html", team=team)
+
+
 class AdminOpenHintsHandler(tornado.web.RequestHandler):
   @login.required("admin")
   def get(self, shortname):
@@ -253,6 +274,7 @@ def GetHandlers():
 
     (r"/admin/applyfastpass/([a-z0-9_]+)/([a-z0-9_]+)$", AdminApplyFastpassHandler),
     (r"/admin/openhints/([a-z0-9_]+)$", AdminOpenHintsHandler),
+    (r"/admin/become/([a-z0-9_]+)$", AdminBecomeTeamHandler),
     ]
   return handlers
 

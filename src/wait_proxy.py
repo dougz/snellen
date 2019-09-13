@@ -183,12 +183,12 @@ class Client:
       except Exception as e:
         print(repr(e), e)
 
-  async def check_session(self, key):
+  async def check_session(self, key, wid):
     if not key:
       raise tornado.web.HTTPError(http.client.UNAUTHORIZED)
 
     key = key.decode("ascii")
-    team = self.session_cache.get(key)
+    team = self.session_cache.get((key, wid))
     if team: return team
 
     req = tornado.httpclient.HTTPRequest(
@@ -199,7 +199,7 @@ class Client:
       response = await self.client.fetch(req)
       team = response.body.decode("ascii")
       if team:
-        self.session_cache[key] = team
+        self.session_cache[(key, wid)] = team
         return team
     except tornado.httpclient.HTTPClientError as e:
       pass
@@ -302,7 +302,7 @@ class WaitHandler(tornado.web.RequestHandler):
 
   async def get(self, wid, received_serial):
     key = self.get_secure_cookie(login.Session.COOKIE_NAME)
-    team = await self.proxy_client.check_session(key)
+    team = await self.proxy_client.check_session(key, wid)
     team = ProxyTeam.get_team(team)
 
     wid = int(wid)

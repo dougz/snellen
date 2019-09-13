@@ -7,6 +7,7 @@
 
 <table class=info>
   <tr><th>username</th><td class=mono>{{team.username}}</td></tr>
+  <tr><th></th><td><a href="/admin/become/{{team.username}}">become this team</a></td></tr>
   <tr><th>location</th><td>{{team.attrs.get("location", "Unknown")}}</td></tr>
   <tr><th class=top>open puzzles ({{len(open_list)}})</th>
     <td>
