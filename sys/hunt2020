@@ -8,8 +8,11 @@ server {
 upstream wait_proxy {
   ip_hash;
   keepalive 100;
-  server unix:/run/sites/snellen_p0;
-  server unix:/run/sites/snellen_p1;
+  server unix:/run/sites/snellen_p0 fail_timeout=1s;
+  server unix:/run/sites/snellen_p1 fail_timeout=1s;
+  server unix:/run/sites/snellen_p2 fail_timeout=1s;
+  server unix:/run/sites/snellen_p3 fail_timeout=1s;
+  server unix:/run/sites/snellen_p4 fail_timeout=1s;
 }
 
 server {

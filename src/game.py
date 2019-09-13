@@ -149,10 +149,7 @@ class Submission:
     if self.state == self.CORRECT:
       self.puzzle_state.answers_found.add(answer)
       if self.puzzle_state.answers_found == self.puzzle.answers:
-        try:
-          self.team.solve_puzzle(self.puzzle, now)
-        except Exception as e:
-          print(e)
+        self.team.solve_puzzle(self.puzzle, now)
 
   def json_dict(self):
     return {"submit_time": self.submit_time,
@@ -380,6 +377,7 @@ class Team(login.LoginUser):
     return True
 
   def open_puzzle(self, puzzle, now):
+    print(f"opening {puzzle.title}")
     state = self.puzzle_state[puzzle]
     if state.state == state.CLOSED:
       state.state = state.OPEN
@@ -463,6 +461,7 @@ class Team(login.LoginUser):
                                     "puzzle_id": puzzle.shortname}])
 
   def compute_puzzle_beam(self, now):
+    print("-----------------------------")
     start_map = Land.BY_SHORTNAME["inner_only"]
     if start_map not in self.open_lands:
       self.open_lands[start_map] = now
@@ -478,15 +477,20 @@ class Team(login.LoginUser):
       land = Land.BY_SHORTNAME[land_name]
       if not land.puzzles: continue
 
-      if land_name in ("castle", "forest"):
-        open_count = 1000 if OPTIONS.open_all else 2
-      elif land_name == "space":
-        open_count = 2 if self.score >= 3 else 0
+      if OPTIONS.open_all:
+        open_count = 1000
       else:
-        print(f"DON'T KNOW WHEN TO OPEN {land_name}!")
-        continue
+        if land_name in ("castle", "forest"):
+          open_count = 3
+        elif land_name == "space":
+          open_count = 1 if self.score >= 8 else 0
+        else:
+          print(f"DON'T KNOW WHEN TO OPEN {land_name}!")
+          continue
 
       open_count += self.fastpasses_used.get(land, 0)
+
+      print(f"land {land_name} open_count {open_count}")
 
       for i, p in enumerate(land.puzzles):
         if open_count <= 0:
@@ -498,13 +502,17 @@ class Team(login.LoginUser):
           if not p.meta:
             open_count -= 1
       leftover_count += open_count
+      print("")
 
+    print(f"leftovers {leftover_count}")
     if leftover_count:
       for p in locked:
         if leftover_count <= 0: break
-        self.open_puzzle(p, now)
-        if not p.meta:
-          leftover_count -= 1
+        if self.puzzle_state[p].state == PuzzleState.CLOSED:
+          self.open_puzzle(p, now)
+        if self.puzzle_state[p].state == PuzzleState.OPEN:
+          if not p.meta:
+            leftover_count -= 1
 
     for st in self.puzzle_state.values():
       if st.state != PuzzleState.CLOSED:
@@ -583,7 +591,7 @@ class Land:
       if "puzzle" in pd:
         p = pd["puzzle"]
         if OPTIONS.placeholders:
-          p = Puzzle.placeholder_puzzle(self, i, -5)
+          p = Puzzle.placeholder_puzzle(self, i, -500, p)
         elif p == "_":
           p = Puzzle.placeholder_puzzle(self, i)
         elif p.startswith("_"):
@@ -666,7 +674,7 @@ class Puzzle:
                                "FOXTROT GOLF HOTEL INDIA JULIETT").split()
 
   @classmethod
-  def placeholder_puzzle(cls, land, icon, count=None):
+  def placeholder_puzzle(cls, land, icon, count=None, title=None):
     cls.PLACEHOLDER_COUNT += 1
     number = cls.PLACEHOLDER_COUNT
 
@@ -684,10 +692,13 @@ class Puzzle:
     shortname = f"{tag.lower()}_placeholder_{number}"
     self = cls(shortname)
 
-    if tag[0] in "AEIOU":
-      self.title = f"The {tag} Placeholder"
+    if title is not None:
+      self.title = title
     else:
-      self.title = f"{tag} Placeholder"
+      if tag[0] in "AEIOU":
+        self.title = f"The {tag} Placeholder"
+      else:
+        self.title = f"{tag} Placeholder"
     self.oncall = "nobody@example.org"
     self.puzzletron_id = -1
     self.version = 0
