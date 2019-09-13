@@ -227,7 +227,6 @@ class Team(login.LoginUser):
     self.streak = []
     self.solve_days = set()
     self.last_incorrect_answer = None
-    self.pages_visited = set()
 
     self.fastpasses_used = {}
 
@@ -274,11 +273,6 @@ class Team(login.LoginUser):
         self.activity_log.append(LogEntry(now, for_team, for_team))
       else:
         raise ValueError("Can't log empty activity.")
-
-  def visit_page(self, page):
-    self.pages_visited.add(page)
-    if self.pages_visited == {"pins", "activity", "health_safety"}:
-      self.achieve_now(Achievement.digital_explorer, delay=1.5)
 
   def achieve_now(self, ach, delay=None):
     if ach not in self.achievements:

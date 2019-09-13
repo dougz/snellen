@@ -113,12 +113,18 @@ class Session:
     self.team = None
     self.capabilities = set(caps)
     self.expires = time.time() + self.SESSION_TIMEOUT
+    self.pages_visited = set()
 
     self.next_msg_serial = 1
     self.msg_cv = asyncio.Condition()
 
   def set_cookie(self, req):
     req.set_secure_cookie(self.COOKIE_NAME, self.key)
+
+  def visit_page(self, page):
+    self.pages_visited.add(page)
+    if self.team and self.pages_visited == {"pins", "activity", "health_safety"}:
+      self.team.achieve_now(game.Achievement.digital_explorer, delay=1.5)
 
   @classmethod
   def from_request(cls, req):
@@ -263,7 +269,9 @@ class LoginSubmit(tornado.web.RequestHandler):
 class Logout(tornado.web.RequestHandler):
   def get(self):
     session = Session.from_request(self)
-    if session and session.team and not session.was_admin:
+    if (session and session.team and
+        game.Global.STATE.event_start_time and
+        not session.was_admin):
       session.team.achieve_now(game.Achievement.come_back, delay=1.0)
 
     # Uncookie the browser, delete the session, send them back to the

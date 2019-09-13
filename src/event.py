@@ -154,7 +154,7 @@ class PuzzlePage(util.TeamPageHandler):
 class ActivityLogPage(util.TeamPageHandler):
   @login.required("team")
   def get(self):
-    self.team.visit_page("activity")
+    self.session.visit_page("activity")
     temp_log = [(a.when, a.for_team) for a in self.team.activity_log if a.for_team is not None]
     json_data = """<script>var log_entries = """ + json.dumps(temp_log) + ";</script>"
     self.render("activity_log.html", json_data=json_data)
@@ -162,13 +162,13 @@ class ActivityLogPage(util.TeamPageHandler):
 class AchievementPage(util.TeamPageHandler):
   @login.required("team")
   def get(self):
-    self.team.visit_page("pins")
+    self.session.visit_page("pins")
     self.render("achievements.html", achievements=game.Achievement.ALL)
 
 class HealthAndSafetyPage(util.TeamPageHandler):
   @login.required("team", require_start=False)
   def get(self):
-    self.team.visit_page("health_safety")
+    self.session.visit_page("health_safety")
     self.render("health_safety.html")
 
 class SubmitHandler(util.TeamHandler):
