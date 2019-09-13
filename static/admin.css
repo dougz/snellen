@@ -73,6 +73,19 @@ table.info td p {
     font-size: 120%;
 }
 
+.landtag {
+    font-size: 84%;
+    font-weight: 700;
+    color: white;
+    padding: 1px 6px;
+    border-radius: 4px;
+}
+
+.round-castle { background-color: #d7d7d7; }
+.round-forest { background-color: #636946; }
+.round-space { background-color: #2b757e; }
+
+
 li { line-height: 20px; }
 ul#mainmenu li { line-height: 30px; }
 

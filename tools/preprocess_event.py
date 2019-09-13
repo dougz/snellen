@@ -47,6 +47,10 @@ def get_image_size(path):
 
 def convert_map(shortname, d, options):
   out = {"title": d["title"]}
+  if "symbol" in d:
+    out["symbol"] = d["symbol"]
+  if "land_order" in d:
+    out["land_order"] = d["land_order"]
   print(f"Parsing {shortname} \"{d['title']}\"...")
 
   base_img = os.path.join(options.input_assets, shortname,

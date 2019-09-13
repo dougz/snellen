@@ -375,8 +375,7 @@ class Team(login.LoginUser):
     if state.state == state.CLOSED:
       state.state = state.OPEN
       state.open_time = now
-      self.log_activity(now, for_team=f'<a href="{puzzle.url}">{html.escape(puzzle.title)}</a> opened.',
-                        for_admin=f'<a href="{puzzle.admin_url}">{html.escape(puzzle.title)}</a> opened.')
+      self.log_activity(now, for_team=puzzle.html + " opened.", for_admin=puzzle.admin_html + " opened.")
 
   def solve_puzzle(self, puzzle, now):
     state = self.puzzle_state[puzzle]
@@ -394,8 +393,8 @@ class Team(login.LoginUser):
           "title": html.escape(puzzle.title),
           "audio": OPTIONS.static_content.get(puzzle.land.shortname + "/solve.mp3"),
           "score": self.score}])
-      self.log_activity(now, for_team=f'<a href="{puzzle.url}">{html.escape(puzzle.title)}</a> solved.',
-                        for_admin=f'<a href="{puzzle.admin_url}">{html.escape(puzzle.title)}</a> solved.')
+      self.log_activity(now, for_team=puzzle.html + " solved.",
+                        for_admin=puzzle.admin_html + " solved.")
 
       self.achieve(Achievement.solve_puzzle, now)
 
@@ -553,6 +552,8 @@ class Land:
     self.title = cfg["title"]
     self.sortkey = util.make_sortkey(self.title)
     self.logo = cfg.get("logo")
+    self.symbol = cfg.get("symbol", "??")
+    self.land_order = cfg.get("land_order")
 
     self.base_img = cfg["base_img"]
     self.base_size = cfg["base_size"]
@@ -573,14 +574,13 @@ class Land:
       if "puzzle" in pd:
         p = pd["puzzle"]
         if OPTIONS.placeholders:
-          p = Puzzle.placeholder_puzzle(-5)
+          p = Puzzle.placeholder_puzzle(self, i, -5)
         elif p == "_":
-          p = Puzzle.placeholder_puzzle()
+          p = Puzzle.placeholder_puzzle(self, i)
         elif p.startswith("_"):
-          p = Puzzle.placeholder_puzzle(int(p[1:]))
+          p = Puzzle.placeholder_puzzle(self, i, int(p[1:]))
         else:
-          p = Puzzle.from_json(os.path.join(event_dir, "puzzles", p + ".json"))
-        p.sortkey = util.make_sortkey(p.title)
+          p = Puzzle.from_json(self, i, os.path.join(event_dir, "puzzles", p + ".json"))
         p.land = self
         p.icon = i
         i.puzzle = p
@@ -593,10 +593,16 @@ class Land:
 
   @classmethod
   def resolve_lands(cls):
+    by_land_order = []
     for land in cls.BY_SHORTNAME.values():
+      if land.land_order:
+        by_land_order.append((land.land_order, land))
       for i in land.icons.values():
         if not i.puzzle:
           i.to_land = cls.BY_SHORTNAME[i.name]
+
+    by_land_order.sort()
+    cls.ordered_lands = [i[1] for i in by_land_order]
 
 
 class Puzzle:
@@ -624,8 +630,17 @@ class Puzzle:
     self.fastest_solver = None
     self.incorrect_answers = {}
 
+
     save_state.add_instance("Puzzle:" + shortname, self)
 
+  def post_init(self, land, icon):
+    self.land = land
+    self.icon = icon
+    self.sortkey = util.make_sortkey(self.title)
+    self.html = (f'<a href="{self.url}"><span class=puzzletitle>{html.escape(self.title)}</span></a> '
+                 f'<span class="landtag round-{land.shortname}">{land.symbol}</span>')
+    self.admin_html = (f'<a href="{self.admin_url}"><span class=puzzletitle>{html.escape(self.title)}</span></a> '
+                       f'<span class="landtag round-{land.shortname}">{land.symbol}</span>')
 
   def __hash__(self):
     return id(self)
@@ -642,7 +657,7 @@ class Puzzle:
                                "FOXTROT GOLF HOTEL INDIA JULIETT").split()
 
   @classmethod
-  def placeholder_puzzle(cls, count=None):
+  def placeholder_puzzle(cls, land, icon, count=None):
     cls.PLACEHOLDER_COUNT += 1
     number = cls.PLACEHOLDER_COUNT
 
@@ -693,10 +708,11 @@ class Puzzle:
     self.for_ops_head = None
     self.for_ops_body = "<p>Teams should not need hints on this one.</p>"
 
+    self.post_init(land, icon)
     return self
 
   @classmethod
-  def from_json(cls, path):
+  def from_json(cls, land, icon, path):
     shortname = os.path.splitext(os.path.basename(path))[0]
     with open(path) as f:
       j = json.load(f)
@@ -727,6 +743,7 @@ class Puzzle:
     self.for_ops_head = j.get("for_ops_head")
     self.for_ops_body = j.get("for_ops_body")
 
+    self.post_init(land, icon)
     return self
 
 

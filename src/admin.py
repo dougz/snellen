@@ -86,6 +86,7 @@ class AdminTeamPuzzlePage(util.AdminPageHandler):
     self.render("admin_team_puzzle_page.html",
                 team=team, puzzle=puzzle, state=team.puzzle_state[puzzle])
 
+
 class AdminHintHistoryHandler(tornado.web.RequestHandler):
   @login.required("admin")
   def get(self, team_username, shortname):
@@ -151,7 +152,7 @@ class ListPuzzlesPage(util.AdminPageHandler):
   @login.required("admin")
   def get(self):
     self.render("admin_list_puzzles.html",
-                puzzles=game.Puzzle.BY_SHORTNAME)
+                lands=game.Land.ordered_lands)
 
 
 class AdminPuzzlePage(util.AdminPageHandler):
@@ -244,7 +245,7 @@ def GetHandlers():
     (r"/stop_server$", StopServerPage),
     (r"/admin/teams$", ListTeamsPage),
     (r"/admin/team/([a-z0-9_]+)$", AdminTeamPage),
-    (r"/admin/teampuzzle/([a-z0-9_]+)/([a-z0-9_]+)$", AdminTeamPuzzlePage),
+    (r"/admin/team/([a-z0-9_]+)/puzzle/([a-z0-9_]+)$", AdminTeamPuzzlePage),
     (r"/admin/puzzles$", ListPuzzlesPage),
     (r"/admin/puzzle/([a-z0-9_]+)$", AdminPuzzlePage),
     (r"/admin/hintreply", HintReplyHandler),

@@ -241,6 +241,11 @@ class HintRequestHandler(util.TeamHandler):
   def post(self):
     text = self.args["text"]
     shortname = self.args["puzzle_id"]
+    puzzle = game.Puzzle.get_by_shortname(shortname)
+    if not puzzle:
+      raise tornado.web.HTTPError(http.client.NOT_FOUND)
+    if not puzzle.hints_available:
+      raise tornado.web.HTTPError(http.client.BAD_REQUEST)
     self.team.add_hint_text(shortname, None, text)
     self.set_status(http.client.NO_CONTENT.value)
     asyncio.create_task(login.AdminUser.flush_messages())

@@ -63,7 +63,8 @@ class AdminPageHandler(tornado.web.RequestHandler):
     cls.static_content = static_content
 
   def get_template_namespace(self):
-    d = {"user": self.user}
+    d = {"user": self.user,
+         "format_timestamp": format_timestamp}
 
     wid = wait_proxy.Server.new_waiter_id()
 
@@ -84,17 +85,20 @@ class AdminPageHandler(tornado.web.RequestHandler):
       d["css"] = self.static_content["admin.css"]
 
     d["script"] += f"<script>var waiter_id = {wid};</script>"
-
     return d
 
 def format_duration(sec):
+  out = []
+  if sec < 0:
+    out.append("-")
+    sec = -sec
+
   sec = int(sec)
   hours = sec // 3600
   sec = sec % 3600
   mins = sec // 60
   sec = sec % 60
 
-  out = []
   if hours:
     out.append(f"{hours}h ")
   if hours or mins:
@@ -108,3 +112,13 @@ def make_sortkey(s):
   while len(s) > 1 and s[0] in ("the", "a", "an"):
     s.pop(0)
   return "".join(s)
+
+def format_timestamp(ts):
+  if ts is None:
+    return "\u2014"
+  else:
+    ref = game.Global.STATE.event_start_time
+    if ref:
+      return time.ctime(ts) + " (" + format_duration(ts-ref) + " into hunt)"
+    else:
+      return time.ctime(ts)

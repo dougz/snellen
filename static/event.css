@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css?family=Merriweather+Sans&display=block');
+@import url('https://fonts.googleapis.com/css?family=Merriweather+Sans:400,700,800&display=block');
 @import url('https://fonts.googleapis.com/css?family=Merriweather&display=block');
 @import url('https://fonts.googleapis.com/css?family=Inconsolata&display=block');
 @import url('https://fonts.googleapis.com/css?family=Open+Sans:600,700&display=block&text=0123456789');
@@ -103,7 +103,7 @@ a#submit:hover {
     flex-direction: column;
     align-items: center;
 
-    min-height: 1000px;
+    min-height: calc(100vh - 41px - 360px);
     background: url(@@STATIC:inner_only/land_clouds.png@@) top repeat-x,
 		url(@@STATIC:inner_only/land_tree.png@@) bottom repeat-x,
 		#c3dffb;
@@ -169,6 +169,22 @@ a#submit:hover {
 #dropdown:hover #dropdown-content {
     display: block;
 }
+
+.puzzletitle {
+    font-weight: bold;
+}
+
+.landtag {
+    font-size: 84%;
+    font-weight: 700;
+    color: white;
+    padding: 1px 6px;
+    border-radius: 4px;
+}
+
+.round-castle { background-color: #d7d7d7; }
+.round-forest { background-color: #636946; }
+.round-space { background-color: #2b757e; }
 
 #dropdown:hover #dropbtn {
     background-color: #999;
