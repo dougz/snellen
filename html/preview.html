@@ -16,6 +16,14 @@
     <form action="/upload" method="post" enctype="multipart/form-data">
       <div>
 	<p>Upload your puzzle zip file here: <input type="file" name="zip" accept="application/zip"></p>
+	<p>Select this puzzle's land style:
+	<select name="land">
+	  <option value="none">default</option>
+	  <option value="castle">The Grand Castle</option>
+	  <option value="forest">Enchanted Forest</option>
+	  <option value="space">Spaceopolis</option>
+	</select></p>
+
 	<input type="submit" name="submit">
 
 	<fieldset>

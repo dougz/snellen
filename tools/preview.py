@@ -39,7 +39,7 @@ class Puzzle:
     Puzzle.BY_PID[self.pid] = self
 
   def process(self, zip_data):
-    self.prefix = common.hash_name(zip_data)
+    self.prefix = common.hash_name(str(time.time()).encode("ascii") + zip_data)
     self.pp = ppp.Puzzle(zip_data, self.options, include_solutions=True)
     self.pp.land = Land
 
@@ -50,6 +50,11 @@ class PreviewPage(tornado.web.RequestHandler):
 
 
 class UploadHandler(tornado.web.RequestHandler):
+  LAND_NAMES = {"castle": "The Grand Castle",
+                "forest": "Enchanted Forest",
+                "space": "Spaceopolis",
+                }
+
   def initialize(self, options):
     self.options = options
 
@@ -57,6 +62,26 @@ class UploadHandler(tornado.web.RequestHandler):
     p = Puzzle()
 
     save = self.get_body_argument("save", False)
+
+    css = [self.static_content["event.css"]]
+    land = self.get_body_argument("land", None)
+    if land and land != "none":
+      path = f"{land}/land.css"
+      if path in self.static_content:
+        css.append(self.static_content[path])
+    landobj = Land()
+    landobj.title = self.LAND_NAMES.get(land, "Some Land")
+
+    d = {"script": None,
+         "json_data": None,
+         "park_open": True,
+         "css": css,
+         "supertitle": ""}
+
+    if land == "space":
+      d["supertitle"] = ('<img src="https://preview-static.storage.googleapis.com/'
+                         '83u3b9EB5Yyruqc9.png">')
+
     who = self.get_body_argument("who", "")
 
     who = who.lower()
@@ -82,15 +107,15 @@ class UploadHandler(tornado.web.RequestHandler):
       else:
         authors = ", ".join(authors[:-1] + ["and " + authors[-1]])
 
+      p.pp.land = landobj
+      d.update({"puzzle": p.pp,
+                "team": Team})
+
       path = f"html/{p.prefix}/solution.html"
       puzzle_html = self.render_string("solution_frame.html",
                                        solution_url=None,
-                                       puzzle=p.pp,
                                        authors=authors,
-                                       team=Team,
-                                       css=[self.static_content["event.css"]],
-                                       script=None,
-                                       json_data=None)
+                                       **d)
       common.upload_object("solution.html",
                            self.options.bucket, path,
                            common.CONTENT_TYPES[".html"],
@@ -101,12 +126,8 @@ class UploadHandler(tornado.web.RequestHandler):
       path = f"html/{p.prefix}/puzzle.html"
       puzzle_html = self.render_string("solution_frame.html",
                                        solution_url=p.solution_url,
-                                       puzzle=p.pp,
                                        authors=None,
-                                       team=Team,
-                                       css=[self.static_content["event.css"]],
-                                       script=None,
-                                       json_data=None)
+                                       **d)
       common.upload_object("puzzle.html",
                            self.options.bucket, path,
                            common.CONTENT_TYPES[".html"],
@@ -116,11 +137,7 @@ class UploadHandler(tornado.web.RequestHandler):
 
       path = f"html/{p.prefix}/for_ops.html"
       puzzle_html = self.render_string("preview_for_ops.html",
-                                       puzzle=p.pp,
-                                       team=Team,
-                                       css=[self.static_content["event.css"]],
-                                       script=None,
-                                       json_data=None)
+                                       **d)
       common.upload_object("for_ops.html",
                            self.options.bucket, path,
                            common.CONTENT_TYPES[".html"],
@@ -184,8 +201,10 @@ def main():
                       help="Google cloud bucket to use for saved zips.")
   parser.add_argument("--bucket", default="snellen-preview",
                       help="Google cloud bucket to use for preview content.")
-  parser.add_argument("--public_host", help="Hostname for assets in urls.")
-  parser.add_argument("--template_path")
+  parser.add_argument("--public_host", default=None,
+                      help="Hostname for assets in urls.")
+  parser.add_argument("--template_path",
+                      default=os.path.join(os.getenv("HUNT2020_BASE"), "snellen/html"))
   parser.add_argument("--skip_upload", action="store_true",
                       help="Don't actually upload to GCS.")
   parser.add_argument("--socket", default="/tmp/preview",
@@ -196,6 +215,9 @@ def main():
 
   options.credentials = oauth2.Oauth2Token(options.credentials)
   Puzzle.options = options
+
+  if not options.public_host:
+    options.public_host = options.bucket + ".storage.googleapis.com"
 
   print("Load map config...")
   with open(os.path.join(options.event_dir, "map_config.json")) as f:

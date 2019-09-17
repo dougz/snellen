@@ -15,6 +15,8 @@ def main():
                  "the preview server."))
   parser.add_argument("--preview_server", default="preview.isotropic.org")
   parser.add_argument("--local_zip", default=None)
+  parser.add_argument("--land", default="none",
+                      choices=("none", "castle", "forest", "space"))
   parser.add_argument("input_dir")
   options = parser.parse_args()
 
@@ -36,11 +38,13 @@ def main():
     with open(options.local_zip, "wb") as f:
       f.write(temp)
 
-  r = requests.post(f"https://{options.preview_server}/upload",
+  r = requests.post(f"http://{options.preview_server}/upload",
                     headers={"Authorization": BASIC_AUTH},
-                    files={"zip": temp})
+                    files={"zip": temp,
+                           "land": ("", options.land)})
   if r.status_code != 200:
     print(f"upload failed: {r}")
+    print(r.content)
     return
 
   if r.url.endswith("error.txt"):

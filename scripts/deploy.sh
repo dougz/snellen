@@ -63,6 +63,20 @@ PUZZLE_SERVERS=(badart tugofwar tunnel_of_love)
 )
 
 ##
+## preview_event
+##
+
+(
+    cd preview_event
+    base="${base}/preview_event"
+    install -m 0755 -d "${base}"
+
+    for i in map_config.json; do
+	install -m 0644 $i "${base}/${i}"
+    done
+)
+
+##
 ## puzzles w/servers
 ##
 
@@ -114,8 +128,7 @@ Section: misc
 Priority: optional
 Architecture: all
 Depends: python3 (>= 3.7), python3-bs4, python3-bcrypt, python3-pycurl,
-  python3-tornado (>= 5.1), python3-html5lib, python3-dateutil, nginx,
-  dh-systemd (>= 1.15)
+  python3-tornado (>= 5.1), python3-html5lib, python3-dateutil, nginx
 Maintainer: Doug Zongker <dougz@isotropic.org>
 Description: MIT Mystery Hunt 2020 server
 EOF

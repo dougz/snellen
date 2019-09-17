@@ -25,9 +25,10 @@
 
 
 {% block content %}
-<h1>{{puzzle.land.title}}</h1>
+<a href="{{puzzle.land.url}}"><h1 id="landtitle">{{puzzle.land.title}}</h1></a>
+
 <div id="content">
-  <h2>{{puzzle.title}}</h2>
+  <h2 id="puzzletitle"><div id=vspace></div>{% raw supertitle %}{{puzzle.title}}</h2>
   {% if authors %}<p class=flavor>by {{authors}}</p>{% end %}
   <div id="puzz">
     {% if solution_url %}
