@@ -678,9 +678,10 @@ $(document).on("click", ".emoji-picker-emoji", function(e) {
 
 $(".emoji-picker-popover-input").on("input", function() {
   var query = this.value;
-  if (query != ""){
+  if (query != "") {
     $(".emoji-picker-emoji:not([title*='"+query.toLowerCase()+"'])").hide();
-  } else{
+    $(".emoji-picker-emoji[title*='"+query.toLowerCase()+"']").show();
+  } else {
     $(".emoji-picker-emoji").show();
   }
 });
