@@ -11,7 +11,7 @@
     <form action="/login_submit" method="post">
       <input type="text" placeholder="Username" name="username"
 	     {% if default_username %}value="{{default_username}}"{% end %}
-	     required>
+	     spellcheck="false" required>
       <input type="password" placeholder="Password" name="password"
 	     {% if default_password %}value="{{default_password}}"{% end %}
 	     required>
