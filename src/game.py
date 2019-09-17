@@ -648,6 +648,8 @@ class Puzzle:
     self.land = land
     self.icon = icon
     self.sortkey = util.make_sortkey(self.title)
+    # TODO(Rich): set this to the correct round (or do this another way)
+    self.emojify = land.shortname == "castle"
     self.html = (f'<a href="{self.url}"><span class=puzzletitle>{html.escape(self.title)}</span></a> '
                  f'<span class="landtag round-{land.shortname}">{land.symbol}</span>')
     self.admin_html = (f'<a href="{self.admin_url}"><span class=puzzletitle>{html.escape(self.title)}</span></a> '

@@ -378,6 +378,112 @@ input#answer {
     font-family: 'Inconsolata', monospace;
 }
 
+
+/** emoji picker support **/
+
+#emoji-picker-button {
+    margin-left: -33px;
+    padding: 10px;
+    color: grey;
+}
+
+#emoji-picker-button:hover {
+    color: black;
+}
+
+.emoji-picker-popover {
+    z-index: 2147483003;
+    position: absolute;
+    top: 320px;
+    background-color: #fff;
+    transition-duration: 200ms;
+    transition-delay: 0ms;
+    transform-style: flat;
+    transform-origin: 50% 50% 0;
+    opacity: 0;
+    transition: all 0.2s linear;
+    visibility: none;
+}
+
+.emoji-picker-popover.active {
+    visibility: visible;
+    opacity: 1;
+}
+
+.emoji-picker {
+    width: 550px;
+    height: 220px;
+}
+
+.emoji-picker-popover-header {
+    position: absolute;
+    top: 0;
+    left: 12px;
+    right: 20px;
+}
+
+.emoji-picker-popover-search-icon {
+    color: grey;
+}
+
+.emoji-picker-popover-input {
+    font-weight: 400;
+    font-size: 14px;
+    color: #6e7a89;
+    height: 40px;
+    width: 50ex;
+    box-sizing: border-box;
+    border:none;
+    outline: none;
+}
+
+.emoji-picker-popover-body {
+    position: absolute;
+    top: 40px;
+    left: 0;
+    right: 0;
+    bottom: 5px;
+    padding: 0 20px;
+    overflow-y: scroll;
+}
+
+.emoji-picker-group {
+    margin: 10px -5px;
+}
+
+.emoji-picker-group {
+    margin: 10px -5px;
+}
+
+.emoji-picker-group-title {
+    color: #b8c3ca;
+    font-weight: 400;
+    font-size: 13px;
+    margin: 5px;
+}
+
+.emoji-picker-emoji {
+    padding: 5px;
+    width: 30px;
+    line-height: 30px;
+    display: inline-table;
+    text-align: center;
+    cursor: pointer;
+    vertical-align: middle;
+    font-size: 28px;
+    transition: -webkit-transform 60ms ease-out;
+    transition: transform 60ms ease-out;
+    transition: transform 60ms ease-out,-webkit-transform 60ms ease-out;
+    transition-delay: 60ms;
+}
+
+.emoji-picker-emoji:hover {
+    transition-delay: 0ms;
+    -webkit-transform: scale(1.4);
+    -ms-transform: scale(1.4);
+    transform: scale(1.4);
+}
+
 /** puzzle content **/
 
 .flavor { font-style: italic; }
