@@ -1,4 +1,4 @@
-/** @type{string} */
+/** @type{?string} */
 var puzzle_id;
 
 /** @type{MapData} */
@@ -13,16 +13,28 @@ var puzzle_init;
 /** @type{number} */
 var waiter_id;
 
+/** @type{Storage} */
+var localStorage;
+
+/** @type{?number} */
+var open_time;
+
 class Message {
     constructor() {
 	/** @type{string} */
 	this.method;
-	/** @type{string} */
+	/** @type{?string} */
 	this.puzzle_id;
-	/** @type{string} */
+	/** @type{?string} */
 	this.title;
 	/** @type{?string} */
 	this.audio;
+	/** @type{?number} */
+	this.new_start;
+	/** @type{?string} */
+	this.url;
+	/** @type{?number} */
+	this.score;
     }
 }
 
@@ -62,6 +74,24 @@ class SubmissionHistory {
     }
 }
 
+class HintMessage {
+    constructor() {
+	/** @type{string} */
+	this.sender;
+	/** @type{number} */
+	this.when;
+	/** @type{string} */
+	this.text;
+    }
+}
+
+class HintHistory {
+    constructor() {
+	/** @type{Array<HintMessage>} */
+	this.history;
+    }
+}
+
 class MapItem {
     constructor() {
 	/** @type{string} */
@@ -74,6 +104,8 @@ class MapItem {
 	this.answer;
 	/** @type{?string} */
 	this.icon_url;
+	/** @type{?string} */
+	this.mask_url;
 	/** @type{?number} */
 	this.pos_x;
 	/** @type{?number} */
@@ -86,6 +118,8 @@ class MapItem {
 	this.poly;
 	/** @type{?string} */
 	this.animate;
+	/** @type{?boolean} */
+	this.new_open;
     }
 }
 

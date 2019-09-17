@@ -1,0 +1,53 @@
+## Set up GCS bucket
+
+create bucket in console
+
+use "bucket policy only" permissions
+
+give Storage Object Admin access to test-bucket-uploader@hunt2020.iam.gserviceaccount.com
+
+give "Storage Legacy Object Reader" access to "allUsers"
+important to not use "Storage Object Viewer"!
+
+
+configure CORS (gsutil cors set)
+[{"maxAgeSeconds": 3600, "method": ["GET", "HEAD"], "origin": ["https://pennypark.fun"], "responseHeader": ["Content-Type"]},
+ {"maxAgeSeconds": 3600, "method": ["GET", "HEAD"], "origin": ["http://snellen"], "responseHeader": ["Content-Type"]}]
+
+
+## Set up CDN
+
+Network Services > Cloud CDN
+
+Add Origin
+
+Load balancer > create a load balancer
+name "assets"
+backend configuration > backend buckets > create a backend bucket
+name "assets", bucket you created
+check "enable cloud CDN"
+
+frontend configuration
+name "assets-http"
+protocol http
+ip address > create
+    name "assets", reserve
+add frontend IP & port
+protocol https
+name "assets-https"
+select "assets" IP
+certificate > create a new certificate
+name "assets-cert"
+"Create google-managed certificate"
+domain "assets.pennypark.fun"
+
+repeat for ipv6
+
+review and finalize
+
+At linode, add DNS A/AAAA records for "assets".
+
+wait for cert to be issued
+"gcloud beta compute ssl-certificates list"
+
+

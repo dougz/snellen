@@ -4,6 +4,8 @@ bin
 external
 misc
 
+test_event/assets/achievements/orig
+
 .project
 .pydevproject
 .settings

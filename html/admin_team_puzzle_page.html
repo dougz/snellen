@@ -1,0 +1,39 @@
+{% extends "admin_base.html" %}
+{% block colorscheme %}darkblue{% end %}
+
+{% block title %}Team "{{team.name}}" &nbsp;&#x25b8;&nbsp; Puzzle "{{puzzle.title}}"{% end %}
+
+{% block head %}
+<script>
+  var team_username = "{{team.username}}";
+  var puzzle_id = "{{puzzle.shortname}}";
+</script>
+{% end %}
+
+
+{% block content %}
+
+<table class=info>
+  <tr><th>puzzle</th><td><a href="/admin/puzzle/{{puzzle.shortname}}">{{puzzle.title}}</a></td></tr>
+
+  <tr><th>state</th><td>{{state.state}}</td></tr>
+  <tr><th>open time</th><td>{{format_timestamp(state.open_time)}}</td></tr>
+  <tr><th>solve time</th><td>{{format_timestamp(state.solve_time)}}</td></tr>
+</table>
+
+<h2>Submission log</h2>
+<div id="teamlog">
+  <ul>
+    {% for t, e in state.admin_log %}
+    <li>{{format_timestamp(t)}} &mdash; {% raw e %}</li>
+    {% end %}
+  </ul>
+</div>
+
+
+<div id="hinthistory"></div>
+<textarea rows=10 id="replytext"></textarea>
+<button id="hintreply">Send reply</button>
+
+
+{% end %}

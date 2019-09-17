@@ -1,0 +1,5 @@
+[Unit]
+Description=Hunt 2020
+
+[Install]
+WantedBy=multi-user.target

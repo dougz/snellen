@@ -1,15 +1,24 @@
 {% extends "admin_base.html" %}
+{% block colorscheme %}darkergray{% end %}
 
-{% block title %}Admin Home{% end %}
+{% block title %}Home{% end %}
+
+
 
 {% block content %}
-<ul>
+<ul id="mainmenu">
   {% if not game_state.event_start_time and user.has_role("control_event") %}
-  <li><a href="/start_event">Start event!</a></li>
+  <li>
+    <form action="/change_start" method="get">
+      <button type="submit">Change start time</button>
+      to
+      <input type="text" placeholder="Start time" name="start_time"
+	     value="{{expected_start_time_text}}" required>
+  </li>
   {% end %}
-  <li><a href="/teams">Team list</a></li>
-  <li><a href="/puzzles">Puzzle list</a></li>
-  <li><a href="/admin_users">Admin users</a></li>
+  <li><a href="/admin/teams">Team list</a></li>
+  <li><a href="/admin/puzzles">Puzzle list</a></li>
+  <li><a href="/admin/users">Admin users</a></li>
   {% if user.has_role("control_event") %}
   <li><a href="/stop_server">Stop server</a></li>
   {% end %}

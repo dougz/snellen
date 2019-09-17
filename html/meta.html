@@ -1,0 +1,91 @@
+<html>
+  <head>
+    <title>{{puzzle.title}} Preview</title>
+    <style>
+      body { font-family: sans-serif; }
+      table { border-collapse: collapse; }
+      .imp { font-weight: bold; font-size: 144%; background-color: #ffffcc}
+      .mono { font-family: monospace; }
+      .b { font-weight: bold; }
+      th { text-align: right; background-color: #f8f8f8; }
+      th.top { vertical-align: top; }
+      th, td { padding: 16px; }
+      a.content {
+	  color: white;
+	  font-weight: bold;
+	  padding: 8px 16px;
+	  margin: 0 16px;
+	  font-size: 120%;
+	  display: inline-block;
+	  text-decoration: none;
+	  border-radius: 4px;
+      }
+      .puzzle { background-color: #009900; }
+      .solution { background-color: #990000; }
+      .for_ops { background-color: #000099; }
+      p { margin-bottom: 4px; }
+    </style>
+  </head>
+  <body>
+    <table>
+      <tr><th>shortname</th><td class=mono>{{puzzle.shortname}}</td></tr>
+      <tr><th>title</th><td class=imp>{{puzzle.title}}</td></tr>
+
+      <tr>
+	<th class=top>author(s)</th>
+	<td>
+	  {% for i, a in enumerate(puzzle.authors) %}
+	  {% if i %}<br>{% end %}{{a}}
+	  {% end %}
+	</td>
+      </tr>
+
+      <tr><th>oncall</th><td>{{puzzle.oncall}}</td></tr>
+      <tr>
+	<th>puzzletron</th>
+	<td><a href="https://ptron.teamleftout.org/puzzle.php?pid={{puzzle.puzzletron_id}}">{{puzzle.puzzletron_id}}</a>
+      </tr>
+
+      <tr>
+	<th>content</th>
+	<td>
+	  <a class="puzzle content" href="{{puzzle_url}}">Puzzle</a>
+	  <a class="solution content" href="{{solution_url}}">Solution</a>
+	  <a class="for_Ops content" href="{{for_ops_url}}">Ops</a>
+	</td>
+      </tr>
+
+      <tr>
+	{% if len(puzzle.answers) == 1 %}
+	<th>answer</th><td class="mono b">{{puzzle.answers[0]}}</td>
+	{% else %}
+	<th class=top>answers ({{len(puzzle.answers)}})</th>
+	<td class="mono b">
+	  {% for i, a in enumerate(puzzle.answers) %}
+	  {% if i > 0 %}<br/>{% end %}
+	  {{a}}
+	  {% end %}
+	{% end %}
+      </tr>
+
+      {% if puzzle.incorrect_responses %}
+      <tr>
+	<th class=top>incorrect responses</th>
+	<td>
+	  {% for i, (a, r) in enumerate(sorted(puzzle.incorrect_responses.items())) %}
+	  <p>
+	  <span class="mono b">{{a}}</span> &mdash;
+	  {% if r is None %}<i>default</i> (Keep going&hellip;){% else %}{% raw r %}{% end %}
+	  </p>
+	  {% end %}
+	</td>
+      </tr>
+      {% end %}
+    </table>
+  </body>
+</html>
+
+
+
+
+

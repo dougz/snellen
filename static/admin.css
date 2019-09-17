@@ -1,15 +1,136 @@
+@import url('https://fonts.googleapis.com/css?family=Inconsolata&display=block');
+
 body {
     font-family: sans-serif;
+    margin: 0;
 }
 
-.admin-role {
+.mono { font-family: 'Inconsolata', monospace; }
+.answer { font-weight: bold; text-transform: uppercase; }
+.b { font-weight: bold; }
+
+a { text-decoration: none; }
+
+table.info th {
+    text-align: right;
+    padding-right: 20px;
+    padding-top: 8px;
+}
+
+table.info td { padding-top: 8px; }
+
+table.info th.top {
+    vertical-align: top;
+}
+
+table.info { margin: 20px; }
+
+table.info td p {
+    margin-block-start: 0;
+    margin-block-end: 0;
+}
+
+/* #5d5c61  #379683  #7395ae  #557a95  #b1a296 */
+
+.lightblue { background-color: #7395ae; }
+.darkblue { background-color: #557a95; }
+.accentgreen { background-color: #379683; }
+.darkergray { background-color: #5d5c61; }
+.lightergray { background-color: #b1a296; }
+
+#topnav {
+    min-width: 1060px;
+    height: 24px;
+    font-size: 18px;
+    color: white;
+    border-bottom: 1px solid black;
+    padding: 8px 20px;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    z-index: 1000;
+    position: relative;
+
+    user-select: none;
+}
+
+#topnav a { color: white; }
+
+/* The spacer should take up all the extra space, forcing the items
+   before it to the left and those after it to the right. */
+#topnav .spacer {
+    flex-grow: 100;
+}
+
+#topnav > span, #topnav > a {
+    margin: 0 20px;
+}
+
+#topnav #title {
+    font-weight: bold;
+    font-size: 120%;
+}
+
+.landtag {
+    font-size: 84%;
+    font-weight: 700;
+    color: white;
+    padding: 1px 6px;
+    border-radius: 4px;
+}
+
+.round-castle { background-color: #d7d7d7; }
+.round-forest { background-color: #636946; }
+.round-space { background-color: #2b757e; }
+
+
+li { line-height: 20px; }
+ul#mainmenu li { line-height: 30px; }
+
+table#user-roles tr.h { background-color: #f0f0f8; }
+table#user-roles { margin: 20px; border-collapse: collapse; }
+table#user-roles th { padding: 8px 20px 8px; color: white; }
+table#user-roles td { padding: 4px 20px 4px; }
+table#user-roles th.left { text-align: left; }
+
+table#user-roles .admin-role {
     text-align: center;
 }
 
-span.username {
-    float: right;
-    font-size: 84%;
+
+div#confirm {
+    margin: 20px;
+    font-size: 120%;
 }
+
+div.buttons {
+    padding: 20px;
+}
+
+div.buttons > a {
+    color: white;
+    padding: 15px 32px;
+    border-radius: 8px;
+    width: 180px;
+    margin: 20px 12px;
+    font-size: 120%;
+    font-weight: bold;
+    outline: none;
+    text-decoration: none;
+}
+
+div.buttons > a.green {
+    background-color: #4caf50;
+}
+
+div.buttons > a.red {
+    background-color: #af4c50;
+}
+
+
+
 
 hr {
     color: #999;
@@ -26,7 +147,7 @@ div.box {
     background-color: #eee;
     border: 1px solid black;
     padding: 16px;
-    margin: 16px;
+    margin: 20px;
 }
 
 div.box h2 {
@@ -42,4 +163,16 @@ div.box label {
 
 div.box button {
     margin-top: 8px;
+}
+
+div#for_ops, div#teamlog {
+    margin: 20px;
+    padding: 20px;
+    border: 1px solid #999;
+    background-color: #f8f8f8;
+    box-shadow: 0 0 6px #ddd;
+}
+
+body > p, body > h2 {
+    margin: 20px;
 }

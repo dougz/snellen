@@ -1,0 +1,69 @@
+@import url('https://fonts.googleapis.com/css?family=Merriweather+Sans&display=block');
+@import url('https://fonts.googleapis.com/css?family=Merriweather&display=block');
+@import url('https://fonts.googleapis.com/css?family=Inconsolata&display=block');
+
+body {
+    background: url(@@STATIC:inner_only/land_clouds.png@@) top repeat-x,
+		url(@@STATIC:inner_only/land_tree.png@@) bottom repeat-x,
+		#c3dffb;
+    font-family: 'Merriweather Sans', sans-serif;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-size: 144%;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+
+img { margin-bottom: 40px; }
+
+label {
+    width: 5em;
+    text-align: right;
+    display: inline-block;
+}
+
+input {
+    font-size: 100%;
+    font-family: 'Merriweather Sans', monospace;
+    margin: 8px 8px;
+    border: none;
+    border-radius: 15px;
+    padding: 8px 16px;
+    box-sizing: border-box;
+    width: 332px;
+    outline: none;
+}
+
+::placeholder {
+    color: #ddd;
+}
+
+button {
+    font-family: 'Merriweather Sans', sans-serif;
+    color: white;
+    font-size: 100%;
+    padding: 8px 16px;
+    margin: 8px 8px;
+    box-sizing: border-box;
+    border: 1px solid #395483;
+    border-radius: 15px;
+    width: 332px;
+    background: linear-gradient(to bottom, #4c70af, #436299);
+    outline: none;
+}
+
+b {
+    display: inline-block;
+    margin: 8px 8px;
+    color: #c00;
+}

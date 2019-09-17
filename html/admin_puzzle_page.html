@@ -1,0 +1,74 @@
+{% extends "admin_base.html" %}
+{% block colorscheme %}lightblue{% end %}
+
+{% block head %}
+{% if puzzle.for_ops_head %}{% raw puzzle.for_ops_head %}{% end %}
+{% end %}
+
+{% block title %}Puzzle "{{puzzle.title}}"{% end %}
+
+{% block content %}
+
+<table class=info>
+  <tr><th>shortname</th><td class=mono>{{puzzle.shortname}}</td></tr>
+  <tr><th>oncall</th><td>{{puzzle.oncall}}</td></tr>
+  <tr>
+    <th class=top>author(s)</th>
+    <td>
+      {% for i, a in enumerate(puzzle.authors) %}
+      {% if i %}<br>{% end %}{{a}}
+      {% end %}
+    </td>
+  </tr>
+  <tr>
+    <th>puzzletron</th>
+    <td><a href="https://ptron.teamleftout.org/puzzle.php?pid={{puzzle.puzzletron_id}}">{{puzzle.puzzletron_id}}</a>
+  </tr>
+  <tr>
+    {% set answers = sorted(list(puzzle.display_answers.values())) %}
+    {% if len(answers) == 1 %}
+    <th>answer</th><td class="mono answer">{{answers[0]}}</td>
+    {% else %}
+    <th class=top>answers ({{len(answers)}})</th>
+    <td class="mono answer">
+      {% for i, a in enumerate(answers) %}
+      {% if i > 0 %}<br/>{% end %}
+      {{a}}
+      {% end %}
+      {% end %}
+  </tr>
+  {% if puzzle.incorrect_responses %}
+  <tr>
+    <th class=top>incorrect responses</th>
+    <td>
+      {% for i, (a, r) in enumerate(sorted(puzzle.incorrect_responses.items())) %}
+      <p>
+	<span class="mono b">{{a}}</span> &mdash;
+	{% if r is None %}<i>default</i> (Keep going&hellip;){% else %}{% raw r %}{% end %}
+      </p>
+      {% end %}
+    </td>
+  </tr>
+  {% end %}
+  <tr><th>hints open</th><td>{{"yes" if puzzle.hints_available else "no"}}</td></tr>
+
+  <tr><th class=top>solves ({{len(solve_list)}})</th>
+    <td>
+      {% for i, (_, t, d) in enumerate(solve_list) %}
+      {% if i > 0 %}<br>{% end %}
+      {% if i >= 5 %}
+      &hellip; and {{len(solve_list)-5}} more &hellip;
+      {% break %}
+      {% end %}
+      <a href="/admin/team/{{t.username}}/puzzle/{{puzzle.shortname}}">{{t.name}}</a> ({{d}})
+      {% end %}
+    </td>
+</table>
+
+<p><b>BTS hack:</b> <a href="/admin/openhints/{{puzzle.shortname}}">make hints available</a></p>
+
+<div id="for_ops">
+  {% raw puzzle.for_ops_body %}
+</div>
+
+{% end %}

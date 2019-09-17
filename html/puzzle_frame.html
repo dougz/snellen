@@ -2,20 +2,39 @@
 
 {% block title %}{{puzzle.title}}{% end %}
 
-{% block crumbs %}
-&gt; <a href="{{puzzle.land.url}}">{{puzzle.land.title}}</a>
-{% end %}
-
 {% block topnav_extraright %}
+{% if solved %}
+<a id="submit" class="submitsolved">Solved</a>
+{% else %}
 <a id="submit">Submit</a>
+{% end %}
+<a id="hinttoggle" style="display: {{"inline" if puzzle.hints_available else "none"}}">Hints</a>
 {% end %}
 
 {% block midnav %}
-<div id="panel" class="submit-panel">
-  <div id="thumb" style="width: {{puzzle.icon.thumb_size[0]}}px; height: {{puzzle.icon.thumb_size[1]}}px;">
-    <img class="base" src="{{puzzle.icon.images[thumb]}}"></img>
+<div id="hintpanel">
+  <div id="hinthistory"></div>
+  <textarea rows=3 id="hinttext"></textarea>
+  <button id="hintrequest">Request hint</button>
+</div>
+<div id="submitpanel">
+  <div id="thumb" style="width: {{thumb.size[0]}}px; height: {{thumb.size[1]}}px;">
+    <a href="{{puzzle.land.url}}"><img class="base" src="{{thumb.url}}"></img></a>
   </div>
-  <div id="submit_table"></div>
+  <div id="submitdata">
+    <div id="submit_table_scroll">
+      <table id="submit_table">
+	<tr><th id="st_answer">Answer</th><th id="st_time">Submit time</th><th id="st_result">Result</th></tr>
+	<tbody id="submit_table_body">
+	</tbody>
+      </table>
+    </div>
+    <div id="submitentry">
+      <input type=text maxlength=40 id="answer" name="answer">
+      <button id="submitsubmit">Submit</button>
+      <span id="top_note"></span>
+    </div>
+  </div>
 </div>
 {% end %}
 
@@ -26,8 +45,14 @@
 
 
 {% block content %}
-<h1>{{puzzle.title}}</h1>
-<div id="puzz">
-  {% raw puzzle.html_body %}
+<a href="{{puzzle.land.url}}"><h1 id="landtitle">{{puzzle.land.title}}</h1></a>
+
+<div id="content">
+
+  <h2 id="puzzletitle"><div id=vspace></div>{% raw supertitle %}{{puzzle.title}}</h2>
+  <div id="puzz">
+    {% raw puzzle.html_body %}
+  </div>
 </div>
+
 {% end %}

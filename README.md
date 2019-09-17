@@ -12,17 +12,9 @@
 
 - Install the Python 3 libraries
 
-    Linux:
+    Linux: `apt-get install python3-bs4 python3-bcrypt python3-html5lib python3-tornado python3-pycurl`
 
-    `apt-get install python3-bs4 python3-bcrypt python3-lxml python3-tornado python3-pycurl`
-
-    Mac:
-
-    `brew install openssl`
-
-    `pip3 install bs4 bcrypt lxml tornado`
-
-    `pip3 install --install-option="--with-openssl" --install-option="--openssl-dir=/usr/local/opt/openssl" pycurl`
+    Mac: `pip3 install bs4 bcrypt html5lib tornado`
 
 - Download and symlink closure and closure-compiler in external
 
@@ -65,6 +57,23 @@
     match your environment.  Also, if you already have nginx installed for other purposes, remove
     the "default server" from the "listen" lines and uncomment the server_name directive.
 
+- Clone the test_event_src and test_event repos.  This should go into
+  directories parallel to the snellen source directory:
+
+    ```
+    /some/path/to/snellen            <-- $SNELLEN_BASE points here
+    /some/path/to/test_event
+    /some/path/to/test_event_src
+    ```
+
+  `test_event` is created from `test_event_src` by running the
+  preprocess_* scripts in snellen/tools on the source config files and
+  puzzle zips in test_event_src.  For convenience you can just clone
+  the prebuild `test_event' repo instead.
+
+  TODO(dougz): document how to build test_event from test_event_src
+
+
 
 # Running the tests
 
@@ -75,6 +84,7 @@
 
 `sudo nginx`  (sudo needed to listen on port 80)
 
-`scripts/run.sh`
-
-
+```
+cd $SNELLEN_BASE/..
+./snellen/scripts/run.sh
+```

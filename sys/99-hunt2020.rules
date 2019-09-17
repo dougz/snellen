@@ -1,0 +1,1 @@
+SUBSYSTEM=="net", ACTION=="add|change", KERNEL=="eth?" ATTR{mtu}="9000" ATTR{tx_queue_len}="5000"

@@ -2,9 +2,20 @@
 
 {% block title %}Activity Log{% end %}
 
-{% block content %}
-<h1>Activity Log</h1>
+{% block head %}
+<style>
+  #content a { color: inherit; }
+  li { line-height: 1.6; }
+</style>
+{% end %}
 
-<ul id=log>
-</ul>
+
+
+{% block content %}
+<div id="content">
+  <h1 id="pagetitle">Activity Log</h1>
+
+  <ul id=log>
+  </ul>
+</div>
 {% end %}

@@ -14,6 +14,7 @@ import util
 
 class LandMapPage(util.TeamPageHandler):
   RECENT_SECONDS = 10.0
+  NEW_PUZZLE_SECONDS = 300  # 5 minutes
 
   @login.required("team")
   def get(self, shortname):
@@ -26,9 +27,11 @@ class LandMapPage(util.TeamPageHandler):
     if land not in self.team.open_lands:
       raise tornado.web.HTTPError(http.client.NOT_FOUND)
 
+    self.land = land
+
     items = []
-    mapdata = {"base_url": land.base_img,
-               "items": items}
+    mapdata = {"base_url": land.base_img}
+    now = time.time()
 
     for i in land.icons.values():
       if i.puzzle:
@@ -45,34 +48,68 @@ class LandMapPage(util.TeamPageHandler):
           if "answer" in d: d["answer"] += ", \u2026"
 
           d["solved"] = False
-          d["icon_url"] = i.images["unlocked"]
+          if i.unlocked.url:
+            d["icon_url"] = i.unlocked.url
+            d["mask_url"] = i.unlocked_mask.url
+            d["pos_x"], d["pos_y"] = i.unlocked.pos
+            d["width"], d["height"] = i.unlocked.size
+            if i.unlocked.poly: d["poly"] = i.unlocked.poly
+
+          if (now - st.open_time < self.NEW_PUZZLE_SECONDS and
+              st.open_time != game.Global.STATE.event_start_time):
+            d["new_open"] = True
 
         elif st.state == game.PuzzleState.SOLVED:
           d["solved"] = True
-          d["icon_url"] = i.images["solved"]
+          if i.solved.url:
+            d["icon_url"] = i.solved.url
+            d["mask_url"] = i.solved_mask.url
+            d["pos_x"], d["pos_y"] = i.solved.pos
+            d["width"], d["height"] = i.solved.size
+            if i.solved.poly: d["poly"] = i.solved.poly
+
+        items.append((p.sortkey, d))
       else:
         if i.to_land not in self.team.open_lands: continue
         d = { "name": i.to_land.title,
               "url": i.to_land.url,
-              "icon_url": i.images["unlocked"] }
+              "icon_url": i.unlocked.url }
+        d["pos_x"], d["pos_y"] = i.unlocked.pos
+        d["width"], d["height"] = i.unlocked.size
+        if i.unlocked.poly: d["poly"] = i.unlocked.poly
+        items.append((i.to_land.sortkey, d))
 
-      d["pos_x"], d["pos_y"] = i.pos
-      d["width"], d["height"] = i.size
-      if i.poly: d["poly"] = i.poly
-      items.append(d)
+    items.sort()
+    mapdata["items"] = [i[1] for i in items]
 
     json_data = "<script>var mapdata = """ + json.dumps(mapdata) + ";</script>"
 
     self.render("land.html", land=land, json_data=json_data)
 
+  def get_template_namespace(self):
+    d = super().get_template_namespace()
+    if hasattr(self, "land"):
+      if False and self.application.settings.get("debug"):
+        d["css"].append(f"/assets/{self.land.shortname}/land.css")
+      else:
+        css = f"{self.land.shortname}/land.css"
+        if css in self.static_content:
+          d["css"].append(self.static_content[css])
+    return d
+
 
 class EventHomePage(LandMapPage):
-  @login.required("team", require_start=False)
+  @login.required()
   def get(self):
-    if not game.Global.STATE.event_start_time:
-      self.render("not_started.html")
-      return
-    self.show_map("inner_only")
+    if self.team:
+      if not game.Global.STATE.event_start_time:
+        json_data = "<script>var open_time = """ + str(game.Global.STATE.expected_start_time) + ";</script>"
+        self.render("not_started.html", json_data=json_data,
+                    css=(self.static_content["notopen.css"],))
+        return
+      self.show_map("inner_only")
+    elif self.user:
+      self.redirect("/admin")
 
 
 class PuzzlePage(util.TeamPageHandler):
@@ -89,25 +126,57 @@ class PuzzlePage(util.TeamPageHandler):
 
     if (state.state == game.PuzzleState.SOLVED and
         not state.recent_solve()):
-      thumb = "solved_thumb"
+      thumb = puzzle.icon.solved_thumb
     else:
-      thumb = "unlocked_thumb"
+      thumb = puzzle.icon.unlocked_thumb
+
+    if puzzle.icon.headerimage:
+      supertitle=f'<img src="{puzzle.icon.headerimage}"><br>'
+    else:
+      supertitle=""
 
     self.puzzle = puzzle
-    self.render("puzzle_frame.html", thumb=thumb)
+    self.render("puzzle_frame.html", thumb=thumb, supertitle=supertitle,
+                solved=(state.state == state.SOLVED))
+
+  def get_template_namespace(self):
+    land = self.puzzle.land
+    d = super().get_template_namespace()
+    if False and self.application.settings.get("debug"):
+      d["css"].append(f"/assets/{land.shortname}/land.css")
+    else:
+      css = f"{land.shortname}/land.css"
+      if css in self.static_content:
+        d["css"].append(self.static_content[css])
+    return d
+
 
 class ActivityLogPage(util.TeamPageHandler):
   @login.required("team")
   def get(self):
-    json_data = """<script>var log_entries = """ + json.dumps(self.team.activity_log) + ";</script>"
+    self.session.visit_page("activity")
+    temp_log = [(a.when, a.for_team) for a in self.team.activity_log if a.for_team is not None]
+    json_data = """<script>var log_entries = """ + json.dumps(temp_log) + ";</script>"
     self.render("activity_log.html", json_data=json_data)
 
-class SubmitHandler(tornado.web.RequestHandler):
+class AchievementPage(util.TeamPageHandler):
+  @login.required("team")
+  def get(self):
+    self.session.visit_page("pins")
+    self.render("achievements.html", achievements=game.Achievement.ALL)
+
+class HealthAndSafetyPage(util.TeamPageHandler):
+  @login.required("team", require_start=False)
+  def get(self):
+    self.session.visit_page("health_safety")
+    self.render("health_safety.html")
+
+class SubmitHandler(util.TeamHandler):
   def prepare(self):
     self.args = json.loads(self.request.body)
 
   @login.required("team", on_fail=http.client.UNAUTHORIZED)
-  async def post(self):
+  def post(self):
     answer = self.args["answer"]
 
     # Worst-case option for entering a single-emoji answer: enter the
@@ -121,14 +190,14 @@ class SubmitHandler(tornado.web.RequestHandler):
 
     submit_id = self.team.next_submit_id()
 
-    msgs = [{"method": "history_change", "puzzle_id": shortname}]
-    r = self.team.submit_answer(submit_id, shortname, answer)
-    if r: msgs.extend(r)
-    await self.team.send_message(msgs)
-    self.set_status(http.client.NO_CONTENT.value)
+    result = self.team.submit_answer(submit_id, shortname, answer)
+    if result:
+      self.write(result)
+      self.set_status(http.client.CONFLICT.value)
+    else:
+      self.set_status(http.client.NO_CONTENT.value)
 
-
-class SubmitHistoryHandler(tornado.web.RequestHandler):
+class SubmitHistoryHandler(util.TeamHandler):
   @login.required("team", on_fail=http.client.UNAUTHORIZED)
   def get(self, shortname):
     state = self.team.get_puzzle_state(shortname)
@@ -152,47 +221,60 @@ class SubmitHistoryHandler(tornado.web.RequestHandler):
       d["total"] = len(state.puzzle.answers)
 
     if state.recent_solve():
-      d["overlay"] = state.puzzle.icon.images["solved_thumb"]
-      d["width"] = state.puzzle.icon.size[0]
-      d["height"] = state.puzzle.icon.size[1]
+      d["overlay"] = state.puzzle.icon.solved_thumb.url
+      d["width"], d["height"] = state.puzzle.icon.solved_thumb.size
 
     self.write(json.dumps(d))
 
-class SubmitCancelHandler(tornado.web.RequestHandler):
+class SubmitCancelHandler(util.TeamHandler):
   @login.required("team", on_fail=http.client.UNAUTHORIZED)
-  async def get(self, shortname, submit_id):
+  def get(self, shortname, submit_id):
     submit_id = int(submit_id)
     self.team.cancel_submission(submit_id, shortname)
-    await self.team.send_message({"method": "history_change", "puzzle_id": shortname})
+    self.team.send_messages([{"method": "history_change", "puzzle_id": shortname}])
 
-# Debug-only handlers that reread the source file each time.
+class HintRequestHandler(util.TeamHandler):
+  def prepare(self):
+    self.args = json.loads(self.request.body)
 
-class ClientJS(tornado.web.RequestHandler):
-  @login.required("team")
-  def get(self):
-    self.set_header("Content-Type", "text/javascript; charset=utf-8")
-    with open("src/client.js", "rb") as f:
-      self.write(f.read())
+  @login.required("team", on_fail=http.client.UNAUTHORIZED)
+  def post(self):
+    text = self.args["text"]
+    shortname = self.args["puzzle_id"]
+    puzzle = game.Puzzle.get_by_shortname(shortname)
+    if not puzzle:
+      raise tornado.web.HTTPError(http.client.NOT_FOUND)
+    if not puzzle.hints_available:
+      raise tornado.web.HTTPError(http.client.BAD_REQUEST)
+    self.team.add_hint_text(shortname, None, text)
+    self.set_status(http.client.NO_CONTENT.value)
+    asyncio.create_task(login.AdminUser.flush_messages())
 
-class EventCSS(tornado.web.RequestHandler):
-  @login.required("team", require_start=False)
-  def get(self):
-    self.set_header("Content-Type", "text/css; charset=utf-8")
-    with open("static/event.css", "rb") as f:
-      self.write(f.read())
+class HintHistoryHandler(util.TeamHandler):
+  @login.required("team", on_fail=http.client.UNAUTHORIZED)
+  def get(self, shortname):
+    state = self.team.get_puzzle_state(shortname)
+    if not state:
+      raise tornado.web.HTTPError(http.client.NOT_FOUND)
 
-def GetHandlers(debug):
+    d = {"history": [msg.json_dict() for msg in state.hints]}
+    self.write(json.dumps(d))
+
+
+def GetHandlers():
   handlers = [
     (r"/", EventHomePage),
     (r"/log", ActivityLogPage),
+    (r"/pins", AchievementPage),
+    (r"/health_and_safety", HealthAndSafetyPage),
     (r"/land/([a-z0-9_]+)", LandMapPage),
-    (r"/puzzle/([^/]+)/?", PuzzlePage),
+    (r"/puzzle/([a-z0-9_]+)/?", PuzzlePage),
     (r"/submit", SubmitHandler),
     (r"/submit_history/([a-z][a-z0-9_]*)", SubmitHistoryHandler),
     (r"/submit_cancel/([a-z][a-z0-9_]*)/(\d+)", SubmitCancelHandler),
-    ]
-  if debug:
-    handlers.append((r"/client.js", ClientJS))
-    handlers.append((r"/event.css", EventCSS))
+    (r"/hintrequest", HintRequestHandler),
+    (r"/hinthistory/([a-z][a-z0-9_]*)", HintHistoryHandler),
+  ]
+
   return handlers
 

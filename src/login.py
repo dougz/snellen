@@ -15,6 +15,7 @@ import tornado.ioloop
 
 import game
 from state import save_state
+import wait_proxy
 
 def make_hash(password):
   return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("ascii")
@@ -35,12 +36,19 @@ class LoginUser:
       return False
     return await asyncio.get_running_loop().run_in_executor(None, check)
 
+  @classmethod
+  async def hash_password(cls, password):
+    return await asyncio.get_running_loop().run_in_executor(None, make_hash, password)
+
 
 class AdminUser(LoginUser):
   BY_USERNAME = {}
 
-  @save_state
-  def __init__(self, now, username, password_hash, fullname, roles):
+  message_mu = asyncio.Lock()
+  message_serial = 1
+  pending_messages = []
+
+  def __init__(self, username, password_hash, fullname, roles):
     self.username = username
     self.password_hash = password_hash.encode("ascii")
     self.fullname = fullname
@@ -48,18 +56,15 @@ class AdminUser(LoginUser):
     self.roles.add(AdminRoles.ADMIN)
     self.BY_USERNAME[username] = self
 
+    save_state.add_instance("AdminUser:" + username, self)
+
+  @classmethod
+  def create_new_user(cls, username, password_hash, fullname):
+    cls(username, password_hash, fullname, ())
+
   @classmethod
   def get_by_username(cls, username):
     return cls.BY_USERNAME.get(username)
-
-  @classmethod
-  def enable_root(cls, password_hash):
-    obj = AdminUser.__new__(AdminUser)
-    obj.username = "root"
-    obj.password_hash = password_hash.encode("ascii")
-    obj.fullname = "Root"
-    obj.roles = set((AdminRoles.ADMIN, AdminRoles.CREATE_USERS))
-    cls.BY_USERNAME["root"] = obj
 
   def has_role(self, role):
     return role in self.roles
@@ -75,6 +80,22 @@ class AdminUser(LoginUser):
   def all_users(cls):
     return cls.BY_USERNAME.values()
 
+  @classmethod
+  def send_messages(cls, objs):
+    cls.pending_messages.extend(objs)
+
+  @classmethod
+  async def flush_messages(cls):
+    if not cls.pending_messages: return
+    objs, cls.pending_messages = cls.pending_messages, []
+    if isinstance(objs, list):
+      strs = [json.dumps(o) for o in objs]
+    async with cls.message_mu:
+      await wait_proxy.Server.send_message("__ADMIN", cls.message_serial, strs)
+      cls.message_serial += len(strs)
+
+
+
 
 class Session:
   BY_KEY = {}
@@ -88,15 +109,22 @@ class Session:
     self.key = base64.urlsafe_b64encode(os.urandom(18))
     self.BY_KEY[self.key] = self
     self.user = user
+    self.pending_become = None
     self.team = None
     self.capabilities = set(caps)
     self.expires = time.time() + self.SESSION_TIMEOUT
+    self.pages_visited = set()
 
     self.next_msg_serial = 1
     self.msg_cv = asyncio.Condition()
 
   def set_cookie(self, req):
     req.set_secure_cookie(self.COOKIE_NAME, self.key)
+
+  def visit_page(self, page):
+    self.pages_visited.add(page)
+    if self.team and self.pages_visited == {"pins", "activity", "health_safety"}:
+      self.team.achieve_now(game.Achievement.digital_explorer, delay=1.5)
 
   @classmethod
   def from_request(cls, req):
@@ -124,17 +152,21 @@ class Session:
 # account with a given capability.  The browser is redirected to the
 # login or access-denied page as appropriate.
 class required:
-  def __init__(self, cap=None, on_fail=None, require_start=True):
+  def __init__(self, cap=None, on_fail=None, require_start=True, clear_become=True):
     self.cap = cap
     self.on_fail = on_fail
     self.require_start = require_start
+    self.clear_become = clear_become
 
   def bounce(self, req):
     if self.on_fail is not None:
       raise tornado.web.HTTPError(self.on_fail)
     session = Session(None)
     session.set_cookie(req)
-    req.redirect("/login?" + urllib.parse.urlencode({"redirect_to": req.request.uri}))
+    if req.request.uri == "/":
+      req.redirect("/login")
+    else:
+      req.redirect("/login?" + urllib.parse.urlencode({"redirect_to": req.request.uri}))
 
   def __call__(self, func):
     @functools.wraps(func)
@@ -146,7 +178,8 @@ class required:
       if now > session.expires:
         Session.delete_from_request(req)
         return self.bounce(req)
-      if self.cap not in session.capabilities:
+      if self.clear_become: session.pending_become = None
+      if self.cap and self.cap not in session.capabilities:
         if AdminRoles.ADMIN in session.capabilities:
           req.redirect("/no_access")
           return
@@ -167,6 +200,10 @@ class required:
 
 
 class Login(tornado.web.RequestHandler):
+  @classmethod
+  def set_static_content(cls, static_content):
+    cls.static_content = static_content
+
   def get(self):
     session = Session.from_request(self)
     target = self.get_argument("redirect_to", None)
@@ -183,7 +220,9 @@ class Login(tornado.web.RequestHandler):
                 bad_login=bad_login,
                 default_username=default_username,
                 default_password=default_password,
-                target=target)
+                target=target,
+                c=self.static_content["login.css"],
+                logo=self.static_content["logo.png"])
 
 
 class LoginSubmit(tornado.web.RequestHandler):
@@ -208,6 +247,7 @@ class LoginSubmit(tornado.web.RequestHandler):
       if allowed:
         session.team = team
         session.capabilities = {"team"}
+        session.was_admin = False
         team.attach_session(session)
         self.redirect(target or "/")
       else:
@@ -220,6 +260,7 @@ class LoginSubmit(tornado.web.RequestHandler):
       if allowed:
         session.user = user
         session.capabilities = user.roles
+        session.was_admin = True
         self.redirect("/admin")
         return
     self.redirect("/login?" + urllib.parse.urlencode(err_d))
@@ -227,6 +268,12 @@ class LoginSubmit(tornado.web.RequestHandler):
 
 class Logout(tornado.web.RequestHandler):
   def get(self):
+    session = Session.from_request(self)
+    if (session and session.team and
+        game.Global.STATE.event_start_time and
+        not session.was_admin):
+      session.team.achieve_now(game.Achievement.come_back, delay=1.0)
+
     # Uncookie the browser, delete the session, send them back to the
     # login page.
     Session.delete_from_request(self)

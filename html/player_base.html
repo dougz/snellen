@@ -3,7 +3,9 @@
   <head>
     <meta name="viewport" content="width=1200, initial-scale=0">
     <meta charset="utf-8">
-    <link rel=stylesheet href="{{css}}">
+    {% for c in css %}
+    <link rel=stylesheet href="{{c}}">
+    {% end %}
     <title>{% block title %}{% end %}</title>
     {% if script %}{% raw script %}{% end %}
     {% if json_data %}{% raw json_data %}{% end %}
@@ -11,22 +13,38 @@
   </head>
   <body>
     <div id="topnav">
-      <span id="teamname">{{team.team_name}}</span>
+      {% block topnav_startedleft %}
+      {% if park_open %}
       <span>
-	<a href="/">Penny Park</a>
-	{% block crumbs %}{% end %}
+	<a href="/">Map</a>
       </span>
+      {% end %}
+      <div id="dropdown">
+	<button id="dropbtn">Useful links</button>
+	<div id="dropdown-content">
+	  {% if park_open %}
+	  <a href="/pins">Pins</a>
+	  <a href="/log">Activity Log</a>
+	  {% else %}
+	  <a href="/">Home</a>
+	  {% end %}
+	  <a href="/health_and_safety">Health & Safety</a>
+	  <a href="/logout">Logout</a>
+	</div>
+      </div>
+      {% end %}
       {% block topnav_extraleft %}{% end %}
       <span class="spacer"></span>
       {% block topnav_extraright %}{% end %}
-      <a href="/log">Activity Log</a>
-      <a href="/logout">Logout</a>
+      {% block topnav_startedright %}
+      {% if park_open %}<span class=buzz>Buzz: <span id=score>{{team.score}}</span></span>{% end %}
+      {% end %}
     </div>
 
     {% block midnav %}{% end %}
 
-    <div id="content">
-      {% block content %}{% end %}
+    <div id="nonnav">
+    {% block content %}<div id="content"></div>{% end %}
     </div>
   </body>
 </html>

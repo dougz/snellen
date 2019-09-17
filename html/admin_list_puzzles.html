@@ -1,0 +1,19 @@
+{% extends "admin_base.html" %}
+{% block colorscheme %}lightblue{% end %}
+
+{% block title %}Puzzles{% end %}
+
+{% block content %}
+
+<ul>
+  {% for land in lands %}
+  <h3>{{land.title}}</h3>
+  <ul>
+    {% for p in land.puzzles %}
+    <li><span class=mono>{{p.shortname}}</span>: {% raw p.admin_html %}</li>
+    {% end %}
+  </ul>
+  {% end %}
+</ul>
+
+{% end %}

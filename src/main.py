@@ -6,7 +6,9 @@ import concurrent
 import json
 import os
 import resource
+import signal
 import sys
+import time
 
 import tornado.ioloop
 import tornado.httpserver
@@ -16,6 +18,7 @@ import tornado.web
 
 
 import admin
+import debug
 import event
 import game
 import login
@@ -24,25 +27,33 @@ import wait_proxy
 import util
 
 
-assert sys.hexversion >= 0x03060700, "Need Python 3.6.7 or newer!"
-assert tornado.version_info >= (5, 0, 2, 0), "Need Tornado 5.0.2 or newer!"
+assert sys.hexversion >= 0x03070300, "Need Python 3.7.3 or newer!"
+assert tornado.version_info >= (5, 1, 1, 0), "Need Tornado 5.1.1 or newer!"
 
 
-def make_app(options, answer_checking, **kwargs):
-  debug = kwargs.get("debug")
+def make_app(options, static_dir, **kwargs):
+  handlers = []
+  handlers.extend(login.GetHandlers())
+  handlers.extend(admin.GetHandlers())
+  handlers.extend(event.GetHandlers())
+  handlers.extend(wait_proxy.GetHandlers())
+  if options.debug:
+    handlers.extend(debug.GetHandlers())
+
   return tornado.web.Application(
-    login.GetHandlers() +
-    admin.GetHandlers(options.debug, answer_checking) +
-    event.GetHandlers(options.debug) +
-    wait_proxy.GetHandlers(),
+    handlers,
     options=options,
+    static_dir=static_dir,
     cookie_secret=options.cookie_secret,
     template_path=options.template_path,
     debug=options.debug,
     **kwargs)
 
 
-def main_server(options):
+async def main_server(options):
+  if options.debug:
+    game.Submission.PER_ANSWER_DELAY = 30
+
   print("Load map config...")
   with open(os.path.join(options.event_dir, "map_config.json")) as f:
     cfg = json.load(f)
@@ -51,10 +62,26 @@ def main_server(options):
     util.TeamPageHandler.set_static_content(cfg["static"])
     util.AdminPageHandler.set_static_content(cfg["static"])
   game.Land.resolve_lands()
+  game.Achievement.define_achievements(cfg["static"])
+  login.Login.set_static_content(cfg["static"])
+  options.static_content = cfg["static"]
 
   save_state.set_classes(AdminUser=login.AdminUser,
                          Team=game.Team,
-                         Global=game.Global)
+                         Global=game.Global,
+                         Puzzle=game.Puzzle)
+
+  with open(os.path.join(options.event_dir, "admins.json")) as f:
+    admins = json.load(f)
+    for username, d in admins.items():
+      login.AdminUser(username, d["pwhash"], d["name"], d.get("roles", ()))
+
+  with open(os.path.join(options.event_dir, "teams.json")) as f:
+    teams = json.load(f)
+    for username, d in teams.items():
+      game.Team(username, d)
+
+
   save_state.open(os.path.join(options.event_dir, "state.log"))
   save_state.replay(advance_time=game.Submission.process_submit_queue)
 
@@ -62,49 +89,35 @@ def main_server(options):
 
   if not game.Global.STATE: game.Global()
 
-  print("Adding new teams...")
-  with open(os.path.join(options.event_dir, "teams.py")) as f:
-    exec(f.read(), {"add_team": game.Team.add_team})
-
-  start_map = game.Land.BY_SHORTNAME["inner_only"]
-  for team in game.Team.BY_USERNAME.values():
-    team.open_lands[start_map] = 0
-
   if options.start_event:
-    game.Global.STATE.start_event()
+    game.Global.STATE.start_event(False)
 
-  if options.root_password:
-    print("Enabling root user...")
-    login.AdminUser.enable_root(login.make_hash(options.root_password))
+  for team in game.Team.BY_USERNAME.values():
+    team.discard_messages()
 
-  answer_checking = tornado.ioloop.PeriodicCallback(
-    game.Submission.realtime_process_submit_queue, 1000)
-
-  app = make_app(options, answer_checking, autoreload=False)
+  app = make_app(options, cfg["static"], autoreload=False)
 
   server = tornado.httpserver.HTTPServer(app)
   sockets = [tornado.netutil.bind_unix_socket(options.socket_path, mode=0o666, backlog=3072)]
   sockets.extend(tornado.netutil.bind_sockets(options.wait_proxy_port, address="localhost"))
   server.add_sockets(sockets)
 
-  answer_checking.start()
-
   loop = asyncio.get_event_loop()
   loop.set_default_executor(concurrent.futures.ThreadPoolExecutor(max_workers=4))
+  loop.create_task(game.Submission.realtime_process_submit_queue())
+  loop.create_task(game.Global.STATE.flawless_check())
 
-  try:
-    print("Serving...")
-    tornado.ioloop.IOLoop.current().start()
-  except KeyboardInterrupt:
-    pass
-
-  save_state.close()
+  print("Serving...")
+  async with game.Global.STATE.stop_cv:
+    while not game.Global.STATE.stopping:
+      await game.Global.STATE.stop_cv.wait()
 
 
 def wait_server(n, options):
-  print(f"I am wait server {n}")
-  wait_proxy.Client(n, options).start()
-  print(f"Wait server {n} exiting")
+  try:
+    asyncio.run(wait_proxy.Client(n, options).start(), debug=options.debug)
+  except KeyboardInterrupt:
+    pass
 
 
 def main():
@@ -115,19 +128,28 @@ def main():
   parser.add_argument("-c", "--cookie_secret",
                       default="snellen2020",
                       help="Secret used to create session cookies.")
-  parser.add_argument("-r", "--root_password",
-                      help="Password for root admin user.")
   parser.add_argument("-e", "--event_dir",
                       help="Path to event content.")
   parser.add_argument("-s", "--socket_path",
                       default="/tmp/snellen",
                       help="Socket for proxy to reach this server.")
+
+  # debugging flags
   parser.add_argument("--start_event", action="store_true",
-                      help="Start event for all teams.")
+                      help="Immediately start event.")
   parser.add_argument("--debug", action="store_true",
                       help="Serve debug javascript.")
+  parser.add_argument("--open_all", action="store_true",
+                      help="Open all puzzles immediately.")
+  parser.add_argument("--placeholders", action="store_true",
+                      help="Replace all puzzles with placeholders.")
   parser.add_argument("--default_credentials",
                       help="Fill username/password field automatically.")
+  parser.add_argument("--start_delay",
+                      type=int, default=30,
+                      help=("Seconds to count down before starting event."))
+
+  # wait proxy configuration
   parser.add_argument("-w", "--wait_proxies",
                       type=int, default=2,
                       help="Number of wait proxy servers to start.")
@@ -141,6 +163,8 @@ def main():
   assert options.template_path is not None, "Must specify --template_path."
   assert options.event_dir is not None, "Must specify --event_dir."
 
+  game.OPTIONS = options
+
   soft, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
   try:
     resource.setrlimit(resource.RLIMIT_NOFILE, (hard, hard))
@@ -148,12 +172,25 @@ def main():
   except ValueError:
     print("Warning: unable to increase file descriptor limit!")
 
+  original_handler = signal.signal(signal.SIGINT, signal.SIG_IGN)
+  proxy_pids = []
   for i in range(options.wait_proxies):
-    if os.fork() == 0:
+    pid = os.fork()
+    if pid == 0:
       wait_server(i, options)
       return
+    proxy_pids.append(pid)
+  signal.signal(signal.SIGINT, original_handler)
 
-  main_server(options)
+  try:
+    asyncio.run(main_server(options), debug=options.debug)
+  except KeyboardInterrupt:
+    pass
+
+  save_state.close()
+
+  for pid in proxy_pids:
+    os.kill(pid, signal.SIGKILL)
 
 
 

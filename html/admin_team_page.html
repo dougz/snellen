@@ -1,0 +1,40 @@
+{% extends "admin_base.html" %}
+{% block colorscheme %}darkblue{% end %}
+
+{% block title %}Team "{{team.name}}"{% end %}
+
+{% block content %}
+
+<table class=info>
+  <tr><th>username</th><td class=mono>{{team.username}}</td></tr>
+  <tr><th></th><td><a href="/admin/become/{{team.username}}">become this team</a></td></tr>
+  <tr><th>location</th><td>{{team.attrs.get("location", "Unknown")}}</td></tr>
+  <tr><th class=top>open puzzles ({{len(open_list)}})</th>
+    <td>
+      {% for i, (_, p, d, a) in enumerate(open_list) %}
+      {% if i > 0 %}<br>{% end %}
+      <a href="/admin/team/{{team.username}}/puzzle/{{p.shortname}}">{{p.title}}</a> ({{d}})
+      {% if a %}&mdash;
+      {% for aa in a %} <span class=answer>{{aa}}</span>{% end %} &hellip;
+      {% end %}
+      {% end %}
+    </td>
+  </tr>
+</table>
+
+<p><b>BTS hack:</b> apply fastpass to:
+  <a href="/admin/applyfastpass/{{team.username}}/castle">castle</a> /
+  <a href="/admin/applyfastpass/{{team.username}}/forest">forest</a> /
+  <a href="/admin/applyfastpass/{{team.username}}/space">space</a>
+</p>
+
+<h2>Activity log</h2>
+<div id="teamlog">
+  <ul>
+    {% for t, e in log %}
+    <li>{{t}} &mdash; {% raw e %}</li>
+    {% end %}
+  </ul>
+</div>
+
+{% end %}

@@ -1,6 +1,14 @@
 <html>
   <head>
     <title>Snellen preview server</title>
+    <style>
+      body { font-family: sans-serif; }
+      fieldset { margin-top: 20px; max-width: 400px; }
+      label { margin: 0px 8px; }
+      legend { font-weight: bold; }
+      fieldset p { margin: 12px; }
+      fieldset p input { margin: 4px; }
+    </style>
   </head>
   <body>
     <h1>Snellen preview server</h1>
@@ -8,7 +16,34 @@
     <form action="/upload" method="post" enctype="multipart/form-data">
       <div>
 	<p>Upload your puzzle zip file here: <input type="file" name="zip" accept="application/zip"></p>
+	<p>Select this puzzle's land style:
+	<select name="land">
+	  <option value="none">default</option>
+	  <option value="castle">The Grand Castle</option>
+	  <option value="forest">Enchanted Forest</option>
+	  <option value="space">Spaceopolis</option>
+	</select></p>
+
 	<input type="submit" name="submit">
+
+	<fieldset>
+	  <legend>
+	    <input type="checkbox" id="save" name="save"><label for="save">Save for hunt server</label>
+	  </legend>
+	  <p>Checking this box causes the uploaded zip to be saved for
+	  use with the hunt server.  Leave it unchecked if you're just
+	  testing; check the box if you're uploading a (potentially)
+	    final version.</p>
+
+	  <p>If you upload a puzzle multiple times with the box
+	  checked, we'll use the last uploaded one unless we hear
+	  otherwise.</p>
+
+	  <p>Enter your name in case we have questions when
+	    integrating the puzzle into the hunt server:<br>
+	    <input type="text" name="who" placeholder="Your name">
+	  </p>
+	</fieldset>
       </div>
     </form>
 

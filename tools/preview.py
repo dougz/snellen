@@ -4,6 +4,8 @@ import argparse
 import asyncio
 import json
 import os
+import re
+import time
 import tornado.ioloop
 import tornado.httpserver
 import tornado.netutil
@@ -18,7 +20,8 @@ import preprocess_puzzle as ppp
 
 
 class Team:
-  team_name = "Team Name Here"
+  name = "Team Name Here"
+  score = 0
 
 
 class Land:
@@ -36,6 +39,7 @@ class Puzzle:
     Puzzle.BY_PID[self.pid] = self
 
   def process(self, zip_data):
+    self.prefix = common.hash_name(str(time.time()).encode("ascii") + zip_data)
     self.pp = ppp.Puzzle(zip_data, self.options, include_solutions=True)
     self.pp.land = Land
 
@@ -44,44 +48,139 @@ class PreviewPage(tornado.web.RequestHandler):
   def get(self):
     self.render("preview.html")
 
+
 class UploadHandler(tornado.web.RequestHandler):
+  LAND_NAMES = {"castle": "The Grand Castle",
+                "forest": "Enchanted Forest",
+                "space": "Spaceopolis",
+                }
+
   def initialize(self, options):
     self.options = options
 
   def post(self):
     p = Puzzle()
 
-    try:
-      p.process(self.request.files["zip"][0]["body"])
+    save = self.get_body_argument("save", False)
 
-      path = f"html/{p.pp.prefix}/solution.html"
+    css = [self.static_content["event.css"]]
+    land = self.get_body_argument("land", None)
+    if land and land != "none":
+      path = f"{land}/land.css"
+      if path in self.static_content:
+        css.append(self.static_content[path])
+    landobj = Land()
+    landobj.title = self.LAND_NAMES.get(land, "Some Land")
+
+    d = {"script": None,
+         "json_data": None,
+         "park_open": True,
+         "css": css,
+         "supertitle": ""}
+
+    if land == "space":
+      d["supertitle"] = ('<img src="https://preview-static.storage.googleapis.com/'
+                         '83u3b9EB5Yyruqc9.png">')
+
+    who = self.get_body_argument("who", "")
+
+    who = who.lower()
+    who = re.sub(r"[^a-z0-9_]+", "", who)
+
+    if save and not who:
+      p.error_msg = "Must enter your name if saving for the hunt server."
+      self.redirect(f"/error/{p.pid}")
+      return
+
+    if save:
+      timestamp = time.strftime("%Y%m%d_%H%M%S")
+
+    try:
+      zip_data = self.request.files["zip"][0]["body"]
+      p.process(zip_data)
+
+      authors = p.pp.authors
+      if len(authors) == 1:
+        authors = authors[0]
+      elif len(authors) == 2:
+        authors = f"{authors[0]} and {authors[1]}"
+      else:
+        authors = ", ".join(authors[:-1] + ["and " + authors[-1]])
+
+      p.pp.land = landobj
+      d.update({"puzzle": p.pp,
+                "team": Team})
+
+      path = f"html/{p.prefix}/solution.html"
       puzzle_html = self.render_string("solution_frame.html",
                                        solution_url=None,
-                                       puzzle=p.pp,
-                                       team=Team,
-                                       css=self.static_content["event.css"],
-                                       script=None,
-                                       json_data=None)
-      common.upload_object(self.options.bucket, path,
+                                       authors=authors,
+                                       **d)
+      common.upload_object("solution.html",
+                           self.options.bucket, path,
                            common.CONTENT_TYPES[".html"],
                            puzzle_html, self.options.credentials)
 
       p.solution_url = f"https://{self.options.public_host}/{path}"
 
-      path = f"html/{p.pp.prefix}/puzzle.html"
+      path = f"html/{p.prefix}/puzzle.html"
       puzzle_html = self.render_string("solution_frame.html",
                                        solution_url=p.solution_url,
-                                       puzzle=p.pp,
-                                       team=Team,
-                                       css=self.static_content["event.css"],
-                                       script=None,
-                                       json_data=None)
-      common.upload_object(self.options.bucket, path,
+                                       authors=None,
+                                       **d)
+      common.upload_object("puzzle.html",
+                           self.options.bucket, path,
                            common.CONTENT_TYPES[".html"],
                            puzzle_html, self.options.credentials)
 
       p.puzzle_url = f"https://{self.options.public_host}/{path}"
-      self.redirect(p.puzzle_url)
+
+      path = f"html/{p.prefix}/for_ops.html"
+      puzzle_html = self.render_string("preview_for_ops.html",
+                                       **d)
+      common.upload_object("for_ops.html",
+                           self.options.bucket, path,
+                           common.CONTENT_TYPES[".html"],
+                           puzzle_html, self.options.credentials)
+
+      p.for_ops_url = f"https://{self.options.public_host}/{path}"
+
+      path = f"html/{p.prefix}/meta.html"
+      meta_html = self.render_string("meta.html",
+                                     puzzle_url=p.puzzle_url,
+                                     solution_url=p.solution_url,
+                                     for_ops_url=p.for_ops_url,
+                                     puzzle=p.pp)
+      common.upload_object("meta.html",
+                           self.options.bucket, path,
+                           common.CONTENT_TYPES[".html"],
+                           meta_html, self.options.credentials)
+
+      p.meta_url = f"https://{self.options.public_host}/{path}"
+
+      if save:
+        path = f"saved/{p.pp.shortname}/{timestamp}.{who}.{p.prefix}.zip"
+        common.upload_object("puzzle zip",
+                             self.options.save_bucket, path,
+                             "appliction/zip",
+                             zip_data, self.options.credentials)
+
+      self.redirect(p.meta_url)
+    except ppp.PuzzleErrors as e:
+      path = f"html/{p.prefix}/error.txt"
+      data = [f"{len(e.errors)} error(s) were encountered:"]
+      for i, err in enumerate(e.errors):
+        data.append(f"{i+1}: {err}")
+      data = "\n".join(data)
+
+      common.upload_object("errors",
+                           self.options.bucket, path,
+                           common.CONTENT_TYPES[".txt"],
+                           data, self.options.credentials)
+
+      error_url = f"https://{self.options.public_host}/{path}"
+
+      self.redirect(error_url)
     except Exception as e:
       p.error_msg = traceback.format_exc()
       self.redirect(f"/error/{p.pid}")
@@ -98,10 +197,14 @@ class ErrorPage(tornado.web.RequestHandler):
 def main():
   parser = argparse.ArgumentParser(description="Live puzzle zip previewer")
   parser.add_argument("--credentials", help="Private key for google cloud service account.")
+  parser.add_argument("--save_bucket", default="snellen-prod-zip",
+                      help="Google cloud bucket to use for saved zips.")
   parser.add_argument("--bucket", default="snellen-preview",
-                      help="Google cloud bucket to use.")
-  parser.add_argument("--public_host", help="Hostname for assets in urls.")
-  parser.add_argument("--template_path")
+                      help="Google cloud bucket to use for preview content.")
+  parser.add_argument("--public_host", default=None,
+                      help="Hostname for assets in urls.")
+  parser.add_argument("--template_path",
+                      default=os.path.join(os.getenv("HUNT2020_BASE"), "snellen/html"))
   parser.add_argument("--skip_upload", action="store_true",
                       help="Don't actually upload to GCS.")
   parser.add_argument("--socket", default="/tmp/preview",
@@ -112,6 +215,9 @@ def main():
 
   options.credentials = oauth2.Oauth2Token(options.credentials)
   Puzzle.options = options
+
+  if not options.public_host:
+    options.public_host = options.bucket + ".storage.googleapis.com"
 
   print("Load map config...")
   with open(os.path.join(options.event_dir, "map_config.json")) as f:

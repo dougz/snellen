@@ -3,119 +3,273 @@
 import argparse
 import base64
 import bs4
-import configparser
 import hashlib
 import io
 import json
 import os
+import yaml
 import zipfile
 
 import common
 import oauth2
 
-SECRET_KEY_LENGTH = 16
+
+class PuzzleErrors(ValueError):
+  def __init__(self, errors):
+    self.errors = errors
 
 
 class Puzzle:
-  METADATA_FILE = "metadata.cfg"
+  METADATA_FILE = "metadata.yaml"
   PUZZLE_HTML = "puzzle.html"
+  STATIC_PUZZLE_HTML = "static_puzzle.html"
   SOLUTION_HTML = "solution.html"
+  FOR_OPS_HTML = "for_ops.html"
 
-  SPECIAL_FILES = {METADATA_FILE, PUZZLE_HTML, SOLUTION_HTML}
+  SPECIAL_FILES = {METADATA_FILE, PUZZLE_HTML, SOLUTION_HTML, STATIC_PUZZLE_HTML, FOR_OPS_HTML}
 
   def __init__(self, zip_data, options, include_solutions=False):
-    h = hashlib.sha256()
-    h.update(zip_data)
-    self.prefix = base64.urlsafe_b64encode(h.digest()).decode("ascii")[:SECRET_KEY_LENGTH]
-
+    self.prefix = common.hash_name(zip_data)
     z = zipfile.ZipFile(io.BytesIO(zip_data))
-    c = configparser.ConfigParser()
-    c.read_file(io.TextIOWrapper(z.open(Puzzle.METADATA_FILE)))
 
-    cp = c["PUZZLE"]
-    self.shortname = cp["shortname"]
-    self.title = cp["title"]
-    self.oncall = cp["oncall"]
-    self.puzzletron_id = int(cp["puzzletron_id"])
-    self.max_queued = cp.get("max_queued", None)
+    errors = []
+
+    metadata = []
+    for n in z.namelist():
+      if os.path.basename(n) == self.METADATA_FILE:
+        metadata.append(n)
+    if len(metadata) == 0:
+      errors.append(f"No {self.METADATA_FILE} file found.")
+    elif len(metadata) > 1:
+      errors.append(f"Multiple {self.METADATA_FILE} files found:\n  " + "\n  ".join(metadata))
+
+    if errors: raise PuzzleErrors(errors)
+    metadata = metadata[0]
+
+    try:
+      y = yaml.load(z.read(metadata).decode("utf-8"))
+    except yaml.YAMLError as e:
+      raise PuzzleErrors([f"Error parsing {self.METADATA_FILE}:\n{e}"])
+
+    shortname = y.get("shortname")
+    if not shortname:
+      errors.append("Missing or empty shortname.")
+
+    if metadata == self.METADATA_FILE:
+      strip_shortname = None
+    elif metadata == os.path.join(shortname, self.METADATA_FILE):
+      for n in z.namelist():
+        if not n.startswith(shortname+"/"):
+          errors.append(f"If shortname directory is used, everything must be in it.")
+          break
+      strip_shortname = shortname + "/"
+    else:
+      errors.append(f"Metadata path {metadata} doesn't match shortname.")
+
+    if errors: raise PuzzleErrors(errors)
+
+    self.shortname = shortname
+
+    self.title = y.get("title")
+    if not self.title:
+      errors.append("Missing or empty title.")
+    elif not isinstance(self.title, str):
+      errors.append("title is not a string.")
+
+    self.oncall = y.get("oncall")
+    if not self.oncall:
+      errors.append("Missing or empty oncall.")
+    elif not isinstance(self.oncall, str):
+      errors.append("oncall is not a string.")
+
+    self.puzzletron_id = y.get("puzzletron_id")
+    if not self.puzzletron_id:
+      errors.append("Missing or empty puzzletron_id.")
+    elif not isinstance(self.puzzletron_id, int):
+      errors.append("puzzletron_id is not an integer.")
+
+    self.max_queued = y.get("max_queued")
+    if self.max_queued is not None and not isinstance(self.max_queued, int):
+      errors.append("max_queued is not an integer.")
 
     print(f"Puzzle {self.shortname} \"{self.title}\" (prefix {self.prefix})")
 
-    ca = c["ANSWER"]
-    self.answers = list(ca.values())
+    # Answer(s) must be a nonempty list of nonempty strings.
+    answers = self.get_plural(y, "answer", errors)
+    if answers is not None:
+      if isinstance(answers, str):
+        self.answers = [answers]
+      elif isinstance(answers, list):
+        self.answers = answers
+
+      if not self.answers:
+        errors.append("No answers given.")
+      else:
+        for a in self.answers:
+          if not isinstance(a, str):
+            errors.append(f"Answer '{a}' not a string.")
+          elif not a:
+            errors.append(f"Answer can't be an empty string.")
+          if a != a.upper():
+            errors.append(f"Answers must be uppercase.")
+
+    # Author(s) must be a nonempty list of nonempty strings.
+    authors = self.get_plural(y, "author", errors)
+    if authors is not None:
+      if isinstance(authors, str):
+        self.authors = [authors]
+      elif isinstance(authors, list):
+        self.authors = authors
+
+      if not self.authors:
+        errors.append("No authors given.")
+      else:
+        for a in self.authors:
+          if not isinstance(a, str):
+            errors.append(f"Author '{a}' not a string.")
+          elif not a:
+            errors.append(f"Author can't be an empty string.")
 
     self.incorrect_responses = {}
-    if "INCORRECT_RESPONSES" in c:
-      for k, v in c["INCORRECT_RESPONSES"].items():
-        self.incorrect_responses[k] = None if not v else v
+    if "response" in y or "responses" in y:
+      responses = self.get_plural(y, "response", errors)
+      if responses is not None:
+        if len(responses) == 0:
+          errors.append("Response(s) is present but empty.")
+        else:
+          for k, v in responses.items():
+            if not isinstance(k, str):
+              errors.append("Response trigger '{k}' not a string.")
+            elif not k:
+              errors.append("Response trigger is empty string.")
+            if v is None:
+              pass
+            elif not isinstance(v, str):
+              errors.append("Response '{v}' not a string.")
+            elif not v:
+              errors.append("Response to '{k}' is empty string.")
+          self.incorrect_responses = responses
 
-    self.upload_assets(z, options, include_solutions)
-    self.parse_puzzle_html(z)
+    if errors: raise PuzzleErrors(errors)
+
+    self.upload_assets(z, options, include_solutions, strip_shortname,
+                       y.get("obfuscate_assets", False))
+
+    restricted_asset_map = self.asset_map.copy()
+    for k, v in self.asset_map.items():
+      if k.startswith("solution/"):
+        restricted_asset_map[k] = None
+
+    self.for_ops_head, self.for_ops_body = self.parse_html(
+      z, strip_shortname, errors, Puzzle.FOR_OPS_HTML, restricted_asset_map)
+
+    for k, v in self.asset_map.items():
+      if k.startswith("ops/"):
+        restricted_asset_map[k] = None
+
+    self.html_head, self.html_body = self.parse_html(
+      z, strip_shortname, errors, Puzzle.PUZZLE_HTML, restricted_asset_map)
+
     if include_solutions:
-      self.parse_solution_html(z)
+      self.solution_head, self.solution_body = self.parse_html(
+        z, strip_shortname, errors, Puzzle.SOLUTION_HTML, self.asset_map)
+
+    if errors: raise PuzzleErrors(errors)
+
+  @staticmethod
+  def get_plural(y, name, errors):
+    plural = name + "s"
+    if name in y and plural in y:
+      errors.append(f"Can't specify both '{name}' and '{plural}'.")
+      return
+    value = y.get(name)
+    if value is None:
+      value = y.get(plural)
+    if value is None:
+      errors.append(f"Must specify {name}(s).")
+      return
+    return value
 
 
-  def upload_assets(self, z, options, include_solutions):
+  def upload_assets(self, z, options, include_solutions, strip_shortname,
+                    obfuscate):
     self.asset_map = {}
     bucket = options.bucket
 
     for n in z.namelist():
-      if n in self.SPECIAL_FILES: continue
-      if n.endswith("/"): continue
-      if not include_solutions and n.startswith("solution/"): continue
+      if strip_shortname:
+        assert n.startswith(strip_shortname)
+        nn = n[len(strip_shortname):]
+        if not nn: continue
+      else:
+        nn = n
 
-      ext = os.path.splitext(n)[1].lower()
+      if nn in self.SPECIAL_FILES: continue
+      if nn.endswith("/"): continue
+      if not include_solutions and nn.startswith("solution/"): continue
+
+      ext = os.path.splitext(nn)[1].lower()
       if ext not in common.CONTENT_TYPES:
-        raise ValueError(f"Don't know Content-Type for '{n}'.")
+        raise ValueError(f"Don't know Content-Type for '{nn}'.")
 
-      path = f"puzzle/{self.prefix}/{self.shortname}/{n}"
+      data = z.read(n)
+      if obfuscate:
+        path = common.hash_name(data) + ext
+      else:
+        path = f"{self.prefix}/{self.shortname}/{nn}"
 
       if not options.skip_upload:
-        print(f"  Uploading {n}...")
-        common.upload_object(bucket, path, common.CONTENT_TYPES[ext], z.read(n), options.credentials)
+        common.upload_object(nn, bucket, path, common.CONTENT_TYPES[ext], z.read(n), options.credentials)
 
-      self.asset_map[n] = f"https://{options.public_host}/{path}"
+      self.asset_map[nn] = f"https://{options.public_host}/{path}"
 
-  def rewrite_html(self, soup):
+  def rewrite_html(self, soup, asset_map, fn, errors):
     for i in soup.find_all():
       for attr in ("src", "href"):
         if attr in i.attrs:
           v = i[attr]
-          vv = self.asset_map.get(v)
-          if vv:
-            print(f"  Rewriting <{i.name} {attr}=\"{v}\"> to {vv}")
-            i[attr] = vv
+          if v in asset_map:
+            vv = asset_map[v]
+            if vv:
+              print(f"  Rewriting <{i.name} {attr}=\"{v}\"> to {vv}")
+              i[attr] = vv
+            else:
+              errors.append(f"{fn} can't refer to {v}")
 
-  def parse_puzzle_html(self, z):
-    soup = bs4.BeautifulSoup(z.open(Puzzle.PUZZLE_HTML), features="html5lib")
-    self.rewrite_html(soup)
-    if soup.head:
-      self.html_head = "".join(str(i) for i in soup.head.contents)
-    else:
-      self.html_head = None
-    self.html_body = "".join(str(i) for i in soup.body.contents)
 
-  def parse_solution_html(self, z):
-    soup = bs4.BeautifulSoup(z.open(Puzzle.SOLUTION_HTML), features="html5lib")
-    self.rewrite_html(soup)
-    if soup.head:
-      self.solution_head = "".join(str(i) for i in soup.head.contents)
+  def parse_html(self, z, strip_shortname, errors, fn, asset_map):
+    if strip_shortname:
+      zfn = strip_shortname + fn
     else:
-      self.solution_head = None
-    self.solution_body = "".join(str(i) for i in soup.body.contents)
+      zfn = fn
+    try:
+      soup = bs4.BeautifulSoup(z.read(zfn).decode("utf-8"), features="html5lib")
+    except KeyError:
+      errors.append(f"Required file {fn} is missing.")
+      return None, None
+    self.rewrite_html(soup, asset_map, fn, errors)
+    if soup.head:
+      head = "".join(str(i) for i in soup.head.contents)
+    else:
+      head = None
+    body = "".join(str(i) for i in soup.body.contents)
+    return head, body
 
   def json_dict(self):
     d = {}
     for n in ("shortname title oncall puzzletron_id max_queued "
-              "answers incorrect_responses "
-              "html_head html_body ").split():
+              "answers incorrect_responses authors "
+              "html_head html_body for_ops_head for_ops_body").split():
       v = getattr(self, n)
       if v is not None: d[n] = v
     return d
 
   def save(self, output_dir):
     with open(os.path.join(output_dir, self.shortname + ".json"), "w") as f:
-      json.dump(self.json_dict(), f)
+      json.dump(self.json_dict(), f, sort_keys=True, indent=2)
+    with open(os.path.join(output_dir, self.shortname + ".assets.json"), "w") as f:
+      json.dump(self.asset_map, f, sort_keys=True, indent=2)
+
 
 
 def main():
@@ -131,13 +285,27 @@ def main():
                       help="The input .zip to process")
   options = parser.parse_args()
 
+  assert os.getenv("HUNT2020_BASE")
+
   options.credentials = oauth2.Oauth2Token(options.credentials)
+  if not options.public_host:
+    options.public_host = options.bucket + ".storage.googleapis.com"
+
+  common.load_object_cache(options.bucket, options.credentials)
+
+  puzzle_dir = os.path.join(options.output_dir, "puzzles")
+  os.makedirs(puzzle_dir, exist_ok=True)
 
   for zipfn in options.input_files:
     with open(zipfn, "rb") as f:
       zip_data = f.read()
-      p = Puzzle(zip_data, options)
-    p.save(options.output_dir)
+      try:
+        p = Puzzle(zip_data, options)
+        p.save(puzzle_dir)
+      except PuzzleErrors as e:
+        print(f"{zipfn} had {len(e.errors)} error(s):")
+        for i, err in enumerate(e.errors):
+          print(f"{i+1}: {err}")
 
 
 if __name__ == "__main__":

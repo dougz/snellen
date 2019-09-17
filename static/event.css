@@ -1,17 +1,51 @@
+@import url('https://fonts.googleapis.com/css?family=Merriweather+Sans:400,700,800&display=block');
+@import url('https://fonts.googleapis.com/css?family=Merriweather&display=block');
+@import url('https://fonts.googleapis.com/css?family=Inconsolata&display=block');
+@import url('https://fonts.googleapis.com/css?family=Open+Sans:600,700&display=block&text=0123456789');
+
 body {
-    font-family: sans-serif;
-    background-image: url("https://snellen.storage.googleapis.com/grass.jpg");
+    font-family: 'Merriweather Sans', sans-serif;
     margin: 0;
+    overscroll-behavior-y: none;
 }
 
+a { text-decoration: none; }
+
+input, button {
+    font-family: 'Merriweather Sans', sans-serif;
+}
+
+.disclaimer {
+    text-align: center;
+    font-style: italic;
+}
+
+#pins li {
+    display: flex;
+    align-items: center;
+    column-gap: 10px;
+    margin-bottom: 20px;
+}
+
+#pins li img { margin-right: 20px; }
+
+#pins { font-size: 120%; }
+#pins .no { color: #999; }
+
+#pins .no img { filter: grayscale(80%);
+		opacity: 0.4;
+	      }
+
 #topnav {
+    font-family: 'Merriweather', sans-serif;
+
     min-width: 1060px;
-    height: 24px;
+    height: 40px;
     font-size: 18px;
     background: #666;
     color: #eee;
     border-bottom: 1px solid black;
-    padding: 8px 20px;
+    padding: 0 20px;
 
     display: flex;
     flex-direction: row;
@@ -19,14 +53,16 @@ body {
 
     z-index: 1000;
     position: relative;
+
+    user-select: none;
 }
+
+@media print { #topnav { display: none; } }
 
 #topnav > span, #topnav > a {
+    display: inline-block;
     margin: 0 20px;
-}
-
-#teamname {
-    font-weight: bold;
+    padding: 8px 0;
 }
 
 /* The spacer should take up all the extra space, forcing the items
@@ -43,10 +79,18 @@ body {
 a#submit {
     font-weight: bold;
     cursor: pointer;
-    padding: 2px 8px;
+    padding: 0 8px;
+    height: 40px;
+    line-height: 40px;
+    vertical-align: center;
     background-color: #eee;
     color: black;
     text-transform: uppercase;
+}
+
+a#submit.submitsolved {
+    background-color: #c00;
+    color: white;
 }
 
 a#submit:hover {
@@ -54,7 +98,24 @@ a#submit:hover {
     color: #c00;
 }
 
+#nonnav {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    min-height: calc(100vh - 41px - 360px);
+    background: url(@@STATIC:inner_only/land_clouds.png@@) top repeat-x,
+		url(@@STATIC:inner_only/land_tree.png@@) bottom repeat-x,
+		#c3dffb;
+    padding: 100px 0 260px 0;
+}
+
+#pagetitle {
+    text-align: center;
+}
+
 #content {
+    font-size: 16px;
     width: 1020px;
     margin-top: 30px;
     margin-bottom: 30px;
@@ -62,48 +123,103 @@ a#submit:hover {
     margin-right: auto;
     padding: 30px 60px 40px 60px;
     background-color: #f8f8f8;
-    box-shadow: 0 0 10px black;
+    border: 2px solid #999;
+    border-radius: 10px;
 }
 
-/** submit panel **/
+#dropdown {
+    position: relative;
+    display: inline-block;
+    height: 40px;
+    padding: 0 20px;
+}
 
-.submit-panel {
+#dropbtn {
+    font-family: 'Merriweather', sans-serif;
+    font-size: 18px;
+    min-width: 200px;
+    background-color: #666;
+    color: #eee;
+    height: 40px;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    margin-left: 1px;
+}
+
+#dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #666;
+    border: 1px solid black;
+    border-top: none;
+    min-width: 200px;
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+    z-index: 1001;
+}
+
+#dropdown-content a {
+    padding: 12px 16px;
+    display: block;
+}
+#dropdown-content a:hover {
+    background-color: #999;
+}
+
+#dropdown:hover #dropdown-content {
+    display: block;
+}
+
+.puzzletitle {
+    font-weight: bold;
+}
+
+.landtag {
+    font-size: 84%;
+    font-weight: 700;
+    color: white;
+    padding: 1px 6px;
+    border-radius: 4px;
+}
+
+.round-castle { background-color: #d7d7d7; }
+.round-forest { background-color: #636946; }
+.round-space { background-color: #2b757e; }
+
+#dropdown:hover #dropbtn {
+    background-color: #999;
+}
+
+
+#hintpanel {
     background-color: #888888ee;
-    border-bottom: 2px solid black;
+    border-bottom: 0px solid black;
 
     height: 0;
     visibility: hidden;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-
 
     z-index: 999;
     position: static;
-    overflow: hidden;
-}
-
-#submit_table {
-    overflow: auto;
-    max-height: 260px;
+    overflow-y: scroll;
+    overflow-x: hidden;
 }
 
 @keyframes slide {
-    0% { height: 0px; visibility: hidden; }
+    0% { height: 0px; visibility: hidden; border-bottom-width: 0px; }
     1% { visibility: visible; }
-    100% { height: 300px; visibility: visible; }
+    100% { height: 300px; visibility: visible; border-bottom-width: 2px; }
 }
 
 @keyframes slide2 {
-    0% { height: 0px; visibility: hidden; }
+    0% { height: 0px; visibility: hidden; border-bottom-width: 0px; }
     1% { visibility: visible; }
-    100% { height: 300px; visibility: visible; }
+    100% { height: 300px; visibility: visible; border-bottom-width: 2px; }
 }
 
-.submit-panel-visible {
+.panel-visible {
     animation: slide 150ms ease-out forwards;
 }
-.submit-panel-invisible {
+.panel-invisible {
     animation: slide2 150ms ease-in reverse;
 }
 
@@ -127,120 +243,149 @@ div#thumb .icon {
 }
 
 
+/** submit panel **/
 
+#submitpanel {
+    background-color: #888888ee;
+    border-bottom: 0px solid black;
 
+    height: 0;
+    visibility: hidden;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
 
-table.submissions {
-    padding: 20px;
+    z-index: 999;
+    position: static;
+    overflow: hidden;
 }
-table.submissions td { vertical-align: middle; }
-table.submissions th { text-align: left; }
 
-.submit-empty {
-    padding-top: 8px;
-    font-style: italic;
+#submitdata {
+    height: 260px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+#submit_table {
+    border-collapse: collapse;
+}
+
+#submit_table_scroll {
+    overflow-y: auto;
+    flex-grow: 1000;
+}
+
+#st_answer {
+    width: 60ex;
+}
+#st_time {
+    width: 20ex;
+}
+#st_result {
+    width: 16ex;
+}
+#top_note {
+    flex-grow: 1;
     text-align: center;
+    color: white;
+
 }
 
-.submit-time {
-    width: 140px;
+
+#submit_table td {
+    vertical-align: middle;
+    padding: 4px 8px;
+}
+#submit_table th {
+    color: white;
+    font-weight: bold;
+    background-color: #666;
+    text-align: left;
+    padding: 8px;
+}
+#submit_table tr.submit-extra {
+    border-top: none;
+}
+
+td.submit-answer {
+    font-family: 'Inconsolata', monospace;
+    font-weight: bold;
+    color: black;
 }
 td.submit-time {
+    color: black;
+}
+
+tr.submit-correct {
+    background-color: #ddffdd;
+    border-top: 1px solid #999;
+}
+
+tr.submit-incorrect {
+    background-color: #fee;
+    border-top: 1px solid #999;
+}
+
+tr.submit-partial, tr.submit-extra {
+    background-color: #fdfd96;
+    border-top: 1px solid #999;
+}
+
+tr.submit-extra {
+    background-color: #fdfd96;
+}
+
+tr.submit-pending {
+    background-color: #dddddd;
+    border-top: 1px solid #999;
+}
+
+.submit-state { text-transform: uppercase; }
+tr.submit-correct .submit-state { color: #090 }
+tr.submit-incorrect .submit-state { color: #c00 }
+tr.submit-partial .submit-state { color: #990 }
+tr.submit-pending .submit-state { color: #666 }
+
+#submit_table tr.submit-extra td {
+    padding-left: 32px;
+}
+
+
+div#submitentry {
     padding-top: 8px;
-}
-.submit-state {
-    width: 120px;
-}
-td.submit-state {
-    padding-right: 8px;
-}
-.submit-answer {
-    width: 400px;
-}
-td.submit-answer {
-    font-weight: bold;
-    font-family: Consolas, monospace;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
 }
 
 .submit-cancel {
-    color: #999999;
-    padding-right: 8px;
-}
-
-.submit-correct {
-    padding: 0px 4px;
-    font-weight: bold;
-    font-size: 70%;
-    border: 1px solid #006600;
-    border-radius: 4px;
-    color: #003300;
-    background-color: #ddffdd;
-    text-transform: uppercase;
-}
-
-.submit-partial {
-    padding: 0px 4px;
-    font-weight: bold;
-    font-size: 70%;
-    border: 1px solid #666600;
-    border-radius: 4px;
-    color: #333300;
-    background-color: #ffffdd;
-    text-transform: uppercase;
-}
-
-.submit-incorrect {
-    padding: 0px 4px;
-    font-weight: bold;
-    font-size: 70%;
-    border: 1px solid #990000;
-    border-radius: 4px;
-    color: #660000;
-    background-color: #ffdddd;
-    text-transform: uppercase;
-}
-
-.submit-pending {
-    padding: 0px 4px;
-    margin-left: 8px;
-    font-weight: bold;
-    font-size: 70%;
-    border: 1px solid #666666;
-    border-radius: 4px;
-    color: #666666;
-    background-color: #dddddd;
-    text-transform: uppercase;
-}
-
-.submit-moot {
-    padding: 0px 4px;
-    font-weight: bold;
-    font-size: 70%;
-    border: 1px solid #666666;
-    border-radius: 4px;
-    color: #666666;
-    background-color: #dddddd;
-    text-transform: uppercase;
+    margin: 0 8px;
+    vertical-align: -0.1em;
 }
 
 .submit-timer {
-    font-weight: bold;
-    font-size: 84%;
+    font-family: sans-serif;
+    font-weight: normal;
 }
 
-.submit-extra {
-    padding-left: 16px;
-}
 
 input#answer {
-    font-family: monospace;
+    width: 50ex;
+    font-weight: bold;
+    font-size: 144%;
+    font-family: 'Inconsolata', monospace;
 }
 
 /** puzzle content **/
 
-.flavor {
-    font-style: italic;
-}
+.flavor { font-style: italic; }
+.sans-serif { font-family: 'Merriweather Sans', sans-serif; }
+.serif { font-family: 'Merriweather', serif; }
+.mono { font-family: 'Inconsolata', monospace; }
+.tabular { font-family: 'Open Sans', 'Merriweather Sans', sans-serif; }
+.answer { font-weight: bold; text-transform: uppercase; }
 
 /** notifications **/
 
@@ -255,22 +400,33 @@ div.toasts {
 div.toast {
     margin: 12px 0px;
     padding: 16px;
-    background-color: #2f98b4;
     color: white;
     box-shadow: #999999 0 0 12px 0;
     box-sizing: border-box;
-    border-radius: 4px;
+    border-radius: 12px;
     animation: fadeIn 0.5s ease-out both;
+    user-select: none;
+}
+
+.toastblue {
+    background-color: #19647e;
+}
+
+.toastgold {
+    background-color: #f9c22e;
+}
+
+.toastsalmon {
+    background-color: #f15946;
 }
 
 div.toasthidden {
     margin: 12px 0px;
     padding: 16px;
-    background-color: #2f98b4;
     color: white;
     box-shadow: #999999 0 0 12px 0;
     box-sizing: border-box;
-    border-radius: 4px;
+    border-radius: 12px;
     animation: fadeOut 0.5s ease-in both;
 }
 
@@ -282,6 +438,19 @@ div.toasthidden {
 @keyframes fadeOut {
     0% { opacity: 1; }
     100% { opacity: 0; }
+}
+
+img.mute {
+    float: right;
+    width: 18px;
+    height: 18px;
+    margin-left: 4px;
+    margin-bottom: 4px;
+    background-image: url(@@STATIC:mute.png@@);
+}
+
+.muteoff {
+    background-position: -18px 0px;
 }
 
 div.mute {
@@ -316,6 +485,13 @@ div#map .icon {
     pointer-events: none;
 }
 
+div#map .mask {
+    position: absolute;
+    pointer-events: none;
+    filter: blur(5px);
+    display: none;
+}
+
 div#map img.sparkle {
     opacity: 0;
     animation: fadeIn 2s ease-out forwards;
@@ -332,19 +508,32 @@ div#map div.p {
     position: absolute;
     pointer-events: none;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
 
-    font-weight: bold;
     font-size: 144%;
-    color: white;
+    color: #eeeeee;
     pointer-events: none;
     text-align: center;
     text-shadow: 2px 2px 5px black;
 }
 
-.right {
-    float: right;
+div#map div.p b {
+    font-family: 'Merriweather Sans', sans-serif;
+    font-weight: bold;
+    color: white;
+}
+
+.newopen {
+    display: inline-block;
+    background-color: #c00;
+    color: white;
+    font-size: 80%;
+    padding: 0 8px;
+    font-weight: bold;
+    margin-right: 8px;
+    border-radius: 6px;
 }
 
 .itemlist {
@@ -353,7 +542,16 @@ div#map div.p {
     margin-right: auto;
 }
 
-h1 {
+#landtitle {
+    font-size: 60px;
+    text-align: center;
+    font-weight: 400;
+}
+
+@media print { #landtitle { display: none; } }
+
+#puzzletitle {
+    font-size: 40px;
     text-align: center;
 }
 
