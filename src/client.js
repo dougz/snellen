@@ -11,16 +11,27 @@ class H2020_Waiter {
 	/** @type{goog.net.XhrIo} */
 	this.xhr = new goog.net.XhrIo();
 	/** @type{number} */
-	this.serial = 0;
+	this.serial = received_serial;
+
+	var e = sessionStorage.getItem("serial");
+	if (e) {
+	    e = parseInt(e, 10);
+	    if (e > this.serial) {
+		this.serial = e;
+	    }
+	}
+
 	/** @type{number} */
 	this.backoff = 250;
-
 	/** @type(H2020_Dispatcher) */
 	this.dispatcher = dispatcher;
     }
 
     waitcomplete() {
         if (this.xhr.getStatus() == 401) {
+	    hunt2020.toast_manager.add_toast(
+		"Server connection lost.  Please reload to continue.",
+		3600000, null, "salmon");
             return;
         }
 
@@ -47,6 +58,8 @@ class H2020_Waiter {
 	    var msg = /** @type{Message} */ (msgs[i][1]);
 	    this.dispatcher.dispatch(msg);
 	}
+
+	sessionStorage.setItem("serial", this.serial.toString());
 
         setTimeout(goog.bind(this.xhr.send, this.xhr,
 			     "/wait/" + waiter_id + "/" + this.serial),
@@ -747,7 +760,10 @@ class H2020_AudioManager {
 	if (localStorage.getItem("mute")) {
 	    this.current.muted = true;
 	}
-	this.current.play();
+	var promise = this.current.play();
+	if (promise !== undefined) {
+	    promise.catch(error => {});
+	}
     }
 
     toggle_mute() {

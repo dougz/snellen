@@ -112,7 +112,7 @@ class Session:
     self.pending_become = None
     self.team = None
     self.capabilities = set(caps)
-    self.expires = time.time() + self.SESSION_TIMEOUT
+    self.expires = int(time.time()) + self.SESSION_TIMEOUT
     self.pages_visited = set()
 
     self.next_msg_serial = 1
@@ -176,6 +176,7 @@ class required:
         return self.bounce(req)
       now = time.time()
       if now > session.expires:
+        print(f"session {session.key} has expired")
         Session.delete_from_request(req)
         return self.bounce(req)
       if self.clear_become: session.pending_become = None
@@ -191,7 +192,7 @@ class required:
         req.redirect("/")
         return
 
-      session.expires = now + session.SESSION_TIMEOUT
+      session.expires = int(now) + session.SESSION_TIMEOUT
       req.session = session
       req.user = session.user
       req.team = session.team
