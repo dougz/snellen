@@ -1,5 +1,5 @@
-<input type=text maxlength=40 id="answer" name="answer">
-<div class="emoji-input" style="display:none"></div>
+<input type=text maxlength=40 id="answer" name="answer" style="display:none"><br>
+<div class="emoji-input" contenteditable="true" data-maxlength=40 id="emoji-answer"></div>
 <span id="emoji-picker-button" class="fa fa-smile-o"></span>
 <div class="emoji-picker-popover">
   <div class="emoji-picker">
@@ -660,14 +660,16 @@
 </div>
 <button id="submitsubmit">Submit</button>
 <script>
+$(document).ready(function() {
+  twemoji.parse(document.body);
+});
+
 $("#emoji-picker-button").click(function(e) {
   e.stopPropagation();
   $(".emoji-picker-popover").toggleClass("active");
   if ($(".emoji-picker-popover").hasClass("active")) {
     $(".emoji-picker-popover-input").focus();
   }
-  $(".emoji-input").show();
-  $("input#answer").hide();
 });
 
 $(document).click(function(e) {
@@ -677,34 +679,29 @@ $(document).click(function(e) {
   }
 });
 
-$(".emoji-input").click(function() {
-  $(".emoji-input").hide();
-  $("input#answer").show().focus();
-});
-
 $(".emoji-picker-emoji").click(function() {
-  var emoji = $(this).html();
-  $(".emoji-input").append(emoji);
-  $(".emoji-input").show();
+  var emojiHtml = $(this).html();
+  var emojiRaw = $(this).find("img").attr("alt");
+  $("#emoji-answer").append(emojiHtml);
   $("input#answer").val(function() {
-    return $("input#answer").val() + emoji;
+    return $("input#answer").val() + emojiRaw;
   });
-  $("input#answer").hide();
 });
 
-$("input#answer").on("input", function() {
-  console.log("updating emoji input to " + this.value);
-  $(".emoji-input").html(this.value);
+$("#emoji-answer").on("input", function() {
+  var text = $(this).text();
+  var maxlength = $(this).data("maxlength");
+  if (text.length > maxlength) {
+    text = text.substring(0, maxlength)
+  }
+  $("input#answer").val(text);
 });
 
 $("#submitsubmit").click(function() {
-  console.log("clearing emoji input");
-  $(".emoji-input").html("").hide();
-  $("input#answer").show();
+  $("#emoji-answer").html("");
 });
 
 $(".emoji-picker-popover-input").on("input", function() {
-  console.log("updating filter to " + this.value);
   var query = this.value;
   if (query != "") {
     $(".emoji-picker-emoji:not([title*='"+query.toLowerCase()+"'])").hide();

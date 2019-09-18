@@ -289,12 +289,15 @@ class H2020_SubmitPanel {
 	    tr = goog.dom.createDom(
 		"TR", {className: "submit-" + sub.state},
 		goog.dom.createDom("TD", {className: "submit-answer"},
-				   answer),
+		       answer),
 		goog.dom.createDom("TD", {className: "submit-time"},
 				   hunt2020.time_formatter.format(sub.submit_time)),
 		goog.dom.createDom("TD", {className: "submit-state"},
 				   goog.dom.createDom("SPAN", null,
 						      sub.state)));
+	    if (typeof twemoji !== 'undefined') {
+	      tr = twemoji.parse(tr);
+	    }
 	    this.table.appendChild(tr);
 
 	    if (sub.response) {
@@ -371,6 +374,9 @@ class H2020_SubmitPanel {
 	    var code = e.target.getStatus();
 	    if (code == 409) {
 		var text = e.target.getResponseText();
+    if (typeof twemoji !== 'undefined') {
+      text = twemoji.parse(text);
+    }
 		hunt2020.toast_manager.add_toast("You've already submitted <b>" + text + "</b>.",
 						 5000, null, "salmon");
 	    } else if (code != 204) {

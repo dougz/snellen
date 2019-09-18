@@ -480,11 +480,11 @@ input#answer, .emoji-input {
     transition-delay: 60ms;
 }
 
-.emoji-picker-emoji img {
-    width: 30px;
+img.emoji {
+    width: 2ex;
 }
 
-.emoji-picker-emoji img:hover {
+.emoji-picker-emoji img.emoji:hover {
     transition-delay: 0ms;
     -webkit-transform: scale(1.4);
     -ms-transform: scale(1.4);

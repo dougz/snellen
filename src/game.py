@@ -787,8 +787,8 @@ class Puzzle:
     out = []
     for k in text:
       cat = unicodedata.category(k)
-      # Letters and "other symbols".
-      if cat == "So" or cat[0] == "L":
+      # Letters, "other symbols", or specific characters needed for complex emojis
+      if cat == "So" or cat[0] == "L" or k == u"\u200D" or k == u"\uFE0F":
         out.append(k)
     return "".join(out)
 
