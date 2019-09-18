@@ -1,3 +1,5 @@
+<input type=text maxlength=40 id="answer" name="answer">
+<div class="emoji-input" style="display:none"></div>
 <span id="emoji-picker-button" class="fa fa-smile-o"></span>
 <div class="emoji-picker-popover">
   <div class="emoji-picker">
@@ -656,27 +658,53 @@
     </div>
   </div>
 </div>
+<button id="submitsubmit">Submit</button>
 <script>
-$(document).on("click", "#emoji-picker-button", function(e){
+$("#emoji-picker-button").click(function(e) {
   e.stopPropagation();
   $(".emoji-picker-popover").toggleClass("active");
+  if ($(".emoji-picker-popover").hasClass("active")) {
+    $(".emoji-picker-popover-input").focus();
+  }
+  $(".emoji-input").show();
+  $("input#answer").hide();
 });
 
-$(document).click(function (e) {
+$(document).click(function(e) {
   if ($(e.target).attr("class") != ".emoji-picker-popover" &&
       $(e.target).parents(".emoji-picker-popover").length == 0) {
     $(".emoji-picker-popover").removeClass("active");
   }
 });
 
-$(document).on("click", ".emoji-picker-emoji", function(e) {
+$(".emoji-input").click(function() {
+  $(".emoji-input").hide();
+  $("input#answer").show().focus();
+});
+
+$(".emoji-picker-emoji").click(function() {
   var emoji = $(this).html();
+  $(".emoji-input").append(emoji);
+  $(".emoji-input").show();
   $("input#answer").val(function() {
-    return this.value + emoji;
+    return $("input#answer").val() + emoji;
   });
+  $("input#answer").hide();
+});
+
+$("input#answer").on("input", function() {
+  console.log("updating emoji input to " + this.value);
+  $(".emoji-input").html(this.value);
+});
+
+$("#submitsubmit").click(function() {
+  console.log("clearing emoji input");
+  $(".emoji-input").html("").hide();
+  $("input#answer").show();
 });
 
 $(".emoji-picker-popover-input").on("input", function() {
+  console.log("updating filter to " + this.value);
   var query = this.value;
   if (query != "") {
     $(".emoji-picker-emoji:not([title*='"+query.toLowerCase()+"'])").hide();

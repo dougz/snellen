@@ -11,7 +11,7 @@ body {
 
 a { text-decoration: none; }
 
-input, button {
+input, button, .emoji-input {
     font-family: 'Merriweather Sans', sans-serif;
 }
 
@@ -371,13 +371,16 @@ div#submitentry {
 }
 
 
-input#answer {
+input#answer, .emoji-input {
     width: 50ex;
+    height: 28px;
     font-weight: bold;
     font-size: 144%;
     font-family: 'Inconsolata', monospace;
+    background-color: #fff;
+    border: 1px solid lightgrey;
+    padding: 1px;
 }
-
 
 /** emoji picker support **/
 
@@ -420,6 +423,7 @@ input#answer {
     top: 0;
     left: 12px;
     right: 20px;
+    border-bottom: 1px solid lightgrey;
 }
 
 .emoji-picker-popover-search-icon {
@@ -473,11 +477,14 @@ input#answer {
     font-size: 28px;
     transition: -webkit-transform 60ms ease-out;
     transition: transform 60ms ease-out;
-    transition: transform 60ms ease-out,-webkit-transform 60ms ease-out;
     transition-delay: 60ms;
 }
 
-.emoji-picker-emoji:hover {
+.emoji-picker-emoji img {
+    width: 30px;
+}
+
+.emoji-picker-emoji img:hover {
     transition-delay: 0ms;
     -webkit-transform: scale(1.4);
     -ms-transform: scale(1.4);
