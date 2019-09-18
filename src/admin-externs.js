@@ -6,6 +6,9 @@ var team_username;
 /** @type{number} */
 var waiter_id;
 
+/** @type{number} */
+var received_serial;
+
 class Message {
     constructor() {
 	/** @type{string} */

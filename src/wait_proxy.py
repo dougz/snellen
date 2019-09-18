@@ -28,6 +28,7 @@ class Server:
   NEXT_WID = 1
 
   def __init__(self, wpid):
+    self.wpid = wpid
     self.cv = asyncio.Condition()
     self.q = []
 
@@ -82,11 +83,14 @@ class CheckSessionHandler(tornado.web.RequestHandler):
     session = login.Session.from_key(key)
     self.set_header("Content-Type", "text/plain")
     if session is not None:
+      session.expires = int(time.time()) + session.SESSION_TIMEOUT
+      group = None
       if hasattr(session, "team") and session.team:
-        self.write(session.team.username)
+        group = session.team.username
       elif hasattr(session, "user") and session.user:
-        self.write("__ADMIN")
-
+        group = "__ADMIN"
+      if group:
+        self.write(f"{group} {int(session.expires)}")
 
 def GetHandlers():
   return [
@@ -120,20 +124,8 @@ class Client:
     socket = tornado.netutil.bind_unix_socket(f"{self.options.socket_path}_p{self.wpid}", mode=0o666, backlog=3072)
     self.server.add_socket(socket)
 
-    asyncio.create_task(self.purge())
-    #asyncio.create_task(self.print_stats())
-
     print(f"proxy waiter #{self.wpid} listening")
     await self.fetch()
-
-  async def print_stats(self):
-    while True:
-      out = {}
-      for t in ProxyTeam.all_teams():
-        out[t.team] = len(t.waiters)
-      print(f"proxy #{self.wpid}: {out}")
-
-      await asyncio.sleep(2.5)
 
   async def fetch(self):
     # Give main server time to start up.
@@ -147,18 +139,6 @@ class Client:
           return
         team = ProxyTeam.get_team(team)
         await team.send_messages(items)
-
-  async def purge(self):
-    while True:
-      await asyncio.sleep(Waiter.WAITER_TIMEOUT)
-      now = time.time()
-      for t in ProxyTeam.all_teams():
-        to_delete = set()
-        for w in t.waiters:
-          if w.purgeable(now):
-            to_delete.add(w)
-        if to_delete:
-          t.waiters -= to_delete
 
   async def get_messages(self):
     while True:
@@ -188,8 +168,8 @@ class Client:
       raise tornado.web.HTTPError(http.client.UNAUTHORIZED)
 
     key = key.decode("ascii")
-    team = self.session_cache.get((key, wid))
-    if team: return team
+    team, expiration = self.session_cache.get((key, wid), (None, None))
+    if team and expiration > time.time(): return team
 
     req = tornado.httpclient.HTTPRequest(
       f"http://localhost:{self.options.wait_proxy_port}/checksession/{key}",
@@ -197,11 +177,16 @@ class Client:
       request_timeout=10.0)
     try:
       response = await self.client.fetch(req)
-      team = response.body.decode("ascii")
-      if team:
-        self.session_cache[(key, wid)] = team
+      reply = response.body.decode("ascii")
+      if reply:
+        team, expiration = reply.split()
+        expiration = int(expiration)
+        expiration -= WaitHandler.WAIT_TIMEOUT + WaitHandler.WAIT_SMEAR
+        self.session_cache[(key, wid)] = (team, expiration)
         return team
     except tornado.httpclient.HTTPClientError as e:
+      pass
+    except ValueError:
       pass
 
     raise tornado.web.HTTPError(http.client.UNAUTHORIZED)
@@ -209,6 +194,7 @@ class Client:
 
 class ProxyTeam:
   BY_TEAM = {}
+  OLD_MESSAGE_AGE = 10.0
 
   @classmethod
   def get_team(cls, team):
@@ -225,72 +211,40 @@ class ProxyTeam:
   def __init__(self, team):
     self.team = team
     self.cv = asyncio.Condition()
-    self.waiters = set()
+    self.q = collections.deque()
 
   def __str__(self):
     return f"<ProxyTeam {self.team}>"
 
   async def send_messages(self, msgs):
     if not msgs: return
-    if not self.waiters: return
+
+    now = time.time()
+    for m in msgs:
+      self.q.append((now, m))
+
     async with self.cv:
-      for w in self.waiters:
-        w.q.extend(msgs)
       self.cv.notify_all()
 
-  def add_waiter(self, waiter):
-    self.waiters.add(waiter)
+    cutoff = time.time() - self.OLD_MESSAGE_AGE
+    while self.q and self.q[0][0] < cutoff:
+      el = self.q.popleft()
 
-
-class Waiter:
-  # If we replied to a waiter more than this long ago and haven't
-  # received a new request, the client is assumed to be dead.
-  WAITER_TIMEOUT = 30  # seconds
-
-  BY_WID = {}
-
-  @classmethod
-  def get_waiter(cls, wid, team):
-    if wid not in cls.BY_WID:
-      cls.BY_WID[wid] = Waiter(wid, team)
-    return cls.BY_WID[wid]
-
-  def __init__(self, wid, team):
-    self.team = team
-    team.add_waiter(self)
-    self.last_acked = 0
-    self.wid = wid
-    self.q = collections.deque()
-
-    self.wait_in_progress = False
-    self.last_return = time.time()
-
-  def __str__(self):
-    return f"<Waiter {self.wid} {self.team.team}>"
-
-  def purgeable(self, now):
-    return (not self.wait_in_progress and
-            now - self.last_return > self.WAITER_TIMEOUT)
-
-  async def wait(self, received_serial, timeout):
-    self.wait_in_progress = True
-    # Discard any messages that have been acked.
-    q = self.q
-    while q and q[0][0] <= received_serial:
-      q.popleft()
-
-    allow_empty = False
+  async def await_new_messages(self, received_serial, timeout):
     while True:
-      if q or allow_empty:
-        self.wait_in_progress = False
-        self.last_return = time.time()
-        return q
-      allow_empty = True
-      async with self.team.cv:
+      if self.q and self.q[-1][1][0] > received_serial:
+        # at least one message to send
+        out = collections.deque()
+        for ts, (s, m) in reversed(self.q):
+          if s > received_serial:
+            out.appendleft((s,m))
+        return out
+
+      async with self.cv:
         try:
-          await asyncio.wait_for(self.team.cv.wait(), timeout)
+          await asyncio.wait_for(self.cv.wait(), timeout)
         except asyncio.TimeoutError:
-          pass
+          return []
 
 
 class WaitHandler(tornado.web.RequestHandler):
@@ -308,16 +262,9 @@ class WaitHandler(tornado.web.RequestHandler):
     wid = int(wid)
     received_serial = int(received_serial)
 
-    waiter = Waiter.get_waiter(wid, team)
+    timeout = self.WAIT_TIMEOUT + random.random() * self.WAIT_SMEAR
 
-    # Choose the timeout for the first wait evenly across the whole
-    # interval, to avoid the thundering herd problem.
-    if received_serial == 0:
-      timeout = random.random() * (self.WAIT_TIMEOUT + self.WAIT_SMEAR)
-    else:
-      timeout = self.WAIT_TIMEOUT + random.random() * self.WAIT_SMEAR
-
-    msgs = await waiter.wait(received_serial, timeout)
+    msgs = await team.await_new_messages(received_serial, timeout)
 
     if False:
       if msgs:

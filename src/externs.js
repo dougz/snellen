@@ -13,8 +13,14 @@ var puzzle_init;
 /** @type{number} */
 var waiter_id;
 
+/** @type{number} */
+var received_serial;
+
 /** @type{Storage} */
 var localStorage;
+
+/** @type{Storage} */
+var sessionStorage;
 
 /** @type{?number} */
 var open_time;

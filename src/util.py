@@ -24,6 +24,7 @@ class TeamPageHandler(TeamHandler):
     d = {"team": self.team}
 
     wid = wait_proxy.Server.new_waiter_id()
+    serial = self.team.next_serial() - 1
 
     if hasattr(self, "puzzle"):
       d["puzzle"] = self.puzzle
@@ -31,13 +32,13 @@ class TeamPageHandler(TeamHandler):
       script = ("<script>\n"
                 f'var puzzle_id = "{self.puzzle.shortname}";\n'
                 "var puzzle_init = null;\n"
-                f"var waiter_id = {wid};\n"
+                f"var waiter_id = {wid}; var received_serial = {serial};\n"
                 "</script>\n")
     else:
       d["puzzle"] = None
       script = ("<script>\n"
                 "var puzzle_id = null;\n"
-                f"var waiter_id = {wid};\n"
+                f"var waiter_id = {wid}; var received_serial = {serial};\n"
                 "</script>\n")
 
     if self.application.settings.get("debug"):

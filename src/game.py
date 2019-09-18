@@ -260,6 +260,9 @@ class Team(login.LoginUser):
   def discard_messages(self):
     self.pending_messages = []
 
+  def next_serial(self):
+    return self.message_serial
+
   def log_activity(self, now, *, for_admin=None, for_team=None):
     # Only for_team: append to both.
     # Only for_admin: append to admin only.

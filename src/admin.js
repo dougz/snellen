@@ -9,7 +9,7 @@ class A2020_Waiter {
 	/** @type{goog.net.XhrIo} */
 	this.xhr = new goog.net.XhrIo();
 	/** @type{number} */
-	this.serial = 0;
+	this.serial = received_serial;
 	/** @type{number} */
 	this.backoff = 250;
 
@@ -19,6 +19,7 @@ class A2020_Waiter {
 
     waitcomplete() {
         if (this.xhr.getStatus() == 401) {
+	    alert("Server connection lost; please reload.");
             return;
         }
 
