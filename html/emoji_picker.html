@@ -688,8 +688,16 @@ $(".emoji-picker-emoji").click(function() {
   });
 });
 
+$("#emoji-answer").on("keypress", function(e) {
+  if (e.keyCode == 13) {
+    $("#submitsubmit").trigger("click");
+    return false;
+  }
+});
+
 $("#emoji-answer").on("input", function() {
   var text = $(this).text();
+  text = text.replace(/[\r\n]+/gm, "");
   var maxlength = $(this).data("maxlength");
   if (text.length > maxlength) {
     text = text.substring(0, maxlength)
