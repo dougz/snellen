@@ -91,7 +91,6 @@ class Submission:
   PER_ANSWER_DELAY = 360
 
   def __init__(self, now, submit_id, team, puzzle, answer):
-    print(f"create submssion {answer} at {now}")
     self.state = self.PENDING
     self.submit_id = submit_id
     self.team = team

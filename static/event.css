@@ -246,7 +246,9 @@ div#thumb .icon {
 /** submit panel **/
 
 #submitpanel {
-    background-color: #888888ee;
+    /*background-color: #888888ee;*/
+    background: linear-gradient(to bottom, #888888ee, #828282ee);
+
     border-bottom: 0px solid black;
 
     height: 0;
@@ -309,6 +311,10 @@ div#thumb .icon {
     border-top: none;
 }
 
+td.submit-empty {
+    color: black;
+}
+;
 td.submit-answer {
     font-family: 'Inconsolata', monospace;
     font-weight: bold;
@@ -359,6 +365,36 @@ div#submitentry {
     flex-direction: row;
     align-items: center;
 }
+
+#submitentry #answer {
+    font-size: 120%;
+    font-family: 'Inconsolata', monospace;
+    margin: 8px 0 8px 8px;
+    border: 1px solid white;
+    border-top-left-radius: 15px;
+    border-bottom-left-radius: 15px;
+    padding: 8px 16px;
+    box-sizing: border-box;
+    outline: none;
+    flex-grow: 1;
+}
+
+#submitentry #submitsubmit {
+    font-family: 'Merriweather Sans', sans-serif;
+    font-weight: 700;
+    color: white;
+    font-size: 100%;
+    padding: 8px 16px;
+    margin: 8px 8px 8px 0;
+    box-sizing: border-box;
+    border: 1px solid #395483;
+    border-top-right-radius: 15px;
+    border-bottom-right-radius: 15px;
+    background: linear-gradient(to bottom, #4c70af, #436299);
+    outline: none;
+}
+
+
 
 .submit-cancel {
     margin-right: 8px;
