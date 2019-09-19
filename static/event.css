@@ -472,9 +472,9 @@ input#answer, .emoji-input {
 }
 
 .emoji-picker-emoji {
-    padding: 5px;
-    width: 30px;
-    line-height: 30px;
+    padding: 2px;
+    width: 28px;
+    line-height: 28px;
     display: inline-table;
     text-align: center;
     cursor: pointer;
