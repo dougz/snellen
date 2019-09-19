@@ -1684,7 +1684,9 @@ $("#emoji-picker-button").click(function(e) {
   e.stopPropagation();
   $(".emoji-picker-popover").toggleClass("active");
   if ($(".emoji-picker-popover").hasClass("active")) {
-    $(".emoji-picker-popover-input").focus();
+    $(".emoji-picker-popover-input").val("").focus();
+    $(".emoji-picker-popover-body").scrollTop(0);
+    $(".emoji-picker-emoji").show();
   }
 });
 
