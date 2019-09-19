@@ -52,7 +52,7 @@ def make_app(options, static_dir, **kwargs):
 
 async def main_server(options):
   if options.debug:
-    game.Submission.PER_ANSWER_DELAY = 30
+    game.Submission.PER_ANSWER_DELAY = 20
 
   print("Load map config...")
   with open(os.path.join(options.event_dir, "map_config.json")) as f:

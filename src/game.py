@@ -91,6 +91,7 @@ class Submission:
   PER_ANSWER_DELAY = 360
 
   def __init__(self, now, submit_id, team, puzzle, answer):
+    print(f"create submssion {answer} at {now}")
     self.state = self.PENDING
     self.submit_id = submit_id
     self.team = team
@@ -98,7 +99,8 @@ class Submission:
     self.puzzle_state = team.get_puzzle_state(puzzle)
     self.answer = Puzzle.canonicalize_answer(answer)
     self.raw_answer = answer
-    self.submit_time = now
+    self.sent_time = now
+    self.submit_time = None
     self.extra_response = None
 
   def __lt__(self, other):
@@ -106,8 +108,8 @@ class Submission:
 
   def check_or_queue(self, now, log_queue=True):
     self.check_time = self.compute_check_time()
-    if self.check_time <= self.submit_time:
-      self.check_answer(self.submit_time)
+    if self.check_time <= self.sent_time:
+      self.check_answer(self.sent_time)
     else:
       if log_queue:
         self.puzzle_state.log(now, "Queued <b>" + html.escape(self.raw_answer) + "</b>")
@@ -122,6 +124,7 @@ class Submission:
     return self.puzzle_state.open_time + (count-1) * self.PER_ANSWER_DELAY
 
   def check_answer(self, now):
+    self.submit_time = now
     answer = self.answer
     if answer in self.puzzle.answers:
       self.state = self.CORRECT
@@ -374,7 +377,7 @@ class Team(login.LoginUser):
     return True
 
   def open_puzzle(self, puzzle, now):
-    print(f"opening {puzzle.title}")
+    #print(f"opening {puzzle.title}")
     state = self.puzzle_state[puzzle]
     if state.state == state.CLOSED:
       state.state = state.OPEN
@@ -458,7 +461,7 @@ class Team(login.LoginUser):
                                     "puzzle_id": puzzle.shortname}])
 
   def compute_puzzle_beam(self, now):
-    print("-----------------------------")
+    #print("-----------------------------")
     start_map = Land.BY_SHORTNAME["inner_only"]
     if start_map not in self.open_lands:
       self.open_lands[start_map] = now
@@ -487,7 +490,7 @@ class Team(login.LoginUser):
 
       open_count += self.fastpasses_used.get(land, 0)
 
-      print(f"land {land_name} open_count {open_count}")
+      #print(f"land {land_name} open_count {open_count}")
 
       for i, p in enumerate(land.puzzles):
         if open_count <= 0:
@@ -499,9 +502,9 @@ class Team(login.LoginUser):
           if not p.meta:
             open_count -= 1
       leftover_count += open_count
-      print("")
+      #print("")
 
-    print(f"leftovers {leftover_count}")
+    #print(f"leftovers {leftover_count}")
     if leftover_count:
       for p in locked:
         if leftover_count <= 0: break
@@ -564,7 +567,7 @@ class Land:
     self.BY_SHORTNAME[shortname] = self
     self.shortname = shortname
     self.title = cfg["title"]
-    self.sortkey = util.make_sortkey(self.title)
+    self.sortkey = (util.make_sortkey(self.title), id(self))
     self.logo = cfg.get("logo")
     self.symbol = cfg.get("symbol", "??")
     self.land_order = cfg.get("land_order")
@@ -650,7 +653,7 @@ class Puzzle:
   def post_init(self, land, icon):
     self.land = land
     self.icon = icon
-    self.sortkey = util.make_sortkey(self.title)
+    self.sortkey = (util.make_sortkey(self.title), id(self))
     self.html = (f'<a href="{self.url}"><span class=puzzletitle>{html.escape(self.title)}</span></a> '
                  f'<span class="landtag round-{land.shortname}">{land.symbol}</span>')
     self.admin_html = (f'<a href="{self.admin_url}"><span class=puzzletitle>{html.escape(self.title)}</span></a> '

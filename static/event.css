@@ -278,7 +278,7 @@ div#thumb .icon {
 }
 
 #st_answer {
-    width: 60ex;
+    width: 40ex;
 }
 #st_time {
     width: 20ex;
@@ -361,7 +361,7 @@ div#submitentry {
 }
 
 .submit-cancel {
-    margin: 0 8px;
+    margin-right: 8px;
     vertical-align: -0.1em;
 }
 

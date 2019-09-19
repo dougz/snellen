@@ -290,21 +290,24 @@ class H2020_SubmitPanel {
             }
 
             var answer = null;
+            var time_el = null;
             if (sub.state == "pending") {
                 var link = goog.dom.createDom("A", {className: "submit-cancel"});
                 link.innerHTML = this.cancel;
                 goog.events.listen(link, goog.events.EventType.CLICK, cancelsub(sub));
-                answer = [sub.answer, link, el];
+                answer = sub.answer;
+                time_el = [link, el];
             } else {
                 answer = sub.answer;
+                time_el = hunt2020.time_formatter.format(sub.submit_time);
             }
+
 
             tr = goog.dom.createDom(
                 "TR", {className: "submit-" + sub.state},
                 goog.dom.createDom("TD", {className: "submit-answer"},
                                    answer),
-                goog.dom.createDom("TD", {className: "submit-time"},
-                                   hunt2020.time_formatter.format(sub.submit_time)),
+                goog.dom.createDom("TD", {className: "submit-time"}, time_el),
                 goog.dom.createDom("TD", {className: "submit-state"},
                                    goog.dom.createDom("SPAN", null,
                                                       sub.state)));
