@@ -381,6 +381,8 @@ input#answer, .emoji-input {
     font-family: 'Inconsolata', monospace;
     background-color: #fff;
     border: 1px solid lightgrey;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
 /** emoji picker support **/

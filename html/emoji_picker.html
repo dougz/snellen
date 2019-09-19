@@ -689,20 +689,35 @@ $(".emoji-picker-emoji").click(function() {
 });
 
 $("#emoji-answer").on("keypress", function(e) {
-  if (e.keyCode == 13) {
+  if (e.which == 13) {
     $("#submitsubmit").trigger("click");
+    return false;
+  }
+  if (e.which != 8 && $(this).text().length >= $(this).data("maxlength")) {
+    e.preventDefault();
     return false;
   }
 });
 
+function sanitizeInput(text, maxlength) {
+  if (text) {
+    text = text.replace(/[\r\n]+/gm, "");
+    text = text.substring(0, maxlength);
+  }
+  return text;
+}
+
 $("#emoji-answer").on("input", function() {
   var text = $(this).text();
-  text = text.replace(/[\r\n]+/gm, "");
-  var maxlength = $(this).data("maxlength");
-  if (text.length > maxlength) {
-    text = text.substring(0, maxlength)
-  }
+  text = sanitizeInput(text, $(this).data("maxlength"));
   $("input#answer").val(text);
+});
+
+$("#emoji-answer").on("paste", function(e) {
+  e.preventDefault();
+  var text = e.originalEvent.clipboardData.getData("text/plain");
+  text = sanitizeInput(text, $(this).data("maxlength") - $(this).text().length);
+  document.execCommand("insertHTML", false, text);
 });
 
 $("#submitsubmit").click(function() {
