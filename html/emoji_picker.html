@@ -708,7 +708,11 @@ function sanitizeInput(text, maxlength) {
 }
 
 $("#emoji-answer").on("input", function() {
-  var text = $(this).text();
+  var node = $("<div>" + $(this).html() + "</div>");
+  node.children("img.emoji").each(function () {
+    $(this).replaceWith($(this).attr("alt"));
+  });
+  var text = $(node).text();
   text = sanitizeInput(text, $(this).data("maxlength"));
   $("input#answer").val(text);
 });
@@ -717,6 +721,7 @@ $("#emoji-answer").on("paste", function(e) {
   e.preventDefault();
   var text = e.originalEvent.clipboardData.getData("text/plain");
   text = sanitizeInput(text, $(this).data("maxlength") - $(this).text().length);
+  text = twemoji.parse(text);
   document.execCommand("insertHTML", false, text);
 });
 
