@@ -653,6 +653,8 @@ class Puzzle:
     self.land = land
     self.icon = icon
     self.sortkey = (util.make_sortkey(self.title), id(self))
+    # TODO(Rich): set this to the correct round (or do this another way)
+    self.emojify = land.shortname == "castle"
     self.html = (f'<a href="{self.url}"><span class=puzzletitle>{html.escape(self.title)}</span></a> '
                  f'<span class="landtag round-{land.shortname}">{land.symbol}</span>')
     self.admin_html = (f'<a href="{self.admin_url}"><span class=puzzletitle>{html.escape(self.title)}</span></a> '
@@ -790,8 +792,8 @@ class Puzzle:
     out = []
     for k in text:
       cat = unicodedata.category(k)
-      # Letters and "other symbols".
-      if cat == "So" or cat[0] == "L":
+      # Letters, "other symbols", or specific characters needed for complex emojis
+      if cat == "So" or cat[0] == "L" or k == u"\u200D" or k == u"\uFE0F":
         out.append(k)
     return "".join(out)
 
@@ -978,4 +980,3 @@ class Achievement:
     Achievement("come_back",
                 "Come back!",
                 "Log out of the hunt server before the coin is found.")
-

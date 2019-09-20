@@ -311,6 +311,9 @@ class H2020_SubmitPanel {
                 goog.dom.createDom("TD", {className: "submit-state"},
                                    goog.dom.createDom("SPAN", null,
                                                       sub.state)));
+            if (typeof twemoji !== 'undefined') {
+              tr = twemoji.parse(tr);
+            }
             this.table.appendChild(tr);
 
             if (sub.response) {
@@ -387,6 +390,9 @@ class H2020_SubmitPanel {
             var code = e.target.getStatus();
             if (code == 409) {
                 var text = e.target.getResponseText();
+                if (typeof twemoji !== 'undefined') {
+                  text = twemoji.parse(text);
+                }
                 hunt2020.toast_manager.add_toast("You've already submitted <b>" + text + "</b>.",
                                                  5000, null, "salmon");
             } else if (code != 204) {
@@ -855,4 +861,3 @@ window.onload = function() {
         hunt2020.open_countdown = new H2020_OpeningCountdown();
     }
 }
-

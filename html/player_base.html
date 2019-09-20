@@ -10,6 +10,12 @@
     {% if script %}{% raw script %}{% end %}
     {% if json_data %}{% raw json_data %}{% end %}
     {% block head %}{% end %}
+    {% if puzzle and puzzle.emojify %}
+      <!-- TODO(Rich): bring in just what we need, and host it locally -->
+      <link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js" crossorigin="anonymous"></script>
+      <script src="https://twemoji.maxcdn.com/v/latest/twemoji.min.js" crossorigin="anonymous"></script>
+    {% end %}
   </head>
   <body>
     <div id="topnav">

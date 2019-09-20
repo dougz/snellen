@@ -30,8 +30,12 @@
       </table>
     </div>
     <div id="submitentry">
-      <input type=text maxlength=40 id="answer" name="answer">
-      <button id="submitsubmit">Submit</button>
+      {% if puzzle.emojify %}
+        {% include "emoji_picker.html" %}
+      {% else %}
+        <input type=text maxlength=40 id="answer" name="answer">
+        <button id="submitsubmit">Submit</button>
+      {% end %}
       <span id="top_note"></span>
     </div>
   </div>

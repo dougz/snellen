@@ -166,8 +166,11 @@ def main():
   game.OPTIONS = options
 
   soft, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
-  resource.setrlimit(resource.RLIMIT_NOFILE, (hard, hard))
-  print(f"Raised limit to {hard} file descriptors.")
+  try:
+    resource.setrlimit(resource.RLIMIT_NOFILE, (hard, hard))
+    print(f"Raised limit to {hard} file descriptors.")
+  except ValueError:
+    print("Warning: unable to increase file descriptor limit!")
 
   original_handler = signal.signal(signal.SIGINT, signal.SIG_IGN)
   proxy_pids = []
