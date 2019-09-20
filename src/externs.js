@@ -46,7 +46,7 @@ class Message {
 
 class Submission {
     constructor() {
-        /** @type{number} */
+        /** @type{?number} */
         this.submit_time;
         /** @type{number} */
         this.check_time;
