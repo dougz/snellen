@@ -32,9 +32,10 @@ input, button, .emoji-input {
 #pins { font-size: 120%; }
 #pins .no { color: #999; }
 
-#pins .no img { filter: grayscale(80%);
-		opacity: 0.4;
-	      }
+#pins .no img {
+  filter: grayscale(80%);
+  opacity: 0.4;
+}
 
 #topnav {
     font-family: 'Merriweather', sans-serif;
@@ -105,8 +106,8 @@ a#submit:hover {
 
     min-height: calc(100vh - 41px - 360px);
     background: url(@@STATIC:inner_only/land_clouds.png@@) top repeat-x,
-		url(@@STATIC:inner_only/land_tree.png@@) bottom repeat-x,
-		#c3dffb;
+       url(@@STATIC:inner_only/land_tree.png@@) bottom repeat-x,
+       #c3dffb;
     padding: 100px 0 260px 0;
 }
 
@@ -366,7 +367,7 @@ div#submitentry {
     align-items: center;
 }
 
-#submitentry #answer {
+#submitentry #answer, .emoji-input {
     font-size: 120%;
     font-family: 'Inconsolata', monospace;
     margin: 8px 0 8px 8px;
@@ -377,6 +378,9 @@ div#submitentry {
     box-sizing: border-box;
     outline: none;
     flex-grow: 1;
+    background-color: #fff;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
 #submitentry #submitsubmit {
@@ -394,8 +398,6 @@ div#submitentry {
     outline: none;
 }
 
-
-
 .submit-cancel {
     margin-right: 8px;
     vertical-align: -0.1em;
@@ -406,20 +408,6 @@ div#submitentry {
     font-weight: normal;
 }
 
-
-input#answer, .emoji-input {
-    width: 500px;
-    height: 28px;
-    padding: 1px;
-    line-height: 28px;
-    font-weight: bold;
-    font-size: 144%;
-    font-family: 'Inconsolata', monospace;
-    background-color: #fff;
-    border: 1px solid lightgrey;
-    overflow: hidden;
-    white-space: nowrap;
-}
 
 /** emoji picker support **/
 
@@ -437,10 +425,11 @@ input#answer, .emoji-input {
 .emoji-picker-popover {
     z-index: 2147483003;
     position: absolute;
-    top: 322px;
-    width: 500px;
+    top: 318px;
+    margin: 0 0 0 8px;
     background-color: #fff;
-    border: 1px solid lightgrey;
+    border: 1px solid white;
+    border-radius: 15px;
     padding: 1px;
     transition-duration: 200ms;
     transition-delay: 0ms;
@@ -457,7 +446,7 @@ input#answer, .emoji-input {
 }
 
 .emoji-picker {
-    width: 500px;
+    width: 632px;
     height: 220px;
 }
 
@@ -720,18 +709,18 @@ div#map div.p b {
 
 @keyframes twist {
     0% {
-	transform: rotate(0.0deg) translateX(0px) scale(0.1) rotate(0.0deg);
-	opacity: 0;
+      transform: rotate(0.0deg) translateX(0px) scale(0.1) rotate(0.0deg);
+      opacity: 0;
     }
     5% {
-	opacity: 1;
+      opacity: 1;
     }
     70% {
-	opacity: 1;
+      opacity: 1;
     }
     100% {
-	transform: rotate(135.0deg) translateX(1px) scale(0.3) rotate(540.0deg);
-	opacity: 0;
+      transform: rotate(135.0deg) translateX(1px) scale(0.3) rotate(540.0deg);
+      opacity: 0;
     }
 }
 
