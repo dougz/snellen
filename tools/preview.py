@@ -2,9 +2,13 @@
 
 import argparse
 import asyncio
+import base64
+from collections import namedtuple
+import hashlib
 import json
 import os
 import re
+import requests
 import time
 import tornado.ioloop
 import tornado.httpserver
@@ -29,6 +33,11 @@ class Land:
   title = "Some Land"
 
 
+SAVED_PUZZLES = {}
+
+SavedPuzzle = namedtuple("SavedPuzzle", ("timestamp", "who", "puzzle_url", "meta_url"))
+
+
 class Puzzle:
   NEXT_PID = 1
   BY_PID = {}
@@ -39,7 +48,10 @@ class Puzzle:
     Puzzle.BY_PID[self.pid] = self
 
   def process(self, zip_data):
-    self.prefix = common.hash_name(str(time.time()).encode("ascii") + zip_data)
+    h = hashlib.md5(zip_data).digest()
+    h = base64.urlsafe_b64encode(h).decode("ascii")
+    assert h[-2:] == "=="
+    self.prefix = h[:-2]
     self.pp = ppp.Puzzle(zip_data, self.options, include_solutions=True)
     self.pp.land = Land
 
@@ -48,6 +60,10 @@ class PreviewPage(tornado.web.RequestHandler):
   def get(self):
     self.render("preview.html")
 
+
+class SavedPage(tornado.web.RequestHandler):
+  def get(self):
+    self.render("saved_prod_zip.html", puzzles=SAVED_PUZZLES)
 
 class UploadHandler(tornado.web.RequestHandler):
   LAND_NAMES = {"castle": "The Grand Castle",
@@ -119,7 +135,7 @@ class UploadHandler(tornado.web.RequestHandler):
       common.upload_object("solution.html",
                            self.options.bucket, path,
                            common.CONTENT_TYPES[".html"],
-                           puzzle_html, self.options.credentials)
+                           puzzle_html, self.options.credentials, update=True)
 
       p.solution_url = f"https://{self.options.public_host}/{path}"
 
@@ -131,7 +147,7 @@ class UploadHandler(tornado.web.RequestHandler):
       common.upload_object("puzzle.html",
                            self.options.bucket, path,
                            common.CONTENT_TYPES[".html"],
-                           puzzle_html, self.options.credentials)
+                           puzzle_html, self.options.credentials, update=True)
 
       p.puzzle_url = f"https://{self.options.public_host}/{path}"
 
@@ -141,7 +157,7 @@ class UploadHandler(tornado.web.RequestHandler):
       common.upload_object("for_ops.html",
                            self.options.bucket, path,
                            common.CONTENT_TYPES[".html"],
-                           puzzle_html, self.options.credentials)
+                           puzzle_html, self.options.credentials, update=True)
 
       p.for_ops_url = f"https://{self.options.public_host}/{path}"
 
@@ -154,16 +170,23 @@ class UploadHandler(tornado.web.RequestHandler):
       common.upload_object("meta.html",
                            self.options.bucket, path,
                            common.CONTENT_TYPES[".html"],
-                           meta_html, self.options.credentials)
+                           meta_html, self.options.credentials, update=True)
 
       p.meta_url = f"https://{self.options.public_host}/{path}"
 
       if save:
-        path = f"saved/{p.pp.shortname}/{timestamp}.{who}.{p.prefix}.zip"
+        path = f"saved/{p.pp.shortname}/{timestamp}.{who}.zip"
         common.upload_object("puzzle zip",
                              self.options.save_bucket, path,
                              "appliction/zip",
                              zip_data, self.options.credentials)
+        global SAVED_PUZZLES
+        SAVED_PUZZLES.setdefault(p.pp.shortname, {})[timestamp] = SavedPuzzle(
+          timestamp=timestamp,
+          who=who,
+          puzzle_url=p.puzzle_url,
+          meta_url=p.meta_url,
+        )
 
       self.redirect(p.meta_url)
     except ppp.PuzzleErrors as e:
@@ -194,6 +217,42 @@ class ErrorPage(tornado.web.RequestHandler):
     self.render("preview_error.html", error=p.error_msg)
 
 
+def load_saved_puzzles(options):
+  global SAVED_PUZZLES
+  page_token = None
+  while True:
+    url = f"https://www.googleapis.com/storage/v1/b/{options.save_bucket}/o?prefix=saved/"
+    if page_token:
+      url += f"&pageToken={page_token}"
+
+    r = requests.get(url, headers={"Authorization": options.credentials.get()})
+    if r.status_code == 401:
+      options.credentials.invalidate()
+      continue
+    if r.status_code != 200:
+      r.raise_for_status()
+
+    d = json.loads(r.content)
+    if "items" not in d: break
+    for i in d["items"]:
+      _, shortname, filename = i["name"].split("/")
+      h = i["md5Hash"]
+      assert h[-2:] == "=="
+      h = h[:-2]
+      h = h.replace("+", "-").replace("/", "_")
+      timestamp, who, _ = filename.split(".")
+      assert _ == "zip"
+      SAVED_PUZZLES.setdefault(shortname, {})[timestamp] = SavedPuzzle(
+        timestamp=timestamp,
+        who=who,
+        puzzle_url=f"https://{options.public_host}/html/{h}/puzzle.html",
+        meta_url=f"https://{options.public_host}/html/{h}/meta.html",
+      )
+
+    page_token = d.get("nextPageToken")
+    if not page_token: break
+
+
 def main():
   parser = argparse.ArgumentParser(description="Live puzzle zip previewer")
   parser.add_argument("--credentials", help="Private key for google cloud service account.")
@@ -219,6 +278,8 @@ def main():
   if not options.public_host:
     options.public_host = options.bucket + ".storage.googleapis.com"
 
+  load_saved_puzzles(options)
+
   print("Load map config...")
   with open(os.path.join(options.event_dir, "map_config.json")) as f:
     cfg = json.load(f)
@@ -228,6 +289,7 @@ def main():
     [
       (r"/", PreviewPage),
       (r"/upload", UploadHandler, {"options": options}),
+      (r"/saved", SavedPage),
       (r"/error/(\d+)", ErrorPage),
     ],
     template_path=options.template_path,

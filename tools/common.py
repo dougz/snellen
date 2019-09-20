@@ -58,25 +58,26 @@ def load_object_cache(bucket, creds):
     if not page_token: break
 
 
-def upload_object(source, bucket, path, content_type, data, creds):
-  if path in object_cache:
+def upload_object(source, bucket, path, content_type, data, creds, update=False):
+  if path in object_cache and not update:
     print(f"    Already have {source} as {path} (cached)...")
     return
 
-  for retry in range(2):
-    r = requests.head(f"https://{bucket}.storage.googleapis.com/{path}",
-                      headers={"Authorization": creds.get()})
-    if r.status_code == 401:
-      creds.invalidate()
-      continue
-    else:
-      break
+  if not update:
+    for retry in range(2):
+      r = requests.head(f"https://{bucket}.storage.googleapis.com/{path}",
+                        headers={"Authorization": creds.get()})
+      if r.status_code == 401:
+        creds.invalidate()
+        continue
+      else:
+        break
 
-  if r.status_code in (200, 204):
-    print(f"    Already have {source} as {path}...")
-    return
-  if r.status_code != 404:
-    r.raise_for_status()
+    if r.status_code in (200, 204):
+      print(f"    Already have {source} as {path}...")
+      return
+    if r.status_code != 404:
+      r.raise_for_status()
 
   print(f"    Uploading {source} as {path}...")
   for i in range(2):

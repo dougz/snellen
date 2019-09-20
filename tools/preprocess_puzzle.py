@@ -7,6 +7,7 @@ import hashlib
 import io
 import json
 import os
+import unicodedata
 import yaml
 import zipfile
 
@@ -112,6 +113,14 @@ class Puzzle:
             errors.append(f"Answer can't be an empty string.")
           if a != a.upper():
             errors.append(f"Answers must be uppercase.")
+
+    emojify = False
+    for a in self.answers:
+      cat = unicodedata.category(a[0])
+      if cat[0] != "L":
+        emojify = True
+        break
+    self.emojify = emojify
 
     # Author(s) must be a nonempty list of nonempty strings.
     authors = self.get_plural(y, "author", errors)
@@ -258,7 +267,7 @@ class Puzzle:
   def json_dict(self):
     d = {}
     for n in ("shortname title oncall puzzletron_id max_queued "
-              "answers incorrect_responses authors "
+              "answers incorrect_responses emojify authors "
               "html_head html_body for_ops_head for_ops_body").split():
       v = getattr(self, n)
       if v is not None: d[n] = v
