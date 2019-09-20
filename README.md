@@ -2,7 +2,7 @@
 
 - Declare the base directory
 
-    `export SNELLEN_BASE=<the directory>`
+    `export HUNT2020_BASE=<the directory>`
 
  - Install Python 3
 
@@ -14,7 +14,7 @@
 
     Linux: `apt-get install python3-bs4 python3-bcrypt python3-html5lib python3-tornado python3-pycurl`
 
-    Mac: `pip3 install bs4 bcrypt html5lib tornado`
+    Mac: `pip3 install bs4 bcrypt html5lib tornado python-dateutil`
 
 - Download and symlink closure and closure-compiler in external
 
@@ -28,7 +28,7 @@
 
     3. Symlink them with something like:
 
-    `cd $SNELLEN_BASE`
+    `cd $HUNT2020_BASE/snellen`
 
     `mkdir -p external`
 
@@ -58,10 +58,10 @@
     the "default server" from the "listen" lines and uncomment the server_name directive.
 
 - Clone the test_event_src and test_event repos.  This should go into
-  directories parallel to the snellen source directory:
+  directories parallel to the snellen source directory, with $HUNT2020_BASE as the parent:
 
     ```
-    /some/path/to/snellen            <-- $SNELLEN_BASE points here
+    /some/path/to/snellen
     /some/path/to/test_event
     /some/path/to/test_event_src
     ```
@@ -85,8 +85,6 @@
 `sudo nginx`  (sudo needed to listen on port 80)
 
 ```
-cd $SNELLEN_BASE/..
+cd $HUNT2020_BASE/..
 ./snellen/scripts/run.sh
 ```
-
-

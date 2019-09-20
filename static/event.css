@@ -11,7 +11,7 @@ body {
 
 a { text-decoration: none; }
 
-input, button {
+input, button, .emoji-input {
     font-family: 'Merriweather Sans', sans-serif;
 }
 
@@ -32,9 +32,10 @@ input, button {
 #pins { font-size: 120%; }
 #pins .no { color: #999; }
 
-#pins .no img { filter: grayscale(80%);
-		opacity: 0.4;
-	      }
+#pins .no img {
+  filter: grayscale(80%);
+  opacity: 0.4;
+}
 
 #topnav {
     font-family: 'Merriweather', sans-serif;
@@ -105,8 +106,8 @@ a#submit:hover {
 
     min-height: calc(100vh - 41px - 360px);
     background: url(@@STATIC:inner_only/land_clouds.png@@) top repeat-x,
-		url(@@STATIC:inner_only/land_tree.png@@) bottom repeat-x,
-		#c3dffb;
+       url(@@STATIC:inner_only/land_tree.png@@) bottom repeat-x,
+       #c3dffb;
     padding: 100px 0 260px 0;
 }
 
@@ -366,7 +367,7 @@ div#submitentry {
     align-items: center;
 }
 
-#submitentry #answer {
+#submitentry #answer, .emoji-input {
     font-size: 120%;
     font-family: 'Inconsolata', monospace;
     margin: 8px 0 8px 8px;
@@ -377,6 +378,9 @@ div#submitentry {
     box-sizing: border-box;
     outline: none;
     flex-grow: 1;
+    background-color: #fff;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
 #submitentry #submitsubmit {
@@ -394,8 +398,6 @@ div#submitentry {
     outline: none;
 }
 
-
-
 .submit-cancel {
     margin-right: 8px;
     vertical-align: -0.1em;
@@ -407,11 +409,115 @@ div#submitentry {
 }
 
 
-input#answer {
+/** emoji picker support **/
+
+#emoji-picker-button {
+    width: 14px;
+    margin-left: -22px;
+    padding-right: 8px;
+    color: grey;
+}
+
+#emoji-picker-button:hover {
+    color: black;
+}
+
+.emoji-picker-popover {
+    z-index: 2147483003;
+    position: absolute;
+    top: 318px;
+    margin: 0 0 0 8px;
+    background-color: #fff;
+    border: 1px solid white;
+    border-radius: 15px;
+    padding: 1px;
+    transition-duration: 200ms;
+    transition-delay: 0ms;
+    transform-style: flat;
+    transform-origin: 50% 50% 0;
+    opacity: 0;
+    transition: all 0.2s linear;
+    visibility: none;
+}
+
+.emoji-picker-popover.active {
+    visibility: visible;
+    opacity: 1;
+}
+
+.emoji-picker {
+    width: 632px;
+    height: 220px;
+}
+
+.emoji-picker-popover-header {
+    position: absolute;
+    top: 0;
+    left: 12px;
+    right: 20px;
+    border-bottom: 1px solid lightgrey;
+}
+
+.emoji-picker-popover-search-icon {
+    color: grey;
+}
+
+.emoji-picker-popover-input {
+    font-weight: 400;
+    font-size: 14px;
+    color: #6e7a89;
+    height: 40px;
     width: 50ex;
-    font-weight: bold;
-    font-size: 144%;
-    font-family: 'Inconsolata', monospace;
+    box-sizing: border-box;
+    border:none;
+    outline: none;
+}
+
+.emoji-picker-popover-body {
+    position: absolute;
+    top: 40px;
+    left: 0;
+    right: 0;
+    bottom: 5px;
+    padding: 0 20px;
+    overflow-y: scroll;
+}
+
+.emoji-picker-group {
+    margin: 10px -5px;
+}
+
+.emoji-picker-group-title {
+    color: #b8c3ca;
+    font-weight: 400;
+    font-size: 13px;
+    margin: 5px;
+}
+
+.emoji-picker-emoji {
+    padding: 2px;
+    width: 28px;
+    line-height: 28px;
+    display: inline-table;
+    text-align: center;
+    cursor: pointer;
+    vertical-align: middle;
+    font-size: 28px;
+    transition: -webkit-transform 60ms ease-out;
+    transition: transform 60ms ease-out;
+    transition-delay: 60ms;
+}
+
+img.emoji {
+    width: 2ex;
+    margin-bottom: -2px;
+}
+
+.emoji-picker-emoji img.emoji:hover {
+    transition-delay: 0ms;
+    -webkit-transform: scale(1.4);
+    -ms-transform: scale(1.4);
+    transform: scale(1.4);
 }
 
 /** puzzle content **/
@@ -603,18 +709,18 @@ div#map div.p b {
 
 @keyframes twist {
     0% {
-	transform: rotate(0.0deg) translateX(0px) scale(0.1) rotate(0.0deg);
-	opacity: 0;
+      transform: rotate(0.0deg) translateX(0px) scale(0.1) rotate(0.0deg);
+      opacity: 0;
     }
     5% {
-	opacity: 1;
+      opacity: 1;
     }
     70% {
-	opacity: 1;
+      opacity: 1;
     }
     100% {
-	transform: rotate(135.0deg) translateX(1px) scale(0.3) rotate(540.0deg);
-	opacity: 0;
+      transform: rotate(135.0deg) translateX(1px) scale(0.3) rotate(540.0deg);
+      opacity: 0;
     }
 }
 
