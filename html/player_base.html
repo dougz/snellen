@@ -10,33 +10,27 @@
     {% if script %}{% raw script %}{% end %}
     {% if json_data %}{% raw json_data %}{% end %}
     {% block head %}{% end %}
-    {% if puzzle and puzzle.emojify %}
-      <!-- TODO(Rich): bring in just what we need, and host it locally -->
-      <link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js" crossorigin="anonymous"></script>
-      <script src="https://twemoji.maxcdn.com/v/latest/twemoji.min.js" crossorigin="anonymous"></script>
-    {% end %}
   </head>
   <body>
     <div id="topnav">
       {% block topnav_startedleft %}
       {% if park_open %}
       <span>
-	<a href="/">Map</a>
+        <a href="/">Map</a>
       </span>
       {% end %}
       <div id="dropdown">
-	<button id="dropbtn">Useful links</button>
-	<div id="dropdown-content">
-	  {% if park_open %}
-	  <a href="/pins">Pins</a>
-	  <a href="/log">Activity Log</a>
-	  {% else %}
-	  <a href="/">Home</a>
-	  {% end %}
-	  <a href="/health_and_safety">Health & Safety</a>
-	  <a href="/logout">Logout</a>
-	</div>
+        <button id="dropbtn">Useful links</button>
+        <div id="dropdown-content">
+          {% if park_open %}
+          <a href="/pins">Pins</a>
+          <a href="/log">Activity Log</a>
+          {% else %}
+          <a href="/">Home</a>
+          {% end %}
+          <a href="/health_and_safety">Health &amp; Safety</a>
+          <a href="/logout">Logout</a>
+        </div>
       </div>
       {% end %}
       {% block topnav_extraleft %}{% end %}

@@ -367,7 +367,7 @@ div#submitentry {
     align-items: center;
 }
 
-#submitentry #answer, .emoji-input {
+#submitentry #answer, #submitentry #emoji-answer {
     font-size: 120%;
     font-family: 'Inconsolata', monospace;
     margin: 8px 0 8px 8px;
@@ -422,27 +422,27 @@ div#submitentry {
     color: black;
 }
 
-.emoji-picker {
+#emoji-picker {
     z-index: 2147483003;
     position: absolute;
     height: 220px;
-    margin: 8px;
+    margin-top: 8px;
     background-color: #fff;
     border: 1px solid white;
     border-radius: 15px;
     transition-duration: 200ms;
     transition-delay: 0ms;
     transition: opacity 0.2s linear;
-    visibility: none;
+    visibility: hidden;
     opacity: 0;
 }
 
-.emoji-picker.active {
+#emoji-picker.active {
     visibility: visible;
     opacity: 1;
 }
 
-.emoji-picker-header {
+#emoji-picker-header {
     position: absolute;
     top: 0;
     left: 12px;
@@ -450,11 +450,11 @@ div#submitentry {
     border-bottom: 1px solid lightgrey;
 }
 
-.emoji-picker-search-icon {
+#emoji-picker-search-icon {
     color: grey;
 }
 
-.emoji-picker-input {
+#emoji-picker-search-input {
     font-weight: 400;
     font-size: 14px;
     color: #6e7a89;
@@ -465,7 +465,7 @@ div#submitentry {
     outline: none;
 }
 
-.emoji-picker-body {
+#emoji-picker-body {
     position: absolute;
     top: 40px;
     left: 0;
