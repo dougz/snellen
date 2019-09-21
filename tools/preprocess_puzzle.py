@@ -35,10 +35,13 @@ class Puzzle:
 
     errors = []
 
+    has_static = False
     metadata = []
     for n in z.namelist():
       if os.path.basename(n) == self.METADATA_FILE:
         metadata.append(n)
+      if os.path.basename(n) == self.STATIC_PUZZLE_HTML:
+        has_static = True
     if len(metadata) == 0:
       errors.append(f"No {self.METADATA_FILE} file found.")
     elif len(metadata) > 1:
@@ -171,6 +174,12 @@ class Puzzle:
 
     self.for_ops_head, self.for_ops_body = self.parse_html(
       z, strip_shortname, errors, Puzzle.FOR_OPS_HTML, restricted_asset_map)
+
+    if has_static:
+      self.static_puzzle_head, self.static_puzzle_body = self.parse_html(
+        z, strip_shortname, errors, Puzzle.STATIC_PUZZLE_HTML, self.asset_map)
+    else:
+      self.static_puzzle_head, self.static_puzzle_body = None, None
 
     for k, v in self.asset_map.items():
       if k.startswith("ops/"):

@@ -178,6 +178,26 @@ class UploadHandler(tornado.web.RequestHandler):
 
       p.solution_url = f"https://{self.options.public_host}/{path}"
 
+      if p.pp.static_puzzle_body:
+        path = f"html/{p.prefix}/static_puzzle.html"
+        temp = (p.pp.html_body, p.pp.html_head)
+        p.pp.html_body = p.pp.static_puzzle_body
+        p.pp.html_head = p.pp.static_puzzle_head
+        print(d["puzzle"].html_body)
+        static_puzzle_html = self.render_string("solution_frame.html",
+                                                solution_url=p.solution_url,
+                                                authors=authors,
+                                                **d)
+        common.upload_object("static_puzzle.html",
+                             self.options.bucket, path,
+                             common.CONTENT_TYPES[".html"],
+                             static_puzzle_html, self.options.credentials, update=True)
+        p.pp.html_body, p.pp.html_head = temp
+
+        p.static_puzzle_url = f"https://{self.options.public_host}/{path}"
+      else:
+        p.static_puzzle_url = None
+
       path = f"html/{p.prefix}/puzzle.html"
       puzzle_html = self.render_string("solution_frame.html",
                                        solution_url=p.solution_url,
@@ -203,6 +223,7 @@ class UploadHandler(tornado.web.RequestHandler):
       path = f"html/{p.prefix}/meta.html"
       meta_html = self.render_string("meta.html",
                                      puzzle_url=p.puzzle_url,
+                                     static_puzzle_url=p.static_puzzle_url,
                                      solution_url=p.solution_url,
                                      for_ops_url=p.for_ops_url,
                                      puzzle=p.pp)
