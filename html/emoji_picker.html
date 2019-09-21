@@ -1,3 +1,4 @@
+<input type=hidden id="answer" name="answer">
 <div class="emoji-input" contenteditable="true" data-maxlength=40 id="emoji-answer"></div>
 <span id="emoji-picker-button" class="fa fa-smile-o"></span>
 <div class="emoji-picker">
@@ -1672,10 +1673,6 @@
   </div>
 </div>
 <script>
-$(document).ready(function() {
-  $("input#answer").hide();
-});
-
 $("#emoji-picker-button").click(function(e) {
   e.stopPropagation();
   $(".emoji-picker").toggleClass("active");
