@@ -246,7 +246,7 @@ class UploadHandler(tornado.web.RequestHandler):
           who=who,
           puzzle_url=p.puzzle_url,
           meta_url=p.meta_url,
-          key=shortname + ":" + timestamp,
+          key=p.pp.shortname + ":" + timestamp,
         )
 
       self.redirect(p.meta_url)
