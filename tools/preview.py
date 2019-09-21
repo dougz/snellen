@@ -5,6 +5,7 @@ import asyncio
 import base64
 from collections import namedtuple
 import hashlib
+import http
 import json
 import os
 import re
@@ -34,8 +35,9 @@ class Land:
 
 
 SAVED_PUZZLES = {}
+STRIBS_APPROVED = set()
 
-SavedPuzzle = namedtuple("SavedPuzzle", ("timestamp", "who", "puzzle_url", "meta_url"))
+SavedPuzzle = namedtuple("SavedPuzzle", ("timestamp", "who", "puzzle_url", "meta_url", "key"))
 
 
 class Puzzle:
@@ -62,8 +64,45 @@ class PreviewPage(tornado.web.RequestHandler):
 
 
 class SavedPage(tornado.web.RequestHandler):
-  def get(self):
-    self.render("saved_prod_zip.html", puzzles=SAVED_PUZZLES)
+  def get(self, path):
+    self.render("saved_prod_zip.html", puzzles=SAVED_PUZZLES,
+                editable=(path == "i_am_stribs"),
+                approved=STRIBS_APPROVED)
+
+class ApproveHandler(tornado.web.RequestHandler):
+  def initialize(self, options):
+    self.options = options
+
+  def get(self, key, state):
+    if state == "y":
+      STRIBS_APPROVED.add(key)
+
+      for i in range(2):
+        r = requests.put(f"https://{self.options.save_bucket}.storage.googleapis.com/approved/{key}",
+                         headers={"Content-Type": "text/plain",
+                                  "Authorization": self.options.credentials.get()},
+                         data=b"")
+        if r.status_code == 401:
+          self.options.credentials.invalidate()
+          continue
+        r.raise_for_status()
+        break
+
+    else:
+      STRIBS_APPROVED.discard(key)
+
+      for i in range(2):
+        r = requests.delete(f"https://{self.options.save_bucket}.storage.googleapis.com/approved/{key}",
+                            headers={"Authorization": self.options.credentials.get()})
+        if r.status_code == 401:
+          self.options.credentials.invalidate()
+          continue
+        if r.status_code == 404:
+          break
+        r.raise_for_status()
+        break
+
+    self.set_status(http.client.NO_CONTENT.value)
 
 class UploadHandler(tornado.web.RequestHandler):
   LAND_NAMES = {"castle": "The Grand Castle",
@@ -186,6 +225,7 @@ class UploadHandler(tornado.web.RequestHandler):
           who=who,
           puzzle_url=p.puzzle_url,
           meta_url=p.meta_url,
+          key=shortname + ":" + timestamp,
         )
 
       self.redirect(p.meta_url)
@@ -247,7 +287,33 @@ def load_saved_puzzles(options):
         who=who,
         puzzle_url=f"https://{options.public_host}/html/{h}/puzzle.html",
         meta_url=f"https://{options.public_host}/html/{h}/meta.html",
+        key=shortname + ":" + timestamp,
       )
+
+    page_token = d.get("nextPageToken")
+    if not page_token: break
+
+
+def load_approvals(options):
+  global STRIBS_APPROVED
+  page_token = None
+  while True:
+    url = f"https://www.googleapis.com/storage/v1/b/{options.save_bucket}/o?prefix=approved/"
+    if page_token:
+      url += f"&pageToken={page_token}"
+
+    r = requests.get(url, headers={"Authorization": options.credentials.get()})
+    if r.status_code == 401:
+      options.credentials.invalidate()
+      continue
+    if r.status_code != 200:
+      r.raise_for_status()
+
+    d = json.loads(r.content)
+    if "items" not in d: break
+    for i in d["items"]:
+      _, key = i["name"].split("/")
+      STRIBS_APPROVED.add(key)
 
     page_token = d.get("nextPageToken")
     if not page_token: break
@@ -279,6 +345,7 @@ def main():
     options.public_host = options.bucket + ".storage.googleapis.com"
 
   load_saved_puzzles(options)
+  load_approvals(options)
 
   print("Load map config...")
   with open(os.path.join(options.event_dir, "map_config.json")) as f:
@@ -289,7 +356,8 @@ def main():
     [
       (r"/", PreviewPage),
       (r"/upload", UploadHandler, {"options": options}),
-      (r"/saved", SavedPage),
+      (r"/(saved|i_am_stribs)", SavedPage),
+      (r"/approve/(\S+)/([yn])$", ApproveHandler, {"options": options}),
       (r"/error/(\d+)", ErrorPage),
     ],
     template_path=options.template_path,

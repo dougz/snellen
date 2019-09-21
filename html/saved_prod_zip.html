@@ -2,10 +2,30 @@
   <head>
     <title>Snellen preview server (saved puzzles)</title>
     <style>
-      body { font-family: sans-serif; }
+      body { font-family: sans-serif; font-size: 18px; }
       li.puzzle { margin-top: 16px;  font-family: monospace; }
       .other { color: #999; }
     </style>
+    <script>
+      window.onload = function() {
+          var cbs = document.querySelectorAll("input[type='checkbox']");
+          for (var i = 0; i < cbs.length; ++i) {
+              var cb = cbs[i];
+              cb.addEventListener('change', (event) => {
+                  var el = event.target;
+                  var xhr = new XMLHttpRequest();
+                  xhr.onreadystatechange = function() {
+                      if (this.readyState == 4 && this.status != 204) {
+                          alert("failed!");
+                      }
+                  }
+                  xhr.open("GET", "/approve/" + el.id + "/" + (el.checked ? "y" : "n"),
+                           true);
+                  xhr.send();
+              });
+          }
+      }
+    </script>
   </head>
   <body>
     <h1>Snellen preview server (saved puzzles)</h1>
@@ -15,7 +35,17 @@
       <li class=puzzle><b>{{ shortname }}</b>
         <ul>
           {% for i, (timestamp, item) in enumerate(reversed(sorted(p.items()))) %}
-          <li class={% if i==0 %}first{% else %}other{% end %}>{{timestamp}} ({{item.who}}) <a href="{{item.puzzle_url}}">puzzle</a> <a href="{{item.meta_url}}">meta</a></li>
+          <li class={% if i==0 %}first{% else %}other{% end %}>
+            {% if editable %}
+            <input type="checkbox" id="{{item.key}}"{% if item.key in approved %} checked{% end %}>
+            {% elif item.key in approved %}
+            <img src="https://preview-static.storage.googleapis.com/greencheck.png">
+            {% end %}
+            {{timestamp}}
+            ({{item.who}})
+            <a href="{{item.puzzle_url}}">puzzle</a>
+            <a href="{{item.meta_url}}">meta</a>
+          </li>
           {% end %}
         </ul>
       {% end %}
