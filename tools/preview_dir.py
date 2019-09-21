@@ -20,19 +20,22 @@ def main():
   parser.add_argument("input_dir")
   options = parser.parse_args()
 
-  temp = io.BytesIO()
-  with zipfile.ZipFile(temp, mode="w") as z:
-    for dirpath, dirnames, filenames in os.walk(options.input_dir):
-      relpath = dirpath[len(options.input_dir):].lstrip("/")
-      d = os.path.basename(relpath)
-      if d.startswith("."): continue
-      if d.startswith("__MACOSX"): continue
-      for fn in filenames:
-        if fn.startswith("."): continue
-        if fn.endswith("~"): continue
-        with open(os.path.join(dirpath, fn), "rb") as f:
-          z.writestr(os.path.join(relpath, fn), f.read())
-  temp = temp.getbuffer()
+  if options.input_dir.endswith(".zip"):
+    temp = open(options.input_dir, "rb")
+  else:
+    temp = io.BytesIO()
+    with zipfile.ZipFile(temp, mode="w") as z:
+      for dirpath, dirnames, filenames in os.walk(options.input_dir):
+        relpath = dirpath[len(options.input_dir):].lstrip("/")
+        d = os.path.basename(relpath)
+        if d.startswith("."): continue
+        if d.startswith("__MACOSX"): continue
+        for fn in filenames:
+          if fn.startswith("."): continue
+          if fn.endswith("~"): continue
+          with open(os.path.join(dirpath, fn), "rb") as f:
+            z.writestr(os.path.join(relpath, fn), f.read())
+    temp = temp.getbuffer()
 
   if options.local_zip:
     with open(options.local_zip, "wb") as f:

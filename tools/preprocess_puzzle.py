@@ -7,6 +7,7 @@ import hashlib
 import io
 import json
 import os
+import unicodedata
 import yaml
 import zipfile
 
@@ -34,10 +35,13 @@ class Puzzle:
 
     errors = []
 
+    has_static = False
     metadata = []
     for n in z.namelist():
       if os.path.basename(n) == self.METADATA_FILE:
         metadata.append(n)
+      if os.path.basename(n) == self.STATIC_PUZZLE_HTML:
+        has_static = True
     if len(metadata) == 0:
       errors.append(f"No {self.METADATA_FILE} file found.")
     elif len(metadata) > 1:
@@ -113,6 +117,14 @@ class Puzzle:
           if a != a.upper():
             errors.append(f"Answers must be uppercase.")
 
+    emojify = False
+    for a in self.answers:
+      cat = unicodedata.category(a[0])
+      if cat[0] != "L":
+        emojify = True
+        break
+    self.emojify = emojify
+
     # Author(s) must be a nonempty list of nonempty strings.
     authors = self.get_plural(y, "author", errors)
     if authors is not None:
@@ -162,6 +174,12 @@ class Puzzle:
 
     self.for_ops_head, self.for_ops_body = self.parse_html(
       z, strip_shortname, errors, Puzzle.FOR_OPS_HTML, restricted_asset_map)
+
+    if has_static:
+      self.static_puzzle_head, self.static_puzzle_body = self.parse_html(
+        z, strip_shortname, errors, Puzzle.STATIC_PUZZLE_HTML, self.asset_map)
+    else:
+      self.static_puzzle_head, self.static_puzzle_body = None, None
 
     for k, v in self.asset_map.items():
       if k.startswith("ops/"):
@@ -258,7 +276,7 @@ class Puzzle:
   def json_dict(self):
     d = {}
     for n in ("shortname title oncall puzzletron_id max_queued "
-              "answers incorrect_responses authors "
+              "answers incorrect_responses emojify authors "
               "html_head html_body for_ops_head for_ops_body").split():
       v = getattr(self, n)
       if v is not None: d[n] = v

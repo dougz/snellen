@@ -520,6 +520,7 @@ img.emoji {
 .mono { font-family: 'Inconsolata', monospace; }
 .tabular { font-family: 'Open Sans', 'Merriweather Sans', sans-serif; }
 .answer { font-weight: bold; text-transform: uppercase; }
+.posthunt { border: 1px solid black; margin: 20px; padding: 20px; background-color: #00000011; }
 
 /** notifications **/
 
