@@ -24,18 +24,17 @@
   <div id="submitdata">
     <div id="submit_table_scroll">
       <table id="submit_table">
-	<tr><th id="st_answer">Answer</th><th id="st_time">Submit time</th><th id="st_result">Result</th></tr>
-	<tbody id="submit_table_body">
-	</tbody>
+        <tr><th id="st_answer">Answer</th><th id="st_time">Submit time</th><th id="st_result">Result</th></tr>
+        <tbody id="submit_table_body">
+        </tbody>
       </table>
     </div>
     <div id="submitentry">
+      <input type=text maxlength=40 id="answer" name="answer">
       {% if puzzle.emojify %}
         {% include "emoji_picker.html" %}
-      {% else %}
-        <input type=text maxlength=40 id="answer" name="answer">
-        <button id="submitsubmit">Submit</button>
       {% end %}
+      <button id="submitsubmit">Submit</button>
       <span id="top_note"></span>
     </div>
   </div>

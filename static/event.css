@@ -422,35 +422,27 @@ div#submitentry {
     color: black;
 }
 
-.emoji-picker-popover {
+.emoji-picker {
     z-index: 2147483003;
     position: absolute;
-    top: 318px;
-    margin: 0 0 0 8px;
+    height: 220px;
+    margin: 8px;
     background-color: #fff;
     border: 1px solid white;
     border-radius: 15px;
-    padding: 1px;
     transition-duration: 200ms;
     transition-delay: 0ms;
-    transform-style: flat;
-    transform-origin: 50% 50% 0;
-    opacity: 0;
-    transition: all 0.2s linear;
+    transition: opacity 0.2s linear;
     visibility: none;
+    opacity: 0;
 }
 
-.emoji-picker-popover.active {
+.emoji-picker.active {
     visibility: visible;
     opacity: 1;
 }
 
-.emoji-picker {
-    width: 632px;
-    height: 220px;
-}
-
-.emoji-picker-popover-header {
+.emoji-picker-header {
     position: absolute;
     top: 0;
     left: 12px;
@@ -458,11 +450,11 @@ div#submitentry {
     border-bottom: 1px solid lightgrey;
 }
 
-.emoji-picker-popover-search-icon {
+.emoji-picker-search-icon {
     color: grey;
 }
 
-.emoji-picker-popover-input {
+.emoji-picker-input {
     font-weight: 400;
     font-size: 14px;
     color: #6e7a89;
@@ -473,7 +465,7 @@ div#submitentry {
     outline: none;
 }
 
-.emoji-picker-popover-body {
+.emoji-picker-body {
     position: absolute;
     top: 40px;
     left: 0;
