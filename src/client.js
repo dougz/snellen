@@ -1,6 +1,7 @@
 goog.require("goog.dom");
 goog.require("goog.dom.classlist");
 goog.require("goog.events");
+goog.require("goog.style");
 goog.require("goog.net.XhrIo");
 goog.require("goog.ui.ModalPopup");
 goog.require("goog.json.Serializer");
@@ -187,6 +188,174 @@ class H2020_TimeFormatter {
     }
 }
 
+class H2020_EmojiPicker {
+    constructor(parent) {
+        /** @type{boolean} */
+        this.built = false;
+        /** @type{?Element} */
+        this.parent = parent;
+
+        /** @type{?Element} */
+        this.input = goog.dom.getElement("answer");
+        /** @type{?Element} */
+        this.emojiinput = goog.dom.getElement("emoji-answer");;
+        goog.events.listen(this.emojiinput, goog.events.EventType.KEYDOWN,
+            goog.bind(this.onkeydown, this));
+        goog.events.listen(this.emojiinput, goog.events.EventType.INPUT,
+            goog.bind(this.oninput, this));
+        goog.events.listen(this.emojiinput, goog.events.EventType.PASTE,
+            goog.bind(this.onpaste, this));
+
+        /** @type{?Element} */
+        this.pickerbutton = goog.dom.getElement("emoji-picker-button");
+        goog.events.listen(this.pickerbutton, goog.events.EventType.CLICK,
+            goog.bind(this.toggle, this));
+
+        /** @type{?Element} */
+        this.emojipicker = null;
+        /** @type{?Element} */
+        this.searchinput = null;
+        /** @type{?Element} */
+        this.pickerbody = null;
+    }
+
+    build() {
+        this.emojipicker = goog.dom.getElement("emoji-picker");
+        this.searchinput = goog.dom.getElement("emoji-picker-search-input");
+        this.pickerbody = goog.dom.getElement("emoji-picker-body");
+
+        goog.events.listen(goog.dom.getDocument(), goog.events.EventType.CLICK,
+            goog.bind(this.maybe_close_picker, this));
+
+        goog.events.listen(this.searchinput, goog.events.EventType.INPUT,
+            goog.bind(this.filter_emojis, this));
+
+        var emojis = goog.dom.getElementsByClass("emoji-picker-emoji");
+        for (var i = 0; i < emojis.length; ++i) {
+          goog.events.listen(emojis[i], goog.events.EventType.CLICK,
+              goog.bind(this.pick_emoji, this));
+        }
+
+        this.built = true;
+    }
+
+    onkeydown(event) {
+        if (event.keyCode == goog.events.KeyCodes.ENTER) {
+          this.parent.submit();
+          event.preventDefault();
+        } else if (event.keyCode != goog.events.KeyCodes.BACKSPACE &&
+                   this.input.value.length >= this.max_input_length()) {
+          event.preventDefault();
+        }
+    }
+
+    oninput(event) {
+        var text = event.target.innerHTML;
+        var children = goog.dom.getChildren(event.target);
+        for (var i = 0; i < children.length; ++i) {
+          if (children[i].alt) {
+            text = text.replace(goog.dom.getOuterHtml(children[i]), children[i].alt);
+          }
+        }
+        this.input.value = this.sanitize_input(text, this.max_input_length());;
+    }
+
+    onpaste(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        var text = event.getBrowserEvent().clipboardData.getData("text/plain");
+        text = this.sanitize_input(text, this.max_input_length() - this.input.value.length);
+        if (typeof twemoji !== 'undefined') {
+          text = twemoji.parse(text);
+        }
+        document.execCommand("insertHTML", false, text);
+    }
+
+    sanitize_input(text, maxlength) {
+      if (text) {
+        text = text.replace(/[\r\n]+/gm, "");
+        text = text.substring(0, maxlength);
+      }
+      return text;
+    }
+
+    max_input_length() {
+        return this.input.getAttribute("maxlength");
+    }
+
+    maybe_close_picker(event) {
+        var isEmojiPickerElement = function(node) {
+            return node.id == "emoji-picker" || node.id == "emoji-picker-button";
+        };
+        if (!goog.dom.getAncestor(event.target, isEmojiPickerElement, true)) {
+            this.close();
+        }
+    }
+
+    filter_emojis() {
+        var searchQuery = this.searchinput.value.toLowerCase();
+        var emojis = goog.dom.getElementsByClass("emoji-picker-emoji");
+        for (var i = 0; i < emojis.length; ++i) {
+            goog.style.setElementShown(emojis[i], emojis[i].title.includes(searchQuery));
+        }
+    }
+
+    pick_emoji(event) {
+        if (this.input.value.length >= this.max_input_length()) {
+          return;
+        }
+        var imgNode = event.target.nodeName == "IMG" ? event.target : event.target.firstChild;
+        this.emojiinput.innerHTML += imgNode.parentNode.innerHTML;
+        this.input.value += imgNode.alt;
+    }
+
+    clear_input() {
+        if (!this.built) this.build();
+        this.emojiinput.innerHTML = "";
+    }
+
+    resize() {
+        if (!this.built) this.build();
+        var inputSize = goog.style.getBorderBoxSize(this.emojiinput);
+        var inputPos = goog.style.getClientPosition(this.emojiinput);
+        goog.style.setPageOffset(this.emojipicker, inputPos.x, inputPos.y + inputSize.height);
+        goog.style.setWidth(this.emojipicker, inputSize.width);
+    }
+
+    reset_search() {
+        if (!this.built) this.build();
+        this.searchinput.value = "";
+        this.filter_emojis();
+        this.pickerbody.scrollTop = 0;
+    }
+
+    focus_search_input() {
+        this.searchinput.focus();
+    }
+
+    toggle() {
+        if (!this.built) this.build();
+        if (goog.dom.classlist.contains(this.emojipicker, "active")) {
+            this.close();
+        } else {
+            this.resize();
+            this.reset_search();
+            this.show();
+        }
+    }
+
+    show() {
+        if (!this.built) this.build();
+        goog.dom.classlist.add(this.emojipicker, "active");
+        // focus on search input field, once fade-in is complete.
+        setTimeout(goog.bind(this.focus_search_input, this), 200);
+    }
+
+    close() {
+        goog.dom.classlist.remove(this.emojipicker, "active");
+    }
+}
+
 class H2020_SubmitPanel {
     constructor() {
         /** @type{boolean} */
@@ -204,6 +373,8 @@ class H2020_SubmitPanel {
         this.top_note = null;
         /** @type{?Element} */
         this.entry = null;
+        /** @type{H2020_EmojiPicker|null} */
+        this.emoji_picker = null;
 
         /** @type{number|null} */
         this.timer = null;
@@ -225,6 +396,10 @@ class H2020_SubmitPanel {
         this.top_note = goog.dom.getElement("top_note");
         this.entry = goog.dom.getElement("submitentry");
         goog.events.listen(this.input, goog.events.EventType.KEYDOWN, goog.bind(this.onkeydown, this));
+
+        if (goog.dom.getElement("emoji-picker-button")) {
+          this.emoji_picker = new H2020_EmojiPicker(this);
+        }
 
         var b = goog.dom.getElement("submitsubmit");
         goog.events.listen(b, goog.events.EventType.CLICK, goog.bind(this.submit, this));
@@ -381,11 +556,13 @@ class H2020_SubmitPanel {
         }
     }
 
-
     submit() {
         var answer = this.input.value;
         if (answer == "") return;
         this.input.value = "";
+        if (this.emoji_picker) {
+          this.emoji_picker.clear_input();
+        }
         goog.net.XhrIo.send("/submit", function(e) {
             var code = e.target.getStatus();
             if (code == 409) {
