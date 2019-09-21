@@ -114,7 +114,7 @@ class H2020_Dispatcher {
             if (el) {
                 el.style.display = "inline";
                 hunt2020.toast_manager.add_toast(
-                    "Hints are now available for <b>" + msg.title + ".",
+                    "You're now eligible to request hints for <b>" + msg.title + ".",
                     6000, null, "salmon");
             }
         }
