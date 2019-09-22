@@ -589,7 +589,7 @@ class Land:
       pd = assignments.get(name, {})
       if "puzzle" in pd:
         p = pd["puzzle"]
-        if OPTIONS.placeholders:
+        if OPTIONS.placeholders and name not in ("ferris", "catapult"):
           p = Puzzle.placeholder_puzzle(self, i, -500, p)
         elif p == "_":
           p = Puzzle.placeholder_puzzle(self, i)
@@ -641,6 +641,7 @@ class Puzzle:
     self.admin_url = f"/admin/puzzle/{shortname}"
     self.points = 1
     self.hints_available = False
+    self.emojify = False
 
     self.solve_durations = {}
     self.fastest_solver = None
@@ -654,7 +655,6 @@ class Puzzle:
     self.icon = icon
     self.sortkey = (util.make_sortkey(self.title), id(self))
     # TODO(Rich): set this to the correct round (or do this another way)
-    self.emojify = land.shortname == "castle"
     self.html = (f'<a href="{self.url}"><span class=puzzletitle>{html.escape(self.title)}</span></a> '
                  f'<span class="landtag round-{land.shortname}">{land.symbol}</span>')
     self.admin_html = (f'<a href="{self.admin_url}"><span class=puzzletitle>{html.escape(self.title)}</span></a> '
@@ -752,6 +752,10 @@ class Puzzle:
     for a in j["answers"]:
       disp = a.upper().strip()
       a = self.canonicalize_answer(a)
+      print(f"{shortname} answer is {a}")
+      if not re.match(r"^[A-Z]+$", a):
+        self.emojify = True
+        print(f"{shortname} uses emoji")
       self.display_answers[a] = disp
       self.answers.add(a)
 

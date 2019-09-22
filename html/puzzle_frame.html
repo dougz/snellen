@@ -31,7 +31,17 @@
     </div>
     <div id="submitentry">
       {% if puzzle.emojify %}
-        {% include "emoji_picker.html" %}
+      <input type=hidden id="answer" name="answer" maxlength=40>
+      <div id="emoji-answer" contenteditable="true"></div>
+      <span id="emoji-picker-button" class="fa fa-smile-o"></span>
+      <div id="emoji-picker">
+        <div id="emoji-picker-header">
+          <span id="emoji-picker-search-icon" class="fa fa-search"></span>
+          <input id="emoji-picker-search-input" placeholder="Search" value="">
+        </div>
+        <div id="emoji-picker-body">
+        </div>
+      </div>
       {% else %}
         <input type=text maxlength=40 id="answer" name="answer">
       {% end %}

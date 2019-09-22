@@ -142,8 +142,8 @@ class PuzzlePage(util.TeamPageHandler):
   def get_template_namespace(self):
     land = self.puzzle.land
     d = super().get_template_namespace()
-    if False and self.application.settings.get("debug"):
-      d["css"].append(f"/assets/{land.shortname}/land.css")
+    if self.application.settings.get("debug"):
+      d["css"].append(f"/debug/assets/{land.shortname}/land.css")
     else:
       css = f"{land.shortname}/land.css"
       if css in self.static_content:
@@ -155,6 +155,11 @@ class PuzzlePage(util.TeamPageHandler):
       d["script"] += """
         <script src="https://twemoji.maxcdn.com/v/latest/twemoji.min.js" crossorigin="anonymous"></script>
         """
+      if self.application.settings.get("debug"):
+        d["script"] += """<script>var edb = "/debug/static/emoji.json";</script>"""
+      else:
+        d["script"] += f"""<script>var edb = "{self.static_content["emoji.json"]}";</script>"""
+
     return d
 
 

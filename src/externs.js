@@ -25,6 +25,10 @@ var sessionStorage;
 /** @type{?number} */
 var open_time;
 
+// emoji database URL
+/** @type{?string} */
+var edb;
+
 class Message {
     constructor() {
         /** @type{string} */
