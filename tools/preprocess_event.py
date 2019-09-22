@@ -21,7 +21,7 @@ DEFAULT_BASE_IMG = "map_base.png"
 def upload_file(path, options, processor=None):
   ext = os.path.splitext(path)[1].lower()
   if ext not in common.CONTENT_TYPES:
-    raise ValueError(f"Don't know Content-Type for '{n}'.")
+    raise ValueError(f"Don't know Content-Type for '{path}'.")
 
   with open(path, "rb") as f:
     data = f.read()
@@ -136,6 +136,7 @@ def convert_static_files(out, options, lands):
                      ("login.css", f"{base}/static/login.css"),
                      ("notopen.css", f"{base}/static/notopen.css"),
                      ("logo.png", f"{base}/static/logo.png"),
+                     ("emoji.json", f"{base}/static/emoji.json"),
                      ])
 
   for fn in os.listdir(os.path.join(options.input_assets, "achievements")):

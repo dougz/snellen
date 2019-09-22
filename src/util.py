@@ -43,8 +43,8 @@ class TeamPageHandler(TeamHandler):
 
     if self.application.settings.get("debug"):
       script += ("""<script src="/closure/goog/base.js"></script>\n"""
-                 """<script src="/client.js"></script>""")
-      d["css"] = ["/event.css"]
+                 """<script src="/debug/src/client.js"></script>""")
+      d["css"] = ["/debug/static/event.css"]
     else:
       script += f"""<script src="{self.static_content["client-compiled.js"]}"></script>"""
       d["css"] = [self.static_content["event.css"]]
@@ -79,8 +79,8 @@ class AdminPageHandler(tornado.web.RequestHandler):
 
     if self.application.settings.get("debug"):
       d["script"] = ("""<script src="/closure/goog/base.js"></script>\n"""
-                     """<script src="/admin.js"></script>""")
-      d["css"] = "/admin.css"
+                     """<script src="/debug/src/admin.js"></script>""")
+      d["css"] = "/debug/static/admin.css"
     else:
       d["script"] = f"""<script src="{self.static_content["admin-compiled.js"]}"></script>"""
       d["css"] = self.static_content["admin.css"]

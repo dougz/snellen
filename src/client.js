@@ -990,6 +990,45 @@ var hunt2020 = {
     open_countdown: null,
 }
 
+/** @param{Node} e */
+/** @param{Event} ev */
+function emoji_builder(e, ev) {
+    var t0 = performance.now();
+    var xhr = /** @type{goog.net.XhrIo} */ (ev.target);
+    var obj = xhr.getResponseJson();
+    for (var i = 0; i < obj.length; ++i) {
+        var group = obj[i][0];
+        var emojis = obj[i][1];
+
+        var ch = new Array();
+
+        var gr = goog.dom.createDom("DIV", {className: "emoji-picker-group"});
+        ch.push(goog.dom.createDom("DIV", {className: "emoji-picker-group-title"}, group));
+
+        for (var j = 0; j < emojis.length; ++j) {
+            var title = emojis[j][0];
+            var text = emojis[j][1];
+            var imgsrc = emojis[j][2];
+            if (imgsrc) {
+                ch.push(goog.dom.createDom("SPAN", {className: "emoji-picker-emoji",
+                                                    title: title},
+                                           goog.dom.createDom("IMG", {draggable: false,
+                                                                      className: "emoji",
+                                                                      alt: text,
+                                                                      src: imgsrc})));
+            } else {
+                ch.push(goog.dom.createDom("SPAN", {className: "emoji-picker-emoji",
+                                                                title: title}, text));
+            }
+        }
+        goog.dom.append(gr, ch);
+        goog.dom.append(/** @type{!Node} */ (e), gr);
+    }
+    var t1 = performance.now();
+    console.log("building picker took " + (t1-t0) + " ms");
+}
+
+
 window.onload = function() {
     hunt2020.time_formatter = new H2020_TimeFormatter();
     hunt2020.toast_manager = new H2020_ToastManager();
@@ -1010,6 +1049,10 @@ window.onload = function() {
         goog.events.listen(a, goog.events.EventType.CLICK,
                            goog.bind(hunt2020.hint_panel.toggle, hunt2020.hint_panel));
 
+        var e = goog.dom.getElement("emoji-picker-body");
+        if (e) {
+            goog.net.XhrIo.send(edb, goog.bind(emoji_builder, null, e));
+        }
         if (puzzle_id && puzzle_init) puzzle_init();
     }
 
