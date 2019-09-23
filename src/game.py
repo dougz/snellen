@@ -708,7 +708,7 @@ class Puzzle:
     if count is None:
       if pstr == "_emoji":
         self.answers = {"\U0001f3f4\u200d\u2620\ufe0f"}
-        self.display_answers = {"\U0001f3f4\u200d\u2620\ufe0f": "\u1f3f4\u200d\u2620\ufe0f"}
+        self.display_answers = {"\U0001f3f4\u200d\u2620\ufe0f": "\U0001f3f4\u200d\u2620\ufe0f"}
         self.incorrect_responses = {}
         self.html_body = f"<p>The answer to this placeholder puzzle is a pirate flag.</p>"
       else:
