@@ -294,9 +294,19 @@ class H2020_EmojiPicker {
 
     filter_emojis() {
         var searchQuery = this.searchinput.value.toLowerCase();
+        // Hide all the groups.
+        var groups = goog.dom.getElementsByClass("emoji-picker-group");
+        for (var i = 0; i < groups.length; ++i) {
+            goog.style.setElementShown(groups[i], false);
+        }
         var emojis = goog.dom.getElementsByClass("emoji-picker-emoji");
         for (var i = 0; i < emojis.length; ++i) {
-            goog.style.setElementShown(emojis[i], emojis[i].title.includes(searchQuery));
+            var show = emojis[i].title.includes(searchQuery);
+            goog.style.setElementShown(emojis[i], show);
+            // Show any group containing a matching emoji.
+            if (show) {
+                goog.style.setElementShown(goog.dom.getParentElement(emojis[i]), true);
+            }
         }
     }
 
