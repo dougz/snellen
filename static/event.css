@@ -411,6 +411,11 @@ div#submitentry {
 
 /** emoji picker support **/
 
+#emoji-answer {
+    font-size: 120%;
+    font-family: 'Inconsolata', monospace;
+}
+
 #emoji-picker-button {
     width: 14px;
     margin-left: -22px;
@@ -488,9 +493,12 @@ div#submitentry {
 
 .emoji-picker-emoji {
     padding: 2px;
-    width: 28px;
+    width: 40px;
+    height: 40px;
     line-height: 28px;
-    display: inline-table;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
     text-align: center;
     cursor: pointer;
     vertical-align: middle;
@@ -500,16 +508,31 @@ div#submitentry {
     transition-delay: 60ms;
 }
 
+.emoji-picker-emoji div.emojisprite {
+    height: 28px;
+    width: 28px;
+    display: inline-block;
+    background: url(@@STATIC:emojisprite.png@@);
+    background-size: 1120px auto;
+}
+
+.emoji-picker-emoji div.emojisprite:hover {
+    transform: scale(1.4);
+}
+
+#emoji-answer img.emojisprite {
+    margin: 0 2px;
+    height: 20px;
+    width: 20px;
+    display: inline;
+    background: url(@@STATIC:emojisprite.png@@);
+    background-size: 800px auto;
+    margin-bottom: -4px;
+}
+
 img.emoji {
     width: 2ex;
     margin-bottom: -2px;
-}
-
-.emoji-picker-emoji img.emoji:hover {
-    transition-delay: 0ms;
-    -webkit-transform: scale(1.4);
-    -ms-transform: scale(1.4);
-    transform: scale(1.4);
 }
 
 /** puzzle content **/

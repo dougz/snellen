@@ -129,6 +129,7 @@ def convert_static_files(out, options, lands):
         to_convert.append((os.path.join(land, xfn), fn))
 
   to_convert.extend([("mute.png", f"{base}/static/mute.png"),
+                     ("emojisprite.png", f"{base}/static/emojisprite.png"),
                      ("admin-compiled.js", f"{base}/bin/admin-compiled.js"),
                      ("client-compiled.js", f"{base}/bin/client-compiled.js"),
                      ("admin.css", f"{base}/static/admin.css"),
