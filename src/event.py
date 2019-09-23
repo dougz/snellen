@@ -156,7 +156,7 @@ class PuzzlePage(util.TeamPageHandler):
         <script src="https://twemoji.maxcdn.com/v/latest/twemoji.min.js" crossorigin="anonymous"></script>
         """
       if self.application.settings.get("debug"):
-        d["script"] += """<script>var edb = "/debug/static/emoji.json";</script>"""
+        d["script"] += """<script>var edb = "/debug/static/emojisprite.json";</script>"""
       else:
         d["script"] += f"""<script>var edb = "{self.static_content["emoji.json"]}";</script>"""
 

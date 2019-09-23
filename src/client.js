@@ -304,9 +304,22 @@ class H2020_EmojiPicker {
         if (this.input.value.length >= this.max_input_length()) {
           return;
         }
-        var imgNode = event.target.nodeName == "IMG" ? event.target : event.target.firstChild;
-        this.emojiinput.innerHTML += imgNode.parentNode.innerHTML;
-        this.input.value += imgNode.alt;
+        var text = event.target.getAttribute("data-text");
+        var x = event.target.getAttribute("data-x");
+        var y = event.target.getAttribute("data-y");
+        x = parseInt(x, 10);
+        y = parseInt(y, 10);
+        if (text) {
+            goog.dom.append(/** @type{!Node} */ (this.emojiinput),
+                            goog.dom.createDom(
+                                "IMG", {className: "emojisprite",
+                                        draggable: false,
+                                        alt: text,
+                                        src: "data:image/png;base64,R0lGODlhFAAUAIAAAP///wAAACH5BAEAAAAALAAAAAAUABQAAAIRhI+py+0Po5y02ouz3rz7rxUAOw==",
+                                        style: "background-position: -" + (x*20) + "px -" +
+                                        (y*20) + "px;"}));
+            this.input.value += text;
+        }
     }
 
     clear_input() {
@@ -1006,20 +1019,20 @@ function emoji_builder(e, ev) {
         ch.push(goog.dom.createDom("DIV", {className: "emoji-picker-group-title"}, group));
 
         for (var j = 0; j < emojis.length; ++j) {
-            var title = emojis[j][0];
-            var text = emojis[j][1];
-            var imgsrc = emojis[j][2];
-            if (imgsrc) {
-                ch.push(goog.dom.createDom("SPAN", {className: "emoji-picker-emoji",
-                                                    title: title},
-                                           goog.dom.createDom("IMG", {draggable: false,
-                                                                      className: "emoji",
-                                                                      alt: text,
-                                                                      src: imgsrc})));
-            } else {
-                ch.push(goog.dom.createDom("SPAN", {className: "emoji-picker-emoji",
-                                                                title: title}, text));
-            }
+            var em = emojis[j];
+            var title = em[0];
+            var text = em[1];
+            var x = em[2];
+            var y = em[3];
+            var d = goog.dom.createDom(
+                "DIV", {className: "emojisprite",
+                        style: "background-position: -" + (x*28) + "px -" +
+                        (y*28) + "px"});
+            d.setAttribute("data-text", text);
+            d.setAttribute("data-x", x);
+            d.setAttribute("data-y", y);
+            ch.push(goog.dom.createDom(
+                "SPAN", {className: "emoji-picker-emoji", title: title}, d));
         }
         goog.dom.append(gr, ch);
         goog.dom.append(/** @type{!Node} */ (e), gr);
