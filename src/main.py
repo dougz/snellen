@@ -56,14 +56,24 @@ async def main_server(options):
   print("Load map config...")
   with open(os.path.join(options.event_dir, "map_config.json")) as f:
     cfg = json.load(f)
-    for shortname, d in cfg["maps"].items():
-      game.Land(shortname, d, options.event_dir)
-    util.TeamPageHandler.set_static_content(cfg["static"])
-    util.AdminPageHandler.set_static_content(cfg["static"])
+
+  static_content = {}
+  for key, (url, path) in cfg["static"].items():
+    if options.debug:
+      static_content[key] = "/debug/" + path
+    else:
+      static_content[key] = url
+
+  for shortname, d in cfg["maps"].items():
+    game.Land(shortname, d, options.event_dir)
+  util.TeamPageHandler.set_static_content(static_content)
+  util.AdminPageHandler.set_static_content(static_content)
   game.Land.resolve_lands()
-  game.Achievement.define_achievements(cfg["static"])
-  login.Login.set_static_content(cfg["static"])
-  options.static_content = cfg["static"]
+  game.Achievement.define_achievements(static_content)
+  if options.debug:
+    debug.DebugPathHandler.set_static_content(static_content)
+  login.Login.set_static_content(static_content)
+  options.static_content = static_content
 
   save_state.set_classes(AdminUser=login.AdminUser,
                          Team=game.Team,

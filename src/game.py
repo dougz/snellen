@@ -125,6 +125,9 @@ class Submission:
   def check_answer(self, now):
     self.submit_time = now
     answer = self.answer
+    print(f"   checking: {util.format_unicode(answer)}")
+    for a in self.puzzle.answers:
+      print(f"    against: {util.format_unicode(a)}")
     if answer in self.puzzle.answers:
       self.state = self.CORRECT
       self.extra_response = None
@@ -465,21 +468,17 @@ class Team(login.LoginUser):
     if start_map not in self.open_lands:
       self.open_lands[start_map] = now
 
-    # BTS hack
-    land_order = ("castle", "forest", "space")
-
     locked = []
 
     open_count = 0
     leftover_count = 0
-    for land_name in land_order:
-      land = Land.BY_SHORTNAME[land_name]
+    for land in Land.ordered_lands:
       if not land.puzzles: continue
 
       if OPTIONS.open_all:
         open_count = 1000
       else:
-        if land_name in ("castle", "forest"):
+        if land in Land.ordered_lands[:2]:
           open_count = 3
         elif land_name == "space":
           open_count = 1 if self.score >= 8 else 0
@@ -589,12 +588,8 @@ class Land:
       pd = assignments.get(name, {})
       if "puzzle" in pd:
         p = pd["puzzle"]
-        if OPTIONS.placeholders and name not in ("ferris", "catapult"):
-          p = Puzzle.placeholder_puzzle(self, i, -500, p)
-        elif p == "_":
-          p = Puzzle.placeholder_puzzle(self, i)
-        elif p.startswith("_"):
-          p = Puzzle.placeholder_puzzle(self, i, int(p[1:]))
+        if OPTIONS.placeholders or p.startswith("_"):
+          p = Puzzle.placeholder_puzzle(self, i, p)
         else:
           p = Puzzle.from_json(self, i, os.path.join(event_dir, "puzzles", p + ".json"))
         p.land = self
@@ -654,11 +649,16 @@ class Puzzle:
     self.land = land
     self.icon = icon
     self.sortkey = (util.make_sortkey(self.title), id(self))
-    # TODO(Rich): set this to the correct round (or do this another way)
+
     self.html = (f'<a href="{self.url}"><span class=puzzletitle>{html.escape(self.title)}</span></a> '
                  f'<span class="landtag round-{land.shortname}">{land.symbol}</span>')
     self.admin_html = (f'<a href="{self.admin_url}"><span class=puzzletitle>{html.escape(self.title)}</span></a> '
                        f'<span class="landtag round-{land.shortname}">{land.symbol}</span>')
+
+    for a in self.answers:
+      if not re.match(r"^[A-Z]+$", a):
+        self.emojify = True
+        break
 
   def __hash__(self):
     return id(self)
@@ -675,15 +675,14 @@ class Puzzle:
                                "FOXTROT GOLF HOTEL INDIA JULIETT").split()
 
   @classmethod
-  def placeholder_puzzle(cls, land, icon, count=None, title=None):
+  def placeholder_puzzle(cls, land, icon, pstr):
     cls.PLACEHOLDER_COUNT += 1
     number = cls.PLACEHOLDER_COUNT
 
-    if count < 0:
-      if number % -count == 0:
-        count = 3
-      else:
-        count = None
+    if pstr.startswith("_multi"):
+      count = int(pstr[6:].replace("_", ""))
+    else:
+      count = None
 
     h = hashlib.sha256(str(number).encode("ascii")).digest()
     tag = (string.ascii_uppercase[h[0] % 26] +
@@ -693,13 +692,13 @@ class Puzzle:
     shortname = f"{tag.lower()}_placeholder_{number}"
     self = cls(shortname)
 
-    if title is not None:
-      self.title = title
-    else:
+    if pstr.startswith("_"):
       if tag[0] in "AEIOU":
         self.title = f"The {tag} Placeholder"
       else:
         self.title = f"{tag} Placeholder"
+    else:
+      self.title = pstr
     self.oncall = "nobody@example.org"
     self.puzzletron_id = -1
     self.version = 0
@@ -707,10 +706,16 @@ class Puzzle:
 
     self.max_queued = 10
     if count is None:
-      self.answers = {tag}
-      self.display_answers = {tag: tag}
-      self.incorrect_responses = {}
-      self.html_body = f"<p>The answer to this placeholder puzzle is <b>{tag}</b>.</p>"
+      if pstr == "_emoji":
+        self.answers = {"\U0001f3f4\u200d\u2620\ufe0f"}
+        self.display_answers = {"\U0001f3f4\u200d\u2620\ufe0f": "\u1f3f4\u200d\u2620\ufe0f"}
+        self.incorrect_responses = {}
+        self.html_body = f"<p>The answer to this placeholder puzzle is a pirate flag.</p>"
+      else:
+        self.answers = {tag}
+        self.display_answers = {tag: tag}
+        self.incorrect_responses = {}
+        self.html_body = f"<p>The answer to this placeholder puzzle is <b>{tag}</b>.</p>"
     else:
       self.answers = set()
       self.display_answers = {}
@@ -752,10 +757,6 @@ class Puzzle:
     for a in j["answers"]:
       disp = a.upper().strip()
       a = self.canonicalize_answer(a)
-      print(f"{shortname} answer is {a}")
-      if not re.match(r"^[A-Z]+$", a):
-        self.emojify = True
-        print(f"{shortname} uses emoji")
       self.display_answers[a] = disp
       self.answers.add(a)
 

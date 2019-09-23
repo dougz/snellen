@@ -109,11 +109,12 @@ def convert_static_files(out, options, lands):
   def css_processor(data):
     text = data.decode("utf-8")
     def replacer(m):
-      return out.get(m.group(1), m.group(1))
+      return out.get(m.group(1), m.group(1))[0]
     text = re.sub(r"@@STATIC:([^@]+)@@", replacer, text)
     return text.encode("utf-8")
 
-  base = os.path.join(os.getenv("HUNT2020_BASE"), "snellen")
+  base = os.getenv("HUNT2020_BASE")
+  absbase = os.path.abspath(base) + "/"
 
   to_convert = []
 
@@ -128,16 +129,16 @@ def convert_static_files(out, options, lands):
       if os.path.exists(fn):
         to_convert.append((os.path.join(land, xfn), fn))
 
-  to_convert.extend([("mute.png", f"{base}/static/mute.png"),
-                     ("emojisprite.png", f"{base}/static/emojisprite.png"),
-                     ("admin-compiled.js", f"{base}/bin/admin-compiled.js"),
-                     ("client-compiled.js", f"{base}/bin/client-compiled.js"),
-                     ("admin.css", f"{base}/static/admin.css"),
-                     ("event.css", f"{base}/static/event.css"),
-                     ("login.css", f"{base}/static/login.css"),
-                     ("notopen.css", f"{base}/static/notopen.css"),
-                     ("logo.png", f"{base}/static/logo.png"),
-                     ("emoji.json", f"{base}/static/emoji.json"),
+  to_convert.extend([("mute.png", f"{base}/snellen/static/mute.png"),
+                     ("emojisprite.png", f"{base}/snellen/static/emojisprite.png"),
+                     ("admin-compiled.js", f"{base}/snellen/bin/admin-compiled.js"),
+                     ("client-compiled.js", f"{base}/snellen/bin/client-compiled.js"),
+                     ("admin.css", f"{base}/snellen/static/admin.css"),
+                     ("event.css", f"{base}/snellen/static/event.css"),
+                     ("login.css", f"{base}/snellen/static/login.css"),
+                     ("notopen.css", f"{base}/snellen/static/notopen.css"),
+                     ("logo.png", f"{base}/snellen/static/logo.png"),
+                     ("emoji.json", f"{base}/snellen/static/emoji.json"),
                      ])
 
   for fn in os.listdir(os.path.join(options.input_assets, "achievements")):
@@ -146,9 +147,17 @@ def convert_static_files(out, options, lands):
     to_convert.append((os.path.join("achievements", base),
                        os.path.join(options.input_assets, "achievements", fn)))
 
+  # Process .css files last.
+  to_convert.sort(key=lambda x: (1 if x[0].endswith(".css") else 0, x[0]))
+
   for key, fn in to_convert:
     processor = css_processor if fn.endswith(".css") else None
-    out[key] = upload_file(fn, options, processor=processor)
+
+    outfn = os.path.abspath(fn)
+    assert outfn.startswith(absbase)
+    outfn = outfn[len(absbase):]
+
+    out[key] = (upload_file(fn, options, processor=processor), outfn)
 
 
 def main():

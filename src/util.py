@@ -3,6 +3,7 @@ import game
 import string
 import time
 import tornado.web
+import unicodedata
 
 import wait_proxy
 
@@ -43,11 +44,11 @@ class TeamPageHandler(TeamHandler):
 
     if self.application.settings.get("debug"):
       script += ("""<script src="/closure/goog/base.js"></script>\n"""
-                 """<script src="/debug/src/client.js"></script>""")
-      d["css"] = ["/debug/static/event.css"]
+                 """<script src="/debug/snellen/src/client.js"></script>""")
     else:
       script += f"""<script src="{self.static_content["client-compiled.js"]}"></script>"""
-      d["css"] = [self.static_content["event.css"]]
+
+    d["css"] = [self.static_content["event.css"]]
 
     d["script"] = script
     d["json_data"] = None
@@ -79,12 +80,11 @@ class AdminPageHandler(tornado.web.RequestHandler):
 
     if self.application.settings.get("debug"):
       d["script"] = ("""<script src="/closure/goog/base.js"></script>\n"""
-                     """<script src="/debug/src/admin.js"></script>""")
-      d["css"] = "/debug/static/admin.css"
+                     """<script src="/debug/snellen/src/admin.js"></script>""")
     else:
       d["script"] = f"""<script src="{self.static_content["admin-compiled.js"]}"></script>"""
-      d["css"] = self.static_content["admin.css"]
 
+    d["css"] = self.static_content["admin.css"]
     d["script"] += f"<script>var waiter_id = {wid};</script>"
     return d
 
@@ -123,3 +123,15 @@ def format_timestamp(ts):
       return time.ctime(ts) + " (" + format_duration(ts-ref) + " into hunt)"
     else:
       return time.ctime(ts)
+
+def format_unicode(s):
+  out = []
+  for k in s:
+    if ord(k) < 128:
+      out.append(k)
+    else:
+      out.append(" ")
+      out.append(hex(ord(k)))
+      out.append(" ")
+      out.append(unicodedata.name(k))
+  return "".join(out).strip()
