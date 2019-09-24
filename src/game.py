@@ -480,7 +480,7 @@ class Team(login.LoginUser):
       else:
         if land in Land.ordered_lands[:2]:
           open_count = 3
-        elif land_name == "space":
+        elif land.shortname == "space":
           open_count = 1 if self.score >= 8 else 0
         else:
           print(f"DON'T KNOW WHEN TO OPEN {land_name}!")

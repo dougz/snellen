@@ -132,6 +132,7 @@ def format_unicode(s):
     else:
       out.append(" ")
       out.append(hex(ord(k)))
-      out.append(" ")
+      out.append(" (")
       out.append(unicodedata.name(k))
+      out.append(")")
   return "".join(out).strip()
