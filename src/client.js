@@ -225,16 +225,10 @@ class H2020_EmojiPicker {
         this.pickerbody = goog.dom.getElement("emoji-picker-body");
 
         goog.events.listen(goog.dom.getDocument(), goog.events.EventType.CLICK,
-            goog.bind(this.maybe_close_picker, this));
+            goog.bind(this.onclick, this));
 
         goog.events.listen(this.searchinput, goog.events.EventType.INPUT,
             goog.bind(this.filter_emojis, this));
-
-        var emojis = goog.dom.getElementsByClass("emoji-picker-emoji");
-        for (var i = 0; i < emojis.length; ++i) {
-          goog.events.listen(emojis[i], goog.events.EventType.CLICK,
-              goog.bind(this.pick_emoji, this));
-        }
 
         this.built = true;
     }
@@ -283,12 +277,20 @@ class H2020_EmojiPicker {
         return this.input.getAttribute("maxlength");
     }
 
-    maybe_close_picker(event) {
+    onclick(event) {
         var isEmojiPickerElement = function(node) {
             return node.id == "emoji-picker" || node.id == "emoji-picker-button";
         };
         if (!goog.dom.getAncestor(event.target, isEmojiPickerElement, true)) {
             this.close();
+        } else {
+            var isEmojiNode = function(node) {
+              return node.classList && node.classList.contains("emojisprite");
+            };
+            var emojiNode = goog.dom.getAncestor(event.target, isEmojiNode, true);
+            if (emojiNode) {
+                this.pick_emoji(emojiNode);
+            }
         }
     }
 
@@ -310,13 +312,13 @@ class H2020_EmojiPicker {
         }
     }
 
-    pick_emoji(event) {
+    pick_emoji(emojiNode) {
         if (this.input.value.length >= this.max_input_length()) {
           return;
         }
-        var text = event.target.getAttribute("data-text");
-        var x = event.target.getAttribute("data-x");
-        var y = event.target.getAttribute("data-y");
+        var text = emojiNode.getAttribute("data-text");
+        var x = emojiNode.getAttribute("data-x");
+        var y = emojiNode.getAttribute("data-y");
         x = parseInt(x, 10);
         y = parseInt(y, 10);
         if (text) {
