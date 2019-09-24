@@ -342,8 +342,8 @@ class H2020_EmojiPicker {
     resize() {
         if (!this.built) this.build();
         var inputSize = goog.style.getBorderBoxSize(this.emojiinput);
-        var inputPos = goog.style.getClientPosition(this.emojiinput);
-        goog.style.setPageOffset(this.emojipicker, inputPos.x, inputPos.y + inputSize.height);
+        var inputPos = goog.style.getPosition(this.emojiinput);
+        goog.style.setPosition(this.emojipicker, inputPos.x, inputPos.y + inputSize.height);
         goog.style.setWidth(this.emojipicker, inputSize.width);
     }
 
