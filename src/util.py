@@ -27,32 +27,34 @@ class TeamPageHandler(TeamHandler):
     wid = wait_proxy.Server.new_waiter_id()
     serial = self.team.next_serial() - 1
 
+    script = ["<script>"]
+
     if hasattr(self, "puzzle"):
       d["puzzle"] = self.puzzle
       d["state"] = self.team.puzzle_state[self.puzzle]
-      script = ("<script>\n"
-                f'var puzzle_id = "{self.puzzle.shortname}";\n'
-                "var puzzle_init = null;\n"
-                f"var waiter_id = {wid}; var received_serial = {serial};\n"
-                "</script>\n")
+      script.append(
+        f'var puzzle_id = "{self.puzzle.shortname}";\n'
+        "var puzzle_init = null;\n"
+      )
     else:
       d["puzzle"] = None
-      script = ("<script>\n"
-                "var puzzle_id = null;\n"
-                f"var waiter_id = {wid}; var received_serial = {serial};\n"
-                "</script>\n")
+      script.append("var puzzle_id = null;\n")
+
+    script.append(f"var waiter_id = {wid}; var received_serial = {serial};\n")
+    script.append("</script>")
 
     if self.application.settings.get("debug"):
-      script += ("""<script src="/closure/goog/base.js"></script>\n"""
-                 """<script src="/debug/snellen/src/client.js"></script>""")
+      script.append("""<script src="/closure/goog/base.js"></script>\n"""
+                    """<script src="/debug/snellen/src/client.js"></script>""")
     else:
-      script += f"""<script src="{self.static_content["client-compiled.js"]}"></script>"""
+      script.append(f"""<script src="{self.static_content["client-compiled.js"]}"></script>""")
 
     d["css"] = [self.static_content["event.css"]]
 
-    d["script"] = script
+    d["script"] = "".join(script)
     d["json_data"] = None
     d["park_open"] = (game.Global.STATE.event_start_time is not None)
+    d["logo_nav"] = self.static_content["logo-nav.png"]
 
     return d
 

@@ -567,7 +567,7 @@ class Land:
     self.title = cfg["title"]
     self.sortkey = (util.make_sortkey(self.title), id(self))
     self.logo = cfg.get("logo")
-    self.symbol = cfg.get("symbol", "??")
+    self.symbol = cfg.get("symbol", None)
     self.land_order = cfg.get("land_order")
 
     self.base_img = cfg["base_img"]

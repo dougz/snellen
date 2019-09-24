@@ -138,6 +138,7 @@ def convert_static_files(out, options, lands):
                      ("login.css", f"{base}/snellen/static/login.css"),
                      ("notopen.css", f"{base}/snellen/static/notopen.css"),
                      ("logo.png", f"{base}/snellen/static/logo.png"),
+                     ("logo-nav.png", f"{base}/snellen/static/logo-nav.png"),
                      ("emoji.json", f"{base}/snellen/static/emoji.json"),
                      ])
 

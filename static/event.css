@@ -60,9 +60,15 @@ input, button, .emoji-input {
 
 @media print { #topnav { display: none; } }
 
-#topnav > span, #topnav > a {
+#topnav > span {
     display: inline-block;
     margin: 0 20px;
+    padding: 8px 0;
+}
+
+#topnav > a {
+    display: inline-block;
+    margin: 0 10px;
     padding: 8px 0;
 }
 
@@ -138,7 +144,7 @@ a#submit:hover {
 #dropbtn {
     font-family: 'Merriweather', sans-serif;
     font-size: 18px;
-    min-width: 200px;
+    /*min-width: 200px;*/
     background-color: #666;
     color: #eee;
     height: 40px;
@@ -146,29 +152,37 @@ a#submit:hover {
     cursor: pointer;
     text-align: left;
     margin-left: 1px;
+    padding: 0 12px;
+}
+
+#dropdown:hover #dropbtn {
+    background-color: #777;
 }
 
 #dropdown-content {
     display: none;
     position: absolute;
-    background-color: #666;
+    right: 19px;
+    background-color: #777;
     border: 1px solid black;
     border-top: none;
     min-width: 200px;
-    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
-    z-index: 1001;
+    z-index: 999;
+}
+
+#dropdown:hover #dropdown-content {
+    display: block;
 }
 
 #dropdown-content a {
     padding: 12px 16px;
     display: block;
+    color: #eee;
 }
 #dropdown-content a:hover {
-    background-color: #999;
-}
-
-#dropdown:hover #dropdown-content {
-    display: block;
+    background-color: #333;
+    opacity: 1.0;
+    color: #fff;
 }
 
 .puzzletitle {
@@ -176,6 +190,7 @@ a#submit:hover {
 }
 
 .landtag {
+    font-family: 'Merriweather Sans', sans-serif;
     font-size: 84%;
     font-weight: 700;
     color: white;
@@ -186,11 +201,6 @@ a#submit:hover {
 .round-castle { background-color: #d7d7d7; }
 .round-forest { background-color: #636946; }
 .round-space { background-color: #2b757e; }
-
-#dropdown:hover #dropbtn {
-    background-color: #999;
-}
-
 
 #hintpanel {
     background-color: #888888ee;
@@ -548,7 +558,7 @@ img.emoji {
 /** notifications **/
 
 div.toasts {
-    width: 300px;
+    width: 320px;
     position: fixed;
     right: 20px;
     top: 45px;
@@ -556,10 +566,11 @@ div.toasts {
 }
 
 div.toast {
-    margin: 12px 0px;
+    width: 300px;
+    margin: 12px auto;
     padding: 16px;
     color: white;
-    box-shadow: #999999 0 0 12px 0;
+    box-shadow: 0 0 12px black;
     box-sizing: border-box;
     border-radius: 12px;
     animation: fadeIn 0.5s ease-out both;
@@ -579,10 +590,11 @@ div.toast {
 }
 
 div.toasthidden {
-    margin: 12px 0px;
+    width: 300px;
+    margin: 12px auto;
     padding: 16px;
     color: white;
-    box-shadow: #999999 0 0 12px 0;
+    box-shadow: 0 0 12px black;
     box-sizing: border-box;
     border-radius: 12px;
     animation: fadeOut 0.5s ease-in both;

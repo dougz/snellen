@@ -15,10 +15,19 @@
     <div id="topnav">
       {% block topnav_startedleft %}
       {% if park_open %}
-      <span>
-        <a href="/">Map</a>
-      </span>
+      <a href="/"><img src="{{logo_nav}}" style="margin-top: 4px;"></a>
+      {% for ol in team.open_lands %}
+      {% if ol.symbol %}
+      <a href="{{ol.url}}"><span class="landtag round-{{ol.shortname}}">{{ol.symbol}}</span></a>
       {% end %}
+      {% end %}
+      {% end %}
+      {% end %}
+      {% block topnav_extraleft %}{% end %}
+      <span class="spacer"></span>
+      {% block topnav_extraright %}{% end %}
+      {% block topnav_startedright %}
+      {% if park_open %}<span class=buzz>Buzz: <span id=score>{{team.score}}</span></span>{% end %}
       <div id="dropdown">
         <button id="dropbtn">Useful links</button>
         <div id="dropdown-content">
@@ -32,12 +41,6 @@
           <a href="/logout">Logout</a>
         </div>
       </div>
-      {% end %}
-      {% block topnav_extraleft %}{% end %}
-      <span class="spacer"></span>
-      {% block topnav_extraright %}{% end %}
-      {% block topnav_startedright %}
-      {% if park_open %}<span class=buzz>Buzz: <span id=score>{{team.score}}</span></span>{% end %}
       {% end %}
     </div>
 
