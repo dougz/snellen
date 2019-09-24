@@ -1,5 +1,6 @@
 goog.require("goog.dom");
 goog.require("goog.dom.classlist");
+goog.require("goog.dom.ViewportSizeMonitor");
 goog.require("goog.events");
 goog.require("goog.style");
 goog.require("goog.net.XhrIo");
@@ -229,6 +230,9 @@ class H2020_EmojiPicker {
 
         goog.events.listen(this.searchinput, goog.events.EventType.INPUT,
             goog.bind(this.filter_emojis, this));
+
+        var vsm = new goog.dom.ViewportSizeMonitor();
+        goog.events.listen(vsm, goog.events.EventType.RESIZE, goog.bind(this.resize, this));
 
         this.built = true;
     }
