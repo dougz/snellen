@@ -146,9 +146,7 @@ class PuzzlePage(util.TeamPageHandler):
     if css in self.static_content:
       d["css"].append(self.static_content[css])
     if self.puzzle.emojify:
-      # TODO: consider hosting these locally
-      d["css"].append(
-        "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css")
+      # TODO: consider hosting (or implementing) twemoji locally
       d["script"] += """
         <script src="https://twemoji.maxcdn.com/v/latest/twemoji.min.js" crossorigin="anonymous"></script>
         """
