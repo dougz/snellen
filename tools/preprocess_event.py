@@ -51,6 +51,8 @@ def convert_map(shortname, d, options):
     out["symbol"] = d["symbol"]
   if "land_order" in d:
     out["land_order"] = d["land_order"]
+  if "color" in d:
+    out["color"] = d["color"]
   print(f"Parsing {shortname} \"{d['title']}\"...")
 
   base_img = os.path.join(options.input_assets, shortname,

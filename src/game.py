@@ -569,6 +569,7 @@ class Land:
     self.logo = cfg.get("logo")
     self.symbol = cfg.get("symbol", None)
     self.land_order = cfg.get("land_order")
+    self.color = cfg.get("color")
 
     self.base_img = cfg["base_img"]
     self.base_size = cfg["base_size"]
@@ -651,7 +652,7 @@ class Puzzle:
     self.sortkey = (util.make_sortkey(self.title), id(self))
 
     self.html = (f'<a href="{self.url}"><span class=puzzletitle>{html.escape(self.title)}</span></a> '
-                 f'<span class="landtag round-{land.shortname}">{land.symbol}</span>')
+                 f'<span class="landtag" style="background-color: {land.color};">{land.symbol}</span>')
     self.admin_html = (f'<a href="{self.admin_url}"><span class=puzzletitle>{html.escape(self.title)}</span></a> '
                        f'<span class="landtag round-{land.shortname}">{land.symbol}</span>')
 

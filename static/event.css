@@ -198,10 +198,6 @@ a#submit:hover {
     border-radius: 4px;
 }
 
-.round-castle { background-color: #d7d7d7; }
-.round-forest { background-color: #636946; }
-.round-space { background-color: #2b757e; }
-
 #hintpanel {
     background-color: #888888ee;
     border-bottom: 0px solid black;
