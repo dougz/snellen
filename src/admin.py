@@ -1,12 +1,13 @@
-import http.client
-import tornado.web
-
 import datetime
 import dateutil.parser
-import game
+import html
+import http.client
 import json
-import login
 import time
+import tornado.web
+
+import game
+import login
 import util
 import wait_proxy
 
@@ -164,6 +165,7 @@ class HintReplyHandler(tornado.web.RequestHandler):
     text = self.args.get("text", "").strip()
     if not text:
       raise tornado.web.HTTPError(http.client.BAD_REQUEST)
+    text = html.escape(text).replace("\n", "<br>")
 
     team.add_hint_text(shortname, self.session.user.username, text)
     await team.flush_messages()

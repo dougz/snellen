@@ -212,9 +212,47 @@ a#submit:hover {
 
     z-index: 999;
     position: static;
-    overflow-y: scroll;
+    overflow-y: inherit;
     overflow-x: hidden;
 }
+
+#hinthistory {
+    margin: 20px;
+    color: #eee;
+}
+
+#hinthistory dt {
+    margin-top: 8px;
+    color: #fff;
+    font-weight: bold;
+}
+
+#hinthistory dd {
+    margin-top: 4px;
+}
+
+#hinttext {
+    font-family: 'Merriweather Sans', sans-serif;
+    margin: 0 20px;
+    width: 800px;
+    padding: 8px;
+}
+
+#hintrequest {
+    display: block;
+    font-family: 'Merriweather Sans', sans-serif;
+    color: white;
+    font-size: 100%;
+    padding: 8px 16px;
+    margin: 8px 0 8px 254px;
+    box-sizing: border-box;
+    border: 1px solid #395483;
+    border-radius: 15px;
+    width: 332px;
+    background: linear-gradient(to bottom, #4c70af, #436299);
+    outline: none;
+}
+
 
 @keyframes slide {
     0% { height: 0px; visibility: hidden; border-bottom-width: 0px; }

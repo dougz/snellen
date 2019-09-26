@@ -1,7 +1,8 @@
 @import url('https://fonts.googleapis.com/css?family=Inconsolata&display=block');
+@import url('https://fonts.googleapis.com/css?family=Merriweather+Sans&display=block');
 
 body {
-    font-family: sans-serif;
+    font-family: 'Merriweather Sans', sans-serif;
     margin: 0;
 }
 
@@ -186,4 +187,49 @@ div.box button {
 
 body > p, body > h2 {
     margin: 20px;
+}
+
+#hinthistory {
+    margin: 20px;
+    color: #222;
+}
+
+#hinthistory dt {
+    margin-top: 8px;
+    color: #000;
+    font-weight: bold;
+}
+
+#hinthistory dd {
+    margin-top: 4px;
+}
+
+#replytext {
+    font-family: 'Merriweather Sans', sans-serif;
+    margin: 0 20px;
+    width: 800px;
+    padding: 8px;
+}
+
+#hintreply {
+    display: block;
+    font-family: 'Merriweather Sans', sans-serif;
+    color: white;
+    font-size: 100%;
+    padding: 8px 16px;
+    margin: 8px 0 8px 254px;
+    box-sizing: border-box;
+    border: 1px solid #395483;
+    border-radius: 15px;
+    width: 332px;
+    background: linear-gradient(to bottom, #4c70af, #436299);
+    outline: none;
+}
+
+p.note {
+    width: 800px;
+    text-align: center;
+    margin-left: 20px;
+    font-size: 70%;
+    color: #333;
 }

@@ -87,9 +87,6 @@ class A2020_HintHistory {
         this.serializer = null;
 
         /** @type{Element|null} */
-        this.hintpanel = null;
-
-        /** @type{Element|null} */
         this.textarea = null;
 
         /** @type{Element|null} */
@@ -140,7 +137,8 @@ class A2020_HintHistory {
             var dt = goog.dom.createDom(
                 "DT", null,
                 "At " + admin2020.time_formatter.format(msg.when) + ", " + msg.sender + " wrote:");
-            var dd = goog.dom.createDom("DD", null, msg.text);
+            var dd = goog.dom.createDom("DD", null);
+            dd.innerHTML = msg.text;
             dl.appendChild(dt);
             dl.appendChild(dd);
         }

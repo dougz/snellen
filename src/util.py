@@ -5,6 +5,7 @@ import time
 import tornado.web
 import unicodedata
 
+import login
 import wait_proxy
 
 class TeamHandler(tornado.web.RequestHandler):
@@ -71,6 +72,7 @@ class AdminPageHandler(tornado.web.RequestHandler):
          "format_timestamp": format_timestamp}
 
     wid = wait_proxy.Server.new_waiter_id()
+    serial = login.AdminUser.message_serial - 1
 
     st = game.Global.STATE
     if st.event_start_time:
@@ -87,7 +89,7 @@ class AdminPageHandler(tornado.web.RequestHandler):
       d["script"] = f"""<script src="{self.static_content["admin-compiled.js"]}"></script>"""
 
     d["css"] = self.static_content["admin.css"]
-    d["script"] += f"<script>var waiter_id = {wid};</script>"
+    d["script"] += f"<script>var waiter_id = {wid}; var received_serial = {serial};</script>\n"
     return d
 
 def format_duration(sec):

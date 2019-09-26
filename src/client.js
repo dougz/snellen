@@ -705,10 +705,19 @@ class H2020_HintPanel {
 
     /** @param{HintHistory} response */
     render_history(response) {
+        var ht = goog.dom.getElement("hinttext");
         if (response.history.length == 0) {
             this.history.innerHTML = "You have not requested any hints.";
+            ht.setAttribute(
+                "placeholder",
+                "Describe what you've tried, where you're stuck\u2026");
+            ht.setAttribute("rows", "9");
             return;
         }
+        ht.setAttribute(
+            "placeholder",
+            "Ask a followup question\u2026");
+        ht.setAttribute("rows", "3");
         this.history.innerHTML = "";
         var dl = goog.dom.createDom("DL");
         for (var i = 0; i < response.history.length; ++i) {
@@ -716,7 +725,8 @@ class H2020_HintPanel {
             var dt = goog.dom.createDom(
                 "DT", null,
                 "At " + hunt2020.time_formatter.format(msg.when) + ", " + msg.sender + " wrote:");
-            var dd = goog.dom.createDom("DD", null, msg.text);
+            var dd = goog.dom.createDom("DD", null);
+            dd.innerHTML = msg.text;
             dl.appendChild(dt);
             dl.appendChild(dd);
         }
