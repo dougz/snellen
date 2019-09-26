@@ -199,6 +199,10 @@ a#submit:hover {
     border-radius: 4px;
 }
 
+#log th { vertical-align: baseline; padding-right: 20px; text-align: right; color: #666; }
+#log td { vertical-align: baseline; padding-bottom: 20px; line-height: 1.4; }
+
+
 #hintpanel {
     background-color: #888888ee;
     border-bottom: 0px solid black;

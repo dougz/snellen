@@ -29,12 +29,14 @@
 </p>
 
 <h2>Activity log</h2>
-<div id="teamlog">
-  <ul>
-    {% for t, e in log %}
-    <li>{{t}} &mdash; {% raw e %}</li>
-    {% end %}
-  </ul>
-</div>
+<table id="teamlog">
+  {% for e in log.entries %}
+  <tr><th>{{format_timestamp(e.when)}}</th><td>
+      {% for i, h in enumerate(e.htmls) %}
+      {% if i > 0 %}<br>{% end %}{% raw h %}
+      {% end %}
+  </td></tr>
+  {% end %}
+</table>
 
 {% end %}

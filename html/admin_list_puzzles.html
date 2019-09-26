@@ -7,10 +7,10 @@
 
 <ul>
   {% for land in lands %}
-  <h3>{{land.title}}</h3>
+  <h3>{{land.title}} <span class="landtag" style="background-color: {{land.color}}">{{land.symbol}}</span></h3>
   <ul>
     {% for p in land.puzzles %}
-    <li><span class=mono>{{p.shortname}}</span>: {% raw p.admin_html %}</li>
+    <li><span class=mono>{{p.shortname}}</span>: <a href="/admin/puzzle/{{p.shortname}}">{{p.title}}</a></li>
     {% end %}
   </ul>
   {% end %}

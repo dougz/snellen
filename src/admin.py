@@ -66,12 +66,7 @@ class AdminTeamPage(util.AdminPageHandler):
         open_list.append((s.open_time, s.puzzle, util.format_duration(now-s.open_time), s.answers_found))
     open_list.sort()
 
-    log = []
-    for e in team.activity_log[-100:]:
-      d = datetime.datetime.fromtimestamp(e.when)
-      log.append((d.strftime("%a %H:%M:%S"), e.for_admin))
-
-    self.render("admin_team_page.html", team=team, open_list=open_list, log=log)
+    self.render("admin_team_page.html", team=team, open_list=open_list, log=team.admin_log)
 
 class AdminTeamPuzzlePage(util.AdminPageHandler):
   @login.required("admin")
@@ -83,8 +78,15 @@ class AdminTeamPuzzlePage(util.AdminPageHandler):
     if not puzzle:
       raise tornado.web.HTTPError(http.client.NOT_FOUND)
 
+    state = team.puzzle_state[puzzle]
+    if state.state == state.SOLVED:
+      dur = state.solve_time - state.open_time
+      dur = "(" + util.format_duration(dur) + " after open)"
+    else:
+      dur = ""
+
     self.render("admin_team_puzzle_page.html",
-                team=team, puzzle=puzzle, state=team.puzzle_state[puzzle])
+                team=team, puzzle=puzzle, state=state, solve_duration=dur)
 
 
 class AdminHintHistoryHandler(tornado.web.RequestHandler):

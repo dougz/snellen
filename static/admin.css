@@ -6,7 +6,7 @@ body {
 }
 
 .mono { font-family: 'Inconsolata', monospace; }
-.answer { font-weight: bold; text-transform: uppercase; }
+.answer { font-weight: bold; }
 .b { font-weight: bold; }
 
 a { text-decoration: none; }
@@ -81,10 +81,9 @@ table.info td p {
     border-radius: 4px;
 }
 
-.round-castle { background-color: #d7d7d7; }
-.round-forest { background-color: #636946; }
-.round-space { background-color: #2b757e; }
-
+#content {
+    margin: 20px;
+}
 
 li { line-height: 20px; }
 ul#mainmenu li { line-height: 30px; }
@@ -130,7 +129,14 @@ div.buttons > a.red {
 }
 
 
+.puzzlestate-solved { color: #4caf50; text-transform: uppercase; font-weight: bold; }
+.puzzlestate-open { color: #274fd3; text-transform: uppercase; font-weight: bold; }
+.puzzlestate-closed { color: #999999; text-transform: uppercase; font-weight: bold; }
 
+.submission-correct { color: #4caf50; text-transform: uppercase; font-weight: bold; }
+.submission-incorrect { color: #af4c50; text-transform: uppercase; font-weight: bold; }
+.submission-partial { color: #d3c827; text-transform: uppercase; font-weight: bold; }
+.submission-queued { color: #999999; text-transform: uppercase; font-weight: bold; }
 
 hr {
     color: #999;
@@ -165,13 +171,18 @@ div.box button {
     margin-top: 8px;
 }
 
-div#for_ops, div#teamlog {
+#for_ops {
     margin: 20px;
     padding: 20px;
     border: 1px solid #999;
     background-color: #f8f8f8;
     box-shadow: 0 0 6px #ddd;
 }
+
+#teamlog th { vertical-align: baseline; padding-right: 20px; text-align: right; color: #666; }
+#teamlog td { vertical-align: baseline; padding-bottom: 20px; line-height: 1.4; }
+.explain { font-family: 'Inconsolata', monospace; font-size: 84%; }
+
 
 body > p, body > h2 {
     margin: 20px;

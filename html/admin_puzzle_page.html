@@ -27,15 +27,17 @@
   <tr>
     {% set answers = sorted(list(puzzle.display_answers.values())) %}
     {% if len(answers) == 1 %}
-    <th>answer</th><td class="mono answer">{{answers[0]}}</td>
+    <th class=top>answer</th>
     {% else %}
     <th class=top>answers ({{len(answers)}})</th>
-    <td class="mono answer">
+    {% end %}
+    <td class="mono">
       {% for i, a in enumerate(answers) %}
       {% if i > 0 %}<br/>{% end %}
-      {{a}}
+      <b>{{a}}</b>
+      {% if a in puzzle.explanations %}<br/><span class="explain">{{puzzle.explanations[a]}}</span>{% end %}
       {% end %}
-      {% end %}
+    </td>
   </tr>
   {% if puzzle.incorrect_responses %}
   <tr>
@@ -67,8 +69,20 @@
 
 <p><b>BTS hack:</b> <a href="/admin/openhints/{{puzzle.shortname}}">make hints available</a></p>
 
+
 <div id="for_ops">
   {% raw puzzle.for_ops_body %}
 </div>
+
+<h2>Puzzle activity log</h2>
+<table id="teamlog">
+  {% for e in puzzle.puzzle_log.entries %}
+  <tr><th>{{format_timestamp(e.when)}}</th><td>
+      {% for i, h in enumerate(e.htmls) %}
+      {% if i > 0 %}<br>{% end %}{% raw h %}
+      {% end %}
+  </td></tr>
+  {% end %}
+</table>
 
 {% end %}

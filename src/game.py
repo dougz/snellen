@@ -1,4 +1,5 @@
 import asyncio
+import collections
 import datetime
 import hashlib
 import heapq
@@ -16,6 +17,24 @@ import util
 import wait_proxy
 
 OPTIONS = None
+
+class Log:
+  Entry = collections.namedtuple("Entry", ("when", "htmls"))
+
+  def __init__(self):
+    self.entries = []
+
+  def add(self, when, html, **kwargs):
+    if kwargs:
+      html = html.format(**kwargs)
+    if self.entries and when == self.entries[0].when:
+      self.entries[0].htmls.append(html)
+    else:
+      self.entries.insert(0, Log.Entry(when, [html]))
+
+  def json(self):
+    return json.dumps(self.entries)
+
 
 class HintMessage:
   def __init__(self, parent, when, sender, text):
@@ -37,7 +56,6 @@ class HintMessage:
     return d
 
 
-
 class PuzzleState:
   CLOSED = "closed"
   OPEN = "open"
@@ -54,7 +72,7 @@ class PuzzleState:
     self.solve_time = None
     self.answers_found = set()
     self.hints = []
-    self.admin_log = []
+    self.admin_log = Log()
 
   def recent_solve(self, now=None):
     if now is None:
@@ -73,9 +91,6 @@ class PuzzleState:
     for sub in after:
       self.submissions.append(sub)
       sub.check_or_queue(now, log_queue=False)
-
-  def log(self, now, msg):
-    self.admin_log.append((now, msg))
 
 
 class Submission:
@@ -111,7 +126,7 @@ class Submission:
       self.check_answer(self.sent_time)
     else:
       if log_queue:
-        self.puzzle_state.log(now, "Queued <b>" + html.escape(self.raw_answer) + "</b>")
+        self.puzzle_state.admin_log.add(now, "Queued <b>" + html.escape(self.raw_answer) + "</b>")
       heapq.heappush(self.GLOBAL_SUBMIT_QUEUE, (self.check_time, self))
       self.team.achieve(Achievement.scattershot, now)
 
@@ -125,9 +140,6 @@ class Submission:
   def check_answer(self, now):
     self.submit_time = now
     answer = self.answer
-    print(f"   checking: {util.format_unicode(answer)}")
-    for a in self.puzzle.answers:
-      print(f"    against: {util.format_unicode(a)}")
     if answer in self.puzzle.answers:
       self.state = self.CORRECT
       self.extra_response = None
@@ -149,7 +161,14 @@ class Submission:
               asyncio.create_task(t.flush_messages())
     self.puzzle_state.requeue_pending(now)
 
-    self.puzzle_state.log(now, "Submitted <b>" + html.escape(self.raw_answer) + "</b>: " + self.state)
+    msg = (f'Submitted <b>{html.escape(self.raw_answer)}</b>: '
+           f'<span class="submission-{self.state}">{self.state}</span>')
+    explain = util.explain_unicode(self.raw_answer)
+    if explain:
+      msg += "<br><span class=explain>" + html.escape(explain) + "</span>"
+    self.puzzle_state.admin_log.add(now, msg)
+    msg = "<b>" + html.escape(self.team.name) + "</b> s" + msg[1:]
+    self.puzzle.puzzle_log.add(now, msg)
 
     if self.state == self.CORRECT:
       self.puzzle_state.answers_found.add(answer)
@@ -189,12 +208,6 @@ class Submission:
         teams.add(sub.team)
     return teams
 
-class LogEntry:
-  def __init__(self, when, for_team, for_admin):
-    self.when = when
-    self.for_team = for_team
-    self.for_admin = for_admin
-
 
 class Team(login.LoginUser):
   BY_USERNAME = {}
@@ -221,7 +234,8 @@ class Team(login.LoginUser):
       self.puzzle_state[puzzle] = PuzzleState(self, puzzle)
 
     self.open_lands = {}
-    self.activity_log = []
+    self.activity_log = Log()    # visible to team
+    self.admin_log = Log()       # visible only to GC
     self.score = 0
 
     self.message_mu = asyncio.Lock()
@@ -268,20 +282,6 @@ class Team(login.LoginUser):
   def next_serial(self):
     return self.message_serial
 
-  def log_activity(self, now, *, for_admin=None, for_team=None):
-    # Only for_team: append to both.
-    # Only for_admin: append to admin only.
-    if for_admin:
-      if for_team:
-        self.activity_log.append(LogEntry(now, for_team, for_admin))
-      else:
-        self.activity_log.append(LogEntry(now, None, for_admin))
-    else:
-      if for_team:
-        self.activity_log.append(LogEntry(now, for_team, for_team))
-      else:
-        raise ValueError("Can't log empty activity.")
-
   def achieve_now(self, ach, delay=None):
     if ach not in self.achievements:
       self.record_achievement(ach.name, delay)
@@ -295,7 +295,9 @@ class Team(login.LoginUser):
   def achieve(self, ach, now, delay=None):
     if ach not in self.achievements:
       self.achievements[ach] = now
-      self.log_activity(now, for_team=f'Received the <b>{html.escape(ach.title)}</b> pin.')
+      text = f'Received the <b>{html.escape(ach.title)}</b> pin.'
+      self.activity_log.add(now, text)
+      self.admin_log.add(now, text)
       msg = [{"method": "achieve", "title": ach.title}]
       if delay:
         async def future():
@@ -359,7 +361,7 @@ class Team(login.LoginUser):
     for i, sub in enumerate(state.submissions):
       if sub.submit_id == submit_id and sub.state == sub.PENDING:
         sub.state = sub.CANCELLED
-        state.log(now, "Canceled queued <b>" + html.escape(sub.raw_answer) + "</b>")
+        state.admin_log.add(now, "Canceled queued <b>" + html.escape(sub.raw_answer) + "</b>")
         state.submissions.pop(i)
         state.requeue_pending(now)
         break
@@ -384,7 +386,8 @@ class Team(login.LoginUser):
     if state.state == state.CLOSED:
       state.state = state.OPEN
       state.open_time = now
-      self.log_activity(now, for_team=puzzle.html + " opened.", for_admin=puzzle.admin_html + " opened.")
+      self.activity_log.add(now, puzzle.html + " opened.")
+      self.admin_log.add(now, puzzle.admin_html + " opened.", team=self)
 
   def solve_puzzle(self, puzzle, now):
     state = self.puzzle_state[puzzle]
@@ -402,8 +405,9 @@ class Team(login.LoginUser):
           "title": html.escape(puzzle.title),
           "audio": OPTIONS.static_content.get(puzzle.land.shortname + "/solve.mp3"),
           "score": self.score}])
-      self.log_activity(now, for_team=puzzle.html + " solved.",
-                        for_admin=puzzle.admin_html + " solved.")
+      self.activity_log.add(now, puzzle.html + " solved.")
+      self.admin_log.add(now, puzzle.admin_html + " solved.", team=self)
+      puzzle.puzzle_log.add(now, "Solved by <b>{team.name}</b>.", team=self)
 
       self.achieve(Achievement.solve_puzzle, now)
 
@@ -638,11 +642,12 @@ class Puzzle:
     self.points = 1
     self.hints_available = False
     self.emojify = False
+    self.explanations = {}
+    self.puzzle_log = Log()
 
     self.solve_durations = {}
     self.fastest_solver = None
     self.incorrect_answers = {}
-
 
     save_state.add_instance("Puzzle:" + shortname, self)
 
@@ -653,13 +658,19 @@ class Puzzle:
 
     self.html = (f'<a href="{self.url}"><span class=puzzletitle>{html.escape(self.title)}</span></a> '
                  f'<span class="landtag" style="background-color: {land.color};">{land.symbol}</span>')
-    self.admin_html = (f'<a href="{self.admin_url}"><span class=puzzletitle>{html.escape(self.title)}</span></a> '
-                       f'<span class="landtag round-{land.shortname}">{land.symbol}</span>')
+    self.admin_html = (f'<a href="/admin/team/{{team.username}}/puzzle/{self.shortname}"><span class=puzzletitle>{html.escape(self.title)}</span></a> '
+                       f'<span class="landtag" style="background-color: {land.color};">{land.symbol}</span>')
 
     for a in self.answers:
-      if not re.match(r"^[A-Z]+$", a):
+      ex = util.explain_unicode(a)
+      if ex:
+        self.explanations[a] = ex
         self.emojify = True
-        break
+    for a in self.incorrect_responses.keys():
+      ex = util.explain_unicode(a)
+      if ex:
+        self.explanations[a] = ex
+
 
   def __hash__(self):
     return id(self)

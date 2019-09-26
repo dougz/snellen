@@ -14,22 +14,24 @@
 {% block content %}
 
 <table class=info>
+  <tr><th>team</th><td><a href="/admin/team/{{team.username}}">{{team.name}}</a></td></tr>
   <tr><th>puzzle</th><td><a href="/admin/puzzle/{{puzzle.shortname}}">{{puzzle.title}}</a></td></tr>
 
-  <tr><th>state</th><td>{{state.state}}</td></tr>
+  <tr><th>state</th><td class="puzzlestate-{{state.state}}">{{state.state}}</td></tr>
   <tr><th>open time</th><td>{{format_timestamp(state.open_time)}}</td></tr>
-  <tr><th>solve time</th><td>{{format_timestamp(state.solve_time)}}</td></tr>
+  <tr><th>solve time</th><td>{{format_timestamp(state.solve_time)}} {{solve_duration}}</td></tr>
 </table>
 
 <h2>Submission log</h2>
-<div id="teamlog">
-  <ul>
-    {% for t, e in state.admin_log %}
-    <li>{{format_timestamp(t)}} &mdash; {% raw e %}</li>
-    {% end %}
-  </ul>
-</div>
-
+<table id="teamlog">
+  {% for e in state.admin_log.entries %}
+  <tr><th>{{format_timestamp(e.when)}}</th><td>
+      {% for i, h in enumerate(e.htmls) %}
+      {% if i > 0 %}<br>{% end %}{% raw h %}
+      {% end %}
+  </td></tr>
+  {% end %}
+</table>
 
 <div id="hinthistory"></div>
 <textarea rows=10 id="replytext"></textarea>

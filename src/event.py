@@ -159,8 +159,7 @@ class ActivityLogPage(util.TeamPageHandler):
   @login.required("team")
   def get(self):
     self.session.visit_page("activity")
-    temp_log = [(a.when, a.for_team) for a in self.team.activity_log if a.for_team is not None]
-    json_data = """<script>var log_entries = """ + json.dumps(temp_log) + ";</script>"
+    json_data = """<script>var log_entries = """ + self.team.activity_log.json() + ";</script>"
     self.render("activity_log.html", json_data=json_data)
 
 class AchievementPage(util.TeamPageHandler):

@@ -121,20 +121,23 @@ def format_timestamp(ts):
     return "\u2014"
   else:
     ref = game.Global.STATE.event_start_time
+    t = time.strftime("%a %-I:%M:%S%p", time.localtime(ts))
+    t = t[:-2] + t[-2:].lower()
     if ref:
-      return time.ctime(ts) + " (" + format_duration(ts-ref) + " into hunt)"
+      return t + " (" + format_duration(ts-ref) + " into hunt)"
     else:
-      return time.ctime(ts)
+      return t
 
-def format_unicode(s):
+def explain_unicode(s):
   out = []
+  ascii = True
   for k in s:
-    if ord(k) < 128:
-      out.append(k)
-    else:
-      out.append(" ")
-      out.append(hex(ord(k)))
-      out.append(" (")
-      out.append(unicodedata.name(k))
-      out.append(")")
-  return "".join(out).strip()
+    if ord(k) < 128: continue
+    ascii = False
+    out.append(" ")
+    out.append(hex(ord(k)))
+    out.append("\u00a0(")
+    out.append(unicodedata.name(k))
+    out.append(")")
+  if ascii: return None
+  return "".join(out[1:])

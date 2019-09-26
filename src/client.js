@@ -1097,12 +1097,21 @@ window.onload = function() {
     if (log) {
         for (var i = 0; i < log_entries.length; ++i) {
             var t = log_entries[i][0];
-            var html = log_entries[i][1];
+            var htmls = log_entries[i][1];
 
-            var span = goog.dom.createDom("SPAN");
-            span.innerHTML = hunt2020.time_formatter.format(t) + " &mdash; " + html;
-            var li = goog.dom.createDom("LI", null, span);
-            log.appendChild(li);
+            var td = goog.dom.createDom("TD");
+
+            var tr = goog.dom.createDom("TR",
+                                        null,
+                                        goog.dom.createDom("TH", null, hunt2020.time_formatter.format(t)),
+                                        td);
+            for (var j = 0; j < htmls.length; ++j) {
+                if (j > 0) {
+                    td.innerHTML += "<br>";
+                }
+                td.innerHTML += htmls[j];
+            }
+            log.appendChild(tr);
         }
     }
 
