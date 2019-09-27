@@ -93,17 +93,22 @@ class A2020_Dispatcher {
 class A2020_HintHistory {
     constructor() {
         /** @type{Object|null} */
-        this.serializer = null;
-
-        /** @type{Element|null} */
-        this.textarea = null;
-
-        /** @type{Element|null} */
-        this.history = null;
-
         this.serializer = new goog.json.Serializer();
+
+        /** @type{Element} */
         this.textarea = goog.dom.getElement("replytext");
+        this.textarea.focus();
+
+        /** @type{Element} */
         this.history = goog.dom.getElement("hinthistory");
+
+        /** @type{Element} */
+        this.claim = goog.dom.getElement("hintclaim");
+
+        /** @type{Element} */
+        this.claimlink = goog.dom.getElement("claimlink");
+        /** @type{Element} */
+        this.unclaimlink = goog.dom.getElement("unclaimlink");
 
         var b = goog.dom.getElement("hintreply");
         goog.events.listen(b, goog.events.EventType.CLICK, goog.bind(this.submit, this));
@@ -128,6 +133,7 @@ class A2020_HintHistory {
             var code = e.target.getStatus();
             if (code == 200) {
                 var response = /** @type{HintHistory} */ (e.target.getResponseJson());
+                console.log(response);
                 this.render_history(response);
             }
         }, this));
@@ -135,6 +141,17 @@ class A2020_HintHistory {
 
     /** @param{HintHistory} response */
     render_history(response) {
+        if (response.claim) {
+            this.claim.style.display = "inline";
+            this.claim.innerHTML = "Claimed by " + response.claim;
+            this.claimlink.style.display = "none";
+            this.unclaimlink.style.display = "inline-block";
+        } else {
+            this.claim.style.display = "none";
+            this.claimlink.style.display = "inline-block";
+            this.unclaimlink.style.display = "none";
+        }
+
         if (response.history.length == 0) {
             this.history.innerHTML = "Team has not requested any hints.";
             return;
@@ -177,7 +194,7 @@ class A2020_HintQueue {
     /** @param{HintQueue} response */
     render_queue(response) {
         if (response.queue.length == 0) {
-            this.tbody.innerHTML = "<tr><td colspan=6>No hint requests are waiting.</td></tr>"
+            this.tbody.innerHTML = "<tr><td colspan=6 style=\"padding: 20px;\">No hint requests are waiting.</td></tr>"
             return;
         }
         this.tbody.innerHTML = "";
@@ -186,18 +203,20 @@ class A2020_HintQueue {
             var msg = response.queue[i];
             var td = goog.dom.createDom("TD", "hqtime counter", admin2020.time_formatter.duration(now-msg.when));
             td.setAttribute("data-since", msg.when);
+            var claimlink = goog.dom.createDom("A", {href: msg.claim}, "Claim");
+            if (msg.claimant) {
+                claimlink.style.visibility = "hidden";
+            }
             var tr = goog.dom.createDom(
                 "TR", null,
                 td,
                 goog.dom.createDom("TD", {className: "hqteam"}, msg.team),
                 goog.dom.createDom("TD", {className: "hqpuzzle"}, msg.puzzle),
                 goog.dom.createDom("TD", {className: "hqview"},
-                                   goog.dom.createDom("A", {href: msg.target},
+                                   goog.dom.createDom("A", {href: msg.target, target: "_blank"},
                                                       "View")),
-                goog.dom.createDom("TD", {className: "hqclaim"},
-                                   goog.dom.createDom("A", {href: msg.target},
-                                                      "Claim")),
-                goog.dom.createDom("TD", {className: "hqclaimant"}));
+                goog.dom.createDom("TD", {className: "hqclaim"}, claimlink),
+                goog.dom.createDom("TD", {className: "hqclaimant"}, msg.claimant));
             this.tbody.appendChild(tr);
         }
         admin2020.counter.reread();

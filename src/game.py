@@ -80,6 +80,10 @@ class HintQueue:
     self.cached_json = None
     login.AdminUser.send_messages([{"method": "hint_queue"}], flush=True)
 
+  def change(self):
+    self.cached_json = None
+    login.AdminUser.send_messages([{"method": "hint_queue"}], flush=True)
+
   def to_json(self):
     if self.cached_json is not None: return self.cached_json
 
@@ -96,7 +100,9 @@ class HintQueue:
       q.append({"team": ps.team.name,
                 "puzzle": ps.puzzle.title,
                 "when": ts,
-                "target": f"/admin/team/{ps.team.username}/puzzle/{ps.puzzle.shortname}"})
+                "claimant": ps.claim.fullname if ps.claim else None,
+                "target": f"/admin/team/{ps.team.username}/puzzle/{ps.puzzle.shortname}",
+                "claim": f"/admin/claim/{ps.team.username}/{ps.puzzle.shortname}"})
     q.sort(key=lambda d: (d["when"], d["puzzle"]))
 
     self.cached_json = json.dumps({"queue": q})
@@ -120,6 +126,7 @@ class PuzzleState:
     self.solve_time = None
     self.answers_found = set()
     self.hints = []
+    self.claim = None  # AdminUser claiming hint response
     self.admin_log = Log()
 
   def recent_solve(self, now=None):
@@ -505,6 +512,7 @@ class Team(login.LoginUser):
       Global.STATE.hint_queue.add(state)
     else:
       sender = login.AdminUser.get_by_username(sender)
+      state.claim = None
       Global.STATE.hint_queue.remove(state)
 
     msg = HintMessage(state, now, sender, text)

@@ -101,6 +101,8 @@ class AdminHintHistoryHandler(tornado.web.RequestHandler):
       raise tornado.web.HTTPError(http.client.NOT_FOUND)
 
     d = {"history": [msg.json_dict(for_admin=True) for msg in state.hints]}
+    if state.claim:
+      d["claim"] = state.claim.fullname
     self.set_header("Content-Type", "application/json")
     self.write(json.dumps(d))
 
@@ -269,6 +271,34 @@ class HintQueueHandler(tornado.web.RequestHandler):
     self.set_header("Content-Type", "application/json")
     self.write(game.Global.STATE.hint_queue.to_json())
 
+class HintClaimHandler(tornado.web.RequestHandler):
+  @login.required("admin")
+  def get(self, un, username, shortname):
+    team = game.Team.get_by_username(username)
+    if not team:
+      raise tornado.web.HTTPError(http.client.NOT_FOUND)
+    puzzle = game.Puzzle.get_by_shortname(shortname)
+    if not puzzle:
+      raise tornado.web.HTTPError(http.client.NOT_FOUND)
+
+    ps = team.puzzle_state[puzzle]
+    if un:
+      if ps.claim:
+        ps.claim = None
+        login.AdminUser.send_messages([{"method": "hint_history",
+                                        "team_username": team.username,
+                                        "puzzle_id": puzzle.shortname}])
+        game.Global.STATE.hint_queue.change()
+    else:
+      if ps.claim is None:
+        ps.claim = self.user
+        login.AdminUser.send_messages([{"method": "hint_history",
+                                        "team_username": team.username,
+                                        "puzzle_id": puzzle.shortname}])
+        game.Global.STATE.hint_queue.change()
+
+    self.redirect(f"/admin/team/{username}/puzzle/{shortname}")
+
 
 def GetHandlers():
   handlers = [
@@ -288,6 +318,7 @@ def GetHandlers():
     (r"/admin/hintqueuedata", HintQueueHandler),
     (r"/admin/hintreply", HintReplyHandler),
     (r"/admin/hinthistory/([a-z0-9_]+)/([a-z0-9_]+)$", AdminHintHistoryHandler),
+    (r"/admin/(un)?claim/([a-z0-9_]+)/([a-z0-9_]+)$", HintClaimHandler),
 
     (r"/admin/applyfastpass/([a-z0-9_]+)/([a-z0-9_]+)$", AdminApplyFastpassHandler),
     (r"/admin/openhints/([a-z0-9_]+)$", AdminOpenHintsHandler),

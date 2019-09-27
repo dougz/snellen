@@ -32,6 +32,11 @@ table.info td p {
     margin-block-end: 0;
 }
 
+td.h1 {
+    font-size: 144%;
+    font-weight: bold;
+}
+
 /* #5d5c61  #379683  #7395ae  #557a95  #b1a296 */
 
 .lightblue { background-color: #7395ae; }
@@ -195,7 +200,6 @@ body > p, body > h2 {
 }
 
 #hinthistory {
-    margin: 20px;
     color: #222;
 }
 
@@ -209,24 +213,74 @@ body > p, body > h2 {
     margin-top: 4px;
 }
 
+#replycontainer {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    width: 900px;
+}
+
 #replytext {
     font-family: 'Merriweather Sans', sans-serif;
-    margin: 0 20px;
-    width: 800px;
+    width: 100%;
     padding: 8px;
+    resize: none;
+    box-sizing: border-box;
+}
+
+#replybuttoncontainer {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+#hspacer {
+    flex-grow: 100;
 }
 
 #hintreply {
-    display: block;
     font-family: 'Merriweather Sans', sans-serif;
     color: white;
     font-size: 100%;
     padding: 8px 16px;
-    margin: 8px 0 8px 254px;
+    margin: 8px 0 8px 0;
     box-sizing: border-box;
     border: 1px solid #395483;
     border-radius: 15px;
     width: 332px;
+    background: linear-gradient(to bottom, #4c70af, #436299);
+    outline: none;
+}
+
+#hintreply:focus {
+    color: yellow;
+    border: 1px solid #819ac7;
+    background: linear-gradient(to bottom, #436299, #4c70af);
+}
+
+#hintclaim {
+    margin: 0 20px;
+}
+
+#claimlink {
+    display: none;
+    color: white;
+    font-size: 100%;
+    padding: 4px 16px;
+    box-sizing: border-box;
+    border: 1px solid #395483;
+    border-radius: 8px;
+    background: linear-gradient(to bottom, #4c70af, #436299);
+}
+
+#unclaimlink {
+    display: none;
+    color: white;
+    font-size: 100%;
+    padding: 4px 16px;
+    box-sizing: border-box;
+    border: 1px solid #395483;
+    border-radius: 8px;
     background: linear-gradient(to bottom, #4c70af, #436299);
 }
 
@@ -248,22 +302,22 @@ p.note {
     padding: 4px;
 }
 
-#hintqueue td.hqtime {
+#hintqueue .hqtime {
     width: 100px;
     text-overflow: ellipsis;
 }
 
-#hintqueue td.hqteam {
+#hintqueue .hqteam {
     width: 300px;
     text-overflow: ellipsis;
 }
 
-#hintqueue td.hqpuzzle {
+#hintqueue .hqpuzzle {
     width: 300px;
     text-overflow: ellipsis;
 }
 
-#hintqueue td.hqclaimant {
+#hintqueue .hqclaimant {
     width: 300px;
     text-overflow: ellipsis;
 }
@@ -273,6 +327,7 @@ p.note {
     display: block;
     color: white;
     font-size: 100%;
+    margin: 0 20px 0 8px;
     padding: 4px 16px;
     box-sizing: border-box;
     border: 1px solid #395483;

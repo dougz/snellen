@@ -5,11 +5,12 @@
 {% if puzzle.for_ops_head %}{% raw puzzle.for_ops_head %}{% end %}
 {% end %}
 
-{% block title %}Puzzle "{{puzzle.title}}"{% end %}
+{% block title %}Puzzle detail{% end %}
 
 {% block content %}
 
 <table class=info>
+  <tr><th>title</th><td class=h1>{{puzzle.title}}</td></tr>
   <tr><th>shortname</th><td class=mono>{{puzzle.shortname}}</td></tr>
   <tr><th>oncall</th><td>{{puzzle.oncall}}</td></tr>
   <tr>

@@ -35,6 +35,8 @@ class HintHistory {
     constructor() {
         /** @type{Array<HintMessage>} */
         this.history;
+        /** @type{?string} */
+        this.claim;
     }
 }
 
@@ -55,6 +57,10 @@ class HintQueueItem {
         this.when;
         /** @type{string} */
         this.target;
+        /** @type{string} */
+        this.claim;
+        /** @type{?string} */
+        this.claimant;
     }
 }
 
