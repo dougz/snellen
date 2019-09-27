@@ -142,6 +142,7 @@ def convert_static_files(out, options, lands):
                      ("logo.png", f"{base}/snellen/static/logo.png"),
                      ("logo-nav.png", f"{base}/snellen/static/logo-nav.png"),
                      ("emoji.json", f"{base}/snellen/static/emoji.json"),
+                     ("home.svg", f"{base}/snellen/static/home.svg"),
                      ])
 
   for fn in os.listdir(os.path.join(options.input_assets, "achievements")):

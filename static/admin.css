@@ -70,6 +70,10 @@ table.info td p {
     margin: 0 20px;
 }
 
+span#home {
+    margin-left: 0;
+}
+
 #topnav #title {
     font-weight: bold;
     font-size: 120%;

@@ -89,6 +89,7 @@ class AdminPageHandler(tornado.web.RequestHandler):
       d["script"] = f"""<script src="{self.static_content["admin-compiled.js"]}"></script>"""
 
     d["css"] = self.static_content["admin.css"]
+    d["home"] = self.static_content["home.svg"]
     d["script"] += f"<script>var waiter_id = {wid}; var received_serial = {serial};</script>\n"
     return d
 
