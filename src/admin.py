@@ -101,6 +101,7 @@ class AdminHintHistoryHandler(tornado.web.RequestHandler):
       raise tornado.web.HTTPError(http.client.NOT_FOUND)
 
     d = {"history": [msg.json_dict(for_admin=True) for msg in state.hints]}
+    self.set_header("Content-Type", "application/json")
     self.write(json.dumps(d))
 
 
@@ -257,6 +258,16 @@ class StartEvent(tornado.web.RequestHandler):
     self.redirect("/admin")
 
 
+class HintQueuePage(util.AdminPageHandler):
+  @login.required("admin")
+  def get(self):
+    self.render("admin_hint_queue.html")
+
+class HintQueueHandler(tornado.web.RequestHandler):
+  @login.required("admin")
+  def get(self):
+    self.set_header("Content-Type", "application/json")
+    self.write(game.Global.STATE.hint_queue.to_json())
 
 
 def GetHandlers():
@@ -273,6 +284,8 @@ def GetHandlers():
     (r"/admin/team/([a-z0-9_]+)/puzzle/([a-z0-9_]+)$", AdminTeamPuzzlePage),
     (r"/admin/puzzles$", ListPuzzlesPage),
     (r"/admin/puzzle/([a-z0-9_]+)$", AdminPuzzlePage),
+    (r"/admin/hintqueue", HintQueuePage),
+    (r"/admin/hintqueuedata", HintQueueHandler),
     (r"/admin/hintreply", HintReplyHandler),
     (r"/admin/hinthistory/([a-z0-9_]+)/([a-z0-9_]+)$", AdminHintHistoryHandler),
 

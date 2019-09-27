@@ -63,11 +63,13 @@ class A2020_Dispatcher {
     constructor() {
         this.methods = {
             "hint_history": this.hint_history,
+            "hint_queue": this.hint_queue,
         }
     }
 
     /** @param{Message} msg */
     dispatch(msg) {
+        console.log(msg);
         this.methods[msg.method](msg);
     }
 
@@ -77,6 +79,13 @@ class A2020_Dispatcher {
             msg.puzzle_id == puzzle_id &&
             msg.team_username == team_username) {
             admin2020.hinthistory.update_history();
+        }
+    }
+
+    /** @param{Message} msg */
+    hint_queue(msg) {
+        if (admin2020.hintqueue) {
+            admin2020.hintqueue.update_queue();
         }
     }
 }
@@ -146,6 +155,46 @@ class A2020_HintHistory {
     }
 }
 
+class A2020_HintQueue {
+    constructor() {
+        /** @type{Element|null} */
+        this.queue = goog.dom.getElement("hintqueue");
+        this.update_queue();
+    }
+
+    update_queue() {
+        goog.net.XhrIo.send("/admin/hintqueuedata", goog.bind(function(e) {
+            var code = e.target.getStatus();
+            if (code == 200) {
+                var response = /** @type{HintQueue} */ (e.target.getResponseJson());
+                console.log(response);
+                this.render_queue(response);
+            }
+        }, this));
+    }
+
+    /** @param{HintQueue} response */
+    render_queue(response) {
+        if (response.queue.length == 0) {
+            this.queue.innerHTML = "No hint requests are waiting."
+            return;
+        }
+        this.queue.innerHTML = "";
+        var dl = goog.dom.createDom("DL");
+        for (var i = 0; i < response.queue.length; ++i) {
+            var msg = response.queue[i];
+            var dt = goog.dom.createDom(
+                "DT", null,
+                "At " + admin2020.time_formatter.format(msg.when) + ", " + msg.team + " wrote:");
+            var dd = goog.dom.createDom("DD", null);
+            dd.innerHTML = msg.text;
+            dl.appendChild(dt);
+            dl.appendChild(dd);
+        }
+        this.queue.appendChild(dl);
+    }
+}
+
 class A2020_TimeFormatter {
     constructor() {
         this.formatter = new goog.i18n.DateTimeFormat("EEE h:mm:ss aa");
@@ -190,6 +239,7 @@ function activate_role_checkboxes() {
 var admin2020 = {
     waiter: null,
     hinthistory: null,
+    hintqueue: null,
     time_formatter: null,
 }
 
@@ -201,5 +251,8 @@ window.onload = function() {
 
     if (goog.dom.getElement("hinthistory")) {
         admin2020.hinthistory = new A2020_HintHistory();
+    }
+    if (goog.dom.getElement("hintqueue")) {
+        admin2020.hintqueue = new A2020_HintQueue();
     }
 }

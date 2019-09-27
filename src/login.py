@@ -81,8 +81,10 @@ class AdminUser(LoginUser):
     return cls.BY_USERNAME.values()
 
   @classmethod
-  def send_messages(cls, objs):
+  def send_messages(cls, objs, flush=False):
     cls.pending_messages.extend(objs)
+    if flush:
+      asyncio.create_task(cls.flush_messages())
 
   @classmethod
   async def flush_messages(cls):

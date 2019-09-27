@@ -11,7 +11,8 @@ import wait_proxy
 class TeamHandler(tornado.web.RequestHandler):
   def on_finish(self):
     if not hasattr(self, "team"): return
-    asyncio.create_task(self.team.flush_messages())
+    if self.team:
+      asyncio.create_task(self.team.flush_messages())
 
 
 class TeamPageHandler(TeamHandler):

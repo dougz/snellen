@@ -38,3 +38,23 @@ class HintHistory {
     }
 }
 
+class HintQueue {
+    constructor() {
+        /** @type{Array<HintQueueItem>} */
+        this.queue;
+    }
+}
+
+class HintQueueItem {
+    constructor() {
+        /** @type{string} */
+        this.team;
+        /** @type{string} */
+        this.puzzle;
+        /** @type{number} */
+        this.when;
+        /** @type{string} */
+        this.text;
+    }
+}
+

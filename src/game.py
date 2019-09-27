@@ -38,7 +38,7 @@ class Log:
 
 class HintMessage:
   def __init__(self, parent, when, sender, text):
-    self.parent = parent
+    self.parent = parent  # PuzzleState
     self.when = when
     # sender is either a Team or an AdminUser
     self.sender = sender
@@ -54,6 +54,54 @@ class HintMessage:
     else:
       d["sender"] = self.parent.team.name
     return d
+
+
+class HintQueue:
+  def __init__(self):
+    # PuzzleStates with outstanding requests
+    self.states = set()
+
+    self.cached_json = None
+
+  def build(self):
+    for t in Team.all_teams():
+      for ps in t.puzzle_state.values():
+        if ps.hints and ps.hints[-1].sender == t:
+          self.states.add(ps)
+    self.ordered = None
+
+  def add(self, puzzle_state):
+    self.states.add(puzzle_state)
+    self.cached_json = None
+    login.AdminUser.send_messages([{"method": "hint_queue"}], flush=True)
+
+  def remove(self, puzzle_state):
+    self.states.discard(puzzle_state)
+    self.cached_json = None
+    login.AdminUser.send_messages([{"method": "hint_queue"}], flush=True)
+
+  def to_json(self):
+    if self.cached_json is not None: return self.cached_json
+
+    q = []
+    for ps in self.states:
+      ts = 0
+      text = "??"
+      for h in reversed(ps.hints):
+        if h.sender == ps.team:
+          ts = h.when
+          text = h.text
+        else:
+          break
+      q.append({"team": ps.team.name,
+                "puzzle": ps.puzzle.title,
+                "when": ts,
+                "text": text})
+    q.sort(key=lambda d: (d["when"], d["puzzle"]))
+
+    self.cached_json = json.dumps({"queue": q})
+
+    return self.cached_json
 
 
 class PuzzleState:
@@ -454,8 +502,10 @@ class Team(login.LoginUser):
 
     if sender is None:
       sender = self
+      Global.STATE.hint_queue.add(state)
     else:
       sender = login.AdminUser.get_by_username(sender)
+      Global.STATE.hint_queue.remove(state)
 
     msg = HintMessage(state, now, sender, text)
     state.hints.append(msg)
@@ -640,7 +690,7 @@ class Puzzle:
     self.url = f"/puzzle/{shortname}"
     self.admin_url = f"/admin/puzzle/{shortname}"
     self.points = 1
-    self.hints_available = False
+    self.hints_available = True # XXX
     self.emojify = False
     self.explanations = {}
     self.puzzle_log = Log()
@@ -834,6 +884,8 @@ class Global:
 
     self.stopping = False
     self.stop_cv = asyncio.Condition()
+
+    self.hint_queue = HintQueue()
 
   async def stop_server(self):
     async with self.stop_cv:
