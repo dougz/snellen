@@ -11,10 +11,10 @@
       <span id="title">{% block title %}{% end %}</span>
       <span class="spacer"></span>
       <span id="time">
-	{% if launched %}
-	Hunt launched {{ format_duration(launched) }} ago.
+	{% if launch %}
+	Hunt launched <span class="counter" data-since="{{launch}}">&mdash;</span> ago.
 	{% else %}
-	Hunt launches in {{ format_duration(until_launch) }}.
+	Hunt launches in <span class="counter" data-util="{{until_launch}}">&mdash;</span> ago.
 	{% end %}
       </span>
       <span class=username>{{user.fullname}}</span>

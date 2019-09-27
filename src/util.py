@@ -77,10 +77,9 @@ class AdminPageHandler(tornado.web.RequestHandler):
 
     st = game.Global.STATE
     if st.event_start_time:
-      d["launched"] = time.time() - st.event_start_time
+      d["launch"] = st.event_start_time
     else:
-      d["launched"] = None
-      d["until_launch"] = st.expected_start_time - time.time()
+      d["expected_launch"] = st.expected_start_time
     d["format_duration"] = format_duration
 
     if self.application.settings.get("debug"):

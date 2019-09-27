@@ -159,6 +159,7 @@ class A2020_HintQueue {
     constructor() {
         /** @type{Element|null} */
         this.queue = goog.dom.getElement("hintqueue");
+        this.tbody = goog.dom.getElement("hintqueuedata");
         this.update_queue();
     }
 
@@ -176,22 +177,30 @@ class A2020_HintQueue {
     /** @param{HintQueue} response */
     render_queue(response) {
         if (response.queue.length == 0) {
-            this.queue.innerHTML = "No hint requests are waiting."
+            this.tbody.innerHTML = "<tr><td colspan=6>No hint requests are waiting.</td></tr>"
             return;
         }
-        this.queue.innerHTML = "";
-        var dl = goog.dom.createDom("DL");
+        this.tbody.innerHTML = "";
+        var now = (new Date()).getTime() / 1000.0;
         for (var i = 0; i < response.queue.length; ++i) {
             var msg = response.queue[i];
-            var dt = goog.dom.createDom(
-                "DT", null,
-                "At " + admin2020.time_formatter.format(msg.when) + ", " + msg.team + " wrote:");
-            var dd = goog.dom.createDom("DD", null);
-            dd.innerHTML = msg.text;
-            dl.appendChild(dt);
-            dl.appendChild(dd);
+            var td = goog.dom.createDom("TD", "hqtime counter", admin2020.time_formatter.duration(now-msg.when));
+            td.setAttribute("data-since", msg.when);
+            var tr = goog.dom.createDom(
+                "TR", null,
+                td,
+                goog.dom.createDom("TD", {className: "hqteam"}, msg.team),
+                goog.dom.createDom("TD", {className: "hqpuzzle"}, msg.puzzle),
+                goog.dom.createDom("TD", {className: "hqview"},
+                                   goog.dom.createDom("A", {href: msg.target},
+                                                      "View")),
+                goog.dom.createDom("TD", {className: "hqclaim"},
+                                   goog.dom.createDom("A", {href: msg.target},
+                                                      "Claim")),
+                goog.dom.createDom("TD", {className: "hqclaimant"}));
+            this.tbody.appendChild(tr);
         }
-        this.queue.appendChild(dl);
+        admin2020.counter.reread();
     }
 }
 
@@ -206,11 +215,48 @@ class A2020_TimeFormatter {
         return txt.substr(0, l-2) + txt.substr(l-2, 2).toLowerCase();
     }
     duration(s) {
+        var hr = Math.trunc(s/3600);
+        s -= hr*3600;
         var min = Math.trunc(s/60);
         var sec = Math.trunc(s%60);
-        return "" + min + ":" + (""+sec).padStart(2, "0");
+        if (hr > 0) {
+            return "" + hr + ":" + (""+min).padStart(2, "0") + ":" + (""+sec).padStart(2, "0");
+        } else {
+            return "" + min + ":" + (""+sec).padStart(2, "0");
+        }
     }
 }
+
+class A2020_Counter {
+    constructor() {
+        this.timer = setInterval(goog.bind(this.update, this), 1000);
+        this.els = [];
+        this.reread();
+
+    }
+
+    reread() {
+        this.els = document.querySelectorAll(".counter");
+    }
+
+    update() {
+        var now = (new Date()).getTime() / 1000.0;
+        for (var i = 0; i < this.els.length; ++i) {
+            var el = this.els[i];
+            var since = el.getAttribute("data-since");
+            if (since) {
+                el.innerHTML = admin2020.time_formatter.duration(now-since);
+            } else {
+                var until = el.getAttribute("data-until");
+                if (until) {
+                    el.innerHTML = admin2020.time_formatter.duration(until-now);
+                }
+            }
+        }
+    }
+}
+
+
 
 
 function alter_role(e) {
@@ -238,6 +284,7 @@ function activate_role_checkboxes() {
 
 var admin2020 = {
     waiter: null,
+    counter: null,
     hinthistory: null,
     hintqueue: null,
     time_formatter: null,
@@ -248,6 +295,8 @@ window.onload = function() {
     admin2020.waiter.start();
 
     admin2020.time_formatter = new A2020_TimeFormatter();
+
+    admin2020.counter = new A2020_Counter();
 
     if (goog.dom.getElement("hinthistory")) {
         admin2020.hinthistory = new A2020_HintHistory();

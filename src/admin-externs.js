@@ -54,7 +54,7 @@ class HintQueueItem {
         /** @type{number} */
         this.when;
         /** @type{string} */
-        this.text;
+        this.target;
     }
 }
 

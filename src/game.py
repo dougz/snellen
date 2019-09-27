@@ -96,7 +96,7 @@ class HintQueue:
       q.append({"team": ps.team.name,
                 "puzzle": ps.puzzle.title,
                 "when": ts,
-                "text": text})
+                "target": f"/admin/team/{ps.team.username}/puzzle/{ps.puzzle.shortname}"})
     q.sort(key=lambda d: (d["when"], d["puzzle"]))
 
     self.cached_json = json.dumps({"queue": q})

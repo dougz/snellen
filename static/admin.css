@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css?family=Inconsolata&display=block');
 @import url('https://fonts.googleapis.com/css?family=Merriweather+Sans&display=block');
+@import url('https://fonts.googleapis.com/css?family=Open+Sans:600,700&display=block&text=0123456789');
 
 body {
     font-family: 'Merriweather Sans', sans-serif;
@@ -223,7 +224,6 @@ body > p, body > h2 {
     border-radius: 15px;
     width: 332px;
     background: linear-gradient(to bottom, #4c70af, #436299);
-    outline: none;
 }
 
 p.note {
@@ -232,4 +232,50 @@ p.note {
     margin-left: 20px;
     font-size: 70%;
     color: #333;
+}
+
+#hintqueue {
+    border-collapse: collapse;
+}
+
+#hintqueue th {
+    background-color: #f8f8f8;
+    text-align: left;
+    padding: 4px;
+}
+
+#hintqueue td.hqtime {
+    width: 100px;
+    text-overflow: ellipsis;
+}
+
+#hintqueue td.hqteam {
+    width: 300px;
+    text-overflow: ellipsis;
+}
+
+#hintqueue td.hqpuzzle {
+    width: 300px;
+    text-overflow: ellipsis;
+}
+
+#hintqueue td.hqclaimant {
+    width: 300px;
+    text-overflow: ellipsis;
+}
+
+.hqclaim { padding: 4px; }
+.hqclaim a {
+    display: block;
+    color: white;
+    font-size: 100%;
+    padding: 4px 16px;
+    box-sizing: border-box;
+    border: 1px solid #395483;
+    border-radius: 8px;
+    background: linear-gradient(to bottom, #4c70af, #436299);
+}
+
+.counter {
+    font-family: 'Open Sans', 'Merriweather Sans', sans-serif;
 }
