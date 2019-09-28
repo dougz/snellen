@@ -507,6 +507,8 @@ class Team(login.LoginUser):
     if not puzzle: return
     state = self.puzzle_state[puzzle]
 
+    team_message = {"method": "hint_history",
+                     "puzzle_id": puzzle.shortname}
     if sender is None:
       sender = self
       Global.STATE.hint_queue.add(state)
@@ -514,12 +516,13 @@ class Team(login.LoginUser):
       sender = login.AdminUser.get_by_username(sender)
       state.claim = None
       Global.STATE.hint_queue.remove(state)
+      team_message["notify"] = True
+      team_message["title"] = puzzle.title
 
     msg = HintMessage(state, now, sender, text)
     state.hints.append(msg)
 
-    self.send_messages([{"method": "hint_history",
-                         "puzzle_id": puzzle.shortname}])
+    self.send_messages([team_message])
     login.AdminUser.send_messages([{"method": "hint_history",
                                     "team_username": self.username,
                                     "puzzle_id": puzzle.shortname}])

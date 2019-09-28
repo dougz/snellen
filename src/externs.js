@@ -45,6 +45,8 @@ class Message {
         this.url;
         /** @type{?number} */
         this.score;
+        /** @type{?boolean} */
+        this.notify;
     }
 }
 

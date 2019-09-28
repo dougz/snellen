@@ -107,6 +107,11 @@ class H2020_Dispatcher {
         if (msg.puzzle_id == puzzle_id) {
             hunt2020.hint_panel.update_history();
         }
+        if (msg.notify) {
+            hunt2020.toast_manager.add_toast(
+                "Hunt HQ has replied to your hint request on <b>" +
+                    msg.title + "</b>.", 6000, null, "salmon");
+        }
     }
 
     /** @param{Message} msg */
