@@ -105,12 +105,8 @@ def format_duration(sec):
   mins = sec // 60
   sec = sec % 60
 
-  if hours:
-    out.append(f"{hours}h ")
-  if hours or mins:
-    out.append(f"{mins}m ")
-  out.append(f"{sec}s")
-  return "".join(out)
+  out = f"{hours:02d}:{mins:02d}:{sec:02d}".lstrip("0:")
+  return out
 
 def make_sortkey(s):
   s = [k for k in s.lower() if k in string.ascii_lowercase + " "]

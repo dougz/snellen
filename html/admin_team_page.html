@@ -12,9 +12,10 @@
   <tr><th>location</th><td>{{team.attrs.get("location", "Unknown")}}</td></tr>
   <tr><th class=top>open puzzles ({{len(open_list)}})</th>
     <td>
-      {% for i, (_, p, d, a) in enumerate(open_list) %}
+      {% for i, (ot, p, a) in enumerate(open_list) %}
       {% if i > 0 %}<br>{% end %}
-      <a href="/admin/team/{{team.username}}/puzzle/{{p.shortname}}">{{p.title}}</a> ({{d}})
+      <a href="/admin/team/{{team.username}}/puzzle/{{p.shortname}}">{{p.title}}</a>
+      (<span class="counter" data-since="{{ot}}">&mdash;</span>)
       {% if a %}&mdash;
       {% for aa in a %} <span class=answer>{{aa}}</span>{% end %} &hellip;
       {% end %}

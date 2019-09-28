@@ -17,7 +17,9 @@
   <tr><th>team</th><td class=h1><a href="/admin/team/{{team.username}}">{{team.name}}</a></td></tr>
   <tr><th>puzzle</th><td class=h1><a href="/admin/puzzle/{{puzzle.shortname}}">{{puzzle.title}}</a></td></tr>
 
-  <tr><th>state</th><td class="puzzlestate-{{state.state}}">{{state.state}}</td></tr>
+  <tr><th>state</th><td class="puzzlestate-{{state.state}}">{{state.state}}
+      {% if state.state == "open" %}(<span class="counter" data-since="{{state.open_time}}">&mdash;</span>){% end %}
+  </td></tr>
   <tr><th>open time</th><td>{{format_timestamp(state.open_time)}}</td></tr>
   <tr><th>solve time</th><td>{{format_timestamp(state.solve_time)}} {{solve_duration}}</td></tr>
 </table>
