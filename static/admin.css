@@ -47,6 +47,11 @@ td.h1 {
 .darkergray { background-color: #5d5c61; }
 .lightergray { background-color: #b1a296; }
 
+.color-home { background-color: #ff6363; }
+.color-team { background-color: #341677; }
+.color-puzzle { background-color: #000272; }
+.color-detail { background-color: #a32f80; }
+
 #topnav {
     min-width: 1060px;
     height: 24px;
