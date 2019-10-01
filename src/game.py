@@ -125,6 +125,7 @@ class PuzzleState:
     self.open_time = None
     self.solve_time = None
     self.answers_found = set()
+    self.hints_available = False
     self.hints = []
     self.claim = None  # AdminUser claiming hint response
     self.admin_log = Log()
@@ -289,6 +290,7 @@ class Team(login.LoginUser):
       self.puzzle_state[puzzle] = PuzzleState(self, puzzle)
 
     self.open_lands = {}
+    self.open_puzzles = set()    # PuzzleState objects
     self.activity_log = Log()    # visible to team
     self.admin_log = Log()       # visible only to GC
     self.score = 0
@@ -441,6 +443,7 @@ class Team(login.LoginUser):
     if state.state == state.CLOSED:
       state.state = state.OPEN
       state.open_time = now
+      self.open_puzzles.add(state)
       self.activity_log.add(now, puzzle.html + " opened.")
       self.admin_log.add(now, puzzle.admin_html + " opened.", team=self)
 
@@ -454,6 +457,7 @@ class Team(login.LoginUser):
         if sub.state == sub.PENDING:
           sub.state = sub.MOOT
       self.score += puzzle.points
+      self.open_puzzles.remove(state)
       self.send_messages(
         [{"method": "solve",
           "puzzle_id": puzzle.shortname,
@@ -500,6 +504,17 @@ class Team(login.LoginUser):
       puzzle = Puzzle.get_by_shortname(puzzle)
       if not puzzle: return None
     return self.puzzle_state[puzzle]
+
+  @save_state
+  def open_hints(self, now, puzzle):
+    puzzle = Puzzle.get_by_shortname(puzzle)
+    if not puzzle: return
+    ps = self.puzzle_state[puzzle]
+    if ps.hints_available: return
+    print(f"opening hints for {ps.puzzle.shortname} for {self.username}")
+    ps.hints_available = True
+    msg = [{"method": "hints_open", "puzzle_id": puzzle.shortname, "title": puzzle.title}]
+    self.send_messages(msg)
 
   @save_state
   def add_hint_text(self, now, puzzle, sender, text):
@@ -701,7 +716,7 @@ class Puzzle:
     self.url = f"/puzzle/{shortname}"
     self.admin_url = f"/admin/puzzle/{shortname}"
     self.points = 1
-    self.hints_available = True # XXX
+    self.hints_available_time = 30 # 12 * 3600   # 12 hours
     self.emojify = False
     self.explanations = {}
     self.puzzle_log = Log()
@@ -855,14 +870,17 @@ class Puzzle:
     return cls.BY_SHORTNAME.values()
 
   @save_state
-  def open_hints(self, now):
-    if self.hints_available: return
-    self.hints_available = True
+  def set_hints_available_time(self, now, new_time):
+    self.hints_available_time = available_time
 
+  def maybe_open_hints(self, now):
     msg = [{"method": "hints_open", "puzzle_id": self.shortname, "title": self.title}]
     for t in Team.all_teams():
-      if t.puzzle_state[self].state == PuzzleState.OPEN:
-        t.send_messages(msg)
+      ps = t.puzzle_state[self]
+      if (ps.state == PuzzleState.OPEN and
+          not ps.hints_available and
+          now - ps.open_time >= self.hints_available_time):
+        t.open_hints(self.shortname)
         asyncio.create_task(t.flush_messages())
 
   @staticmethod
@@ -881,6 +899,19 @@ class Puzzle:
     if text is None: return None
     return " ".join(text.split()).strip()
 
+  @classmethod
+  async def realtime_open_hints(cls):
+    while True:
+      now = time.time()
+      for t in Team.all_teams():
+        flush = False
+        for ps in t.open_puzzles:
+          if not ps.hints_available and now - ps.open_time >= ps.puzzle.hints_available_time:
+            t.open_hints(ps.puzzle.shortname)
+            flush = True
+        if flush:
+          asyncio.create_task(t.flush_messages())
+      await asyncio.sleep(10.0)
 
 class Global:
   STATE = None

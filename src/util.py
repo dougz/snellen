@@ -95,11 +95,15 @@ class AdminPageHandler(tornado.web.RequestHandler):
 
 def format_duration(sec):
   out = []
+  sec = int(sec)
   if sec < 0:
     out.append("-")
     sec = -sec
 
-  sec = int(sec)
+  if sec < 60:
+    out.append(f"0:{sec:02d}")
+    return "".join(out)
+
   hours = sec // 3600
   sec = sec % 3600
   mins = sec // 60

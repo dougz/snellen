@@ -249,7 +249,8 @@ class HintRequestHandler(util.TeamHandler):
     puzzle = game.Puzzle.get_by_shortname(shortname)
     if not puzzle:
       raise tornado.web.HTTPError(http.client.NOT_FOUND)
-    if not puzzle.hints_available:
+    state = self.team.puzzle_state[puzzle]
+    if not state.hints_available:
       raise tornado.web.HTTPError(http.client.BAD_REQUEST)
     self.team.add_hint_text(shortname, None, text)
     self.set_status(http.client.NO_CONTENT.value)

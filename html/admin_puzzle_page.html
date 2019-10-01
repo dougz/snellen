@@ -53,7 +53,7 @@
     </td>
   </tr>
   {% end %}
-  <tr><th>hints open</th><td>{{"yes" if puzzle.hints_available else "no"}}</td></tr>
+  <tr><th>hint open time</th><td>{{format_duration(puzzle.hints_available_time)}}</td></tr>
 
   <tr><th class=top>solves ({{len(solve_list)}})</th>
     <td>
