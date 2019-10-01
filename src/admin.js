@@ -307,9 +307,11 @@ var admin2020 = {
     hinthistory: null,
     hintqueue: null,
     time_formatter: null,
+    serializer: null,
 }
 
 window.onload = function() {
+    admin2020.serializer = new goog.json.Serializer();
     admin2020.waiter = new A2020_Waiter(new A2020_Dispatcher());
     admin2020.waiter.start();
 
@@ -322,5 +324,25 @@ window.onload = function() {
     }
     if (goog.dom.getElement("hintqueue")) {
         admin2020.hintqueue = new A2020_HintQueue();
+    }
+
+    if (goog.dom.getElement("hinttimechange")) {
+        var el = goog.dom.getElement("hinttimechange");
+        goog.events.listen(el, goog.events.EventType.CLICK, function() {
+            goog.dom.getElement("hinttimechange").style.display = "none";
+            goog.dom.getElement("hinttimechangeentry").style.display = "inline";
+            goog.events.listen(goog.dom.getElement("newhinttimesubmit"), goog.events.EventType.CLICK, function() {
+                var text = goog.dom.getElement("newhinttime").value;
+                console.log("submitting [" + text + "]");
+                goog.net.XhrIo.send("/admin/hinttimechange", function(e) {
+                    var code = e.target.getStatus();
+                    if (code == 204) {
+                        location.reload();
+                    } else {
+                        alert(e.target.getResponseText());
+                    }
+                }, "POST", admin2020.serializer.serialize({"puzzle_id": puzzle_id, "hint_time": text}));
+            });
+        });
     }
 }

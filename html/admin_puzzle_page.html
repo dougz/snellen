@@ -3,6 +3,7 @@
 
 {% block head %}
 {% if puzzle.for_ops_head %}{% raw puzzle.for_ops_head %}{% end %}
+<script>var puzzle_id = "{{puzzle.shortname}}";</script>
 {% end %}
 
 {% block title %}Puzzle detail{% end %}
@@ -53,7 +54,13 @@
     </td>
   </tr>
   {% end %}
-  <tr><th>hint open time</th><td>{{format_duration(puzzle.hints_available_time)}}</td></tr>
+  <tr><th>hint open time</th><td>{{format_duration(puzzle.hints_available_time)}}
+      <span id=hinttimechangeentry>
+        <input type=text id=newhinttime placeholder="h:mm:ss" size=10 maxlength=8></input>
+        <button id=newhinttimesubmit>Submit</button>
+      </span>
+      <a id=hinttimechange>Change</a>
+  </td></tr>
 
   <tr><th class=top>solves ({{len(solve_list)}})</th>
     <td>

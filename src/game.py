@@ -716,7 +716,7 @@ class Puzzle:
     self.url = f"/puzzle/{shortname}"
     self.admin_url = f"/admin/puzzle/{shortname}"
     self.points = 1
-    self.hints_available_time = 30 # 12 * 3600   # 12 hours
+    self.hints_available_time = 12 * 3600   # 12 hours
     self.emojify = False
     self.explanations = {}
     self.puzzle_log = Log()
@@ -870,8 +870,11 @@ class Puzzle:
     return cls.BY_SHORTNAME.values()
 
   @save_state
-  def set_hints_available_time(self, now, new_time):
-    self.hints_available_time = available_time
+  def set_hints_available_time(self, now, new_time, admin_user):
+    self.hints_available_time = new_time
+    admin_user = login.AdminUser.get_by_username(admin_user)
+    self.puzzle_log.add(now, f"Hint time set to {util.format_duration(new_time)} by {admin_user.fullname}.")
+    self.maybe_open_hints(now)
 
   def maybe_open_hints(self, now):
     msg = [{"method": "hints_open", "puzzle_id": self.shortname, "title": self.title}]

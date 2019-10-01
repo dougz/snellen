@@ -299,6 +299,37 @@ class HintClaimHandler(tornado.web.RequestHandler):
 
     self.redirect(f"/admin/team/{username}/puzzle/{shortname}")
 
+class HintTimeChangeHandler(tornado.web.RequestHandler):
+  def prepare(self):
+    self.args = json.loads(self.request.body)
+
+  @login.required("admin")
+  async def post(self):
+    shortname = self.args.get("puzzle_id")
+    puzzle = game.Puzzle.get_by_shortname(shortname)
+    if not puzzle:
+      raise tornado.web.HTTPError(http.client.NOT_FOUND)
+
+    try:
+      text = self.args.get("hint_time")
+      text = text.split(":")
+      text = [int(t, 10) for t in text]
+
+      secs = 0
+      if text: secs += text.pop()
+      if text: secs += 60 * text.pop()
+      if text: secs += 3600 * text.pop()
+      if text:
+        raise tornado.web.HTTPError(http.client.BAD_REQUEST)
+
+    except (KeyError, ValueError):
+      raise tornado.web.HTTPError(http.client.BAD_REQUEST)
+
+    if secs < 0:
+      secs = 0
+
+    puzzle.set_hints_available_time(secs, self.user.username)
+    self.set_status(http.client.NO_CONTENT.value)
 
 def GetHandlers():
   handlers = [
@@ -319,6 +350,7 @@ def GetHandlers():
     (r"/admin/hintreply", HintReplyHandler),
     (r"/admin/hinthistory/([a-z0-9_]+)/([a-z0-9_]+)$", AdminHintHistoryHandler),
     (r"/admin/(un)?claim/([a-z0-9_]+)/([a-z0-9_]+)$", HintClaimHandler),
+    (r"/admin/hinttimechange", HintTimeChangeHandler),
 
     (r"/admin/applyfastpass/([a-z0-9_]+)/([a-z0-9_]+)$", AdminApplyFastpassHandler),
     (r"/admin/openhints/([a-z0-9_]+)$", AdminOpenHintsHandler),

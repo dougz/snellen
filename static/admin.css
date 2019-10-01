@@ -345,3 +345,13 @@ p.note {
 .counter {
     font-family: 'Open Sans', 'Merriweather Sans', sans-serif;
 }
+
+#hinttimechangeentry {
+    margin-left: 20px;
+    display: none;
+}
+
+#hinttimechange {
+    margin-left: 20px;
+    font-size: 70%;
+}
