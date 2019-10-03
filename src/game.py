@@ -439,6 +439,8 @@ class Team(login.LoginUser):
   def apply_fastpass(self, now, land_name):
     land = Land.BY_SHORTNAME.get(land_name)
     if not land or not land.puzzles: return
+    if not self.fastpasses_available: return
+    self.fastpasses_available.pop(0)
     self.fastpasses_used[land] = self.fastpasses_used.get(land, 0) + 1
     if not save_state.REPLAYING:
       self.send_messages([{"method": "apply_fastpass", "title": land.title}])

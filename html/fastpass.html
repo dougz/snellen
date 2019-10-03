@@ -17,6 +17,18 @@
     <li><span class="counter" data-until="{{xp}}">&mdash;</span></li>
     {% end %}
   </ul>
+
+  {% if not usable %}
+  <p>There aren't any lands in which you can use a FastPass right now.</p>
+  {% else %}
+  <p>Click any of these links to use a FastPass in:</p>
+  <ul>
+    {% for land in usable %}
+    <li><a href="/fastpass/{{land.shortname}}">{{land.title}}</a></li>
+    {% end %}
+  </ul>
+  {% end %}
+
   {% end %}
 </div>
 

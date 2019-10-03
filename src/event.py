@@ -173,7 +173,25 @@ class FastPassPage(util.TeamPageHandler):
   @login.required("team")
   def get(self):
     self.session.visit_page("fastpass")
-    self.render("fastpass.html")
+
+    usable = []
+    for land in game.Land.ordered_lands:
+      if land not in self.team.open_lands: continue
+      for puzzle in land.puzzles:
+        st = self.team.puzzle_state[puzzle]
+        if st.state == game.PuzzleState.CLOSED:
+          usable.append(land)
+          break
+
+    self.render("fastpass.html", usable=usable)
+
+class ApplyFastPassHandler(util.TeamHandler):
+  @login.required("team")
+  def get(self, land_name):
+    if self.team.apply_fastpass(land_name):
+      self.redirect("/fastpass")
+    else:
+      raise tornado.web.HTTPError(http.client.NOT_FOUND)
 
 class HealthAndSafetyPage(util.TeamPageHandler):
   @login.required("team", require_start=False)
@@ -272,13 +290,12 @@ class HintHistoryHandler(util.TeamHandler):
     d = {"history": [msg.json_dict() for msg in state.hints]}
     self.write(json.dumps(d))
 
-
 def GetHandlers():
   handlers = [
     (r"/", EventHomePage),
     (r"/log", ActivityLogPage),
     (r"/pins", AchievementPage),
-    (r"/fastpass", FastPassPage),
+    (r"/fastpass$", FastPassPage),
     (r"/health_and_safety", HealthAndSafetyPage),
     (r"/land/([a-z0-9_]+)", LandMapPage),
     (r"/puzzle/([a-z0-9_]+)/?", PuzzlePage),
@@ -287,6 +304,7 @@ def GetHandlers():
     (r"/submit_cancel/([a-z][a-z0-9_]*)/(\d+)", SubmitCancelHandler),
     (r"/hintrequest", HintRequestHandler),
     (r"/hinthistory/([a-z][a-z0-9_]*)", HintHistoryHandler),
+    (r"/fastpass/([a-z][a-z0-9_]*)$", ApplyFastPassHandler),
   ]
 
   return handlers
