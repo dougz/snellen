@@ -79,6 +79,7 @@ class AdminPageHandler(tornado.web.RequestHandler):
     if st.event_start_time:
       d["launch"] = st.event_start_time
     else:
+      d["launch"] = None
       d["expected_launch"] = st.expected_start_time
     d["format_duration"] = format_duration
 

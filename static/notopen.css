@@ -15,10 +15,10 @@ body {
     position: absolute;
     left: 0;
     top: 41px;
-    animation: cloudy linear 150s forwards infinite;
+    animation: scudding linear 150s forwards infinite;
 }
 
-@keyframes cloudy {
+@keyframes scudding {
     0% { background-position: 0 0; }
     100% { background-position: 1733px 0; }
 }
@@ -84,7 +84,7 @@ a { text-decoration: none; }
 #dropbtn {
     font-family: 'Merriweather', sans-serif;
     font-size: 18px;
-    min-width: 200px;
+    /*min-width: 200px;*/
     background-color: #666;
     color: #eee;
     height: 40px;
@@ -92,33 +92,36 @@ a { text-decoration: none; }
     cursor: pointer;
     text-align: left;
     margin-left: 1px;
+    padding: 0 12px;
+}
+
+#dropdown:hover #dropbtn {
+    background-color: #777;
 }
 
 #dropdown-content {
     display: none;
     position: absolute;
-    background-color: #666;
+    right: 19px;
+    background-color: #777;
     border: 1px solid black;
     border-top: none;
     min-width: 200px;
-    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
-    z-index: 1001;
-}
-
-#dropdown-content a {
-    padding: 12px 16px;
-    display: block;
-}
-#dropdown-content a:hover {
-    background-color: #999;
+    z-index: 999;
 }
 
 #dropdown:hover #dropdown-content {
     display: block;
 }
-
-#dropdown:hover #dropbtn {
-    background-color: #999;
+#dropdown-content a {
+    padding: 12px 16px;
+    display: block;
+    color: #eee;
+}
+#dropdown-content a:hover {
+    background-color: #333;
+    opacity: 1.0;
+    color: #fff;
 }
 
 #opencountdown { font-family: 'Open Sans', 'Merriweather Sans', sans-serif; }

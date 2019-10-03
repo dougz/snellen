@@ -104,8 +104,8 @@ class EventHomePage(LandMapPage):
   def get(self):
     if self.team:
       if not game.Global.STATE.event_start_time:
-        json_data = "<script>var open_time = """ + str(game.Global.STATE.expected_start_time) + ";</script>"
-        self.render("not_started.html", json_data=json_data,
+        self.render("not_started.html",
+                    open_time=game.Global.STATE.expected_start_time,
                     css=(self.static_content["notopen.css"],))
         return
       self.show_map("inner_only")

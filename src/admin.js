@@ -248,14 +248,21 @@ class A2020_TimeFormatter {
 
 class A2020_Counter {
     constructor() {
-        this.timer = setInterval(goog.bind(this.update, this), 1000);
+        this.timer = null;
         this.els = [];
         this.reread();
-
     }
 
     reread() {
+        if (this.timer) {
+            clearInterval(this.timer);
+            this.timer = null;
+        }
         this.els = document.querySelectorAll(".counter");
+        if (this.els.length > 0) {
+            this.timer = setInterval(goog.bind(this.update, this), 1000);
+        }
+        this.update();
     }
 
     update() {
@@ -268,7 +275,9 @@ class A2020_Counter {
             } else {
                 var until = el.getAttribute("data-until");
                 if (until) {
-                    el.innerHTML = admin2020.time_formatter.duration(until-now);
+                    var d = until - now;
+                    if (d < 0) d = 0;
+                    el.innerHTML = admin2020.time_formatter.duration(d);
                 }
             }
         }

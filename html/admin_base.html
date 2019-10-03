@@ -15,7 +15,7 @@
 	{% if launch %}
 	Hunt launched <span class="counter" data-since="{{launch}}">&mdash;</span> ago.
 	{% else %}
-	Hunt launches in <span class="counter" data-util="{{until_launch}}">&mdash;</span> ago.
+	Hunt launches in <span class="counter" data-until="{{expected_launch}}">&mdash;</span>.
 	{% end %}
       </span>
       <span class=username>{{user.fullname}}</span>

@@ -175,7 +175,11 @@ class H2020_Dispatcher {
 
     /** @param{Message} msg */
     update_start(msg) {
-        open_time = msg.new_start;
+        var el = goog.dom.getElement("opencountdown");
+        if (el) {
+            el.setAttribute("data-until", msg.new_start.toString());
+            hunt2020.counter.reread();
+        }
     }
 
     /** @param{Message} msg */
@@ -417,11 +421,6 @@ class H2020_SubmitPanel {
         /** @type{H2020_EmojiPicker|null} */
         this.emoji_picker = null;
 
-        /** @type{number|null} */
-        this.timer = null;
-        /** @type{Array} */
-        this.counters = null;
-
         /** @type{boolean} */
         this.has_overlay = false;
 
@@ -468,12 +467,6 @@ class H2020_SubmitPanel {
 
     /** @param{SubmissionHistory} response */
     render_history(response) {
-        if (this.timer) {
-            clearInterval(this.timer);
-            this.timer = null;
-        }
-        this.counters = [];
-
         if (response.total) {
             this.top_note.innerHTML = response.correct + "/" + response.total + " correct answers found";
             this.top_note.style.display = "inline";
@@ -501,8 +494,8 @@ class H2020_SubmitPanel {
             var sub = response.history[i];
             var el = null;
             if (sub.state == "pending") {
-                el = goog.dom.createDom("SPAN", {className: "submit-timer"});
-                this.counters.push([sub.check_time, el])
+                el = goog.dom.createDom("SPAN", {className: "counter submit-timer"});
+                el.setAttribute("data-until", sub.check_time)
             }
 
             var answer = null;
@@ -540,10 +533,7 @@ class H2020_SubmitPanel {
             }
         }
 
-        if (this.counters.length > 0) {
-            this.update_counters();
-            this.timer = setInterval(goog.bind(this.update_counters, this), 1000);
-        }
+        hunt2020.counter.reread();
 
         if (response.overlay && !this.has_overlay) {
             // actually the div containing the icon images
@@ -580,21 +570,6 @@ class H2020_SubmitPanel {
         div.innerHTML = html;
 
         parent.appendChild(div);
-    }
-
-    update_counters() {
-        var now = (new Date()).getTime() / 1000.0;
-        for (var i = 0; i < this.counters.length; ++i) {
-            var check_time = this.counters[i][0] + 1.0;
-            var el = this.counters[i][1];
-            var remain = null;
-            if (check_time > now) {
-                remain = hunt2020.time_formatter.duration(check_time - now);
-            } else {
-                remain = "0:00";
-            }
-            el.innerText = remain;
-        }
     }
 
     submit() {
@@ -655,10 +630,6 @@ class H2020_SubmitPanel {
     close() {
         goog.dom.classlist.addRemove(this.submitpanel, "panel-visible",
                                      "panel-invisible");
-        if (this.timer) {
-            clearInterval(this.timer);
-            this.timer = null;
-        }
     }
 }
 
@@ -777,10 +748,6 @@ class H2020_HintPanel {
     close() {
         goog.dom.classlist.addRemove(this.hintpanel, "panel-visible",
                                      "panel-invisible");
-        // if (this.timer) {
-        //     clearInterval(this.timer);
-        //     this.timer = null;
-        // }
     }
 }
 
@@ -955,23 +922,6 @@ class H2020_MapDraw {
     }
 }
 
-class H2020_OpeningCountdown {
-    constructor() {
-        this.el = goog.dom.getElement("opencountdown");
-        this.timer = setInterval(goog.bind(this.update_timer, this), 1000);
-    }
-
-    update_timer() {
-        var now = (new Date()).getTime() / 1000.0;
-        var s = open_time - now;
-        if (s < 0) s = 0;
-        var min = Math.trunc(s/60);
-        var sec = Math.trunc(s%60);
-        var text = "" + min + ":" + (""+sec).padStart(2, "0");
-        this.el.innerHTML = text;
-    }
-}
-
 class H2020_AudioManager {
     constructor() {
         this.current = null;
@@ -1037,13 +987,14 @@ class H2020_Counter {
 
     reread() {
         if (this.timer) {
-            cancelInterval(this.timer);
+            clearInterval(this.timer);
             this.timer = null;
         }
         this.els = document.querySelectorAll(".counter");
         if (this.els.length > 0) {
             this.timer = setInterval(goog.bind(this.update, this), 1000);
         }
+        this.update();
     }
 
     update() {
@@ -1056,7 +1007,9 @@ class H2020_Counter {
             } else {
                 var until = el.getAttribute("data-until");
                 if (until) {
-                    el.innerHTML = hunt2020.time_formatter.duration(until-now);
+                    var d = until - now;
+                    if (d < 0) d = 0;
+                    el.innerHTML = hunt2020.time_formatter.duration(d);
                 }
             }
         }
@@ -1071,7 +1024,6 @@ var hunt2020 = {
     toast_manager: null,
     audio_manager: null,
     map_draw: null,
-    open_countdown: null,
     counter: null,
 }
 
@@ -1170,9 +1122,5 @@ window.onload = function() {
             }
             log.appendChild(tr);
         }
-    }
-
-    if (goog.dom.getElement("opencountdown")) {
-        hunt2020.open_countdown = new H2020_OpeningCountdown();
     }
 }

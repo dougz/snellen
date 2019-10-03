@@ -3,6 +3,8 @@
 {% block title %}Penny Park{% end %}
 
 {% block topnav_startedleft %}
+{% end %}
+{% block topnav_startedright %}
 <div id="dropdown">
   <button id="dropbtn">Useful links</button>
   <div id="dropdown-content">
@@ -11,11 +13,12 @@
   </div>
 </div>
 {% end %}
-{% block topnav_startedright %}{% end %}
 
 {% block content %}
 <div id="clouds"></div>
 
-<p id="openwait">Penny Park should open in <span id="opencountdown">..</span>.</p>
+<p id="openwait">Penny Park should open in
+  <span id="opencountdown" class="counter" data-until="{{open_time}}">..</span>.
+</p>
 
 {% end %}
