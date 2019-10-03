@@ -169,6 +169,12 @@ class AchievementPage(util.TeamPageHandler):
     self.session.visit_page("pins")
     self.render("achievements.html", achievements=game.Achievement.ALL)
 
+class FastPassPage(util.TeamPageHandler):
+  @login.required("team")
+  def get(self):
+    self.session.visit_page("fastpass")
+    self.render("fastpass.html")
+
 class HealthAndSafetyPage(util.TeamPageHandler):
   @login.required("team", require_start=False)
   def get(self):
@@ -272,6 +278,7 @@ def GetHandlers():
     (r"/", EventHomePage),
     (r"/log", ActivityLogPage),
     (r"/pins", AchievementPage),
+    (r"/fastpass", FastPassPage),
     (r"/health_and_safety", HealthAndSafetyPage),
     (r"/land/([a-z0-9_]+)", LandMapPage),
     (r"/puzzle/([a-z0-9_]+)/?", PuzzlePage),

@@ -107,15 +107,14 @@ class AdminHintHistoryHandler(tornado.web.RequestHandler):
     self.write(json.dumps(d))
 
 
-class AdminApplyFastpassHandler(tornado.web.RequestHandler):
+class AdminBestowFastpassHandler(tornado.web.RequestHandler):
   @login.required("admin")
-  def get(self, team_username, land_name):
+  def get(self, team_username):
     team = game.Team.get_by_username(team_username)
     if not team:
       raise tornado.web.HTTPError(http.client.NOT_FOUND)
-    if not team.apply_fastpass(land_name):
-      raise tornado.web.HTTPError(http.client.NOT_FOUND)
-    self.redirect(f"/admin/team/{team.username}")
+    team.receive_fastpass(300)
+    self.set_status(http.client.NO_CONTENT.value)
 
 
 class AdminBecomeTeamHandler(util.AdminPageHandler):
@@ -137,16 +136,6 @@ class AdminBecomeTeamHandler(util.AdminPageHandler):
     else:
       self.session.pending_become = team
       self.render("admin_become.html", team=team)
-
-
-class AdminOpenHintsHandler(tornado.web.RequestHandler):
-  @login.required("admin")
-  def get(self, shortname):
-    puzzle = game.Puzzle.get_by_shortname(shortname)
-    if not puzzle:
-      raise tornado.web.HTTPError(http.client.NOT_FOUND)
-    puzzle.open_hints()
-    self.redirect(f"/admin/puzzle/{shortname}")
 
 
 class HintReplyHandler(tornado.web.RequestHandler):
@@ -351,9 +340,7 @@ def GetHandlers():
     (r"/admin/hinthistory/([a-z0-9_]+)/([a-z0-9_]+)$", AdminHintHistoryHandler),
     (r"/admin/(un)?claim/([a-z0-9_]+)/([a-z0-9_]+)$", HintClaimHandler),
     (r"/admin/hinttimechange", HintTimeChangeHandler),
-
-    (r"/admin/applyfastpass/([a-z0-9_]+)/([a-z0-9_]+)$", AdminApplyFastpassHandler),
-    (r"/admin/openhints/([a-z0-9_]+)$", AdminOpenHintsHandler),
+    (r"/admin/bestowfastpass/([a-z0-9_]+)$", AdminBestowFastpassHandler),
     (r"/admin/become/([a-z0-9_]+)$", AdminBecomeTeamHandler),
     ]
   return handlers

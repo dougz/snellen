@@ -304,6 +304,7 @@ class Team(login.LoginUser):
     self.solve_days = set()
     self.last_incorrect_answer = None
 
+    self.fastpasses_available = []
     self.fastpasses_used = {}
 
   def __repr__(self):
@@ -425,6 +426,14 @@ class Team(login.LoginUser):
     else:
       print(f"failed to cancel submit {submit_id} puzzle {shortname} for {self.username}")
       return
+
+  @save_state
+  def receive_fastpass(self, now, expire):
+    self.fastpasses_available.append(now + expire)
+    self.fastpasses_available.sort()
+    self.send_messages([{"method": "receive_fastpass"}])
+    asyncio.create_task(self.flush_messages())
+
 
   @save_state
   def apply_fastpass(self, now, land_name):

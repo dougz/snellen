@@ -275,9 +275,6 @@ class A2020_Counter {
     }
 }
 
-
-
-
 function alter_role(e) {
     var n = e.target.id.search("::");
     var user = e.target.id.substring(0, n);
@@ -291,7 +288,6 @@ function alter_role(e) {
                             }
                         });
 }
-
 
 function activate_role_checkboxes() {
     var cbs = document.querySelectorAll("table#user-roles input[type='checkbox']");
@@ -342,6 +338,20 @@ window.onload = function() {
                         alert(e.target.getResponseText());
                     }
                 }, "POST", admin2020.serializer.serialize({"puzzle_id": puzzle_id, "hint_time": text}));
+            });
+        });
+    }
+
+    var el = goog.dom.getElement("bestowfastpass");
+    if (el && team_username) {
+        goog.events.listen(el, goog.events.EventType.CLICK, function() {
+            goog.net.XhrIo.send("/admin/bestowfastpass/" + team_username, function(e) {
+                var code = e.target.getStatus();
+                if (code == 204) {
+                    location.reload();
+                } else {
+                    alert(e.target.getResponseText());
+                }
             });
         });
     }

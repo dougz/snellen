@@ -3,6 +3,10 @@
 
 {% block title %}Team detail{% end %}
 
+{% block head %}
+<script>var team_username = "{{team.username}}";</script>
+{% end %}
+
 {% block content %}
 
 <table class=info>
@@ -10,6 +14,9 @@
   <tr><th>username</th><td class=mono>{{team.username}}</td></tr>
   <tr><th></th><td><a href="/admin/become/{{team.username}}">become this team</a></td></tr>
   <tr><th>location</th><td>{{team.attrs.get("location", "Unknown")}}</td></tr>
+  <tr><th>fastpasses</th><td>
+      <button id=bestowfastpass>Bestow fastpass</button>
+  </td></tr>
   <tr><th class=top>open puzzles ({{len(open_list)}})</th>
     <td>
       {% for i, (ot, p, a) in enumerate(open_list) %}
@@ -23,12 +30,6 @@
     </td>
   </tr>
 </table>
-
-<p><b>BTS hack:</b> apply fastpass to:
-  <a href="/admin/applyfastpass/{{team.username}}/castle">castle</a> /
-  <a href="/admin/applyfastpass/{{team.username}}/forest">forest</a> /
-  <a href="/admin/applyfastpass/{{team.username}}/space">space</a>
-</p>
 
 <h2>Activity log</h2>
 <table id="teamlog">

@@ -1,0 +1,23 @@
+{% extends "player_base.html" %}
+
+{% block title %}FastPasses{% end %}
+
+{% block content %}
+<div id="content">
+  <h1 id="pagetitle">FastPasses</h1>
+
+  <p>FastPasses give you early access to the next attraction in a Penny Park land of your choice!</p>
+
+  {% if not team.fastpasses_available %}
+  <p>You don't have any FastPasses available right now.</p>
+  {% else %}
+  <p>You have FastPasses available, expiring in:</p>
+  <ul>
+    {% for xp in team.fastpasses_available %}
+    <li><span class="counter" data-until="{{xp}}">&mdash;</span></li>
+    {% end %}
+  </ul>
+  {% end %}
+</div>
+
+{% end %}

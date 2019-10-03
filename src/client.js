@@ -85,6 +85,7 @@ class H2020_Dispatcher {
             "update_start": this.update_start,
             "to_page": this.to_page,
             "hint_history": this.hint_history,
+            "receive_fastpass": this.receive_fastpass,
             "apply_fastpass": this.apply_fastpass,
             "hints_open": this.hints_open,
         }
@@ -158,6 +159,12 @@ class H2020_Dispatcher {
     achieve(msg) {
         hunt2020.toast_manager.add_toast(
             "You received the <b>" + msg.title + "</b> pin!", 6000, null, "gold");
+    }
+
+    /** @param{Message} msg */
+    receive_fastpass(msg) {
+        hunt2020.toast_manager.add_toast(
+            "You've received a FastPass!", 6000, null);
     }
 
     /** @param{Message} msg */
@@ -1021,7 +1028,40 @@ class H2020_AudioManager {
     }
 }
 
+class H2020_Counter {
+    constructor() {
+        this.timer = null;
+        this.els = [];
+        this.reread();
+    }
 
+    reread() {
+        if (this.timer) {
+            cancelInterval(this.timer);
+            this.timer = null;
+        }
+        this.els = document.querySelectorAll(".counter");
+        if (this.els.length > 0) {
+            this.timer = setInterval(goog.bind(this.update, this), 1000);
+        }
+    }
+
+    update() {
+        var now = (new Date()).getTime() / 1000.0;
+        for (var i = 0; i < this.els.length; ++i) {
+            var el = this.els[i];
+            var since = el.getAttribute("data-since");
+            if (since) {
+                el.innerHTML = hunt2020.time_formatter.duration(now-since);
+            } else {
+                var until = el.getAttribute("data-until");
+                if (until) {
+                    el.innerHTML = hunt2020.time_formatter.duration(until-now);
+                }
+            }
+        }
+    }
+}
 
 var hunt2020 = {
     waiter: null,
@@ -1032,6 +1072,7 @@ var hunt2020 = {
     audio_manager: null,
     map_draw: null,
     open_countdown: null,
+    counter: null,
 }
 
 /** @param{Node} e */
@@ -1077,6 +1118,7 @@ window.onload = function() {
     hunt2020.time_formatter = new H2020_TimeFormatter();
     hunt2020.toast_manager = new H2020_ToastManager();
     hunt2020.audio_manager = new H2020_AudioManager();
+    hunt2020.counter = new H2020_Counter();
 
     hunt2020.waiter = new H2020_Waiter(new H2020_Dispatcher());
     hunt2020.waiter.start();
