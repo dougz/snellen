@@ -165,12 +165,24 @@ class H2020_Dispatcher {
     receive_fastpass(msg) {
         hunt2020.toast_manager.add_toast(
             "You've received a FastPass!", 6000, null);
+        if (hunt2020.fastpass) {
+            hunt2020.fastpass.build(msg.fastpass);
+        }
     }
 
     /** @param{Message} msg */
     apply_fastpass(msg) {
-        hunt2020.toast_manager.add_toast(
-            "A FastPass has been applied to <b>" + msg.title + "</b>!", 6000, null);
+        var text;
+        if (msg.title) {
+            text = "A FastPass has been applied to <b>" + msg.land +
+                "</b>, opening <b>" + msg.title + "</b>!";
+        } else {
+            text = "A FastPass has been applied to <b>" + msg.land + "</b>!";
+        }
+        hunt2020.toast_manager.add_toast(text, 6000, null);
+        if (hunt2020.fastpass) {
+            hunt2020.fastpass.build(msg.fastpass);
+        }
     }
 
     /** @param{Message} msg */
@@ -1016,6 +1028,65 @@ class H2020_Counter {
     }
 }
 
+class H2020_FastPass {
+    constructor() {
+        this.build(/** @type{FastPassState} */ (initial_json));
+    }
+
+    /** @param{FastPassState} data */
+    build(data) {
+        var e_none = goog.dom.getElement("fphavenone");
+        var e_some = goog.dom.getElement("fphavesome");
+        if (data.expire_time.length == 0) {
+            e_none.style.display = "initial";
+            e_some.style.display = "none";
+            return;
+        }
+        e_none.style.display = "none";
+        e_some.style.display = "initial";
+
+        var e_xlist = goog.dom.getElement("fpexpirelist");
+        e_xlist.innerHTML = "";
+        for (var i = 0; i < data.expire_time.length; ++i) {
+            var s = goog.dom.createDom("SPAN", {className: "counter"});
+            s.setAttribute("data-until", data.expire_time[i].toString());
+            e_xlist.appendChild(goog.dom.createDom("LI", null, s));
+        }
+        hunt2020.counter.reread();
+
+        e_none = goog.dom.getElement("fpunusable");
+        e_some = goog.dom.getElement("fpusable");
+        if (data.usable_lands.length == 0) {
+            e_none.style.display = "initial";
+            e_some.style.display = "none";
+            return;
+        }
+        e_none.style.display = "none";
+        e_some.style.display = "initial";
+
+        var e_ulist = goog.dom.getElement("fpusablelist");
+        e_ulist.innerHTML = "";
+        for (var i = 0; i < data.usable_lands.length; ++i) {
+            var u = data.usable_lands[i];
+            var a = goog.dom.createDom("A", null, u.title);
+            goog.events.listen(a, goog.events.EventType.CLICK,
+                               goog.bind(this.use, this, u.shortname));
+            e_ulist.appendChild(goog.dom.createDom("LI", null, a));
+        }
+    }
+
+    /** @param{string} shortname */
+    use(shortname) {
+        goog.net.XhrIo.send("/fastpass/" + shortname, function(e) {
+            var code = e.target.getStatus();
+            if (code != 204) {
+                alert(e.target.getResponseText());
+            }
+        });
+    }
+}
+
+
 var hunt2020 = {
     waiter: null,
     submit_panel: null,
@@ -1025,6 +1096,7 @@ var hunt2020 = {
     audio_manager: null,
     map_draw: null,
     counter: null,
+    fastpass: null,
 }
 
 /** @param{Node} e */
@@ -1122,5 +1194,9 @@ window.onload = function() {
             }
             log.appendChild(tr);
         }
+    }
+
+    if (goog.dom.getElement("fphavenone")) {
+        hunt2020.fastpass = new H2020_FastPass();
     }
 }

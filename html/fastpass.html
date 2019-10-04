@@ -8,28 +8,19 @@
 
   <p>FastPasses give you early access to the next attraction in a Penny Park land of your choice!</p>
 
-  {% if not team.fastpasses_available %}
-  <p>You don't have any FastPasses available right now.</p>
-  {% else %}
-  <p>You have FastPasses available, expiring in:</p>
-  <ul>
-    {% for xp in team.fastpasses_available %}
-    <li><span class="counter" data-until="{{xp}}">&mdash;</span></li>
-    {% end %}
-  </ul>
+  <p id="fphavenone">You don't have any FastPasses available right now.</p>
+  <div id="fphavesome">
+    <p>You have FastPasses available, expiring in:</p>
+    <ul id="fpexpirelist">
+    </ul>
 
-  {% if not usable %}
-  <p>There aren't any lands in which you can use a FastPass right now.</p>
-  {% else %}
-  <p>Click any of these links to use a FastPass in:</p>
-  <ul>
-    {% for land in usable %}
-    <li><a href="/fastpass/{{land.shortname}}">{{land.title}}</a></li>
-    {% end %}
-  </ul>
-  {% end %}
-
-  {% end %}
+    <p id="fpunusable">There aren't any lands in which you can use a FastPass right now.</p>
+    <div id="fpusable">
+      <p>Click any of these links to use a FastPass in:</p>
+      <ul id="fpusablelist">
+      </ul>
+    </div>
+  </div>
 </div>
 
 {% end %}

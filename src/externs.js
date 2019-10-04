@@ -29,6 +29,9 @@ var open_time;
 /** @type{?string} */
 var edb;
 
+/** @type{?Object} */
+var initial_json;
+
 class Message {
     constructor() {
         /** @type{string} */
@@ -37,6 +40,8 @@ class Message {
         this.puzzle_id;
         /** @type{?string} */
         this.title;
+        /** @type{?string} */
+        this.land;
         /** @type{?string} */
         this.audio;
         /** @type{?number} */
@@ -47,6 +52,8 @@ class Message {
         this.score;
         /** @type{?boolean} */
         this.notify;
+        /** @type{?FastPassState} */
+        this.fastpass;
     }
 }
 
@@ -141,5 +148,23 @@ class MapData {
         this.base_url;
         /** @type{Array<MapItem>} */
         this.items;
+    }
+}
+
+class Land {
+    constructor() {
+        /** @type{string} */
+        this.shortname;
+        /** @type{string} */
+        this.title;
+    }
+}
+
+class FastPassState {
+    constructor() {
+        /** @type{Array<number>} */
+        this.expire_time;
+        /** @type{Array<Land>} */
+        this.usable_lands;
     }
 }

@@ -173,23 +173,14 @@ class FastPassPage(util.TeamPageHandler):
   @login.required("team")
   def get(self):
     self.session.visit_page("fastpass")
-
-    usable = []
-    for land in game.Land.ordered_lands:
-      if land not in self.team.open_lands: continue
-      for puzzle in land.puzzles:
-        st = self.team.puzzle_state[puzzle]
-        if st.state == game.PuzzleState.CLOSED:
-          usable.append(land)
-          break
-
-    self.render("fastpass.html", usable=usable)
+    json_data = "<script>var initial_json = " + json.dumps(self.team.get_fastpass_data()) + ";</script>"
+    self.render("fastpass.html", json_data=json_data)
 
 class ApplyFastPassHandler(util.TeamHandler):
   @login.required("team")
   def get(self, land_name):
     if self.team.apply_fastpass(land_name):
-      self.redirect("/fastpass")
+      self.set_status(http.client.NO_CONTENT.value)
     else:
       raise tornado.web.HTTPError(http.client.NOT_FOUND)
 

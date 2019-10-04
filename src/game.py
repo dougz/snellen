@@ -427,13 +427,32 @@ class Team(login.LoginUser):
       print(f"failed to cancel submit {submit_id} puzzle {shortname} for {self.username}")
       return
 
+  def get_fastpass_data(self):
+    if self.fastpasses_available:
+      usable = []
+      for land in Land.ordered_lands:
+        if land not in self.open_lands: continue
+        for puzzle in land.puzzles:
+          st = self.puzzle_state[puzzle]
+          if st.state == PuzzleState.CLOSED:
+            usable.append({"shortname": land.shortname,
+                           "title": land.title})
+            break
+    else:
+      usable = None
+    return {"expire_time": self.fastpasses_available,
+            "usable_lands": usable}
+
   @save_state
   def receive_fastpass(self, now, expire):
     self.fastpasses_available.append(now + expire)
     self.fastpasses_available.sort()
-    self.send_messages([{"method": "receive_fastpass"}])
-    asyncio.create_task(self.flush_messages())
-
+    text = "Received a FastPass."
+    self.activity_log.add(now, text)
+    self.admin_log.add(now, text)
+    if not save_state.REPLAYING:
+      self.send_messages([{"method": "receive_fastpass", "fastpass": self.get_fastpass_data()}])
+      asyncio.create_task(self.flush_messages())
 
   @save_state
   def apply_fastpass(self, now, land_name):
@@ -442,10 +461,18 @@ class Team(login.LoginUser):
     if not self.fastpasses_available: return
     self.fastpasses_available.pop(0)
     self.fastpasses_used[land] = self.fastpasses_used.get(land, 0) + 1
+    text = f'Used a FastPass on <b>{html.escape(land.title)}</b>.'
+    self.activity_log.add(now, text)
+    self.admin_log.add(now, text)
+    opened = self.compute_puzzle_beam(now)
     if not save_state.REPLAYING:
-      self.send_messages([{"method": "apply_fastpass", "title": land.title}])
+      msg = {"method": "apply_fastpass",
+             "land": land.title,
+             "fastpass": self.get_fastpass_data()}
+      if len(opened) == 1:
+        msg["title"] = opened[0].title
+      self.send_messages([msg])
       asyncio.create_task(self.flush_messages())
-    self.compute_puzzle_beam(now)
     return True
 
   def open_puzzle(self, puzzle, now):
@@ -559,6 +586,7 @@ class Team(login.LoginUser):
     if start_map not in self.open_lands:
       self.open_lands[start_map] = now
 
+    opened = []
     locked = []
 
     open_count = 0
@@ -587,6 +615,7 @@ class Team(login.LoginUser):
           break
         if self.puzzle_state[p].state == PuzzleState.CLOSED:
           self.open_puzzle(p, now)
+          opened.append(p)
         if self.puzzle_state[p].state == PuzzleState.OPEN:
           if not p.meta:
             open_count -= 1
@@ -599,6 +628,7 @@ class Team(login.LoginUser):
         if leftover_count <= 0: break
         if self.puzzle_state[p].state == PuzzleState.CLOSED:
           self.open_puzzle(p, now)
+          opened.append(p)
         if self.puzzle_state[p].state == PuzzleState.OPEN:
           if not p.meta:
             leftover_count -= 1
@@ -609,6 +639,8 @@ class Team(login.LoginUser):
           if now != Global.STATE.event_start_time:
             self.send_messages([{"method": "open", "title": html.escape(st.puzzle.land.title)}])
           self.open_lands[st.puzzle.land] = now
+
+    return opened
 
 class Subicon:
   def __init__(self, d):
