@@ -1,9 +1,6 @@
 /** @type{?string} */
 var puzzle_id;
 
-/** @type{MapData} */
-var mapdata;
-
 /** @type{Array<Object>} */
 var log_entries;
 
@@ -54,6 +51,8 @@ class Message {
         this.notify;
         /** @type{?FastPassState} */
         this.fastpass;
+        /** @type{?MapData} */
+        this.mapdata;
     }
 }
 
@@ -146,6 +145,8 @@ class MapData {
     constructor() {
         /** @type{?string} */
         this.base_url;
+        /** @type{string} */
+        this.shortname;
         /** @type{Array<MapItem>} */
         this.items;
     }

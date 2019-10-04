@@ -88,6 +88,7 @@ class H2020_Dispatcher {
             "receive_fastpass": this.receive_fastpass,
             "apply_fastpass": this.apply_fastpass,
             "hints_open": this.hints_open,
+            "update_map": this.update_map,
         }
     }
 
@@ -197,6 +198,13 @@ class H2020_Dispatcher {
     /** @param{Message} msg */
     to_page(msg) {
         window.location = msg.url;
+    }
+
+    /** @param{Message} msg */
+    update_map(msg) {
+        if (hunt2020.map_draw) {
+            hunt2020.map_draw.draw_map(msg.mapdata);
+        }
     }
 }
 
@@ -833,9 +841,16 @@ class H2020_MapDraw {
         this.highlight_el = null;
         /** @type{?Element} */
         this.mask_el = null;
+
+        var mapdata = /** @type{MapData} */ (initial_json);
+        this.shortname = mapdata.shortname;
+
+        this.draw_map(mapdata);
     }
 
     draw_map(mapdata) {
+        if (this.shortname != mapdata.shortname) return;
+
         this.map_el.innerHTML = "";
         this.mapmap_el.innerHTML = "";
         this.list_el.innerHTML = "";
@@ -1170,7 +1185,6 @@ window.onload = function() {
     var m = goog.dom.getElement("map");
     if (m) {
         hunt2020.map_draw = new H2020_MapDraw();
-        hunt2020.map_draw.draw_map(mapdata);
     }
 
     // Only present on the activity log page.
@@ -1196,6 +1210,7 @@ window.onload = function() {
         }
     }
 
+    // Only present on the fastpass page.
     if (goog.dom.getElement("fphavenone")) {
         hunt2020.fastpass = new H2020_FastPass();
     }

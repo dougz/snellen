@@ -15,7 +15,6 @@ import util
 
 class LandMapPage(util.TeamPageHandler):
   RECENT_SECONDS = 10.0
-  NEW_PUZZLE_SECONDS = 300  # 5 minutes
 
   @login.required("team")
   def get(self, shortname):
@@ -27,64 +26,9 @@ class LandMapPage(util.TeamPageHandler):
       raise tornado.web.HTTPError(http.client.NOT_FOUND)
     if land not in self.team.open_lands:
       raise tornado.web.HTTPError(http.client.NOT_FOUND)
-
     self.land = land
-
-    items = []
-    mapdata = {"base_url": land.base_img}
-    now = time.time()
-
-    for i in land.icons.values():
-      if i.puzzle:
-        p = i.puzzle
-        st = self.team.puzzle_state[p]
-        if st.state == game.PuzzleState.CLOSED: continue
-
-        d = { "name": p.title, "url": p.url }
-
-        if st.answers_found:
-          d["answer"] = ", ".join(sorted(p.display_answers[a] for a in st.answers_found))
-
-        if st.state == game.PuzzleState.OPEN:
-          if "answer" in d: d["answer"] += ", \u2026"
-
-          d["solved"] = False
-          if i.unlocked.url:
-            d["icon_url"] = i.unlocked.url
-            d["mask_url"] = i.unlocked_mask.url
-            d["pos_x"], d["pos_y"] = i.unlocked.pos
-            d["width"], d["height"] = i.unlocked.size
-            if i.unlocked.poly: d["poly"] = i.unlocked.poly
-
-          if (now - st.open_time < self.NEW_PUZZLE_SECONDS and
-              st.open_time != game.Global.STATE.event_start_time):
-            d["new_open"] = True
-
-        elif st.state == game.PuzzleState.SOLVED:
-          d["solved"] = True
-          if i.solved.url:
-            d["icon_url"] = i.solved.url
-            d["mask_url"] = i.solved_mask.url
-            d["pos_x"], d["pos_y"] = i.solved.pos
-            d["width"], d["height"] = i.solved.size
-            if i.solved.poly: d["poly"] = i.solved.poly
-
-        items.append((p.sortkey, d))
-      else:
-        if i.to_land not in self.team.open_lands: continue
-        d = { "name": i.to_land.title,
-              "url": i.to_land.url,
-              "icon_url": i.unlocked.url }
-        d["pos_x"], d["pos_y"] = i.unlocked.pos
-        d["width"], d["height"] = i.unlocked.size
-        if i.unlocked.poly: d["poly"] = i.unlocked.poly
-        items.append((i.to_land.sortkey, d))
-
-    items.sort()
-    mapdata["items"] = [i[1] for i in items]
-
-    json_data = "<script>var mapdata = """ + json.dumps(mapdata) + ";</script>"
-
+    mapdata = self.team.get_land_data(land)
+    json_data = "<script>var initial_json = """ + json.dumps(mapdata) + ";</script>"
     self.render("land.html", land=land, json_data=json_data)
 
   def get_template_namespace(self):

@@ -270,6 +270,9 @@ class Team(login.LoginUser):
 
   NEXT_SUBMIT_ID = 1
 
+  # If a puzzle was opened less than this long ago, it gets a "new!" tag.
+  NEW_PUZZLE_SECONDS = 300  # 5 minutes
+
   def __init__(self, username, info):
     assert username not in self.BY_USERNAME
     self.BY_USERNAME[username] = self
@@ -298,6 +301,7 @@ class Team(login.LoginUser):
     self.message_mu = asyncio.Lock()
     self.message_serial = 1
     self.pending_messages = []
+    self.dirty_lands = set()
 
     self.achievements = {}
     self.streak = []
@@ -326,6 +330,12 @@ class Team(login.LoginUser):
 
   async def flush_messages(self):
     """Flush the pending message queue, actually sending them to the team."""
+    if self.dirty_lands:
+      for land in self.dirty_lands:
+        self.pending_messages.append({"method": "update_map",
+                                      "mapdata": self.get_land_data(land)})
+      self.dirty_lands.clear()
+
     if not self.pending_messages: return
     objs, self.pending_messages = self.pending_messages, []
     if isinstance(objs, list):
@@ -344,6 +354,66 @@ class Team(login.LoginUser):
     if ach not in self.achievements:
       self.record_achievement(ach.name, delay)
       return True
+
+  def get_land_data(self, land):
+    items = []
+    mapdata = {"base_url": land.base_img, "shortname": land.shortname}
+    now = time.time()
+
+    for i in land.icons.values():
+      if i.puzzle:
+        # This is a land map page (the items are puzzles).
+
+        p = i.puzzle
+        ps = self.puzzle_state[p]
+        if ps.state == PuzzleState.CLOSED: continue
+
+        d = { "name": p.title, "url": p.url }
+
+        if ps.answers_found:
+          d["answer"] = ", ".join(sorted(p.display_answers[a] for a in ps.answers_found))
+
+        if ps.state == PuzzleState.OPEN:
+          if "answer" in d: d["answer"] += ", \u2026"
+
+          d["solved"] = False
+          if i.unlocked.url:
+            d["icon_url"] = i.unlocked.url
+            d["mask_url"] = i.unlocked_mask.url
+            d["pos_x"], d["pos_y"] = i.unlocked.pos
+            d["width"], d["height"] = i.unlocked.size
+            if i.unlocked.poly: d["poly"] = i.unlocked.poly
+
+          if (now - ps.open_time < self.NEW_PUZZLE_SECONDS and
+              ps.open_time != Global.STATE.event_start_time):
+            d["new_open"] = True
+
+        elif ps.state == PuzzleState.SOLVED:
+          d["solved"] = True
+          if i.solved.url:
+            d["icon_url"] = i.solved.url
+            d["mask_url"] = i.solved_mask.url
+            d["pos_x"], d["pos_y"] = i.solved.pos
+            d["width"], d["height"] = i.solved.size
+            if i.solved.poly: d["poly"] = i.solved.poly
+
+        items.append((p.sortkey, d))
+      else:
+        # This is a main map page (the items are other lands).
+
+        if i.to_land not in self.open_lands: continue
+        d = { "name": i.to_land.title,
+              "url": i.to_land.url,
+              "icon_url": i.unlocked.url }
+        d["pos_x"], d["pos_y"] = i.unlocked.pos
+        d["width"], d["height"] = i.unlocked.size
+        if i.unlocked.poly: d["poly"] = i.unlocked.poly
+        items.append((i.to_land.sortkey, d))
+
+    items.sort()
+    mapdata["items"] = [i[1] for i in items]
+
+    return mapdata
 
   @save_state
   def record_achievement(self, now, aname, delay):
@@ -484,6 +554,7 @@ class Team(login.LoginUser):
       self.open_puzzles.add(state)
       self.activity_log.add(now, puzzle.html + " opened.")
       self.admin_log.add(now, puzzle.admin_html + " opened.", team=self)
+      self.dirty_lands.add(puzzle.land)
 
   def solve_puzzle(self, puzzle, now):
     state = self.puzzle_state[puzzle]
@@ -502,6 +573,7 @@ class Team(login.LoginUser):
           "title": html.escape(puzzle.title),
           "audio": OPTIONS.static_content.get(puzzle.land.shortname + "/solve.mp3"),
           "score": self.score}])
+      self.dirty_lands.add(puzzle.land)
       self.activity_log.add(now, puzzle.html + " solved.")
       self.admin_log.add(now, puzzle.admin_html + " solved.", team=self)
       puzzle.puzzle_log.add(now, "Solved by <b>{team.name}</b>.", team=self)
@@ -639,6 +711,7 @@ class Team(login.LoginUser):
           if now != Global.STATE.event_start_time:
             self.send_messages([{"method": "open", "title": html.escape(st.puzzle.land.title)}])
           self.open_lands[st.puzzle.land] = now
+          self.dirty_lands.add(Land.BY_SHORTNAME["inner_only"])
 
     return opened
 
