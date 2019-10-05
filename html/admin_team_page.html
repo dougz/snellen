@@ -4,6 +4,7 @@
 {% block title %}Team detail{% end %}
 
 {% block head %}
+<script src="{{puzzle_json_url}}"></script>
 <script>var team_username = "{{team.username}}";</script>
 {% end %}
 
@@ -27,6 +28,14 @@
       {% for aa in a %} <span class=answer>{{aa}}</span>{% end %} &hellip;
       {% end %}
       {% end %}
+    </td>
+  </tr>
+  <tr><th>go to puzzle</th>
+    <td>
+      <div id="puzzleselect" class="ac-select">
+        <input class="ac-select-input" style="width:500px;"></input>
+        <div class="ac-select-dropdown"></div>
+      </div>
     </td>
   </tr>
 </table>

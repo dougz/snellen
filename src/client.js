@@ -2,6 +2,7 @@ goog.require("goog.dom");
 goog.require("goog.dom.classlist");
 goog.require("goog.dom.ViewportSizeMonitor");
 goog.require("goog.events");
+goog.require("goog.events.KeyCodes");
 goog.require("goog.style");
 goog.require("goog.net.XhrIo");
 goog.require("goog.ui.ModalPopup");

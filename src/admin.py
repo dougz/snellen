@@ -1,5 +1,6 @@
 import datetime
 import dateutil.parser
+import hashlib
 import html
 import http.client
 import json
@@ -320,6 +321,26 @@ class HintTimeChangeHandler(tornado.web.RequestHandler):
     puzzle.set_hints_available_time(secs, self.user.username)
     self.set_status(http.client.NO_CONTENT.value)
 
+class PuzzleJsonHandler(tornado.web.RequestHandler):
+  @classmethod
+  def build(cls):
+    out = []
+    for p in game.Puzzle.all_puzzles():
+      out.append([p.shortname, p.title])
+    out.sort()
+    cls.body = "var puzzle_list = " + json.dumps(out) + ";\n"
+    h = hashlib.md5(cls.body.encode("utf-8")).hexdigest()[:12]
+    cls.etag = h
+    util.AdminPageHandler.set_puzzle_json_url("/admin/puzzle_json/" + h)
+
+  @login.required("admin")
+  async def get(self):
+    self.set_header("Content-Type", "application/json")
+    self.set_header("Cache-Control", "private, max-age=3600")
+    self.set_header("ETag", self.etag)
+    self.write(self.body)
+
+
 def GetHandlers():
   handlers = [
     (r"/admin$", AdminHomePage),
@@ -342,6 +363,7 @@ def GetHandlers():
     (r"/admin/hinttimechange", HintTimeChangeHandler),
     (r"/admin/bestowfastpass/([a-z0-9_]+)$", AdminBestowFastpassHandler),
     (r"/admin/become/([a-z0-9_]+)$", AdminBecomeTeamHandler),
+    (r"/admin/puzzle_json/.*", PuzzleJsonHandler),
     ]
   return handlers
 

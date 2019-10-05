@@ -96,6 +96,8 @@ async def main_server(options):
 
   wait_proxy.Server.init_proxies(options.wait_proxies)
 
+  admin.PuzzleJsonHandler.build()
+
   if not game.Global.STATE: game.Global()
 
   if options.start_event:

@@ -9,6 +9,9 @@ var waiter_id;
 /** @type{number} */
 var received_serial;
 
+/** @type{?Array<Array<string>>} */
+var puzzle_list;
+
 class Message {
     constructor() {
         /** @type{string} */

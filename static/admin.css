@@ -18,6 +18,7 @@ table.info th {
     padding-right: 20px;
     padding-top: 8px;
     vertical-align: baseline;
+    min-width: 120px;
 }
 
 table.info td { padding-top: 8px; }
@@ -354,4 +355,62 @@ p.note {
 #hinttimechange {
     margin-left: 20px;
     font-size: 70%;
+}
+
+.ac label {
+    font-weight: bold;
+}
+
+.ac-select {
+    display: inline;
+    position: relative;
+}
+
+.ac-select-input {
+    box-sizing: border-box;
+}
+
+.ac-select-dropdown {
+    display: none;
+    position: absolute;
+    left: 0px;
+    top: 22px;
+    background: #f8f8f8;
+    border: 1px solid #666;
+    border-top: none;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+    width: 500px;
+    box-sizing: border-box;
+    padding: 4px 0;
+}
+
+.ac-selected {
+    background-color: #ffff00;
+}
+
+.ac-row {
+    display: block;
+    padding: 4px 8px;
+    cursor: pointer;
+}
+
+.ac-row:hover {
+    background-color: #ffffcc;
+}
+
+.ac-match {
+    font-weight: bold;
+}
+
+.ac-none {
+    display: block;
+    padding: 4px 16px;
+    color: #999;
+}
+
+.ac-overflow {
+    display: block;
+    padding: 4px 16px;
+    color: #999;
 }

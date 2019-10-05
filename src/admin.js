@@ -1,5 +1,7 @@
 goog.require("goog.dom");
+goog.require("goog.dom.classlist");
 goog.require("goog.events");
+goog.require("goog.events.KeyCodes");
 goog.require("goog.net.XhrIo");
 goog.require("goog.json.Serializer");
 goog.require("goog.i18n.DateTimeFormat");
@@ -313,6 +315,7 @@ var admin2020 = {
     hintqueue: null,
     time_formatter: null,
     serializer: null,
+    puzzle_select: null,
 }
 
 window.onload = function() {
@@ -331,8 +334,10 @@ window.onload = function() {
         admin2020.hintqueue = new A2020_HintQueue();
     }
 
-    if (goog.dom.getElement("hinttimechange")) {
-        var el = goog.dom.getElement("hinttimechange");
+    var el;
+
+    el = goog.dom.getElement("hinttimechange");
+    if (el) {
         goog.events.listen(el, goog.events.EventType.CLICK, function() {
             goog.dom.getElement("hinttimechange").style.display = "none";
             goog.dom.getElement("hinttimechangeentry").style.display = "inline";
@@ -351,7 +356,7 @@ window.onload = function() {
         });
     }
 
-    var el = goog.dom.getElement("bestowfastpass");
+    el = goog.dom.getElement("bestowfastpass");
     if (el && team_username) {
         goog.events.listen(el, goog.events.EventType.CLICK, function() {
             goog.net.XhrIo.send("/admin/bestowfastpass/" + team_username, function(e) {
@@ -364,4 +369,122 @@ window.onload = function() {
             });
         });
     }
+
+    el = goog.dom.getElement("puzzleselect");
+    if (el) {
+        admin2020.puzzle_select = new A2020_Autocomplete(
+            el, puzzle_list,
+            function(shortname) {
+                window.location.href = "/admin/team/" + team_username + "/puzzle/" + shortname;
+            });
+    }
 }
+
+class A2020_Autocomplete {
+    /** @param{Element} select */
+    /** @param{Array<Array<string>>} data */
+    constructor(select, data, invoke) {
+        this.data = data;
+        this.search = [];
+        for (var i = 0; i < data.length; ++i) {
+            this.search.push(data[i][1].toLowerCase());
+        }
+
+        this.select = select;
+        for (var i = 0; i < select.childNodes.length; ++i) {
+            var el = select.childNodes[i];
+            if (el.className == "ac-select-input") {
+                this.input = el;
+            } else if (el.className == "ac-select-dropdown") {
+                this.dropdown = el;
+            }
+        }
+        this.highlight = -1;
+        this.matches = [];
+
+        this.invoke = invoke;
+
+        goog.events.listen(this.input, goog.events.EventType.INPUT,
+                           goog.bind(this.oninput, this));
+        goog.events.listen(this.input, goog.events.EventType.KEYDOWN,
+                           goog.bind(this.onkeypress, this));
+    }
+
+    oninput() {
+        var value = this.input.value;
+
+        this.highlight = -1;
+
+        if (!value) {
+            this.dropdown.style.display = "none";
+            return;
+        }
+        value = value.toLowerCase();
+
+        this.dropdown.innerHTML = "";
+        this.dropdown.style.display = "inline-block";
+
+        this.matches = [];
+        var matches = 0;
+        for (var i = 0; i < this.search.length; ++i) {
+            var pos = this.search[i].indexOf(value);
+            if (pos < 0) continue;
+            ++matches;
+            if (matches <= 5) {
+                var m = this.data[i][1];
+                var row = goog.dom.createDom(
+                    "SPAN", "ac-row",
+                    goog.dom.createTextNode(m.substring(0, pos)),
+                    goog.dom.createDom("SPAN", "ac-match", m.substring(pos, pos+value.length)),
+                    goog.dom.createTextNode(m.substring(pos+value.length)));
+                row.setAttribute("data-target", this.data[i][0]);
+                goog.events.listen(row, goog.events.EventType.CLICK,
+                                   goog.bind(this.invoke_row, this, row));
+                this.matches.push(row);
+                this.dropdown.appendChild(row);
+            }
+        }
+        if (matches > 5) {
+            this.dropdown.appendChild(goog.dom.createDom("SPAN", "ac-overflow", "(" + (matches-5) + " more matches)"));
+        }
+        if (matches == 0) {
+            this.dropdown.appendChild(goog.dom.createDom("SPAN", "ac-none", "No matches."));
+        }
+        if (matches == 1) this.move_highlight(1);
+    }
+
+    onkeypress(e) {
+        if (e.keyCode == goog.events.KeyCodes.DOWN) {
+            this.move_highlight(1);
+            e.preventDefault();
+        } else if (e.keyCode == goog.events.KeyCodes.UP) {
+            this.move_highlight(-1);
+            e.preventDefault();
+        } else if (e.keyCode == goog.events.KeyCodes.ENTER) {
+            if (this.highlight >= 0) {
+                this.invoke_row(this.matches[this.highlight]);
+            }
+            e.preventDefault();
+        }
+    }
+
+    move_highlight(d) {
+        if (this.highlight + d < -1 || this.highlight + d >= this.matches.length) return;
+
+        if (this.highlight >= 0) {
+            goog.dom.classlist.remove(this.matches[this.highlight], "ac-selected");
+        }
+        this.highlight += d;
+        if (this.highlight >= 0) {
+            goog.dom.classlist.add(this.matches[this.highlight], "ac-selected");
+        }
+    }
+
+    invoke_row(row) {
+        var target = row.getAttribute("data-target");
+        this.invoke(target);
+    }
+
+}
+
+
