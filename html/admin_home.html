@@ -3,7 +3,11 @@
 
 {% block title %}Home{% end %}
 
-
+{% block head %}
+<script src="{{puzzle_json_url}}"></script>
+<script src="{{team_json_url}}"></script>
+<script>var team_username = null; var puzzle_id = null;</script>
+{% end %}
 
 {% block content %}
 <ul id="mainmenu">
@@ -18,7 +22,23 @@
   {% end %}
   <li><a href="/admin/hintqueue">Hint queue</a></li>
   <li><a href="/admin/teams">Team list</a></li>
+  <li>
+    <label>go to team</label>
+    <div id="teamselect" class="ac-select">
+      <input class="ac-select-input" style="width:500px;"></input>
+      <div class="ac-select-dropdown"></div>
+    </div>
+  </li>
+
   <li><a href="/admin/puzzles">Puzzle list</a></li>
+  <li>
+    <label>go to puzzle</label>
+    <div id="puzzleselect" class="ac-select">
+      <input class="ac-select-input" style="width:500px;"></input>
+      <div class="ac-select-dropdown"></div>
+    </div>
+  </li>
+
   <li><a href="/admin/users">Admin users</a></li>
   {% if user.has_role("control_event") %}
   <li><a href="/stop_server">Stop server</a></li>

@@ -316,6 +316,7 @@ var admin2020 = {
     time_formatter: null,
     serializer: null,
     puzzle_select: null,
+    team_select: null,
 }
 
 window.onload = function() {
@@ -375,7 +376,24 @@ window.onload = function() {
         admin2020.puzzle_select = new A2020_Autocomplete(
             el, puzzle_list,
             function(shortname) {
-                window.location.href = "/admin/team/" + team_username + "/puzzle/" + shortname;
+                if (team_username) {
+                    window.location.href = "/admin/team/" + team_username + "/puzzle/" + shortname;
+                } else {
+                    window.location.href = "/admin/puzzle/" + shortname;
+                }
+            });
+    }
+
+    el = goog.dom.getElement("teamselect");
+    if (el) {
+        admin2020.team_select = new A2020_Autocomplete(
+            el, team_list,
+            function(username) {
+                if (puzzle_id) {
+                    window.location.href = "/admin/team/" + username + "/puzzle/" + puzzle_id;
+                } else {
+                    window.location.href = "/admin/team/" + username;
+                }
             });
     }
 }

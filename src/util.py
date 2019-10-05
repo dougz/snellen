@@ -62,8 +62,8 @@ class TeamPageHandler(TeamHandler):
 
 class AdminPageHandler(tornado.web.RequestHandler):
   @classmethod
-  def set_puzzle_json_url(cls, url):
-    cls.puzzle_json_url = url
+  def set_attribute(cls, attr, value):
+    setattr(cls, attr, value)
 
   def prepare(self):
     self.set_header("Content-Type", "text/html; charset=utf-8")
@@ -75,7 +75,8 @@ class AdminPageHandler(tornado.web.RequestHandler):
   def get_template_namespace(self):
     d = {"user": self.user,
          "format_timestamp": format_timestamp,
-         "puzzle_json_url": self.puzzle_json_url}
+         "puzzle_json_url": self.puzzle_json_url,
+         "team_json_url": self.team_json_url}
 
     wid = wait_proxy.Server.new_waiter_id()
     serial = login.AdminUser.message_serial - 1

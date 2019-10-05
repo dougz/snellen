@@ -90,13 +90,13 @@ async def main_server(options):
     for username, d in teams.items():
       game.Team(username, d)
 
-
   save_state.open(os.path.join(options.event_dir, "state.log"))
   save_state.replay(advance_time=game.Submission.process_submit_queue)
 
   wait_proxy.Server.init_proxies(options.wait_proxies)
 
   admin.PuzzleJsonHandler.build()
+  admin.TeamJsonHandler.build()
 
   if not game.Global.STATE: game.Global()
 

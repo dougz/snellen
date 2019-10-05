@@ -3,6 +3,7 @@
 
 {% block head %}
 {% if puzzle.for_ops_head %}{% raw puzzle.for_ops_head %}{% end %}
+<script src="{{team_json_url}}"></script>
 <script>var puzzle_id = "{{puzzle.shortname}}";</script>
 {% end %}
 
@@ -73,6 +74,14 @@
       <a href="/admin/team/{{t.username}}/puzzle/{{puzzle.shortname}}">{{t.name}}</a> ({{d}})
       {% end %}
     </td>
+  <tr><th>go to team</th>
+    <td>
+      <div id="teamselect" class="ac-select">
+        <input class="ac-select-input" style="width:500px;"></input>
+        <div class="ac-select-dropdown"></div>
+      </div>
+    </td>
+  </tr>
 </table>
 
 <p><b>BTS hack:</b> <a href="/admin/openhints/{{puzzle.shortname}}">make hints available</a></p>

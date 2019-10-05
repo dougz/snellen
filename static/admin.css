@@ -383,6 +383,7 @@ p.note {
     width: 500px;
     box-sizing: border-box;
     padding: 4px 0;
+    z-index: 100;
 }
 
 .ac-selected {

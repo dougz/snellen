@@ -331,7 +331,26 @@ class PuzzleJsonHandler(tornado.web.RequestHandler):
     cls.body = "var puzzle_list = " + json.dumps(out) + ";\n"
     h = hashlib.md5(cls.body.encode("utf-8")).hexdigest()[:12]
     cls.etag = h
-    util.AdminPageHandler.set_puzzle_json_url("/admin/puzzle_json/" + h)
+    util.AdminPageHandler.set_attribute("puzzle_json_url", "/admin/puzzle_json/" + h)
+
+  @login.required("admin")
+  async def get(self):
+    self.set_header("Content-Type", "application/json")
+    self.set_header("Cache-Control", "private, max-age=3600")
+    self.set_header("ETag", self.etag)
+    self.write(self.body)
+
+class TeamJsonHandler(tornado.web.RequestHandler):
+  @classmethod
+  def build(cls):
+    out = []
+    for t in game.Team.all_teams():
+      out.append([t.username, t.name])
+    out.sort()
+    cls.body = "var team_list = " + json.dumps(out) + ";\n"
+    h = hashlib.md5(cls.body.encode("utf-8")).hexdigest()[:12]
+    cls.etag = h
+    util.AdminPageHandler.set_attribute("team_json_url", "/admin/team_json/" + h)
 
   @login.required("admin")
   async def get(self):
@@ -364,6 +383,7 @@ def GetHandlers():
     (r"/admin/bestowfastpass/([a-z0-9_]+)$", AdminBestowFastpassHandler),
     (r"/admin/become/([a-z0-9_]+)$", AdminBecomeTeamHandler),
     (r"/admin/puzzle_json/.*", PuzzleJsonHandler),
+    (r"/admin/team_json/.*", TeamJsonHandler),
     ]
   return handlers
 

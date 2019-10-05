@@ -11,6 +11,8 @@ var received_serial;
 
 /** @type{?Array<Array<string>>} */
 var puzzle_list;
+/** @type{?Array<Array<string>>} */
+var team_list;
 
 class Message {
     constructor() {
