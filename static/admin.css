@@ -401,8 +401,12 @@ p.note {
 
 .ac-row {
     display: block;
+    color: #222;
     padding: 4px 8px;
     cursor: pointer;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
 .ac-row:hover {
@@ -410,6 +414,7 @@ p.note {
 }
 
 .ac-match {
+    color: black;
     font-weight: bold;
 }
 
