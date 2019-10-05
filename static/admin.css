@@ -367,23 +367,32 @@ p.note {
 }
 
 .ac-select-input {
+    width: 200px;
+    font-family: 'Merriweather Sans', sans-serif;
+    padding: 8px;
     box-sizing: border-box;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    outline: none;
 }
+.ac-select-input:focus {
+    border: 1px solid #666;
+}
+
 
 .ac-select-dropdown {
     display: none;
     position: absolute;
     left: 0px;
-    top: 22px;
+    top: 32px;
     background: #f8f8f8;
     border: 1px solid #666;
-    border-top: none;
-    border-bottom-left-radius: 8px;
-    border-bottom-right-radius: 8px;
+    border-radius: 8px;
     width: 500px;
     box-sizing: border-box;
     padding: 4px 0;
     z-index: 100;
+    box-shadow: 2px 2px 4px #55555533;
 }
 
 .ac-selected {

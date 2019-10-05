@@ -44,7 +44,7 @@ def main():
     od["size"] = d.pop("size")
 
     # Password nonempty
-    assert d["password"]
+    assert d["password"], f"{username} missing password"
     od["pwhash"] = make_hash(d.pop("password"))
 
     if d:
