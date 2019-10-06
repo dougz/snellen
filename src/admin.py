@@ -46,7 +46,6 @@ class UpdateAdminRole(tornado.web.RequestHandler):
     user.update_role(role, action == "set")
     self.set_status(http.client.NO_CONTENT.value)
 
-
 class ListTeamsPage(util.AdminPageHandler):
   @login.required("admin")
   def get(self):
@@ -188,7 +187,7 @@ class AdminPuzzlePage(util.AdminPageHandler):
     self.render("admin_puzzle_page.html", puzzle=puzzle, solve_list=solve_list)
 
 
-class CreateUser(tornado.web.RequestHandler):
+class CreateUserHandler(tornado.web.RequestHandler):
   @login.required(login.AdminRoles.CREATE_USERS)
   async def post(self):
     username = self.get_argument("username")
@@ -200,13 +199,31 @@ class CreateUser(tornado.web.RequestHandler):
     login.AdminUser.create_new_user(username, pwhash, fullname)
     self.redirect("/admin/users")
 
+class ChangePasswordHandler(tornado.web.RequestHandler):
+  @login.required("admin")
+  async def post(self):
+    username = self.get_argument("username", None)
+    password = self.get_argument("password", None)
+    new_password = self.get_argument("newpassword")
+    confirm = self.get_argument("confirm")
 
-class StopServerPage(util.AdminPageHandler):
-  @login.required(login.AdminRoles.CONTROL_EVENT)
-  async def get(self):
-    self.write("Stopping server\u2026")
-    await wait_proxy.Server.exit()
-    await game.Global.STATE.stop_server()
+    if login.AdminRoles.CREATE_USERS in self.user.roles:
+      change_user = login.AdminUser.get_by_username(username)
+      if not change_user:
+        raise tornado.web.HTTPError(http.client.BAD_REQUEST, "No such user")
+    else:
+      change_user = self.user
+      if not password:
+        raise tornado.web.HTTPError(http.client.BAD_REQUEST, "Current password not correct")
+      password = password
+      if not await change_user.check_password(password):
+        raise tornado.web.HTTPError(http.client.BAD_REQUEST, "Current password not correct")
+
+    if new_password != confirm:
+      raise tornado.web.HTTPError(http.client.BAD_REQUEST, "New passwords don't match")
+
+    change_user.update_pwhash(await change_user.hash_password(new_password))
+    self.redirect("/admin/users")
 
 
 class ChangeStartPage(util.AdminPageHandler):
@@ -364,11 +381,11 @@ def GetHandlers():
   handlers = [
     (r"/admin$", AdminHomePage),
     (r"/admin/users$", AdminUsersPage),
-    (r"/(set|clear)_admin_role/([^/]+)/([^/]+)$", UpdateAdminRole),
-    (r"/create_user$", CreateUser),
-    (r"/change_start$", ChangeStartPage),
-    (r"/confirm_change_start$", ConfirmChangeStartPage),
-    (r"/stop_server$", StopServerPage),
+    (r"/admin/(set|clear)_role/([^/]+)/([^/]+)$", UpdateAdminRole),
+    (r"/admin/create_user$", CreateUserHandler),
+    (r"/admin/change_password$", ChangePasswordHandler),
+    (r"/admin/change_start$", ChangeStartPage),
+    (r"/admin/confirm_change_start$", ConfirmChangeStartPage),
     (r"/admin/teams$", ListTeamsPage),
     (r"/admin/team/([a-z0-9_]+)$", AdminTeamPage),
     (r"/admin/team/([a-z0-9_]+)/puzzle/([a-z0-9_]+)$", AdminTeamPuzzlePage),

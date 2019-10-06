@@ -76,6 +76,10 @@ class AdminUser(LoginUser):
     else:
       self.roles.discard(role)
 
+  @save_state
+  def update_pwhash(self, now, pwhash):
+    self.password_hash = pwhash.encode("ascii")
+
   @classmethod
   def all_users(cls):
     return cls.BY_USERNAME.values()

@@ -286,115 +286,28 @@ class A2020_Counter {
     }
 }
 
-function alter_role(e) {
-    var n = e.target.id.search("::");
-    var user = e.target.id.substring(0, n);
-    var role = e.target.id.substring(n+2);
-
-    goog.net.XhrIo.send("/" + (e.target.checked ? "set" : "clear") + "_admin_role/" + user + "/" + role,
-                        function(e) {
-                            var xhr = e.target;
-                            if (xhr.getStatus() != 204) {
-                                alert("Updating " + user + " " + role + " failed: " + xhr.getResponseText());
-                            }
-                        });
-}
-
-function activate_role_checkboxes() {
-    var cbs = document.querySelectorAll("table#user-roles input[type='checkbox']");
-    for (var i = 0; i < cbs.length; ++i) {
-        var cb = cbs[i];
-        goog.events.listen(cb, goog.events.EventType.CHANGE, alter_role);
-    }
-}
-
-var admin2020 = {
-    waiter: null,
-    counter: null,
-    hinthistory: null,
-    hintqueue: null,
-    time_formatter: null,
-    serializer: null,
-    puzzle_select: null,
-    team_select: null,
-}
-
-window.onload = function() {
-    admin2020.serializer = new goog.json.Serializer();
-    admin2020.waiter = new A2020_Waiter(new A2020_Dispatcher());
-    admin2020.waiter.start();
-
-    admin2020.time_formatter = new A2020_TimeFormatter();
-
-    admin2020.counter = new A2020_Counter();
-
-    if (goog.dom.getElement("hinthistory")) {
-        admin2020.hinthistory = new A2020_HintHistory();
-    }
-    if (goog.dom.getElement("hintqueue")) {
-        admin2020.hintqueue = new A2020_HintQueue();
+class A2020_UserRoles {
+    constructor() {
+        var cbs = document.querySelectorAll("table#user-roles input[type='checkbox']");
+        for (var i = 0; i < cbs.length; ++i) {
+            var cb = cbs[i];
+            goog.events.listen(cb, goog.events.EventType.CHANGE,
+                               goog.bind(this.alter_role, this));
+        }
     }
 
-    var el;
+    alter_role(e) {
+        var n = e.target.id.search("::");
+        var user = e.target.id.substring(0, n);
+        var role = e.target.id.substring(n+2);
 
-    el = goog.dom.getElement("hinttimechange");
-    if (el) {
-        goog.events.listen(el, goog.events.EventType.CLICK, function() {
-            goog.dom.getElement("hinttimechange").style.display = "none";
-            goog.dom.getElement("hinttimechangeentry").style.display = "inline";
-            goog.events.listen(goog.dom.getElement("newhinttimesubmit"), goog.events.EventType.CLICK, function() {
-                var text = goog.dom.getElement("newhinttime").value;
-                console.log("submitting [" + text + "]");
-                goog.net.XhrIo.send("/admin/hinttimechange", function(e) {
-                    var code = e.target.getStatus();
-                    if (code == 204) {
-                        location.reload();
-                    } else {
-                        alert(e.target.getResponseText());
-                    }
-                }, "POST", admin2020.serializer.serialize({"puzzle_id": puzzle_id, "hint_time": text}));
-            });
-        });
-    }
-
-    el = goog.dom.getElement("bestowfastpass");
-    if (el && team_username) {
-        goog.events.listen(el, goog.events.EventType.CLICK, function() {
-            goog.net.XhrIo.send("/admin/bestowfastpass/" + team_username, function(e) {
-                var code = e.target.getStatus();
-                if (code == 204) {
-                    location.reload();
-                } else {
-                    alert(e.target.getResponseText());
-                }
-            });
-        });
-    }
-
-    el = goog.dom.getElement("puzzleselect");
-    if (el) {
-        admin2020.puzzle_select = new A2020_Autocomplete(
-            el, puzzle_list,
-            function(shortname) {
-                if (team_username) {
-                    window.location.href = "/admin/team/" + team_username + "/puzzle/" + shortname;
-                } else {
-                    window.location.href = "/admin/puzzle/" + shortname;
-                }
-            });
-    }
-
-    el = goog.dom.getElement("teamselect");
-    if (el) {
-        admin2020.team_select = new A2020_Autocomplete(
-            el, team_list,
-            function(username) {
-                if (puzzle_id) {
-                    window.location.href = "/admin/team/" + username + "/puzzle/" + puzzle_id;
-                } else {
-                    window.location.href = "/admin/team/" + username;
-                }
-            });
+        goog.net.XhrIo.send("/admin/" + (e.target.checked ? "set" : "clear") + "_role/" + user + "/" + role,
+                            function(e) {
+                                var xhr = e.target;
+                                if (xhr.getStatus() != 204) {
+                                    alert("Updating " + user + " " + role + " failed: " + xhr.getResponseText());
+                                }
+                            });
     }
 }
 
@@ -505,4 +418,98 @@ class A2020_Autocomplete {
 
 }
 
+var admin2020 = {
+    waiter: null,
+    counter: null,
+    hinthistory: null,
+    hintqueue: null,
+    time_formatter: null,
+    serializer: null,
+    puzzle_select: null,
+    team_select: null,
+    user_roles: null,
+}
+
+window.onload = function() {
+    admin2020.serializer = new goog.json.Serializer();
+    admin2020.waiter = new A2020_Waiter(new A2020_Dispatcher());
+    admin2020.waiter.start();
+
+    admin2020.time_formatter = new A2020_TimeFormatter();
+
+    admin2020.counter = new A2020_Counter();
+
+    if (goog.dom.getElement("hinthistory")) {
+        admin2020.hinthistory = new A2020_HintHistory();
+    }
+    if (goog.dom.getElement("hintqueue")) {
+        admin2020.hintqueue = new A2020_HintQueue();
+    }
+
+    var el;
+
+    el = goog.dom.getElement("hinttimechange");
+    if (el) {
+        goog.events.listen(el, goog.events.EventType.CLICK, function() {
+            goog.dom.getElement("hinttimechange").style.display = "none";
+            goog.dom.getElement("hinttimechangeentry").style.display = "inline";
+            goog.events.listen(goog.dom.getElement("newhinttimesubmit"), goog.events.EventType.CLICK, function() {
+                var text = goog.dom.getElement("newhinttime").value;
+                console.log("submitting [" + text + "]");
+                goog.net.XhrIo.send("/admin/hinttimechange", function(e) {
+                    var code = e.target.getStatus();
+                    if (code == 204) {
+                        location.reload();
+                    } else {
+                        alert(e.target.getResponseText());
+                    }
+                }, "POST", admin2020.serializer.serialize({"puzzle_id": puzzle_id, "hint_time": text}));
+            });
+        });
+    }
+
+    el = goog.dom.getElement("bestowfastpass");
+    if (el && team_username) {
+        goog.events.listen(el, goog.events.EventType.CLICK, function() {
+            goog.net.XhrIo.send("/admin/bestowfastpass/" + team_username, function(e) {
+                var code = e.target.getStatus();
+                if (code == 204) {
+                    location.reload();
+                } else {
+                    alert(e.target.getResponseText());
+                }
+            });
+        });
+    }
+
+    el = goog.dom.getElement("puzzleselect");
+    if (el) {
+        admin2020.puzzle_select = new A2020_Autocomplete(
+            el, puzzle_list,
+            function(shortname) {
+                if (team_username) {
+                    window.location.href = "/admin/team/" + team_username + "/puzzle/" + shortname;
+                } else {
+                    window.location.href = "/admin/puzzle/" + shortname;
+                }
+            });
+    }
+
+    el = goog.dom.getElement("teamselect");
+    if (el) {
+        admin2020.team_select = new A2020_Autocomplete(
+            el, team_list,
+            function(username) {
+                if (puzzle_id) {
+                    window.location.href = "/admin/team/" + username + "/puzzle/" + puzzle_id;
+                } else {
+                    window.location.href = "/admin/team/" + username;
+                }
+            });
+    }
+
+    if (goog.dom.getElement("user-roles")) {
+        admin2020.user_roles = new A2020_UserRoles()
+    }
+}
 

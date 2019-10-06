@@ -49,6 +49,7 @@ td.h1 {
 .lightergray { background-color: #b1a296; }
 
 .color-home { background-color: #ff6363; }
+.color-users { background-color: #ff6363; }
 .color-team { background-color: #341677; }
 .color-puzzle { background-color: #000272; }
 .color-detail { background-color: #a32f80; }
@@ -173,7 +174,38 @@ div.box {
     border: 1px solid black;
     padding: 16px;
     margin: 20px;
+    width: 300px;
+    border-radius: 8px;
 }
+
+div.box form {
+    display: flex;
+    flex-direction: column;
+}
+
+
+
+div.box input {
+     font-family: 'Merriweather Sans', sans-serif;
+     margin: 8px 8px;
+     border: none;
+     border-radius: 15px;
+     padding: 8px 16px;
+     box-sizing: border-box;
+}
+
+div.box button {
+    font-family: 'Merriweather Sans', sans-serif;
+    color: white;
+    font-size: 100%;
+    padding: 8px 16px;
+    margin: 8px 8px;
+    box-sizing: border-box;
+    border: 1px solid #395483;
+    border-radius: 15px;
+    background: linear-gradient(to bottom, #4c70af, #436299);
+}
+
 
 div.box h2 {
     font-size: 1em;
