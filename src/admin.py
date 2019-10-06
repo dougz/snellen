@@ -377,10 +377,25 @@ class TeamJsonHandler(tornado.web.RequestHandler):
     self.write(self.body)
 
 
+class BigBoardPage(util.AdminPageHandler):
+  @login.required("admin")
+  def get(self):
+    self.render("admin_bigboard.html")
+
+class BigBoardDataHandler(tornado.web.RequestHandler):
+  @login.required("admin")
+  def get(self):
+    bbdata = game.Global.STATE.bigboard_data()
+    self.set_header("Content-Type", "application/json")
+    self.write(json.dumps(bbdata))
+
+
+
 def GetHandlers():
   handlers = [
     (r"/admin$", AdminHomePage),
 
+    (r"/admin/bigboard$", BigBoardPage),
     (r"/admin/change_start$", ChangeStartPage),
     (r"/admin/confirm_change_start$", ConfirmChangeStartPage),
     (r"/admin/hintqueue$", HintQueuePage),
@@ -395,6 +410,7 @@ def GetHandlers():
     (r"/admin/(un)?claim/([a-z0-9_]+)/([a-z0-9_]+)$", HintClaimHandler),
     (r"/admin/become/([a-z0-9_]+)$", BecomeTeamHandler),
     (r"/admin/bestowfastpass/([a-z0-9_]+)$", BestowFastpassHandler),
+    (r"/admin/bigboard_data$", BigBoardDataHandler),
     (r"/admin/change_password$", ChangePasswordHandler),
     (r"/admin/create_user$", CreateUserHandler),
     (r"/admin/hinthistory/([a-z0-9_]+)/([a-z0-9_]+)$", HintHistoryHandler),

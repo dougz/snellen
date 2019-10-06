@@ -375,6 +375,10 @@ p.note {
     background: linear-gradient(to bottom, #4c70af, #436299);
 }
 
+.tabular {
+    font-family: 'Open Sans', 'Merriweather Sans', sans-serif;
+}
+
 .counter {
     font-family: 'Open Sans', 'Merriweather Sans', sans-serif;
 }

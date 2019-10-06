@@ -4,6 +4,7 @@
     <title>{% block title %}{% end %}</title>
     <link rel=stylesheet href="{{css}}">
     {% if script %}{% raw script %}{% end %}
+    {% if json_data %}{% raw json_data %}{% end %}
     {% block head %}{% end %}
   </head>
   <body>
@@ -18,8 +19,10 @@
 	Hunt launches in <span class="counter" data-until="{{expected_launch}}">&mdash;</span>.
 	{% end %}
       </span>
+      {% block rightnav %}
       <span class=username>{{user.fullname}}</span>
       <a href="/logout">logout</a>
+      {% end %}
     </div>
 
     <div id="content">

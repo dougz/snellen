@@ -71,7 +71,6 @@ class A2020_Dispatcher {
 
     /** @param{Message} msg */
     dispatch(msg) {
-        console.log(msg);
         this.methods[msg.method](msg);
     }
 
@@ -88,6 +87,9 @@ class A2020_Dispatcher {
     hint_queue(msg) {
         if (admin2020.hintqueue) {
             admin2020.hintqueue.update_queue();
+        }
+        if (admin2020.bigboard) {
+            admin2020.bigboard.refresh();
         }
     }
 }
@@ -418,6 +420,30 @@ class A2020_Autocomplete {
 
 }
 
+class A2020_BigBoard {
+    constructor() {
+        /** @type{Element} */
+        this.hintqueue = goog.dom.getElement("bbhintqueue");
+        this.refresh();
+    }
+
+    refresh() {
+        goog.net.XhrIo.send("/admin/bigboard_data", goog.bind(function(e) {
+            var code = e.target.getStatus();
+            if (code != 200) {
+                alert(e.target.getResponseText());
+            }
+            this.build(/** @type{BigBoardData} */ (e.target.getResponseJson()));
+        }, this), "GET");
+    }
+
+    build(data) {
+        if (!data) return;
+
+        this.hintqueue.innerHTML = "" + data.hint_queue_size + " (" + (data.hint_queue_size - data.hint_queue_claimed) + ")";
+    }
+}
+
 var admin2020 = {
     waiter: null,
     counter: null,
@@ -428,6 +454,7 @@ var admin2020 = {
     puzzle_select: null,
     team_select: null,
     user_roles: null,
+    bigboard: null,
 }
 
 window.onload = function() {
@@ -510,6 +537,10 @@ window.onload = function() {
 
     if (goog.dom.getElement("user-roles")) {
         admin2020.user_roles = new A2020_UserRoles()
+    }
+
+    if (goog.dom.getElement("bbhintqueue")) {
+        admin2020.bigboard = new A2020_BigBoard();
     }
 }
 

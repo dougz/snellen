@@ -62,6 +62,7 @@ class HintQueue:
     self.states = set()
 
     self.cached_json = None
+    self.cached_bbdata = None
 
   def build(self):
     for t in Team.all_teams():
@@ -73,19 +74,30 @@ class HintQueue:
   def add(self, puzzle_state):
     self.states.add(puzzle_state)
     self.cached_json = None
+    self.cached_bbdata = None
     login.AdminUser.send_messages([{"method": "hint_queue"}], flush=True)
 
   def remove(self, puzzle_state):
     self.states.discard(puzzle_state)
     self.cached_json = None
+    self.cached_bbdata = None
     login.AdminUser.send_messages([{"method": "hint_queue"}], flush=True)
 
   def change(self):
     self.cached_json = None
+    self.cached_bbdata = None
     login.AdminUser.send_messages([{"method": "hint_queue"}], flush=True)
+
+  def get_bb_data(self):
+    if self.cached_bbdata is None:
+      self.to_json()
+    return self.cached_bbdata
 
   def to_json(self):
     if self.cached_json is not None: return self.cached_json
+
+    total = 0
+    claimed = 0
 
     q = []
     for ps in self.states:
@@ -103,9 +115,12 @@ class HintQueue:
                 "claimant": ps.claim.fullname if ps.claim else None,
                 "target": f"/admin/team/{ps.team.username}/puzzle/{ps.puzzle.shortname}",
                 "claim": f"/admin/claim/{ps.team.username}/{ps.puzzle.shortname}"})
+      total += 1
+      if ps.claim: claimed += 1
     q.sort(key=lambda d: (d["when"], d["puzzle"]))
 
     self.cached_json = json.dumps({"queue": q})
+    self.cached_bbdata = {"hint_queue_size": total, "hint_queue_claimed": claimed}
 
     return self.cached_json
 
@@ -1102,6 +1117,10 @@ class Global:
           if team.achieve_now(Achievement.flawless):
             asyncio.create_task(team.flush_messages())
       await asyncio.sleep(15)
+
+  def bigboard_data(self):
+    out = self.hint_queue.get_bb_data()
+    return out
 
 
 class Achievement:

@@ -98,6 +98,7 @@ class AdminPageHandler(tornado.web.RequestHandler):
     d["css"] = self.static_content["admin.css"]
     d["home"] = self.static_content["home.svg"]
     d["script"] += f"<script>var waiter_id = {wid}; var received_serial = {serial};</script>\n"
+    d["json_data"] = None
     return d
 
 def format_duration(sec):
