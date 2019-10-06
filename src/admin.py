@@ -35,7 +35,7 @@ class AdminUsersPage(util.AdminPageHandler):
                 users=login.AdminUser.all_users(),
                 user=self.user)
 
-class UpdateAdminRole(tornado.web.RequestHandler):
+class UpdateAdminRoleHandler(tornado.web.RequestHandler):
   @login.required(login.AdminRoles.CREATE_USERS)
   def get(self, action, username, role):
     if role not in login.AdminRoles.ROLES:
@@ -53,7 +53,7 @@ class ListTeamsPage(util.AdminPageHandler):
                 teams=game.Team.BY_USERNAME)
 
 
-class AdminTeamPage(util.AdminPageHandler):
+class TeamPage(util.AdminPageHandler):
   @login.required("admin")
   def get(self, username):
     team = game.Team.get_by_username(username)
@@ -69,7 +69,7 @@ class AdminTeamPage(util.AdminPageHandler):
 
     self.render("admin_team_page.html", team=team, open_list=open_list, log=team.admin_log)
 
-class AdminTeamPuzzlePage(util.AdminPageHandler):
+class TeamPuzzlePage(util.AdminPageHandler):
   @login.required("admin")
   def get(self, username, shortname):
     team = game.Team.get_by_username(username)
@@ -90,7 +90,7 @@ class AdminTeamPuzzlePage(util.AdminPageHandler):
                 team=team, puzzle=puzzle, state=state, solve_duration=dur)
 
 
-class AdminHintHistoryHandler(tornado.web.RequestHandler):
+class HintHistoryHandler(tornado.web.RequestHandler):
   @login.required("admin")
   def get(self, team_username, shortname):
     team = game.Team.get_by_username(team_username)
@@ -107,7 +107,7 @@ class AdminHintHistoryHandler(tornado.web.RequestHandler):
     self.write(json.dumps(d))
 
 
-class AdminBestowFastpassHandler(tornado.web.RequestHandler):
+class BestowFastpassHandler(tornado.web.RequestHandler):
   @login.required("admin")
   def get(self, team_username):
     team = game.Team.get_by_username(team_username)
@@ -117,7 +117,7 @@ class AdminBestowFastpassHandler(tornado.web.RequestHandler):
     self.set_status(http.client.NO_CONTENT.value)
 
 
-class AdminBecomeTeamHandler(util.AdminPageHandler):
+class BecomeTeamHandler(util.AdminPageHandler):
   @login.required("admin", clear_become=False)
   def get(self, team_username):
     team = game.Team.get_by_username(team_username)
@@ -172,7 +172,7 @@ class ListPuzzlesPage(util.AdminPageHandler):
                 lands=game.Land.ordered_lands)
 
 
-class AdminPuzzlePage(util.AdminPageHandler):
+class PuzzlePage(util.AdminPageHandler):
   @login.required("admin")
   def get(self, shortname):
     puzzle = game.Puzzle.get_by_shortname(shortname)
@@ -380,25 +380,28 @@ class TeamJsonHandler(tornado.web.RequestHandler):
 def GetHandlers():
   handlers = [
     (r"/admin$", AdminHomePage),
-    (r"/admin/users$", AdminUsersPage),
-    (r"/admin/(set|clear)_role/([^/]+)/([^/]+)$", UpdateAdminRole),
-    (r"/admin/create_user$", CreateUserHandler),
-    (r"/admin/change_password$", ChangePasswordHandler),
+
     (r"/admin/change_start$", ChangeStartPage),
     (r"/admin/confirm_change_start$", ConfirmChangeStartPage),
-    (r"/admin/teams$", ListTeamsPage),
-    (r"/admin/team/([a-z0-9_]+)$", AdminTeamPage),
-    (r"/admin/team/([a-z0-9_]+)/puzzle/([a-z0-9_]+)$", AdminTeamPuzzlePage),
+    (r"/admin/hintqueue$", HintQueuePage),
+    (r"/admin/puzzle/([a-z0-9_]+)$", PuzzlePage),
     (r"/admin/puzzles$", ListPuzzlesPage),
-    (r"/admin/puzzle/([a-z0-9_]+)$", AdminPuzzlePage),
-    (r"/admin/hintqueue", HintQueuePage),
-    (r"/admin/hintqueuedata", HintQueueHandler),
-    (r"/admin/hintreply", HintReplyHandler),
-    (r"/admin/hinthistory/([a-z0-9_]+)/([a-z0-9_]+)$", AdminHintHistoryHandler),
+    (r"/admin/team/([a-z0-9_]+)$", TeamPage),
+    (r"/admin/team/([a-z0-9_]+)/puzzle/([a-z0-9_]+)$", TeamPuzzlePage),
+    (r"/admin/teams$", ListTeamsPage),
+    (r"/admin/users$", AdminUsersPage),
+
+    (r"/admin/(set|clear)_role/([^/]+)/([^/]+)$", UpdateAdminRoleHandler),
     (r"/admin/(un)?claim/([a-z0-9_]+)/([a-z0-9_]+)$", HintClaimHandler),
-    (r"/admin/hinttimechange", HintTimeChangeHandler),
-    (r"/admin/bestowfastpass/([a-z0-9_]+)$", AdminBestowFastpassHandler),
-    (r"/admin/become/([a-z0-9_]+)$", AdminBecomeTeamHandler),
+    (r"/admin/become/([a-z0-9_]+)$", BecomeTeamHandler),
+    (r"/admin/bestowfastpass/([a-z0-9_]+)$", BestowFastpassHandler),
+    (r"/admin/change_password$", ChangePasswordHandler),
+    (r"/admin/create_user$", CreateUserHandler),
+    (r"/admin/hinthistory/([a-z0-9_]+)/([a-z0-9_]+)$", HintHistoryHandler),
+    (r"/admin/hintqueuedata$", HintQueueHandler),
+    (r"/admin/hintreply$", HintReplyHandler),
+    (r"/admin/hinttimechange$", HintTimeChangeHandler),
+
     (r"/admin/puzzle_json/.*", PuzzleJsonHandler),
     (r"/admin/team_json/.*", TeamJsonHandler),
     ]

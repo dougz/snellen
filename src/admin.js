@@ -205,7 +205,7 @@ class A2020_HintQueue {
             var msg = response.queue[i];
             var td = goog.dom.createDom("TD", "hqtime counter", admin2020.time_formatter.duration(now-msg.when));
             td.setAttribute("data-since", msg.when);
-            var claimlink = goog.dom.createDom("A", {href: msg.claim}, "Claim");
+            var claimlink = goog.dom.createDom("A", {href: msg.claim, target: "_blank"}, "Claim");
             if (msg.claimant) {
                 claimlink.style.visibility = "hidden";
             }
