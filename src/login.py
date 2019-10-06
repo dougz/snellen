@@ -48,7 +48,8 @@ class AdminUser(LoginUser):
   message_serial = 1
   pending_messages = []
 
-  def __init__(self, username, password_hash, fullname, roles):
+  @save_state
+  def __init__(self, now, username, password_hash, fullname, roles):
     self.username = username
     self.password_hash = password_hash.encode("ascii")
     self.fullname = fullname

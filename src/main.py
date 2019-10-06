@@ -80,11 +80,6 @@ async def main_server(options):
                          Global=game.Global,
                          Puzzle=game.Puzzle)
 
-  with open(os.path.join(options.event_dir, "admins.json")) as f:
-    admins = json.load(f)
-    for username, d in admins.items():
-      login.AdminUser(username, d["pwhash"], d["name"], d.get("roles", ()))
-
   with open(os.path.join(options.event_dir, "teams.json")) as f:
     teams = json.load(f)
     for username, d in teams.items():
@@ -92,6 +87,12 @@ async def main_server(options):
 
   save_state.open(os.path.join(options.event_dir, "state.log"))
   save_state.replay(advance_time=game.Submission.process_submit_queue)
+
+  if not login.AdminUser.BY_USERNAME:
+    with open(os.path.join(options.event_dir, "admins.json")) as f:
+      admins = json.load(f)
+      for username, d in admins.items():
+        login.AdminUser(username, d["pwhash"], d["name"], d.get("roles", ()))
 
   wait_proxy.Server.init_proxies(options.wait_proxies)
 

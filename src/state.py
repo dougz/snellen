@@ -35,15 +35,15 @@ class SaverClass:
       def wrapped_init(self, *args, **kwargs):
         now = time.time()
         cname = self.__class__.__name__
-        new_id = cname + ":" + str(cls.next_id)
-        record = (new_id, fn.__name__, now, args, kwargs)
+        fn(self, now, *args, **kwargs)
+        if not hasattr(self, "_saver_id"):
+          self._saver_id = cname + ":" + str(cls.next_id)
+          cls.next_id += 1
+          cls.instance_index[self._saver_id] = self
+        record = (self._saver_id, fn.__name__, now, args, kwargs)
         json.dump(record, cls.log)
         cls.log.write("\n")
         cls.log.flush()
-        fn(self, now, *args, **kwargs)
-        self._saver_id = new_id
-        cls.next_id += 1
-        cls.instance_index[self._saver_id] = self
 
       return wrapped_init
 
