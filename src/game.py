@@ -120,7 +120,7 @@ class HintQueue:
     q.sort(key=lambda d: (d["when"], d["puzzle"]))
 
     self.cached_json = json.dumps({"queue": q})
-    self.cached_bbdata = {"hint_queue_size": total, "hint_queue_claimed": claimed}
+    self.cached_bbdata = {"size": total, "claimed": claimed}
 
     return self.cached_json
 
@@ -312,6 +312,7 @@ class Team(login.LoginUser):
     self.activity_log = Log()    # visible to team
     self.admin_log = Log()       # visible only to GC
     self.score = 0
+    self.last_score_change = 0
 
     self.message_mu = asyncio.Lock()
     self.message_serial = 1
@@ -325,6 +326,8 @@ class Team(login.LoginUser):
 
     self.fastpasses_available = []
     self.fastpasses_used = {}
+
+    self.cached_bb_data = None
 
   def __repr__(self):
     return f"<Team {self.username}>"
@@ -538,6 +541,7 @@ class Team(login.LoginUser):
     if not save_state.REPLAYING:
       self.send_messages([{"method": "receive_fastpass", "fastpass": self.get_fastpass_data()}])
       asyncio.create_task(self.flush_messages())
+    self.invalidate()
 
   @save_state
   def apply_fastpass(self, now, land_name):
@@ -558,6 +562,7 @@ class Team(login.LoginUser):
         msg["title"] = opened[0].title
       self.send_messages([msg])
       asyncio.create_task(self.flush_messages())
+    self.invalidate()
     return True
 
   def open_puzzle(self, puzzle, now):
@@ -581,6 +586,7 @@ class Team(login.LoginUser):
         if sub.state == sub.PENDING:
           sub.state = sub.MOOT
       self.score += puzzle.points
+      self.last_score_change = now
       self.open_puzzles.remove(state)
       self.send_messages(
         [{"method": "solve",
@@ -623,12 +629,27 @@ class Team(login.LoginUser):
         self.achieve(Achievement.hot_streak, now)
 
       self.compute_puzzle_beam(now)
+      self.invalidate()
 
   def get_puzzle_state(self, puzzle):
     if isinstance(puzzle, str):
       puzzle = Puzzle.get_by_shortname(puzzle)
       if not puzzle: return None
     return self.puzzle_state[puzzle]
+
+  def invalidate(self):
+    if self.cached_bb_data:
+      self.cached_bb_data = None
+      login.AdminUser.send_messages([{"method": "update_team", "team_username": self.username}], flush=True)
+
+  def bb_data(self):
+    if not self.cached_bb_data:
+      self.cached_bb_data = {
+        "score": self.score,
+        "score_change": self.last_score_change,
+        "name": self.name,
+        }
+    return self.cached_bb_data
 
   @save_state
   def open_hints(self, now, puzzle):
@@ -1118,9 +1139,8 @@ class Global:
             asyncio.create_task(team.flush_messages())
       await asyncio.sleep(15)
 
-  def bigboard_data(self):
-    out = self.hint_queue.get_bb_data()
-    return out
+  def bb_hint_queue_data(self):
+    return self.hint_queue.get_bb_data()
 
 
 class Achievement:

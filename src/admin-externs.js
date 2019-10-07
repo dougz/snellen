@@ -69,12 +69,13 @@ class HintQueueItem {
     }
 }
 
-class BigBoardData {
+class BBHintQueue {
     constructor() {
         /** @type{?number} */
-        this.hint_queue_size;
+        this.size;
         /** @type{?number} */
-        this.hint_queue_claimed;
+        this.claimed;
     }
 }
+
 

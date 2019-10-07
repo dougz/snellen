@@ -382,12 +382,29 @@ class BigBoardPage(util.AdminPageHandler):
   def get(self):
     self.render("admin_bigboard.html")
 
-class BigBoardDataHandler(tornado.web.RequestHandler):
+class BigBoardHintQueueDataHandler(tornado.web.RequestHandler):
   @login.required("admin")
   def get(self):
-    bbdata = game.Global.STATE.bigboard_data()
+    data = game.Global.STATE.bb_hint_queue_data()
     self.set_header("Content-Type", "application/json")
-    self.write(json.dumps(bbdata))
+    self.write(json.dumps(data))
+
+class BigBoardTeamDataHandler(tornado.web.RequestHandler):
+  @login.required("admin")
+  def get(self, username):
+    if username:
+      username = username.lstrip("/")
+      team = game.Team.get_by_username(username)
+      if not team:
+        raise tornado.web.HTTPError(http.client.NOT_FOUND)
+      data = team.bb_data()
+    else:
+      data = {}
+      for t in game.Team.all_teams():
+        data[t.username] = t.bb_data()
+    self.set_header("Content-Type", "application/json")
+    self.write(json.dumps(data))
+
 
 
 
@@ -410,7 +427,8 @@ def GetHandlers():
     (r"/admin/(un)?claim/([a-z0-9_]+)/([a-z0-9_]+)$", HintClaimHandler),
     (r"/admin/become/([a-z0-9_]+)$", BecomeTeamHandler),
     (r"/admin/bestowfastpass/([a-z0-9_]+)$", BestowFastpassHandler),
-    (r"/admin/bigboard_data$", BigBoardDataHandler),
+    (r"/admin/bb/hintqueue$", BigBoardHintQueueDataHandler),
+    (r"/admin/bb/team(/[a-z0-9_]+)?$", BigBoardTeamDataHandler),
     (r"/admin/change_password$", ChangePasswordHandler),
     (r"/admin/create_user$", CreateUserHandler),
     (r"/admin/hinthistory/([a-z0-9_]+)/([a-z0-9_]+)$", HintHistoryHandler),

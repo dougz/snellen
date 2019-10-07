@@ -66,6 +66,7 @@ class A2020_Dispatcher {
         this.methods = {
             "hint_history": this.hint_history,
             "hint_queue": this.hint_queue,
+            "update_team": this.update_team,
         }
     }
 
@@ -89,10 +90,18 @@ class A2020_Dispatcher {
             admin2020.hintqueue.update_queue();
         }
         if (admin2020.bigboard) {
-            admin2020.bigboard.refresh();
+            admin2020.bigboard.refresh_hintqueue();
+        }
+    }
+
+    /** @param{Message} msg */
+    update_team(msg) {
+        if (admin2020.bigboard) {
+            admin2020.bigboard.refresh_team(msg.team_username);
         }
     }
 }
+
 
 class A2020_HintHistory {
     constructor() {
@@ -424,23 +433,108 @@ class A2020_BigBoard {
     constructor() {
         /** @type{Element} */
         this.hintqueue = goog.dom.getElement("bbhintqueue");
-        this.refresh();
-    }
+        this.refresh_hintqueue();
 
-    refresh() {
-        goog.net.XhrIo.send("/admin/bigboard_data", goog.bind(function(e) {
+        this.team_data = null;
+        this.team_els = [];
+
+        /** @type{Element} */
+        this.teamdiv = goog.dom.getElement("bbteams");
+
+        goog.net.XhrIo.send("/admin/bb/team", goog.bind(function(e) {
             var code = e.target.getStatus();
             if (code != 200) {
                 alert(e.target.getResponseText());
             }
-            this.build(/** @type{BigBoardData} */ (e.target.getResponseJson()));
+            this.update_all_teams(e.target.getResponseJson());
         }, this), "GET");
     }
 
-    build(data) {
-        if (!data) return;
+    update_all_teams(data) {
+        this.team_data = data;
 
-        this.hintqueue.innerHTML = "" + data.hint_queue_size + " (" + (data.hint_queue_size - data.hint_queue_claimed) + ")";
+        for (var i = 0; i < team_list.length; ++i) {
+            var username = team_list[i][0];
+            var d = this.team_data[username];
+
+            var score = goog.dom.createDom("DIV", "bb-score", "" + d.score);
+            var name = goog.dom.createDom("DIV", "bb-name", team_list[i][1]);
+
+            var el = goog.dom.createDom("DIV", "bb-row", score, name);
+            el.setAttribute("data-username", username);
+
+            this.team_data[username]["el"] = el;
+            this.team_els.push(el);
+        }
+
+        this.reorder_teams();
+    }
+
+    refresh_team(username) {
+        // Can't refresh until we have the initial data.
+        if (this.team_data === null) return;
+
+        goog.net.XhrIo.send("/admin/bb/team/" + username, goog.bind(function(e) {
+            var code = e.target.getStatus();
+            if (code != 200) {
+                alert(e.target.getResponseText());
+            }
+            this.update_one_team(username, e.target.getResponseJson());
+        }, this), "GET");
+    }
+
+    update_one_team(username, data) {
+        var el = this.team_data[username]["el"];
+        this.team_data[username] = data;
+        this.team_data[username]["el"] = el;
+
+        var score = el.firstChild;
+        score.innerHTML = "" + data.score;
+
+        this.reorder_teams();
+    }
+
+    reorder_teams() {
+        this.team_els.sort(goog.bind(function(a_el, b_el) {
+            var a = this.team_data[a_el.getAttribute("data-username")];
+            var b = this.team_data[b_el.getAttribute("data-username")];
+
+            // Decreasing order by score...
+            var d = a.score - b.score;
+            if (d != 0) return -d;
+
+            // ...then increasing order of last score change time...
+            d = a.score_change - b.score_change;
+            if (d != 0) return d;
+
+            // ...then team name.
+            if (a.name < b.name) {
+                return -1;
+            } else if (a.name > b.name) {
+                return 1;
+            } else {
+                return 0;
+            }
+        }, this));
+        this.teamdiv.innerHTML = "";
+        for (var i = 0; i < this.team_els.length; ++i) {
+            this.teamdiv.appendChild(this.team_els[i]);
+        }
+    }
+
+    refresh_hintqueue() {
+        goog.net.XhrIo.send("/admin/bb/hintqueue", goog.bind(function(e) {
+            var code = e.target.getStatus();
+            if (code != 200) {
+                alert(e.target.getResponseText());
+            }
+            this.update_hintqueue(/** @type{BBHintQueue} */ (e.target.getResponseJson()));
+        }, this), "GET");
+    }
+
+    update_hintqueue(data) {
+        if (!data) return;
+        this.hintqueue.innerHTML = "" + data.size + " (" + (data.size - data.claimed) + ")";
     }
 }
 

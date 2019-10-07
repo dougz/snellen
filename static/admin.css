@@ -465,3 +465,31 @@ p.note {
     padding: 4px 16px;
     color: #999;
 }
+
+.bb-row {
+    height: 45px;
+    display: flex;
+    align-items: center;
+}
+
+.bb-score {
+    font-family: 'Open Sans', 'Merriweather Sans', sans-serif;
+    display: inline-block;
+    width: 40px;
+    vertical-align: bottom;
+}
+
+.bb-name {
+    display: inline-block;
+    width: 200px;
+    text-overflow: ellipsis;
+    overflow-x: hidden;
+    white-space: nowrap;
+    vertical-align: bottom;
+}
+
+.bb-name:hover {
+    overflow-x: visible;
+}
+
+
