@@ -642,7 +642,7 @@ class Team(login.LoginUser):
       self.cached_bb_data = None
       login.AdminUser.send_messages([{"method": "update_team", "team_username": self.username}], flush=True)
 
-  BB_PUZZLE_COLOR = {PuzzleState.CLOSED: "#999999",
+  BB_PUZZLE_COLOR = {PuzzleState.CLOSED: "#dddddd",
                      PuzzleState.OPEN: "#ffdd66",
                      PuzzleState.SOLVED: "#009900"}
 
@@ -655,20 +655,25 @@ class Team(login.LoginUser):
         "username": self.username,
         }
 
+      out = ['<g fill="none">']
+      lx = 0
       for land in Land.ordered_lands:
-        count = len(land.puzzles)
-        cols = ((count+3)-1) // 3 + 1   # +3 because the meta takes up 4 spots
-        out = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{cols*15-1}" height="44" viewBox="0 0 {cols*15-1} 44">']
         nx = 0
         ny = 2
         for p in land.puzzles:
           ps = self.puzzle_state[p]
           if p.meta:
-            out.append(f'<circle cx="14.5" cy="14.5" r="14.5" fill="{self.BB_PUZZLE_COLOR[ps.state]}"/>')
+            if ps.state == PuzzleState.CLOSED:
+              out.append(f'<circle cx="{lx+14.5}" cy="14.5" r="12" stroke="{self.BB_PUZZLE_COLOR[ps.state]}"/>')
+            else:
+              out.append(f'<circle cx="{lx+14.5}" cy="14.5" r="13" fill="{self.BB_PUZZLE_COLOR[ps.state]}"/>')
           else:
             cx = nx * 15 + 7
             cy = ny * 15 + 7
-            out.append(f'<circle cx="{cx}" cy="{cy}" r="7" fill="{self.BB_PUZZLE_COLOR[ps.state]}"/>')
+            if ps.state == PuzzleState.CLOSED:
+              out.append(f'<circle cx="{lx+cx}" cy="{cy}" r="5" stroke="{self.BB_PUZZLE_COLOR[ps.state]}"/>')
+            else:
+              out.append(f'<circle cx="{lx+cx}" cy="{cy}" r="6" fill="{self.BB_PUZZLE_COLOR[ps.state]}"/>')
 
             if nx == 0:
               nx = 1
@@ -677,8 +682,11 @@ class Team(login.LoginUser):
               if ny == 3:
                 nx += 1
                 ny = 0
-        out.append("</svg>")
-        svg = "".join(out)
+        lx += cx + 30
+
+      out.insert(0, f'<svg xmlns="http://www.w3.org/2000/svg" width="{lx}" height="44" viewBox="0 0 {lx} 44">')
+      out.append("</g></svg>")
+      svg = "".join(out)
       self.cached_bb_data["svg"] = svg
 
     return self.cached_bb_data

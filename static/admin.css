@@ -486,6 +486,7 @@ p.note {
     overflow-x: hidden;
     white-space: nowrap;
     vertical-align: bottom;
+    z-index: 100;
 }
 
 .bb-name:hover {
