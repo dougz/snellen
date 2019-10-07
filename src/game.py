@@ -642,13 +642,45 @@ class Team(login.LoginUser):
       self.cached_bb_data = None
       login.AdminUser.send_messages([{"method": "update_team", "team_username": self.username}], flush=True)
 
+  BB_PUZZLE_COLOR = {PuzzleState.CLOSED: "#999999",
+                     PuzzleState.OPEN: "#ffdd66",
+                     PuzzleState.SOLVED: "#009900"}
+
   def bb_data(self):
     if not self.cached_bb_data:
       self.cached_bb_data = {
         "score": self.score,
         "score_change": self.last_score_change,
         "name": self.name,
+        "username": self.username,
         }
+
+      for land in Land.ordered_lands:
+        count = len(land.puzzles)
+        cols = ((count+3)-1) // 3 + 1   # +3 because the meta takes up 4 spots
+        out = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{cols*15-1}" height="44" viewBox="0 0 {cols*15-1} 44">']
+        nx = 0
+        ny = 2
+        for p in land.puzzles:
+          ps = self.puzzle_state[p]
+          if p.meta:
+            out.append(f'<circle cx="14.5" cy="14.5" r="14.5" fill="{self.BB_PUZZLE_COLOR[ps.state]}"/>')
+          else:
+            cx = nx * 15 + 7
+            cy = ny * 15 + 7
+            out.append(f'<circle cx="{cx}" cy="{cy}" r="7" fill="{self.BB_PUZZLE_COLOR[ps.state]}"/>')
+
+            if nx == 0:
+              nx = 1
+            else:
+              ny += 1
+              if ny == 3:
+                nx += 1
+                ny = 0
+        out.append("</svg>")
+        svg = "".join(out)
+      self.cached_bb_data["svg"] = svg
+
     return self.cached_bb_data
 
   @save_state

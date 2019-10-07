@@ -459,8 +459,10 @@ class A2020_BigBoard {
 
             var score = goog.dom.createDom("DIV", "bb-score", "" + d.score);
             var name = goog.dom.createDom("DIV", "bb-name", team_list[i][1]);
+            var svg = goog.dom.createDom("DIV", "bb-svg");
+            svg.innerHTML = d.svg;
 
-            var el = goog.dom.createDom("DIV", "bb-row", score, name);
+            var el = goog.dom.createDom("DIV", "bb-row", score, name, svg);
             el.setAttribute("data-username", username);
 
             this.team_data[username]["el"] = el;
@@ -484,12 +486,17 @@ class A2020_BigBoard {
     }
 
     update_one_team(username, data) {
+        console.log(data)
+
         var el = this.team_data[username]["el"];
         this.team_data[username] = data;
         this.team_data[username]["el"] = el;
 
         var score = el.firstChild;
         score.innerHTML = "" + data.score;
+
+        var svg = score.nextSibling.nextSibling;
+        svg.innerHTML = data.svg;
 
         this.reorder_teams();
     }
