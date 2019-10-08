@@ -16,7 +16,7 @@
       {% block topnav_startedleft %}
       {% if park_open %}
       <a href="/"><img src="{{logo_nav}}" style="margin-top: 4px;"></a>
-      {% for ol in team.open_lands %}
+      {% for ol in team.sorted_open_lands %}
       {% if ol.symbol %}
       <a href="{{ol.url}}"><span class="landtag" style="background-color: {{ol.color}};">{{ol.symbol}}</span></a>
       {% end %}

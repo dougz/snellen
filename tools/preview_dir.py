@@ -16,7 +16,7 @@ def main():
   parser.add_argument("--preview_server", default="preview.isotropic.org")
   parser.add_argument("--local_zip", default=None)
   parser.add_argument("--land", default="none",
-                      choices=("none", "castle", "forest", "space"))
+                      choices=("none", "castle", "forest", "space", "bigtop"))
   parser.add_argument("input_dir")
   options = parser.parse_args()
 

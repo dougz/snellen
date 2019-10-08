@@ -20,6 +20,7 @@
 	  text-decoration: none;
 	  border-radius: 4px;
       }
+      .explain { font-family: 'Inconsolata', monospace; font-size: 84%; }
       .puzzle { background-color: #009900; }
       .static_puzzle { background-color: #00bb00; }
       .solution { background-color: #990000; }
@@ -60,16 +61,15 @@
       </tr>
 
       <tr>
-	{% if len(puzzle.answers) == 1 %}
-	<th>answer</th><td class="mono b">{{puzzle.answers[0]}}</td>
-	{% else %}
-	<th class=top>answers ({{len(puzzle.answers)}})</th>
+
+	<th class=top>answer{% if len(puzzle.answers) > 1 %}s ({{len(puzzle.answers)}}){% end %}</th>
 	<td class="mono b">
 	  {% for i, a in enumerate(puzzle.answers) %}
 	  {% if i > 0 %}<br/>{% end %}
 	  {{a}}
+          {% if a in puzzle.explanations %}<br/><span class="explain">{{puzzle.explanations[a]}}</span>{% end %}
 	  {% end %}
-	{% end %}
+        </td>
       </tr>
 
       {% if puzzle.incorrect_responses %}

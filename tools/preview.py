@@ -20,6 +20,7 @@ import traceback
 
 import common
 import oauth2
+import util
 
 import preprocess_puzzle as ppp
 
@@ -27,6 +28,7 @@ import preprocess_puzzle as ppp
 class Team:
   name = "Team Name Here"
   score = 0
+  sorted_open_lands = []
 
 
 class Land:
@@ -56,6 +58,13 @@ class Puzzle:
     self.prefix = h[:-2]
     self.pp = ppp.Puzzle(zip_data, self.options, include_solutions=True)
     self.pp.land = Land
+
+    self.pp.explanations = {}
+    for a in self.pp.answers:
+      ex = util.explain_unicode(a)
+      if ex:
+        self.pp.explanations[a] = ex
+
 
 
 class PreviewPage(tornado.web.RequestHandler):
@@ -108,6 +117,7 @@ class UploadHandler(tornado.web.RequestHandler):
   LAND_NAMES = {"castle": "The Grand Castle",
                 "forest": "Enchanted Forest",
                 "space": "Spaceopolis",
+                "bigtop": "Big Top Carnival",
                 }
 
   def initialize(self, options):
@@ -131,7 +141,9 @@ class UploadHandler(tornado.web.RequestHandler):
          "json_data": None,
          "park_open": True,
          "css": css,
-         "supertitle": ""}
+         "supertitle": "",
+         "logo_nav": self.static_content["logo-nav.png"],
+         }
 
     if land == "space":
       d["supertitle"] = ('<img src="https://preview-static.storage.googleapis.com/'
@@ -371,7 +383,7 @@ def main():
   print("Load map config...")
   with open(os.path.join(options.event_dir, "map_config.json")) as f:
     cfg = json.load(f)
-    UploadHandler.static_content = cfg["static"]
+    UploadHandler.static_content = dict((k,v[0]) for (k,v) in cfg["static"].items())
 
   app = tornado.web.Application(
     [

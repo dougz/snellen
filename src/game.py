@@ -308,6 +308,7 @@ class Team(login.LoginUser):
       self.puzzle_state[puzzle] = PuzzleState(self, puzzle)
 
     self.open_lands = {}
+    self.sorted_open_lands = []
     self.open_puzzles = set()    # PuzzleState objects
     self.activity_log = Log()    # visible to team
     self.admin_log = Log()       # visible only to GC
@@ -787,6 +788,8 @@ class Team(login.LoginUser):
           if now != Global.STATE.event_start_time:
             self.send_messages([{"method": "open", "title": html.escape(st.puzzle.land.title)}])
           self.open_lands[st.puzzle.land] = now
+          self.sorted_open_lands = [land for land in self.open_lands.keys() if land.land_order]
+          self.sorted_open_lands.sort(key=lambda land: land.land_order)
           self.dirty_lands.add(Land.BY_SHORTNAME["inner_only"])
 
     return opened
@@ -887,6 +890,7 @@ class Land:
 
     by_land_order.sort()
     cls.ordered_lands = [i[1] for i in by_land_order]
+    print(cls.ordered_lands)
 
 
 class Puzzle:
