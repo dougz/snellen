@@ -5,7 +5,6 @@
 
 {% block head %}
 <script src="{{puzzle_json_url}}"></script>
-<script>var team_username = "{{team.username}}";</script>
 {% end %}
 
 {% block content %}
@@ -18,6 +17,7 @@
   <tr><th>fastpasses</th><td>
       <button id=bestowfastpass>Bestow fastpass</button>
   </td></tr>
+  <!--
   <tr><th class=top>open puzzles ({{len(open_list)}})</th>
     <td>
       {% for i, (ot, p, a) in enumerate(open_list) %}
@@ -30,6 +30,7 @@
       {% end %}
     </td>
   </tr>
+  -->
   <tr><th>go to puzzle</th>
     <td>
       <div id="puzzleselect" class="ac-select">
@@ -40,6 +41,7 @@
   </tr>
 </table>
 
+<!--
 <h2>Activity log</h2>
 <table id="teamlog">
   {% for e in log.entries %}
@@ -50,5 +52,6 @@
   </td></tr>
   {% end %}
 </table>
+-->
 
 {% end %}

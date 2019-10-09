@@ -643,5 +643,9 @@ window.onload = function() {
     if (goog.dom.getElement("bbhintqueue")) {
         admin2020.bigboard = new A2020_BigBoard();
     }
+
+    if (team_username && !puzzle_id) {
+        console.log("setting up team page");
+    }
 }
 

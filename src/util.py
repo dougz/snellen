@@ -1,5 +1,6 @@
 import asyncio
 import game
+import http
 import string
 import time
 import tornado.web
@@ -60,13 +61,31 @@ class TeamPageHandler(TeamHandler):
 
     return d
 
-class AdminPageHandler(tornado.web.RequestHandler):
+class AdminHandler(tornado.web.RequestHandler):
+  def get_team(self, username):
+    team = game.Team.get_by_username(username)
+    if not team:
+      raise tornado.web.HTTPError(http.client.NOT_FOUND)
+    self.pageteam = team
+    return team
+
+  def get_puzzle(self, shortname):
+    puzzle = game.Puzzle.get_by_shortname(shortname)
+    if not puzzle:
+      raise tornado.web.HTTPError(http.client.NOT_FOUND)
+    self.pagepuzzle = puzzle
+    return puzzle
+
+
+class AdminPageHandler(AdminHandler):
   @classmethod
   def set_attribute(cls, attr, value):
     setattr(cls, attr, value)
 
   def prepare(self):
     self.set_header("Content-Type", "text/html; charset=utf-8")
+    self.pageteam = None
+    self.pagepuzzle = None
 
   @classmethod
   def set_static_content(cls, static_content):
@@ -99,6 +118,10 @@ class AdminPageHandler(tornado.web.RequestHandler):
     d["home"] = self.static_content["home.svg"]
     d["script"] += f"<script>var waiter_id = {wid}; var received_serial = {serial};</script>\n"
     d["json_data"] = None
+    d["team_username"] = (f'"{self.pageteam.username}"') if self.pageteam else "null"
+    d["puzzle_id"] = (f'"{self.pagepuzzle.shortname}"') if self.pagepuzzle else "null"
+    if self.pageteam: d["team"] = self.pageteam
+    if self.pagepuzzle: d["puzzle"] = self.pagepuzzle
     return d
 
 def format_duration(sec):

@@ -7,6 +7,10 @@
     {% if script %}{% raw script %}{% end %}
     {% if json_data %}{% raw json_data %}{% end %}
     {% block head %}{% end %}
+    <script>
+      var team_username = {% raw team_username %};
+      var puzzle_id = {% raw puzzle_id %};
+    </script>
   </head>
   <body>
     <div id="topnav" class="{% block colorscheme %}{% end %}">

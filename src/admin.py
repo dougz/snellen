@@ -15,7 +15,6 @@ import wait_proxy
 class AdminHomePage(util.AdminPageHandler):
   @login.required("admin")
   def get(self):
-
     st = game.Global.STATE
     args = {"user": self.user,
             "game_state": st}
@@ -56,28 +55,33 @@ class ListTeamsPage(util.AdminPageHandler):
 class TeamPage(util.AdminPageHandler):
   @login.required("admin")
   def get(self, username):
-    team = game.Team.get_by_username(username)
+    team = self.get_team(username)
     if not team:
       raise tornado.web.HTTPError(http.client.NOT_FOUND)
+    self.render("admin_team_page.html", open_list=(), log=team.admin_log)
 
-    now = time.time()
+class TeamDataHandler(tornado.web.RequestHandler):
+  @login.required("admin")
+  def get(self, username):
+    team = self.get_team(username)
+
     open_list = []
     for s in team.puzzle_state.values():
       if s.state == s.OPEN:
         open_list.append((s.open_time, s.puzzle, s.answers_found))
     open_list.sort()
 
-    self.render("admin_team_page.html", team=team, open_list=open_list, log=team.admin_log)
+    d = {"open_puzzles": open_list}
+
+    self.set_header("Content-Type", "application/json")
+    self.write(json.dumps(d))
+
 
 class TeamPuzzlePage(util.AdminPageHandler):
   @login.required("admin")
   def get(self, username, shortname):
-    team = game.Team.get_by_username(username)
-    if not team:
-      raise tornado.web.HTTPError(http.client.NOT_FOUND)
-    puzzle = game.Puzzle.get_by_shortname(shortname)
-    if not puzzle:
-      raise tornado.web.HTTPError(http.client.NOT_FOUND)
+    team = self.get_team(username)
+    puzzle = self.get_puzzle(shortname)
 
     state = team.puzzle_state[puzzle]
     if state.state == state.SOLVED:
@@ -86,16 +90,13 @@ class TeamPuzzlePage(util.AdminPageHandler):
     else:
       dur = ""
 
-    self.render("admin_team_puzzle_page.html",
-                team=team, puzzle=puzzle, state=state, solve_duration=dur)
+    self.render("admin_team_puzzle_page.html", state=state, solve_duration=dur)
 
 
-class HintHistoryHandler(tornado.web.RequestHandler):
+class HintHistoryHandler(util.AdminHandler):
   @login.required("admin")
-  def get(self, team_username, shortname):
-    team = game.Team.get_by_username(team_username)
-    if not team:
-      raise tornado.web.HTTPError(http.client.NOT_FOUND)
+  def get(self, username, shortname):
+    team = self.get_team(username)
     state = team.get_puzzle_state(shortname)
     if not state:
       raise tornado.web.HTTPError(http.client.NOT_FOUND)
@@ -107,22 +108,18 @@ class HintHistoryHandler(tornado.web.RequestHandler):
     self.write(json.dumps(d))
 
 
-class BestowFastpassHandler(tornado.web.RequestHandler):
+class BestowFastpassHandler(util.AdminHandler):
   @login.required("admin")
-  def get(self, team_username):
-    team = game.Team.get_by_username(team_username)
-    if not team:
-      raise tornado.web.HTTPError(http.client.NOT_FOUND)
+  def get(self, username):
+    team = self.get_team(username)
     team.receive_fastpass(300)
     self.set_status(http.client.NO_CONTENT.value)
 
 
 class BecomeTeamHandler(util.AdminPageHandler):
   @login.required("admin", clear_become=False)
-  def get(self, team_username):
-    team = game.Team.get_by_username(team_username)
-    if not team:
-      raise tornado.web.HTTPError(http.client.NOT_FOUND)
+  def get(self, username):
+    team = self.get_team(username)
 
     if self.session.pending_become == team:
       self.session.team = team
@@ -138,21 +135,17 @@ class BecomeTeamHandler(util.AdminPageHandler):
       self.render("admin_become.html", team=team)
 
 
-class HintReplyHandler(tornado.web.RequestHandler):
+class HintReplyHandler(util.AdminHandler):
   def prepare(self):
     self.args = json.loads(self.request.body)
 
   @login.required("admin")
   async def post(self):
-    team_username = self.args.get("team_username")
-    team = game.Team.get_by_username(team_username)
-    if not team:
-      raise tornado.web.HTTPError(http.client.NOT_FOUND)
+    username = self.args.get("team_username")
+    team = self.get_team(username)
 
     shortname = self.args.get("puzzle_id");
-    puzzle = game.Puzzle.get_by_shortname(shortname)
-    if not puzzle:
-      raise tornado.web.HTTPError(http.client.NOT_FOUND)
+    puzzle = self.get_puzzle(shortname)
 
     text = self.args.get("text", "").strip()
     if not text:
@@ -175,19 +168,17 @@ class ListPuzzlesPage(util.AdminPageHandler):
 class PuzzlePage(util.AdminPageHandler):
   @login.required("admin")
   def get(self, shortname):
-    puzzle = game.Puzzle.get_by_shortname(shortname)
-    if not puzzle:
-      raise tornado.web.HTTPError(http.client.NOT_FOUND)
+    puzzle = self.get_puzzle(shortname)
 
     solve_list = []
     for t, d in puzzle.solve_durations.items():
       solve_list.append((d, t, util.format_duration(d)))
     solve_list.sort()
 
-    self.render("admin_puzzle_page.html", puzzle=puzzle, solve_list=solve_list)
+    self.render("admin_puzzle_page.html", solve_list=solve_list)
 
 
-class CreateUserHandler(tornado.web.RequestHandler):
+class CreateUserHandler(util.AdminHandler):
   @login.required(login.AdminRoles.CREATE_USERS)
   async def post(self):
     username = self.get_argument("username")
@@ -199,10 +190,10 @@ class CreateUserHandler(tornado.web.RequestHandler):
     login.AdminUser.create_new_user(username, pwhash, fullname)
     self.redirect("/admin/users")
 
-class ChangePasswordHandler(tornado.web.RequestHandler):
+class ChangePasswordHandler(util.AdminHandler):
   @login.required("admin")
   async def post(self):
-    username = self.get_argument("username", None)
+    username = self.get_argument("team_username", None)
     password = self.get_argument("password", None)
     new_password = self.get_argument("newpassword")
     confirm = self.get_argument("confirm")
@@ -260,7 +251,7 @@ class ConfirmChangeStartPage(util.AdminPageHandler):
     self.redirect("/admin")
 
 
-class StartEvent(tornado.web.RequestHandler):
+class StartEvent(util.AdminHandler):
   @login.required(login.AdminRoles.CONTROL_EVENT)
   def get(self):
     game.Global.STATE.start_event()
@@ -272,22 +263,17 @@ class HintQueuePage(util.AdminPageHandler):
   def get(self):
     self.render("admin_hint_queue.html")
 
-class HintQueueHandler(tornado.web.RequestHandler):
+class HintQueueHandler(util.AdminHandler):
   @login.required("admin")
   def get(self):
     self.set_header("Content-Type", "application/json")
     self.write(game.Global.STATE.hint_queue.to_json())
 
-class HintClaimHandler(tornado.web.RequestHandler):
+class HintClaimHandler(util.AdminHandler):
   @login.required("admin")
   def get(self, un, username, shortname):
-    team = game.Team.get_by_username(username)
-    if not team:
-      raise tornado.web.HTTPError(http.client.NOT_FOUND)
-    puzzle = game.Puzzle.get_by_shortname(shortname)
-    if not puzzle:
-      raise tornado.web.HTTPError(http.client.NOT_FOUND)
-
+    team = self.get_team(username)
+    puzzle = self.get_puzzle(shortname)
     ps = team.puzzle_state[puzzle]
     if un:
       if ps.claim:
@@ -306,7 +292,7 @@ class HintClaimHandler(tornado.web.RequestHandler):
 
     self.redirect(f"/admin/team/{username}/puzzle/{shortname}")
 
-class HintTimeChangeHandler(tornado.web.RequestHandler):
+class HintTimeChangeHandler(util.AdminHandler):
   def prepare(self):
     self.args = json.loads(self.request.body)
 
@@ -338,7 +324,7 @@ class HintTimeChangeHandler(tornado.web.RequestHandler):
     puzzle.set_hints_available_time(secs, self.user.username)
     self.set_status(http.client.NO_CONTENT.value)
 
-class PuzzleJsonHandler(tornado.web.RequestHandler):
+class PuzzleJsonHandler(util.AdminHandler):
   @classmethod
   def build(cls):
     out = []
@@ -357,7 +343,7 @@ class PuzzleJsonHandler(tornado.web.RequestHandler):
     self.set_header("ETag", self.etag)
     self.write(self.body)
 
-class TeamJsonHandler(tornado.web.RequestHandler):
+class TeamJsonHandler(util.AdminHandler):
   @classmethod
   def build(cls):
     out = []
@@ -382,14 +368,14 @@ class BigBoardPage(util.AdminPageHandler):
   def get(self):
     self.render("admin_bigboard.html")
 
-class BigBoardHintQueueDataHandler(tornado.web.RequestHandler):
+class BigBoardHintQueueDataHandler(util.AdminHandler):
   @login.required("admin")
   def get(self):
     data = game.Global.STATE.bb_hint_queue_data()
     self.set_header("Content-Type", "application/json")
     self.write(json.dumps(data))
 
-class BigBoardTeamDataHandler(tornado.web.RequestHandler):
+class BigBoardTeamDataHandler(util.AdminHandler):
   @login.required("admin")
   def get(self, username):
     if username:
