@@ -247,8 +247,8 @@ class Submission:
       self.puzzle_state.answers_found.add(answer)
       if self.puzzle_state.answers_found == self.puzzle.answers:
         self.team.solve_puzzle(self.puzzle, now)
-      else:
-        self.team.invalidate()
+
+    self.team.invalidate(self.puzzle)
 
   def json_dict(self):
     return {"submit_time": self.submit_time,
@@ -634,7 +634,6 @@ class Team(login.LoginUser):
         self.achieve(Achievement.hot_streak, now)
 
       self.compute_puzzle_beam(now)
-      self.invalidate()
 
   def get_puzzle_state(self, puzzle):
     if isinstance(puzzle, str):
@@ -642,11 +641,14 @@ class Team(login.LoginUser):
       if not puzzle: return None
     return self.puzzle_state[puzzle]
 
-  def invalidate(self):
+  def invalidate(self, puzzle=None, flush=True):
     if self.cached_bb_data:
       self.cached_bb_data = None
-    login.AdminUser.send_messages([{"method": "update_team",
-                                    "team_username": self.username}], flush=True)
+    d = {"method": "update",
+         "team_username": self.username}
+    if puzzle:
+      d["puzzle_id"] = puzzle.shortname
+    login.AdminUser.send_messages([d], flush=flush)
 
   BB_PUZZLE_COLOR = {PuzzleState.CLOSED: "#dddddd",
                      PuzzleState.OPEN: "#ffdd66",
@@ -1160,8 +1162,10 @@ class Global:
     print(f"starting event at {now}")
     for team in Team.BY_USERNAME.values():
       team.compute_puzzle_beam(self.event_start_time)
+      team.invalidate(flush=False)
     if timed and not save_state.REPLAYING:
       asyncio.create_task(self.notify_event_start())
+      asyncio.create_task(login.AdminUser.flush_messages())
 
   async def notify_event_start(self):
     for team in Team.BY_USERNAME.values():

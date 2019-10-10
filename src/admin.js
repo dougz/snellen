@@ -66,7 +66,7 @@ class A2020_Dispatcher {
         this.methods = {
             "hint_history": this.hint_history,
             "hint_queue": this.hint_queue,
-            "update_team": this.update_team,
+            "update": this.update,
         }
     }
 
@@ -96,12 +96,14 @@ class A2020_Dispatcher {
     }
 
     /** @param{Message} msg */
-    update_team(msg) {
-        if (admin2020.bigboard) {
-            admin2020.bigboard.refresh_team(msg.team_username);
-        }
-        if (admin2020.team_page && team_username == msg.team_username) {
-            admin2020.team_page.update();
+    update(msg) {
+        if (msg.team_username) {
+            if (admin2020.bigboard) {
+                admin2020.bigboard.refresh_team(msg.team_username);
+            }
+            if (admin2020.team_page && team_username == msg.team_username) {
+                admin2020.team_page.update();
+            }
         }
     }
 }
