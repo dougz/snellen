@@ -375,7 +375,8 @@ class TeamJsonHandler(util.AdminHandler):
 class BigBoardPage(util.AdminPageHandler):
   @login.required("admin")
   def get(self):
-    self.render("admin_bigboard.html")
+    label_info = game.Team.bb_label_info()
+    self.render("admin_bigboard.html", label_info=json.dumps({"lands": label_info}))
 
 class BigBoardHintQueueDataHandler(util.AdminHandler):
   @login.required("admin")

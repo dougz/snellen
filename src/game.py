@@ -292,6 +292,8 @@ class Team(login.LoginUser):
   # If a puzzle was opened less than this long ago, it gets a "new!" tag.
   NEW_PUZZLE_SECONDS = 300  # 5 minutes
 
+  cached_bb_label_info = None
+
   def __init__(self, username, info):
     assert username not in self.BY_USERNAME
     self.BY_USERNAME[username] = self
@@ -653,6 +655,36 @@ class Team(login.LoginUser):
   BB_PUZZLE_COLOR = {PuzzleState.CLOSED: "#dddddd",
                      PuzzleState.OPEN: "#ffdd66",
                      PuzzleState.SOLVED: "#009900"}
+
+  @classmethod
+  def bb_label_info(cls):
+    if cls.cached_bb_label_info:
+      return cls.cached_bb_label_info
+
+    land_offsets = []
+    lx = 0
+    for land in Land.ordered_lands:
+      d = {"symbol": land.symbol,
+           "color": land.color,
+           "left": lx}
+      land_offsets.append(d)
+      nx = 0
+      ny = 2
+      for p in land.puzzles:
+        if not p.meta:
+          cx = nx * 15 + 7
+          cy = ny * 15 + 7
+
+          if nx == 0:
+            nx = 1
+          else:
+            ny += 1
+            if ny == 3:
+              nx += 1
+              ny = 0
+      lx += cx + 30
+    cls.cached_bb_label_info = land_offsets
+    return land_offsets
 
   def bb_data(self):
     if not self.cached_bb_data:

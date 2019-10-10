@@ -152,7 +152,6 @@ class A2020_HintHistory {
             var code = e.target.getStatus();
             if (code == 200) {
                 var response = /** @type{HintHistory} */ (e.target.getResponseJson());
-                console.log(response);
                 this.render_history(response);
             }
         }, this));
@@ -204,7 +203,6 @@ class A2020_HintQueue {
             var code = e.target.getStatus();
             if (code == 200) {
                 var response = /** @type{HintQueue} */ (e.target.getResponseJson());
-                console.log(response);
                 this.render_queue(response);
             }
         }, this));
@@ -471,7 +469,6 @@ class A2020_TeamPage {
 
     /** param{TeamPageData} data */
     build(data) {
-        console.log(data);
         this.tpopencount.innerHTML = "" + data.open_puzzles.length;
 
         var i, j;
@@ -550,6 +547,18 @@ class A2020_BigBoard {
         /** @type{Element} */
         this.teamdiv = goog.dom.getElement("bbteams");
 
+        var div = goog.dom.getElement("bblandlabels");
+
+        for (var i = 0; i < label_info.lands.length; ++i) {
+            var land = label_info.lands[i];
+            var sp = goog.dom.createDom(
+                "SPAN",
+                {className: "landtag bblandtaghead",
+                 style: "background-color: " + land.color + "; left: " + land.left + "px;"},
+                land.symbol);
+            div.appendChild(sp);
+        }
+
         goog.net.XhrIo.send("/admin/bb/team", goog.bind(function(e) {
             var code = e.target.getStatus();
             if (code != 200) {
@@ -595,8 +604,6 @@ class A2020_BigBoard {
     }
 
     update_one_team(username, data) {
-        console.log(data)
-
         var el = this.team_data[username]["el"];
         this.team_data[username] = data;
         this.team_data[username]["el"] = el;
@@ -693,7 +700,6 @@ window.onload = function() {
             goog.dom.getElement("hinttimechangeentry").style.display = "inline";
             goog.events.listen(goog.dom.getElement("newhinttimesubmit"), goog.events.EventType.CLICK, function() {
                 var text = goog.dom.getElement("newhinttime").value;
-                console.log("submitting [" + text + "]");
                 goog.net.XhrIo.send("/admin/hinttimechange", function(e) {
                     var code = e.target.getStatus();
                     if (code == 204) {

@@ -14,6 +14,9 @@ var puzzle_list;
 /** @type{?Array<Array<string>>} */
 var team_list;
 
+/** @type{BBLabelInfo} */
+var label_info;
+
 class Message {
     constructor() {
         /** @type{string} */
@@ -111,3 +114,20 @@ class TeamPageData {
     }
 }
 
+class BBLandLabel {
+    constructor() {
+        /** @type{string} */
+        this.symbol;
+        /** @type{string} */
+        this.color;
+        /** @type{number} */
+        this.left;
+    }
+}
+
+class BBLabelInfo {
+    constructor() {
+        /** @type{Array<BBLandLabel>} */
+        this.lands;
+    }
+}

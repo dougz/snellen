@@ -470,6 +470,14 @@ p.note {
     color: #999;
 }
 
+#bblabel {
+    position: relative;
+    height: 30px;
+}
+
+.bbsymbol {
+}
+
 .bb-row {
     height: 60px;
     display: flex;
@@ -479,8 +487,21 @@ p.note {
 .bb-score {
     font-family: 'Open Sans', 'Merriweather Sans', sans-serif;
     display: inline-block;
-    width: 40px;
+    width: 44px;
+    padding-right: 16px;
     vertical-align: bottom;
+    text-align: right;
+}
+
+#bbscorehead {
+    font-family: 'Merriweather Sans', sans-serif;
+    font-weight: bold;
+    width: 44px;
+    padding-right: 16px;
+    vertical-align: bottom;
+    display: inline-block;
+    height: 20px;
+    text-align: right;
 }
 
 .bb-name {
@@ -497,4 +518,22 @@ p.note {
     overflow-x: visible;
 }
 
+#bbnamehead {
+    font-family: 'Merriweather Sans', sans-serif;
+    font-weight: bold;
+    width: 200px;
+    vertical-align: bottom;
+    display: inline-block;
+    height: 20px;
+}
 
+#bblandlabels {
+    display: inline-block;
+    position: relative;
+    height: 20px;
+}
+
+.bblandtaghead {
+    position: absolute;
+    bottom: 0px;
+}

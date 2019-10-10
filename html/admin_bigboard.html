@@ -5,6 +5,7 @@
 
 {% block head %}
 <script src="{{team_json_url}}"></script>
+<script>var label_info = {% raw label_info %};</script>
 {% end %}
 
 {% block rightnav %}
@@ -12,5 +13,7 @@
 {% end %}
 
 {% block content %}
+<div id="bblabel"><div id="bbscorehead">score</div><div id="bbnamehead">team</div><div id="bblandlabels"></div></div>
+<hr>
 <div id="bbteams"></div>
 {% end %}
