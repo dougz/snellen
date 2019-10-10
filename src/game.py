@@ -23,6 +23,7 @@ class Log:
 
   def __init__(self):
     self.entries = []
+    self.data = []
 
   def add(self, when, html, **kwargs):
     if kwargs:
@@ -31,9 +32,10 @@ class Log:
       self.entries[0].htmls.append(html)
     else:
       self.entries.insert(0, Log.Entry(when, [html]))
+      self.data.insert(0, self.entries[0]._asdict())
 
-  def json(self):
-    return json.dumps(self.entries)
+  def get_data(self):
+    return self.data
 
 
 class HintMessage:
@@ -245,6 +247,8 @@ class Submission:
       self.puzzle_state.answers_found.add(answer)
       if self.puzzle_state.answers_found == self.puzzle.answers:
         self.team.solve_puzzle(self.puzzle, now)
+      else:
+        self.team.invalidate()
 
   def json_dict(self):
     return {"submit_time": self.submit_time,
@@ -641,7 +645,8 @@ class Team(login.LoginUser):
   def invalidate(self):
     if self.cached_bb_data:
       self.cached_bb_data = None
-      login.AdminUser.send_messages([{"method": "update_team", "team_username": self.username}], flush=True)
+    login.AdminUser.send_messages([{"method": "update_team",
+                                    "team_username": self.username}], flush=True)
 
   BB_PUZZLE_COLOR = {PuzzleState.CLOSED: "#dddddd",
                      PuzzleState.OPEN: "#ffdd66",

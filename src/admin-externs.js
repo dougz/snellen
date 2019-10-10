@@ -78,4 +78,36 @@ class BBHintQueue {
     }
 }
 
+class OpenPuzzle {
+    constructor() {
+        /** @type{string} */
+        this.shortname;
+        /** @type{string} */
+        this.title;
+        /** @type{number} */
+        this.open_time;
+        /** @type{?Array<string>} */
+        this.answers_found;
+    }
+}
+
+class LogEntry {
+    constructor() {
+        /** @type{number} */
+        this.when;
+        /** @type{Array<string>} */
+        this.html;
+    }
+}
+
+class TeamPageData {
+    constructor() {
+        /** @type{Array<OpenPuzzle>} */
+        this.open_puzzles;
+        /** @type{?Array<number>} */
+        this.fastpasses;
+        /** @type{Array<LogEntry>} */
+        this.log;
+    }
+}
 

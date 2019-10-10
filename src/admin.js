@@ -72,6 +72,7 @@ class A2020_Dispatcher {
 
     /** @param{Message} msg */
     dispatch(msg) {
+        console.log(msg);
         this.methods[msg.method](msg);
     }
 
@@ -98,6 +99,9 @@ class A2020_Dispatcher {
     update_team(msg) {
         if (admin2020.bigboard) {
             admin2020.bigboard.refresh_team(msg.team_username);
+        }
+        if (admin2020.team_page && team_username == msg.team_username) {
+            admin2020.team_page.update();
         }
     }
 }
@@ -429,6 +433,109 @@ class A2020_Autocomplete {
 
 }
 
+class A2020_TeamPage {
+    constructor() {
+        /** @type{Element} */
+        this.tpopencount = goog.dom.getElement("tpopencount");
+        /** @type{Element} */
+        this.tpopenlist = goog.dom.getElement("tpopenlist");
+        /** @type{Element} */
+        this.tpfastpass = goog.dom.getElement("tpfastpass");
+        /** @type{Element} */
+        this.tplog = goog.dom.getElement("tplog");
+
+        var el = goog.dom.getElement("bestowfastpass");
+        goog.events.listen(el, goog.events.EventType.CLICK, function() {
+            goog.net.XhrIo.send("/admin/bestowfastpass/" + team_username, function(e) {
+                var code = e.target.getStatus();
+                if (code != 204) {
+                    alert(e.target.getResponseText());
+                }
+            });
+        });
+
+        this.update();
+    }
+
+    update() {
+        goog.net.XhrIo.send("/admin/js/team/" + team_username, goog.bind(function(e) {
+            var code = e.target.getStatus();
+            if (code != 200) {
+                alert(e.target.getResponseText());
+            }
+            this.build(e.target.getResponseJson());
+        }, this), "GET");
+    }
+
+    /** param{TeamPageData} data */
+    build(data) {
+        console.log(data);
+        this.tpopencount.innerHTML = "" + data.open_puzzles.length;
+
+        var i, j;
+
+        var el = this.tpopenlist;
+        el.innerHTML = "";
+        for (i = 0; i < data.open_puzzles.length; ++i) {
+            var op = data.open_puzzles[i];
+            if (i > 0) {
+                el.appendChild(goog.dom.createDom("BR"));
+            }
+            el.appendChild(goog.dom.createDom(
+                "A", {href: "/admin/team/" + team_username + "/puzzle/" + op.shortname},
+                op.title));
+            el.appendChild(goog.dom.createTextNode(" ("));
+            var sp = goog.dom.createDom("SPAN", "counter");
+            sp.setAttribute("data-since", op.open_time);
+            el.appendChild(sp);
+            el.appendChild(goog.dom.createTextNode(")"));
+            if (!op.answers_found) continue;
+            el.appendChild(goog.dom.createTextNode(" \u2014 "));
+            for (j = 0; j < op.answers_found.length; ++j) {
+                if (j > 0) {
+                    el.appendChild(goog.dom.createTextNode(", "));
+                }
+                el.appendChild(goog.dom.createDom("SPAN", "answer", op.answers_found[j]));
+            }
+        }
+
+        el = this.tpfastpass;
+        el.innerHTML = "";
+        if (data.fastpasses) {
+            for (i = 0; i < data.fastpasses.length; ++i) {
+                if (i > 0) {
+                    el.appendChild(goog.dom.createTextNode(", "));
+                }
+                var sp = goog.dom.createDom("SPAN", "counter");
+                sp.setAttribute("data-until", data.fastpasses[i]);
+                el.appendChild(sp);
+            }
+        }
+
+        el = this.tplog;
+        el.innerHTML = "";
+        for (i = 0; i < data.log.length; ++i) {
+            var e = data.log[i];
+            var td = goog.dom.createDom("TD");
+            for (j = 0; j < e.htmls.length; ++j) {
+                if (j > 0) td.appendChild(goog.dom.createDom("BR"));
+                var sp = goog.dom.createDom("SPAN");
+                sp.innerHTML = e.htmls[j];
+                td.appendChild(sp);
+            }
+
+            var tr = goog.dom.createDom("TR",
+                                        null,
+                                        goog.dom.createDom("TH", null, admin2020.time_formatter.format(e.when)),
+                                        td);
+            el.appendChild(tr);
+        }
+
+
+        admin2020.counter.reread();
+    }
+}
+
 class A2020_BigBoard {
     constructor() {
         /** @type{Element} */
@@ -556,6 +663,7 @@ var admin2020 = {
     team_select: null,
     user_roles: null,
     bigboard: null,
+    team_page: null,
 }
 
 window.onload = function() {
@@ -596,20 +704,6 @@ window.onload = function() {
         });
     }
 
-    el = goog.dom.getElement("bestowfastpass");
-    if (el && team_username) {
-        goog.events.listen(el, goog.events.EventType.CLICK, function() {
-            goog.net.XhrIo.send("/admin/bestowfastpass/" + team_username, function(e) {
-                var code = e.target.getStatus();
-                if (code == 204) {
-                    location.reload();
-                } else {
-                    alert(e.target.getResponseText());
-                }
-            });
-        });
-    }
-
     el = goog.dom.getElement("puzzleselect");
     if (el) {
         admin2020.puzzle_select = new A2020_Autocomplete(
@@ -645,7 +739,7 @@ window.onload = function() {
     }
 
     if (team_username && !puzzle_id) {
-        console.log("setting up team page");
+        admin2020.team_page = new A2020_TeamPage();
     }
 }
 

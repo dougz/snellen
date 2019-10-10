@@ -15,23 +15,13 @@
   <tr><th></th><td><a href="/admin/become/{{team.username}}">become this team</a></td></tr>
   <tr><th>location</th><td>{{team.attrs.get("location", "Unknown")}}</td></tr>
   <tr><th>fastpasses</th><td>
+      <span id=tpfastpass></span>
       <button id=bestowfastpass>Bestow fastpass</button>
   </td></tr>
-  <!--
-  <tr><th class=top>open puzzles ({{len(open_list)}})</th>
-    <td>
-      {% for i, (ot, p, a) in enumerate(open_list) %}
-      {% if i > 0 %}<br>{% end %}
-      <a href="/admin/team/{{team.username}}/puzzle/{{p.shortname}}">{{p.title}}</a>
-      (<span class="counter" data-since="{{ot}}">&mdash;</span>)
-      {% if a %}&mdash;
-      {% for aa in a %} <span class=answer>{{aa}}</span>{% end %} &hellip;
-      {% end %}
-      {% end %}
-    </td>
+  <tr><th class=top>open puzzles (<span id=tpopencount></span>)</th>
+    <td id=tpopenlist></td>
   </tr>
-  -->
-  <tr><th>go to puzzle</th>
+  <tr><th class=center>go to puzzle</th>
     <td>
       <div id="puzzleselect" class="ac-select">
         <input class="ac-select-input"></input>
@@ -41,17 +31,7 @@
   </tr>
 </table>
 
-<!--
 <h2>Activity log</h2>
-<table id="teamlog">
-  {% for e in log.entries %}
-  <tr><th>{{format_timestamp(e.when)}}</th><td>
-      {% for i, h in enumerate(e.htmls) %}
-      {% if i > 0 %}<br>{% end %}{% raw h %}
-      {% end %}
-  </td></tr>
-  {% end %}
-</table>
--->
+<table id="tplog"></table>
 
 {% end %}

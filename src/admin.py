@@ -60,7 +60,7 @@ class TeamPage(util.AdminPageHandler):
       raise tornado.web.HTTPError(http.client.NOT_FOUND)
     self.render("admin_team_page.html", open_list=(), log=team.admin_log)
 
-class TeamDataHandler(tornado.web.RequestHandler):
+class TeamDataHandler(util.AdminHandler):
   @login.required("admin")
   def get(self, username):
     team = self.get_team(username)
@@ -68,10 +68,19 @@ class TeamDataHandler(tornado.web.RequestHandler):
     open_list = []
     for s in team.puzzle_state.values():
       if s.state == s.OPEN:
-        open_list.append((s.open_time, s.puzzle, s.answers_found))
-    open_list.sort()
+        d = {"shortname": s.puzzle.shortname,
+             "open_time": s.open_time,
+             "title": s.puzzle.title}
+        if s.answers_found:
+          af = list(s.answers_found)
+          af.sort()
+          d["answers_found"] = af
+        open_list.append(d)
+    open_list.sort(key=lambda d: (d["open_time"], d["title"]))
 
-    d = {"open_puzzles": open_list}
+    d = {"open_puzzles": open_list,
+         "fastpasses": team.fastpasses_available,
+         "log": team.admin_log.get_data()}
 
     self.set_header("Content-Type", "application/json")
     self.write(json.dumps(d))
@@ -424,6 +433,7 @@ def GetHandlers():
 
     (r"/admin/puzzle_json/.*", PuzzleJsonHandler),
     (r"/admin/team_json/.*", TeamJsonHandler),
+    (r"/admin/js/team/([a-z0-9_]+)$", TeamDataHandler),
     ]
   return handlers
 
