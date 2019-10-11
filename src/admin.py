@@ -55,10 +55,8 @@ class ListTeamsPage(util.AdminPageHandler):
 class TeamPage(util.AdminPageHandler):
   @login.required("admin")
   def get(self, username):
-    team = self.get_team(username)
-    if not team:
-      raise tornado.web.HTTPError(http.client.NOT_FOUND)
-    self.render("admin_team_page.html", open_list=(), log=team.admin_log)
+    self.get_team(username)
+    self.render("admin_team_page.html")
 
 class TeamDataHandler(util.AdminHandler):
   @login.required("admin")
@@ -81,6 +79,29 @@ class TeamDataHandler(util.AdminHandler):
     d = {"open_puzzles": open_list,
          "fastpasses": team.fastpasses_available,
          "log": team.admin_log.get_data()}
+
+    self.set_header("Content-Type", "application/json")
+    self.write(json.dumps(d))
+
+class PuzzlePage(util.AdminPageHandler):
+  @login.required("admin")
+  def get(self, shortname):
+    self.get_puzzle(shortname)
+    self.render("admin_puzzle_page.html")
+
+class PuzzleDataHandler(util.AdminHandler):
+  @login.required("admin")
+  def get(self, shortname):
+    puzzle = self.get_puzzle(shortname)
+
+    solves = []
+    for team, d in puzzle.solve_durations.items():
+      solves.append({"username": team.username, "name": team.name, "duration": d})
+    solves.sort(key=lambda d: d["duration"])
+
+    d = {"solves": solves,
+         "hint_time": puzzle.hints_available_time,
+         "log": puzzle.puzzle_log.get_data()}
 
     self.set_header("Content-Type", "application/json")
     self.write(json.dumps(d))
@@ -435,6 +456,7 @@ def GetHandlers():
     (r"/admin/puzzle_json/.*", PuzzleJsonHandler),
     (r"/admin/team_json/.*", TeamJsonHandler),
     (r"/admin/js/team/([a-z0-9_]+)$", TeamDataHandler),
+    (r"/admin/js/puzzle/([a-z0-9_]+)$", PuzzleDataHandler),
     ]
   return handlers
 

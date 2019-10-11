@@ -105,6 +105,11 @@ class A2020_Dispatcher {
                 admin2020.team_page.update();
             }
         }
+        if (msg.puzzle_id) {
+            if (admin2020.puzzle_page && puzzle_id == msg.puzzle_id) {
+                admin2020.puzzle_page.update();
+            }
+        }
     }
 }
 
@@ -535,6 +540,98 @@ class A2020_TeamPage {
     }
 }
 
+class A2020_PuzzlePage {
+    constructor() {
+        /** @type{Element} */
+        this.ppsolvecount = goog.dom.getElement("ppsolvecount");
+        /** @type{Element} */
+        this.ppsolvelist = goog.dom.getElement("ppsolvelist");
+         /** @type{Element} */
+        this.pplog = goog.dom.getElement("pplog");
+         /** @type{Element} */
+        this.pphinttime = goog.dom.getElement("pphinttime");
+
+        var el = goog.dom.getElement("hinttimechange");
+        goog.events.listen(el, goog.events.EventType.CLICK, function() {
+            goog.dom.getElement("hinttimechange").style.display = "none";
+            goog.dom.getElement("hinttimechangeentry").style.display = "inline";
+        });
+        goog.events.listen(
+            goog.dom.getElement("newhinttimesubmit"),
+            goog.events.EventType.CLICK,
+            function() {
+                var text = goog.dom.getElement("newhinttime").value;
+                goog.net.XhrIo.send(
+                    "/admin/hinttimechange",
+                    function(e) {
+                        var code = e.target.getStatus();
+                        if (code != 204) {
+                            alert(e.target.getResponseText());
+                        }
+                    }, "POST", admin2020.serializer.serialize({"puzzle_id": puzzle_id,
+                                                               "hint_time": text}));
+                goog.dom.getElement("hinttimechange").style.display = "initial";
+                goog.dom.getElement("hinttimechangeentry").style.display = "none";
+            });
+
+        this.update();
+    }
+
+    update() {
+        goog.net.XhrIo.send("/admin/js/puzzle/" + puzzle_id, goog.bind(function(e) {
+            var code = e.target.getStatus();
+            if (code != 200) {
+                alert(e.target.getResponseText());
+            }
+            this.build(e.target.getResponseJson());
+        }, this), "GET");
+    }
+
+    /** param{PuzzlePageData} data */
+    build(data) {
+        console.log(data);
+        this.ppsolvecount.innerHTML = "" + data.solves.length;
+
+        var i, j, el;
+
+        this.pphinttime.innerHTML = admin2020.time_formatter.duration(data.hint_time);
+
+        el = this.ppsolvelist;
+        el.innerHTML = "";
+        for (i = 0; i < data.solves.length; ++i) {
+            var so = data.solves[i];
+            if (i > 0) {
+                el.appendChild(goog.dom.createDom("BR"));
+            }
+            el.appendChild(goog.dom.createDom(
+                "A", {href: "/admin/team/" + so.username + "/puzzle/" + puzzle_id},
+                so.name));
+            el.appendChild(goog.dom.createTextNode(" (" + admin2020.time_formatter.duration(so.duration) + ")"));
+        }
+
+        this.pplog.innerHTML = "";
+        for (i = 0; i < data.log.length; ++i) {
+            var e = data.log[i];
+            var td = goog.dom.createDom("TD");
+            for (j = 0; j < e.htmls.length; ++j) {
+                if (j > 0) td.appendChild(goog.dom.createDom("BR"));
+                var sp = goog.dom.createDom("SPAN");
+                sp.innerHTML = e.htmls[j];
+                td.appendChild(sp);
+            }
+
+            var tr = goog.dom.createDom("TR",
+                                        null,
+                                        goog.dom.createDom("TH", null, admin2020.time_formatter.format(e.when)),
+                                        td);
+            this.pplog.appendChild(tr);
+        }
+
+
+        admin2020.counter.reread();
+    }
+}
+
 class A2020_BigBoard {
     constructor() {
         /** @type{Element} */
@@ -673,6 +770,7 @@ var admin2020 = {
     user_roles: null,
     bigboard: null,
     team_page: null,
+    puzzle_page: null,
 }
 
 window.onload = function() {
@@ -692,25 +790,6 @@ window.onload = function() {
     }
 
     var el;
-
-    el = goog.dom.getElement("hinttimechange");
-    if (el) {
-        goog.events.listen(el, goog.events.EventType.CLICK, function() {
-            goog.dom.getElement("hinttimechange").style.display = "none";
-            goog.dom.getElement("hinttimechangeentry").style.display = "inline";
-            goog.events.listen(goog.dom.getElement("newhinttimesubmit"), goog.events.EventType.CLICK, function() {
-                var text = goog.dom.getElement("newhinttime").value;
-                goog.net.XhrIo.send("/admin/hinttimechange", function(e) {
-                    var code = e.target.getStatus();
-                    if (code == 204) {
-                        location.reload();
-                    } else {
-                        alert(e.target.getResponseText());
-                    }
-                }, "POST", admin2020.serializer.serialize({"puzzle_id": puzzle_id, "hint_time": text}));
-            });
-        });
-    }
 
     el = goog.dom.getElement("puzzleselect");
     if (el) {
@@ -748,6 +827,9 @@ window.onload = function() {
 
     if (team_username && !puzzle_id) {
         admin2020.team_page = new A2020_TeamPage();
+    }
+    if (puzzle_id && !team_username) {
+        admin2020.puzzle_page = new A2020_PuzzlePage();
     }
 }
 

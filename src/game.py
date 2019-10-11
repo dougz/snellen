@@ -1110,6 +1110,12 @@ class Puzzle:
     admin_user = login.AdminUser.get_by_username(admin_user)
     self.puzzle_log.add(now, f"Hint time set to {util.format_duration(new_time)} by {admin_user.fullname}.")
     self.maybe_open_hints(now)
+    self.invalidate()
+
+  def invalidate(self, flush=True):
+    d = {"method": "update",
+         "puzzle_id": self.shortname}
+    login.AdminUser.send_messages([d], flush=flush)
 
   def maybe_open_hints(self, now):
     msg = [{"method": "hints_open", "puzzle_id": self.shortname, "title": self.title}]

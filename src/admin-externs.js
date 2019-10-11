@@ -94,6 +94,17 @@ class OpenPuzzle {
     }
 }
 
+class SolvedPuzzle {
+    constructor() {
+        /** @type{string} */
+        this.username;
+        /** @type{string} */
+        this.name;
+        /** @type{number} */
+        this.duration
+    }
+}
+
 class LogEntry {
     constructor() {
         /** @type{number} */
@@ -113,6 +124,18 @@ class TeamPageData {
         this.log;
     }
 }
+
+class PuzzlePageData {
+    constructor() {
+        /** @type{Array<SolvedPuzzle>} */
+        this.solves;
+        /** @type{Array<LogEntry>} */
+        this.log;
+        /** @type{number} */
+        this.hint_time;
+    }
+}
+
 
 class BBLandLabel {
     constructor() {

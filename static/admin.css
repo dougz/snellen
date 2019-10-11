@@ -236,6 +236,8 @@ div.box button {
 
 #tplog th { vertical-align: baseline; padding-right: 20px; text-align: right; color: #666; }
 #tplog td { vertical-align: baseline; padding-bottom: 20px; line-height: 1.4; }
+#pplog th { vertical-align: baseline; padding-right: 20px; text-align: right; color: #666; }
+#pplog td { vertical-align: baseline; padding-bottom: 20px; line-height: 1.4; }
 .explain { font-family: 'Inconsolata', monospace; font-size: 84%; }
 
 

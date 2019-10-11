@@ -54,7 +54,7 @@
     </td>
   </tr>
   {% end %}
-  <tr><th>hint open time</th><td>{{format_duration(puzzle.hints_available_time)}}
+  <tr><th>hint open time</th><td><span id="pphinttime"></span>
       <span id=hinttimechangeentry>
         <input type=text id=newhinttime placeholder="h:mm:ss" size=10 maxlength=8></input>
         <button id=newhinttimesubmit>Submit</button>
@@ -62,18 +62,10 @@
       <a id=hinttimechange>Change</a>
   </td></tr>
 
-  <tr><th class=top>solves ({{len(solve_list)}})</th>
-    <td>
-      {% for i, (_, t, d) in enumerate(solve_list) %}
-      {% if i > 0 %}<br>{% end %}
-      {% if i >= 5 %}
-      &hellip; and {{len(solve_list)-5}} more &hellip;
-      {% break %}
-      {% end %}
-      <a href="/admin/team/{{t.username}}/puzzle/{{puzzle.shortname}}">{{t.name}}</a> ({{d}})
-      {% end %}
-    </td>
-  <tr><th>go to team</th>
+  <tr><th class=top>solves (<span id="ppsolvecount"></span>)</th>
+    <td id="ppsolvelist"></td>
+  </tr>
+  <tr><th class=center>go to team</th>
     <td>
       <div id="teamselect" class="ac-select">
         <input class="ac-select-input"></input>
@@ -83,22 +75,11 @@
   </tr>
 </table>
 
-<p><b>BTS hack:</b> <a href="/admin/openhints/{{puzzle.shortname}}">make hints available</a></p>
-
-
 <div id="for_ops">
   {% raw puzzle.for_ops_body %}
 </div>
 
 <h2>Puzzle activity log</h2>
-<table id="teamlog">
-  {% for e in puzzle.puzzle_log.entries %}
-  <tr><th>{{format_timestamp(e.when)}}</th><td>
-      {% for i, h in enumerate(e.htmls) %}
-      {% if i > 0 %}<br>{% end %}{% raw h %}
-      {% end %}
-  </td></tr>
-  {% end %}
-</table>
+<table id="pplog"></table>
 
 {% end %}
