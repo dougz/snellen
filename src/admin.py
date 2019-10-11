@@ -112,28 +112,26 @@ class TeamPuzzlePage(util.AdminPageHandler):
   def get(self, username, shortname):
     team = self.get_team(username)
     puzzle = self.get_puzzle(shortname)
-
-    state = team.puzzle_state[puzzle]
-    if state.state == state.SOLVED:
-      dur = state.solve_time - state.open_time
-      dur = "(" + util.format_duration(dur) + " after open)"
-    else:
-      dur = ""
-
-    self.render("admin_team_puzzle_page.html", state=state, solve_duration=dur)
+    self.render("admin_team_puzzle_page.html")
 
 
-class HintHistoryHandler(util.AdminHandler):
+class TeamPuzzleDataHandler(util.AdminHandler):
   @login.required("admin")
   def get(self, username, shortname):
     team = self.get_team(username)
-    state = team.get_puzzle_state(shortname)
-    if not state:
+    ps = team.get_puzzle_state(shortname)
+    if not ps:
       raise tornado.web.HTTPError(http.client.NOT_FOUND)
 
-    d = {"history": [msg.json_dict(for_admin=True) for msg in state.hints]}
-    if state.claim:
-      d["claim"] = state.claim.fullname
+    d = {"history": [msg.json_dict(for_admin=True) for msg in ps.hints],
+         "state": ps.state,
+         "log": ps.admin_log.get_data()}
+    if ps.open_time: d["open_time"] = ps.open_time
+    if ps.solve_time: d["solve_time"] = ps.solve_time
+    if ps.claim:
+      d["claim"] = ps.claim.fullname
+
+
     self.set_header("Content-Type", "application/json")
     self.write(json.dumps(d))
 
@@ -301,26 +299,29 @@ class HintQueueHandler(util.AdminHandler):
 
 class HintClaimHandler(util.AdminHandler):
   @login.required("admin")
-  def get(self, un, username, shortname):
+  def get(self, openpage, un, username, shortname):
     team = self.get_team(username)
     puzzle = self.get_puzzle(shortname)
     ps = team.puzzle_state[puzzle]
     if un:
       if ps.claim:
         ps.claim = None
-        login.AdminUser.send_messages([{"method": "hint_history",
+        login.AdminUser.send_messages([{"method": "update",
                                         "team_username": team.username,
-                                        "puzzle_id": puzzle.shortname}])
+                                        "puzzle_id": puzzle.shortname}], flush=True)
         game.Global.STATE.hint_queue.change()
     else:
       if ps.claim is None:
         ps.claim = self.user
-        login.AdminUser.send_messages([{"method": "hint_history",
+        login.AdminUser.send_messages([{"method": "update",
                                         "team_username": team.username,
-                                        "puzzle_id": puzzle.shortname}])
+                                        "puzzle_id": puzzle.shortname}], flush=True)
         game.Global.STATE.hint_queue.change()
 
-    self.redirect(f"/admin/team/{username}/puzzle/{shortname}")
+    if openpage:
+      self.redirect(f"/admin/team/{team.username}/puzzle/{puzzle.shortname}")
+    else:
+      self.set_status(http.client.NO_CONTENT.value)
 
 class HintTimeChangeHandler(util.AdminHandler):
   def prepare(self):
@@ -441,14 +442,13 @@ def GetHandlers():
     (r"/admin/users$", AdminUsersPage),
 
     (r"/admin/(set|clear)_role/([^/]+)/([^/]+)$", UpdateAdminRoleHandler),
-    (r"/admin/(un)?claim/([a-z0-9_]+)/([a-z0-9_]+)$", HintClaimHandler),
+    (r"/admin/(open)?(un)?claim/([a-z0-9_]+)/([a-z0-9_]+)$", HintClaimHandler),
     (r"/admin/become/([a-z0-9_]+)$", BecomeTeamHandler),
     (r"/admin/bestowfastpass/([a-z0-9_]+)$", BestowFastpassHandler),
     (r"/admin/bb/hintqueue$", BigBoardHintQueueDataHandler),
     (r"/admin/bb/team(/[a-z0-9_]+)?$", BigBoardTeamDataHandler),
     (r"/admin/change_password$", ChangePasswordHandler),
     (r"/admin/create_user$", CreateUserHandler),
-    (r"/admin/hinthistory/([a-z0-9_]+)/([a-z0-9_]+)$", HintHistoryHandler),
     (r"/admin/hintqueuedata$", HintQueueHandler),
     (r"/admin/hintreply$", HintReplyHandler),
     (r"/admin/hinttimechange$", HintTimeChangeHandler),
@@ -457,6 +457,7 @@ def GetHandlers():
     (r"/admin/team_json/.*", TeamJsonHandler),
     (r"/admin/js/team/([a-z0-9_]+)$", TeamDataHandler),
     (r"/admin/js/puzzle/([a-z0-9_]+)$", PuzzleDataHandler),
+    (r"/admin/js/teampuzzle/([a-z0-9_]+)/([a-z0-9_]+)$", TeamPuzzleDataHandler),
     ]
   return handlers
 

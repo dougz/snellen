@@ -28,26 +28,6 @@ class Message {
     }
 }
 
-class HintMessage {
-    constructor() {
-        /** @type{string} */
-        this.sender;
-        /** @type{number} */
-        this.when;
-        /** @type{string} */
-        this.text;
-    }
-}
-
-class HintHistory {
-    constructor() {
-        /** @type{Array<HintMessage>} */
-        this.history;
-        /** @type{?string} */
-        this.claim;
-    }
-}
-
 class HintQueue {
     constructor() {
         /** @type{Array<HintQueueItem>} */
@@ -135,6 +115,35 @@ class PuzzlePageData {
         this.hint_time;
     }
 }
+
+class HintMessage {
+    constructor() {
+        /** @type{string} */
+        this.sender;
+        /** @type{number} */
+        this.when;
+        /** @type{string} */
+        this.text;
+    }
+}
+
+class TeamPuzzlePageData {
+    constructor() {
+        /** @type{Array<HintMessage>} */
+        this.history;
+        /** @type{?string} */
+        this.claim;
+        /** @type{string} */
+        this.state;
+        /** @type{?number} */
+        this.open_time;
+        /** @type{?number} */
+        this.solve_time;
+        /** @type{Array<LogEntry>} */
+        this.log;
+    }
+}
+
 
 
 class BBLandLabel {

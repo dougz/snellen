@@ -238,6 +238,8 @@ div.box button {
 #tplog td { vertical-align: baseline; padding-bottom: 20px; line-height: 1.4; }
 #pplog th { vertical-align: baseline; padding-right: 20px; text-align: right; color: #666; }
 #pplog td { vertical-align: baseline; padding-bottom: 20px; line-height: 1.4; }
+#tpplog th { vertical-align: baseline; padding-right: 20px; text-align: right; color: #666; }
+#tpplog td { vertical-align: baseline; padding-bottom: 20px; line-height: 1.4; }
 .explain { font-family: 'Inconsolata', monospace; font-size: 84%; }
 
 
@@ -245,28 +247,28 @@ body > p, body > h2 {
     margin: 20px;
 }
 
-#hinthistory {
+#tpphinthistory {
     color: #222;
 }
 
-#hinthistory dt {
+#tpphinthistory dt {
     margin-top: 8px;
     color: #000;
     font-weight: bold;
 }
 
-#hinthistory dd {
+#tpphinthistory dd {
     margin-top: 4px;
 }
 
-#replycontainer {
+#tppreplycontainer {
     display: flex;
     flex-direction: column;
     align-items: stretch;
     width: 900px;
 }
 
-#replytext {
+#tppreplytext {
     font-family: 'Merriweather Sans', sans-serif;
     width: 100%;
     padding: 8px;
@@ -274,7 +276,7 @@ body > p, body > h2 {
     box-sizing: border-box;
 }
 
-#replybuttoncontainer {
+#tppreplybuttoncontainer {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -284,7 +286,7 @@ body > p, body > h2 {
     flex-grow: 100;
 }
 
-#hintreply {
+#tpphintreply {
     font-family: 'Merriweather Sans', sans-serif;
     color: white;
     font-size: 100%;
@@ -298,17 +300,18 @@ body > p, body > h2 {
     outline: none;
 }
 
-#hintreply:focus {
+#tpphintreply:focus {
     color: yellow;
     border: 1px solid #819ac7;
     background: linear-gradient(to bottom, #436299, #4c70af);
 }
 
-#hintclaim {
+#tpphintclaim {
     margin: 0 20px;
 }
 
-#claimlink {
+#tppclaimlink {
+    font-family: 'Merriweather Sans', sans-serif;
     display: none;
     color: white;
     font-size: 100%;
@@ -319,7 +322,8 @@ body > p, body > h2 {
     background: linear-gradient(to bottom, #4c70af, #436299);
 }
 
-#unclaimlink {
+#tppunclaimlink {
+    font-family: 'Merriweather Sans', sans-serif;
     display: none;
     color: white;
     font-size: 100%;

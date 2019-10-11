@@ -116,7 +116,7 @@ class HintQueue:
                 "when": ts,
                 "claimant": ps.claim.fullname if ps.claim else None,
                 "target": f"/admin/team/{ps.team.username}/puzzle/{ps.puzzle.shortname}",
-                "claim": f"/admin/claim/{ps.team.username}/{ps.puzzle.shortname}"})
+                "claim": f"/admin/openclaim/{ps.team.username}/{ps.puzzle.shortname}"})
       total += 1
       if ps.claim: claimed += 1
     q.sort(key=lambda d: (d["when"], d["puzzle"]))
@@ -749,7 +749,7 @@ class Team(login.LoginUser):
     state = self.puzzle_state[puzzle]
 
     team_message = {"method": "hint_history",
-                     "puzzle_id": puzzle.shortname}
+                    "puzzle_id": puzzle.shortname}
     if sender is None:
       sender = self
       Global.STATE.hint_queue.add(state)
@@ -764,9 +764,9 @@ class Team(login.LoginUser):
     state.hints.append(msg)
 
     self.send_messages([team_message])
-    login.AdminUser.send_messages([{"method": "hint_history",
+    login.AdminUser.send_messages([{"method": "update",
                                     "team_username": self.username,
-                                    "puzzle_id": puzzle.shortname}])
+                                    "puzzle_id": puzzle.shortname}], flush=True)
 
   def compute_puzzle_beam(self, now):
     #print("-----------------------------")
@@ -1203,7 +1203,7 @@ class Global:
       team.invalidate(flush=False)
     if timed and not save_state.REPLAYING:
       asyncio.create_task(self.notify_event_start())
-      asyncio.create_task(login.AdminUser.flush_messages())
+    asyncio.create_task(login.AdminUser.flush_messages())
 
   async def notify_event_start(self):
     for team in Team.BY_USERNAME.values():

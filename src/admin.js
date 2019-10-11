@@ -64,7 +64,6 @@ class A2020_Waiter {
 class A2020_Dispatcher {
     constructor() {
         this.methods = {
-            "hint_history": this.hint_history,
             "hint_queue": this.hint_queue,
             "update": this.update,
         }
@@ -72,17 +71,7 @@ class A2020_Dispatcher {
 
     /** @param{Message} msg */
     dispatch(msg) {
-        console.log(msg);
         this.methods[msg.method](msg);
-    }
-
-    /** @param{Message} msg */
-    hint_history(msg) {
-        if (admin2020.hinthistory &&
-            msg.puzzle_id == puzzle_id &&
-            msg.team_username == team_username) {
-            admin2020.hinthistory.update_history();
-        }
     }
 
     /** @param{Message} msg */
@@ -101,43 +90,66 @@ class A2020_Dispatcher {
             if (admin2020.bigboard) {
                 admin2020.bigboard.refresh_team(msg.team_username);
             }
-            if (admin2020.team_page && team_username == msg.team_username) {
-                admin2020.team_page.update();
+            if (team_username == msg.team_username) {
+                if (admin2020.team_page) admin2020.team_page.update();
+                if (admin2020.team_puzzle_page && puzzle_id == msg.puzzle_id) {
+                    admin2020.team_puzzle_page.update();
+                }
             }
         }
-        if (msg.puzzle_id) {
-            if (admin2020.puzzle_page && puzzle_id == msg.puzzle_id) {
-                admin2020.puzzle_page.update();
-            }
+        if (msg.puzzle_id && puzzle_id == msg.puzzle_id && admin2020.puzzle_page) {
+            admin2020.puzzle_page.update();
         }
     }
 }
 
 
-class A2020_HintHistory {
+class A2020_TeamPuzzlePage {
     constructor() {
-        /** @type{Object|null} */
-        this.serializer = new goog.json.Serializer();
+        /** @type{Element} */
+        this.textarea = goog.dom.getElement("tppreplytext");
 
         /** @type{Element} */
-        this.textarea = goog.dom.getElement("replytext");
-        this.textarea.focus();
+        this.history = goog.dom.getElement("tpphinthistory");
 
         /** @type{Element} */
-        this.history = goog.dom.getElement("hinthistory");
+        this.claim = goog.dom.getElement("tpphintclaim");
 
         /** @type{Element} */
-        this.claim = goog.dom.getElement("hintclaim");
+        this.claimlink = goog.dom.getElement("tppclaimlink");
+        /** @type{Element} */
+        this.unclaimlink = goog.dom.getElement("tppunclaimlink");
 
         /** @type{Element} */
-        this.claimlink = goog.dom.getElement("claimlink");
+        this.tppstate = goog.dom.getElement("tppstate");
         /** @type{Element} */
-        this.unclaimlink = goog.dom.getElement("unclaimlink");
+        this.tppopen = goog.dom.getElement("tppopen");
+        /** @type{Element} */
+        this.tppsolve = goog.dom.getElement("tppsolve");
 
-        var b = goog.dom.getElement("hintreply");
-        goog.events.listen(b, goog.events.EventType.CLICK, goog.bind(this.submit, this));
+        /** @type{Element} */
+        this.tpplog = goog.dom.getElement("tpplog");
 
-        this.update_history();
+        goog.events.listen(goog.dom.getElement("tpphintreply"),
+                           goog.events.EventType.CLICK, goog.bind(this.submit, this));
+
+        goog.events.listen(this.claimlink, goog.events.EventType.CLICK,
+                           goog.bind(this.do_claim, this, "claim"));
+        goog.events.listen(this.unclaimlink, goog.events.EventType.CLICK,
+                           goog.bind(this.do_claim, this, "unclaim"));
+
+        this.update();
+    }
+
+    do_claim(which) {
+        goog.net.XhrIo.send(
+            "/admin/" + which + "/" + team_username + "/" + puzzle_id,
+            function(e) {
+                var code = e.target.getStatus();
+                if (code != 204) {
+                    alert(e.target.getResponseText());
+                }
+            });
     }
 
     submit() {
@@ -149,24 +161,52 @@ class A2020_HintHistory {
             if (code != 204) {
                 alert(e.target.getResponseText());
             }
-        }, "POST", this.serializer.serialize({"team_username": team_username, "puzzle_id": puzzle_id, "text": text}));
+        }, "POST", admin2020.serializer.serialize({"team_username": team_username,
+                                                   "puzzle_id": puzzle_id,
+                                                   "text": text}));
     }
 
-    update_history() {
-        goog.net.XhrIo.send("/admin/hinthistory/" + team_username + "/" + puzzle_id, goog.bind(function(e) {
-            var code = e.target.getStatus();
-            if (code == 200) {
-                var response = /** @type{HintHistory} */ (e.target.getResponseJson());
-                this.render_history(response);
+    update() {
+        goog.net.XhrIo.send(
+            "/admin/js/teampuzzle/" + team_username + "/" + puzzle_id,
+            goog.bind(function(e) {
+                var code = e.target.getStatus();
+                if (code == 200) {
+                    this.build(e.target.getResponseJson());
+                } else {
+                    alert(e.target.getResponseText());
+                }
+            }, this));
+    }
+
+    /** @param{TeamPuzzlePageData} data */
+    build(data) {
+        goog.dom.classlist.set(this.tppstate, "puzzlestate-" + data.state);
+        this.tppstate.innerHTML = data.state;
+
+        if (data.open_time) {
+            this.tppopen.innerHTML = admin2020.time_formatter.format(data.open_time);
+            if (data.state == "open") {
+                this.tppopen.appendChild(goog.dom.createTextNode(" ("));
+                var sp = goog.dom.createDom("SPAN", "counter");
+                sp.setAttribute("data-since", data.open_time);
+                this.tppopen.appendChild(sp);
+                this.tppopen.appendChild(goog.dom.createTextNode(")"));
             }
-        }, this));
-    }
+        } else {
+            this.tppopen.innerHTML = "\u2014";
+        }
+        if (data.solve_time) {
+            this.tppsolve.innerHTML = admin2020.time_formatter.format(data.solve_time) +
+                " (" + admin2020.time_formatter.duration(data.solve_time - data.open_time) + ")";
+        } else {
+            this.tppsolve.innerHTML = "\u2014";
+        }
 
-    /** @param{HintHistory} response */
-    render_history(response) {
-        if (response.claim) {
+
+        if (data.claim) {
             this.claim.style.display = "inline";
-            this.claim.innerHTML = "Claimed by " + response.claim;
+            this.claim.innerHTML = "Claimed by " + data.claim;
             this.claimlink.style.display = "none";
             this.unclaimlink.style.display = "inline-block";
         } else {
@@ -175,23 +215,27 @@ class A2020_HintHistory {
             this.unclaimlink.style.display = "none";
         }
 
-        if (response.history.length == 0) {
+        if (data.history.length == 0) {
             this.history.innerHTML = "Team has not requested any hints.";
-            return;
+        } else {
+            this.history.innerHTML = "";
+            var dl = goog.dom.createDom("DL");
+            for (var i = 0; i < data.history.length; ++i) {
+                var msg = data.history[i];
+                var dt = goog.dom.createDom(
+                    "DT", null,
+                    "At " + admin2020.time_formatter.format(msg.when) + ", " + msg.sender + " wrote:");
+                var dd = goog.dom.createDom("DD", null);
+                dd.innerHTML = msg.text;
+                dl.appendChild(dt);
+                dl.appendChild(dd);
+            }
+            this.history.appendChild(dl);
         }
-        this.history.innerHTML = "";
-        var dl = goog.dom.createDom("DL");
-        for (var i = 0; i < response.history.length; ++i) {
-            var msg = response.history[i];
-            var dt = goog.dom.createDom(
-                "DT", null,
-                "At " + admin2020.time_formatter.format(msg.when) + ", " + msg.sender + " wrote:");
-            var dd = goog.dom.createDom("DD", null);
-            dd.innerHTML = msg.text;
-            dl.appendChild(dt);
-            dl.appendChild(dd);
-        }
-        this.history.appendChild(dl);
+
+        A2020_DisplayLog(this.tpplog, data.log);
+
+        admin2020.counter.reread();
     }
 }
 
@@ -438,6 +482,29 @@ class A2020_Autocomplete {
 
 }
 
+function A2020_DisplayLog(el, log) {
+    if (log.length == 0) {
+        el.innerHTML = "No activity.";
+        return;
+    }
+    el.innerHTML = "";
+    for (var i = 0; i < log.length; ++i) {
+        var e = log[i];
+        var td = goog.dom.createDom("TD");
+        for (var j = 0; j < e.htmls.length; ++j) {
+            if (j > 0) td.appendChild(goog.dom.createDom("BR"));
+            var sp = goog.dom.createDom("SPAN");
+            sp.innerHTML = e.htmls[j];
+            td.appendChild(sp);
+        }
+        var tr = goog.dom.createDom("TR",
+                                    null,
+                                    goog.dom.createDom("TH", null, admin2020.time_formatter.format(e.when)),
+                                    td);
+        el.appendChild(tr);
+    }
+}
+
 class A2020_TeamPage {
     constructor() {
         /** @type{Element} */
@@ -465,11 +532,12 @@ class A2020_TeamPage {
     update() {
         goog.net.XhrIo.send("/admin/js/team/" + team_username, goog.bind(function(e) {
             var code = e.target.getStatus();
-            if (code != 200) {
+            if (code == 200) {
+                this.build(e.target.getResponseJson());
+            } else {
                 alert(e.target.getResponseText());
             }
-            this.build(e.target.getResponseJson());
-        }, this), "GET");
+        }, this));
     }
 
     /** param{TeamPageData} data */
@@ -516,25 +584,7 @@ class A2020_TeamPage {
             }
         }
 
-        el = this.tplog;
-        el.innerHTML = "";
-        for (i = 0; i < data.log.length; ++i) {
-            var e = data.log[i];
-            var td = goog.dom.createDom("TD");
-            for (j = 0; j < e.htmls.length; ++j) {
-                if (j > 0) td.appendChild(goog.dom.createDom("BR"));
-                var sp = goog.dom.createDom("SPAN");
-                sp.innerHTML = e.htmls[j];
-                td.appendChild(sp);
-            }
-
-            var tr = goog.dom.createDom("TR",
-                                        null,
-                                        goog.dom.createDom("TH", null, admin2020.time_formatter.format(e.when)),
-                                        td);
-            el.appendChild(tr);
-        }
-
+        A2020_DisplayLog(this.tplog, data.log);
 
         admin2020.counter.reread();
     }
@@ -580,16 +630,16 @@ class A2020_PuzzlePage {
     update() {
         goog.net.XhrIo.send("/admin/js/puzzle/" + puzzle_id, goog.bind(function(e) {
             var code = e.target.getStatus();
-            if (code != 200) {
+            if (code == 200) {
+                this.build(e.target.getResponseJson());
+            } else {
                 alert(e.target.getResponseText());
             }
-            this.build(e.target.getResponseJson());
-        }, this), "GET");
+        }, this));
     }
 
     /** param{PuzzlePageData} data */
     build(data) {
-        console.log(data);
         this.ppsolvecount.innerHTML = "" + data.solves.length;
 
         var i, j, el;
@@ -609,24 +659,7 @@ class A2020_PuzzlePage {
             el.appendChild(goog.dom.createTextNode(" (" + admin2020.time_formatter.duration(so.duration) + ")"));
         }
 
-        this.pplog.innerHTML = "";
-        for (i = 0; i < data.log.length; ++i) {
-            var e = data.log[i];
-            var td = goog.dom.createDom("TD");
-            for (j = 0; j < e.htmls.length; ++j) {
-                if (j > 0) td.appendChild(goog.dom.createDom("BR"));
-                var sp = goog.dom.createDom("SPAN");
-                sp.innerHTML = e.htmls[j];
-                td.appendChild(sp);
-            }
-
-            var tr = goog.dom.createDom("TR",
-                                        null,
-                                        goog.dom.createDom("TH", null, admin2020.time_formatter.format(e.when)),
-                                        td);
-            this.pplog.appendChild(tr);
-        }
-
+        A2020_DisplayLog(this.pplog, data.log);
 
         admin2020.counter.reread();
     }
@@ -761,7 +794,6 @@ class A2020_BigBoard {
 var admin2020 = {
     waiter: null,
     counter: null,
-    hinthistory: null,
     hintqueue: null,
     time_formatter: null,
     serializer: null,
@@ -771,6 +803,7 @@ var admin2020 = {
     bigboard: null,
     team_page: null,
     puzzle_page: null,
+    team_puzzle_page: null,
 }
 
 window.onload = function() {
@@ -782,9 +815,6 @@ window.onload = function() {
 
     admin2020.counter = new A2020_Counter();
 
-    if (goog.dom.getElement("hinthistory")) {
-        admin2020.hinthistory = new A2020_HintHistory();
-    }
     if (goog.dom.getElement("hintqueue")) {
         admin2020.hintqueue = new A2020_HintQueue();
     }
@@ -830,6 +860,9 @@ window.onload = function() {
     }
     if (puzzle_id && !team_username) {
         admin2020.puzzle_page = new A2020_PuzzlePage();
+    }
+    if (puzzle_id && team_username) {
+        admin2020.team_puzzle_page = new A2020_TeamPuzzlePage();
     }
 }
 

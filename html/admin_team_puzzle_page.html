@@ -9,40 +9,28 @@
   <tr><th>team</th><td class=h1><a href="/admin/team/{{team.username}}">{{team.name}}</a></td></tr>
   <tr><th>puzzle</th><td class=h1><a href="/admin/puzzle/{{puzzle.shortname}}">{{puzzle.title}}</a></td></tr>
 
-  <tr><th>state</th><td class="puzzlestate-{{state.state}}">{{state.state}}
-      {% if state.state == "open" %}(<span class="counter" data-since="{{state.open_time}}">&mdash;</span>){% end %}
-  </td></tr>
-  <tr><th>open time</th><td>{{format_timestamp(state.open_time)}}</td></tr>
-  <tr><th>solve time</th><td>{{format_timestamp(state.solve_time)}} {{solve_duration}}</td></tr>
+  <tr><th>state</th><td id="tppstate"></td></tr>
+  <tr><th>open time</th><td id="tppopen"></td></tr>
+  <tr><th>solve time</th><td id="tppsolve"></td></tr>
 </table>
 
 <h2>Submission log</h2>
-{% if state.admin_log.entries %}
-<table id="teamlog">
-  {% for e in state.admin_log.entries %}
-  <tr><th>{{format_timestamp(e.when)}}</th><td>
-      {% for i, h in enumerate(e.htmls) %}
-      {% if i > 0 %}<br>{% end %}{% raw h %}
-      {% end %}
-  </td></tr>
-  {% end %}
-</table>
-{% else %}
-<p>No submissions yet.</p>
-{% end %}
+<table id="tpplog"></table>
 
 <h2>Hint thread</h2>
-<div id="hinthistory"></div>
-<div id="replycontainer">
-  <textarea rows=8 id="replytext"></textarea>
-  <div id="replybuttoncontainer">
-    <button id="hintreply">Send reply</button>
+<div id="tpphinthistory"></div>
+<div id="tppreplycontainer">
+  <textarea rows=8 id="tppreplytext"></textarea>
+  <div id="tppreplybuttoncontainer">
+    <button id="tpphintreply">Send reply</button>
     <span id="hspacer"></span>
-    <span id="hintclaim"></span>
-    <a id="claimlink" href="/admin/claim/{{team.username}}/{{puzzle.shortname}}">Claim</a>
-    <a id="unclaimlink" href="/admin/unclaim/{{team.username}}/{{puzzle.shortname}}">Unclaim</a>
+    <span id="tpphintclaim"></span>
+    <button id="tppclaimlink">Claim</button>
+    <button id="tppunclaimlink">Unclaim</button>
   </div>
-  <p class=note>All replies appear to teams as coming from "Hunt HQ", not you personally.  Teams can't see which HQ staffer wrote any reply.<p>
+  <p class=note>All replies appear to teams as coming from "Hunt HQ",
+  not you personally.  Teams can't see which HQ staffer wrote any
+  reply.<p>
 </div>
 
 
