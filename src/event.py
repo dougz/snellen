@@ -119,6 +119,13 @@ class AchievementPage(util.TeamPageHandler):
     self.session.visit_page("pins")
     self.render("achievements.html", achievements=game.Achievement.ALL)
 
+class AchievementDataHandler(util.TeamHandler):
+  @login.required("team")
+  def get(self):
+    ach = [{"name": a.name, "subtitle": a.subtitle} for a in self.team.achievements]
+    self.set_header("Content-Type", "application/json")
+    self.write(json.dumps(ach))
+
 class FastPassPage(util.TeamPageHandler):
   @login.required("team")
   def get(self):
@@ -247,6 +254,7 @@ def GetHandlers():
     (r"/hinthistory/([a-z][a-z0-9_]*)", HintHistoryHandler),
     (r"/fastpass/([a-z][a-z0-9_]*)$", ApplyFastPassHandler),
     (r"/js/log", ActivityLogDataHandler),
+    (r"/js/pins", AchievementDataHandler),
   ]
 
   return handlers

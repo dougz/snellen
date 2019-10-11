@@ -186,3 +186,13 @@ class ActivityLogData {
     }
 }
 
+class Achievement {
+    constructor() {
+        /** @type{string} */
+        this.name;
+        /** @type{string} */
+        this.subtitle;
+    }
+}
+
+

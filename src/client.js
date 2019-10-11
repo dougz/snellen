@@ -164,6 +164,7 @@ class H2020_Dispatcher {
         hunt2020.toast_manager.add_toast(
             "You received the <b>" + msg.title + "</b> pin!", 6000, null, "gold");
         if (hunt2020.activity) hunt2020.activity.update();
+        if (hunt2020.achievements) hunt2020.achievements.update();
     }
 
     /** @param{Message} msg */
@@ -1119,6 +1120,7 @@ var hunt2020 = {
     counter: null,
     fastpass: null,
     activity: null,
+    achievements: null,
 }
 
 /** @param{Node} e */
@@ -1199,6 +1201,11 @@ window.onload = function() {
         hunt2020.activity = new H2020_ActivityLog();
     }
 
+    // Only present on the achievements page.
+    if (goog.dom.getElement("pins")) {
+        hunt2020.achievements = new H2020_Achievements();
+    }
+
     // Only present on the fastpass page.
     if (goog.dom.getElement("fphavenone")) {
         hunt2020.fastpass = new H2020_FastPass();
@@ -1226,8 +1233,6 @@ class H2020_ActivityLog {
 
     /** param{ActivityLogData} data */
     build(data) {
-        console.log(data);
-
         if (data.log.length == 0) {
             this.log.innerHTML = "No activity.";
             return;
@@ -1247,6 +1252,33 @@ class H2020_ActivityLog {
                                         goog.dom.createDom("TH", null, hunt2020.time_formatter.format(e.when)),
                                         td);
             this.log.appendChild(tr);
+        }
+    }
+}
+
+class H2020_Achievements {
+    constructor() {
+        this.update();
+    }
+
+    update() {
+        goog.net.XhrIo.send("/js/pins", goog.bind(function(e) {
+            var code = e.target.getStatus();
+            if (code == 200) {
+                this.build(e.target.getResponseJson());
+            } else {
+                alert(e.target.getResponseText());
+            }
+        }, this));
+    }
+
+    /** param{Array<Achievement>} data */
+    build(data) {
+        for (var i = 0; i < data.length; ++i) {
+            var e = data[i];
+            var el = goog.dom.getElement("ach_" + e.name);
+            if (!el) continue;
+            goog.dom.classlist.addRemove(el, "no", "yes");
         }
     }
 }
