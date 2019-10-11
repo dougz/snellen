@@ -872,6 +872,7 @@ class H2020_MapDraw {
         for (var i = 0; i < mapdata.items.length; ++i) {
             this.draw_item(mapdata.items[i]);
         }
+        hunt2020.counter.reread();
     }
 
     draw_item(it) {
@@ -907,7 +908,9 @@ class H2020_MapDraw {
         if (it.name) {
             var a = [];
             if (it.new_open) {
-                a.push(goog.dom.createDom("SPAN", {className: "newopen"}, "NEW"));
+                var sp = goog.dom.createDom("SPAN", {className: "newopen counter"}, "NEW");
+                sp.setAttribute("data-expires", it.new_open);
+                a.push(sp);
             }
             a.push(goog.dom.createDom("A", {href: it.url}, it.name));
             if (it.answer) {
@@ -1032,6 +1035,7 @@ class H2020_Counter {
     }
 
     update() {
+        var dirty = false;
         var now = (new Date()).getTime() / 1000.0;
         for (var i = 0; i < this.els.length; ++i) {
             var el = this.els[i];
@@ -1044,9 +1048,17 @@ class H2020_Counter {
                     var d = until - now;
                     if (d < 0) d = 0;
                     el.innerHTML = hunt2020.time_formatter.duration(d);
+                } else {
+                    var expires = el.getAttribute("data-expires");
+
+                    if (expires && now > parseFloat(expires)) {
+                        el.parentNode.removeChild(el);
+                        dirty = true;
+                    }
                 }
             }
         }
+        if (dirty) this.reread();
     }
 }
 

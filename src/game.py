@@ -290,7 +290,7 @@ class Team(login.LoginUser):
   NEXT_SUBMIT_ID = 1
 
   # If a puzzle was opened less than this long ago, it gets a "new!" tag.
-  NEW_PUZZLE_SECONDS = 300  # 5 minutes
+  NEW_PUZZLE_SECONDS = 120  # 2 minutes
 
   cached_bb_label_info = None
 
@@ -411,7 +411,7 @@ class Team(login.LoginUser):
 
           if (now - ps.open_time < self.NEW_PUZZLE_SECONDS and
               ps.open_time != Global.STATE.event_start_time):
-            d["new_open"] = True
+            d["new_open"] = ps.open_time + self.NEW_PUZZLE_SECONDS
 
         elif ps.state == PuzzleState.SOLVED:
           d["solved"] = True
