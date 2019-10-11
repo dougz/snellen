@@ -149,18 +149,21 @@ class H2020_Dispatcher {
                 el.innerHTML = "Solved";
             }
         }
+        if (hunt2020.activity) hunt2020.activity.update();
     }
 
     /** @param{Message} msg */
     open(msg) {
         hunt2020.toast_manager.add_toast(
             "<b>" + msg.title + "</b> is now open!", 6000);
+        if (hunt2020.activity) hunt2020.activity.update();
     }
 
     /** @param{Message} msg */
     achieve(msg) {
         hunt2020.toast_manager.add_toast(
             "You received the <b>" + msg.title + "</b> pin!", 6000, null, "gold");
+        if (hunt2020.activity) hunt2020.activity.update();
     }
 
     /** @param{Message} msg */
@@ -170,6 +173,7 @@ class H2020_Dispatcher {
         if (hunt2020.fastpass) {
             hunt2020.fastpass.build(msg.fastpass);
         }
+        if (hunt2020.activity) hunt2020.activity.update();
     }
 
     /** @param{Message} msg */
@@ -185,6 +189,7 @@ class H2020_Dispatcher {
         if (hunt2020.fastpass) {
             hunt2020.fastpass.build(msg.fastpass);
         }
+        if (hunt2020.activity) hunt2020.activity.update();
     }
 
     /** @param{Message} msg */
@@ -1113,6 +1118,7 @@ var hunt2020 = {
     map_draw: null,
     counter: null,
     fastpass: null,
+    activity: null,
 }
 
 /** @param{Node} e */
@@ -1189,26 +1195,8 @@ window.onload = function() {
     }
 
     // Only present on the activity log page.
-    var log = goog.dom.getElement("log");
-    if (log) {
-        for (var i = 0; i < log_entries.length; ++i) {
-            var t = log_entries[i][0];
-            var htmls = log_entries[i][1];
-
-            var td = goog.dom.createDom("TD");
-
-            var tr = goog.dom.createDom("TR",
-                                        null,
-                                        goog.dom.createDom("TH", null, hunt2020.time_formatter.format(t)),
-                                        td);
-            for (var j = 0; j < htmls.length; ++j) {
-                if (j > 0) {
-                    td.innerHTML += "<br>";
-                }
-                td.innerHTML += htmls[j];
-            }
-            log.appendChild(tr);
-        }
+    if (goog.dom.getElement("log")) {
+        hunt2020.activity = new H2020_ActivityLog();
     }
 
     // Only present on the fastpass page.
@@ -1216,3 +1204,50 @@ window.onload = function() {
         hunt2020.fastpass = new H2020_FastPass();
     }
 }
+
+class H2020_ActivityLog {
+    constructor() {
+        /** @type{Element} */
+        this.log = goog.dom.getElement("log");
+
+        this.update();
+    }
+
+    update() {
+        goog.net.XhrIo.send("/js/log", goog.bind(function(e) {
+            var code = e.target.getStatus();
+            if (code == 200) {
+                this.build(e.target.getResponseJson());
+            } else {
+                alert(e.target.getResponseText());
+            }
+        }, this));
+    }
+
+    /** param{ActivityLogData} data */
+    build(data) {
+        console.log(data);
+
+        if (data.log.length == 0) {
+            this.log.innerHTML = "No activity.";
+            return;
+        }
+        this.log.innerHTML = "";
+        for (var i = 0; i < data.log.length; ++i) {
+            var e = data.log[i];
+            var td = goog.dom.createDom("TD");
+            for (var j = 0; j < e.htmls.length; ++j) {
+                if (j > 0) td.appendChild(goog.dom.createDom("BR"));
+                var sp = goog.dom.createDom("SPAN");
+                sp.innerHTML = e.htmls[j];
+                td.appendChild(sp);
+            }
+            var tr = goog.dom.createDom("TR",
+                                        null,
+                                        goog.dom.createDom("TH", null, hunt2020.time_formatter.format(e.when)),
+                                        td);
+            this.log.appendChild(tr);
+        }
+    }
+}
+

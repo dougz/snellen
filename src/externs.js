@@ -169,3 +169,20 @@ class FastPassState {
         this.usable_lands;
     }
 }
+
+class LogEntry {
+    constructor() {
+        /** @type{number} */
+        this.when;
+        /** @type{Array<string>} */
+        this.html;
+    }
+}
+
+class ActivityLogData {
+    constructor() {
+        /** @type{Array<LogEntry>} */
+        this.log;
+    }
+}
+

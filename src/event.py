@@ -104,8 +104,14 @@ class ActivityLogPage(util.TeamPageHandler):
   @login.required("team")
   def get(self):
     self.session.visit_page("activity")
-    json_data = """<script>var log_entries = """ + self.team.activity_log.json() + ";</script>"
-    self.render("activity_log.html", json_data=json_data)
+    self.render("activity_log.html")
+
+class ActivityLogDataHandler(util.TeamHandler):
+  @login.required("team")
+  def get(self):
+    d = {"log": self.team.activity_log.get_data()}
+    self.set_header("Content-Type", "application/json")
+    self.write(json.dumps(d))
 
 class AchievementPage(util.TeamPageHandler):
   @login.required("team")
@@ -240,6 +246,7 @@ def GetHandlers():
     (r"/hintrequest", HintRequestHandler),
     (r"/hinthistory/([a-z][a-z0-9_]*)", HintHistoryHandler),
     (r"/fastpass/([a-z][a-z0-9_]*)$", ApplyFastPassHandler),
+    (r"/js/log", ActivityLogDataHandler),
   ]
 
   return handlers
