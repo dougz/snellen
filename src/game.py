@@ -742,7 +742,6 @@ class Team(login.LoginUser):
     if not puzzle: return
     ps = self.puzzle_state[puzzle]
     if ps.hints_available: return
-    print(f"opening hints for {ps.puzzle.shortname} for {self.username}")
     ps.hints_available = True
     msg = [{"method": "hints_open", "puzzle_id": puzzle.shortname, "title": puzzle.title}]
     self.send_messages(msg)

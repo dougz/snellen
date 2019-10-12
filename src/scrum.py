@@ -145,6 +145,9 @@ class ScrumApp:
     team.size = size
     return team, key
 
+  async def on_wait(self, team, session, wid):
+    pass
+
 
 class Waiter:
   # If we replied to a waiter more than this long ago and haven't
@@ -197,14 +200,10 @@ class Waiter:
         except asyncio.TimeoutError:
           pass
 
-  async def on_wait(self, team, session):
-    pass
-
-
 
 class WaitHandler(tornado.web.RequestHandler):
-  WAIT_TIMEOUT = 600
-  WAIT_SMEAR = 60
+  DEFAULT_WAIT_TIMEOUT = 600
+  DEFAULT_WAIT_SMEAR = 60
 
   def initialize(self, scrum_app):
     self.scrum_app = scrum_app
@@ -217,14 +216,17 @@ class WaitHandler(tornado.web.RequestHandler):
 
     waiter = Waiter.get_waiter(wid, team)
 
+    wait_timeout = getattr(self.scrum_app, "WAIT_TIMEOUT", self.DEFAULT_WAIT_TIMEOUT)
+    wait_smear = getattr(self.scrum_app, "WAIT_SMEAR", self.DEFAULT_WAIT_SMEAR)
+
     # Choose the timeout for the first wait evenly across the whole
     # interval, to avoid the thundering herd problem.
     if received_serial == 0:
-      timeout = random.random() * (self.WAIT_TIMEOUT + self.WAIT_SMEAR)
+      timeout = random.random() * (wait_timeout + wait_smear)
     else:
-      timeout = self.WAIT_TIMEOUT + random.random() * self.WAIT_SMEAR
+      timeout = wait_timeout + random.random() * wait_smear
 
-    await self.scrum_app.on_wait(team, session)
+    await self.scrum_app.on_wait(team, session, wid)
 
     msgs = await waiter.wait(received_serial, timeout)
 
