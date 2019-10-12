@@ -112,8 +112,10 @@ class ScrumApp:
 
   async def check_session(self, key):
     key = key.decode("ascii")
-    team = self.session_cache.get(key)
-    if team: return team
+    v = self.session_cache.get(key)
+    if v:
+      team, expiration, size = v
+      if team and expiration > time.time(): return team, size
 
     req = tornado.httpclient.HTTPRequest(
       f"http://localhost:{self.options.main_server_port}/checksession/{key}",
@@ -121,10 +123,14 @@ class ScrumApp:
       request_timeout=10.0)
     try:
       response = await self.client.fetch(req)
-      team = response.body.decode("ascii")
-      if team:
-        self.session_cache[key] = team
-        return team
+      reply = response.body.decode("utf-8")
+      if reply:
+        d = json.loads(reply)
+        team = d["group"]
+        expiration = d["expire"] - 15
+        size = d["size"]
+        self.session_cache[key] = (team, expiration, size)
+        return team, size
     except tornado.httpclient.HTTPClientError as e:
       pass
 
@@ -134,8 +140,10 @@ class ScrumApp:
     key = req.get_secure_cookie("SESSION") # login.Session.COOKIE_NAME
     if not key:
       raise tornado.web.HTTPError(http.client.UNAUTHORIZED)
-    team = await self.check_session(key)
-    return ProxyTeam.get_team(team), key
+    team, size = await self.check_session(key)
+    team = ProxyTeam.get_team(team)
+    team.size = size
+    return team, key
 
 
 class Waiter:

@@ -81,16 +81,19 @@ class CheckSessionHandler(tornado.web.RequestHandler):
   def get(self, key):
     key = key.encode("ascii")
     session = login.Session.from_key(key)
-    self.set_header("Content-Type", "text/plain")
+    self.set_header("Content-Type", "application/json")
     if session is not None:
       session.expires = int(time.time()) + session.SESSION_TIMEOUT
       group = None
+      d = {"expire": int(session.expires)}
       if hasattr(session, "team") and session.team:
         group = session.team.username
+        d["size"] = session.team.size
       elif hasattr(session, "user") and session.user:
         group = "__ADMIN"
       if group:
-        self.write(f"{group} {int(session.expires)}")
+        d["group"] = group
+        self.write(json.dumps(d))
 
 def GetHandlers():
   return [
@@ -168,8 +171,10 @@ class Client:
       raise tornado.web.HTTPError(http.client.UNAUTHORIZED)
 
     key = key.decode("ascii")
-    team, expiration = self.session_cache.get((key, wid), (None, None))
-    if team and expiration > time.time(): return team
+    v = self.session_cache.get((key, wid))
+    if v:
+      team, expiration, size = v
+      if team and expiration > time.time(): return team
 
     req = tornado.httpclient.HTTPRequest(
       f"http://localhost:{self.options.wait_proxy_port}/checksession/{key}",
@@ -177,12 +182,14 @@ class Client:
       request_timeout=10.0)
     try:
       response = await self.client.fetch(req)
-      reply = response.body.decode("ascii")
+      reply = response.body.decode("utf-8")
       if reply:
-        team, expiration = reply.split()
-        expiration = int(expiration)
+        d = json.loads(reply)
+        team = d["group"]
+        expiration = d["expire"]
         expiration -= WaitHandler.WAIT_TIMEOUT + WaitHandler.WAIT_SMEAR
-        self.session_cache[(key, wid)] = (team, expiration)
+        size = d.get("size", None)
+        self.session_cache[(key, wid)] = (team, expiration, size)
         return team
     except tornado.httpclient.HTTPClientError as e:
       pass

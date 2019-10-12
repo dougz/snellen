@@ -794,6 +794,8 @@ class Team(login.LoginUser):
           open_count = 3
         elif land.shortname == "space":
           open_count = 1 if self.score >= 8 else 0
+        elif land.shortname == "bigtop":
+          open_count = 1 if self.score >= 10 else 0
         else:
           print(f"DON'T KNOW WHEN TO OPEN {land_name}!")
           continue
