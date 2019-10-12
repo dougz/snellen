@@ -1018,6 +1018,7 @@ class Puzzle:
     tag = (string.ascii_uppercase[h[0] % 26] +
            string.ascii_uppercase[h[1] % 26] +
            string.ascii_uppercase[h[2] % 26])
+    height = (0, 100, 200, 400, 800, 1600, 3200)[h[3]%7]
 
     shortname = f"{tag.lower()}_placeholder_{number}"
     self = cls(shortname)
@@ -1045,7 +1046,8 @@ class Puzzle:
         self.answers = {tag}
         self.display_answers = {tag: tag}
         self.incorrect_responses = {}
-        self.html_body = f"<p>The answer to this placeholder puzzle is <b>{tag}</b>.</p>"
+        self.html_body = (f"<p>The answer to this placeholder puzzle is <b>{tag}</b>.</p>"
+                          f"<div style=\"height: {height}px;\"></div><p>Hello.</p>")
     else:
       self.answers = set()
       self.display_answers = {}
