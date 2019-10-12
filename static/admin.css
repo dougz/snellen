@@ -199,15 +199,7 @@ div.box input {
 }
 
 div.box button {
-    font-family: 'Merriweather Sans', sans-serif;
-    color: white;
-    font-size: 100%;
-    padding: 8px 16px;
     margin: 8px 8px;
-    box-sizing: border-box;
-    border: 1px solid #395483;
-    border-radius: 15px;
-    background: linear-gradient(to bottom, #4c70af, #436299);
 }
 
 
@@ -243,10 +235,54 @@ div.box button {
 #tpplog b { font-family: 'Inconsolata', monospace; }
 .explain { font-family: 'Inconsolata', monospace; font-size: 84%; }
 
-
 body > p, body > h2 {
     margin: 20px;
 }
+
+#tpnotebuttons {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 900px;
+}
+
+#tpnotetext {
+    display: block;
+    width: 900px;
+}
+
+.action {
+    font-family: 'Merriweather Sans', sans-serif;
+    color: white;
+    font-size: 100%;
+    padding: 8px 16px;
+    margin: 8px 0 8px 0;
+    box-sizing: border-box;
+    border: 1px solid #395483;
+    border-radius: 15px;
+    background: linear-gradient(to bottom, #4c70af, #436299);
+    outline: none;
+}
+.action:focus, .action:hover {
+    color: yellow;
+    border: 1px solid #819ac7;
+    background: linear-gradient(to bottom, #436299, #4c70af);
+}
+
+.miniaction {
+    font-family: 'Merriweather Sans', sans-serif;
+    color: white;
+    font-size: 70%;
+    padding: 0 8px;
+    margin: 4px 0 4px 0;
+    box-sizing: border-box;
+    border: 1px solid #395483;
+    border-radius: 15px;
+    background: linear-gradient(to bottom, #4c70af, #436299);
+    outline: none;
+}
+
+
 
 #tpphinthistory {
     color: #222;
@@ -288,23 +324,7 @@ body > p, body > h2 {
 }
 
 #tpphintreply {
-    font-family: 'Merriweather Sans', sans-serif;
-    color: white;
-    font-size: 100%;
-    padding: 8px 16px;
-    margin: 8px 0 8px 0;
-    box-sizing: border-box;
-    border: 1px solid #395483;
-    border-radius: 15px;
     width: 332px;
-    background: linear-gradient(to bottom, #4c70af, #436299);
-    outline: none;
-}
-
-#tpphintreply:focus {
-    color: yellow;
-    border: 1px solid #819ac7;
-    background: linear-gradient(to bottom, #436299, #4c70af);
 }
 
 #tpphintclaim {
@@ -312,36 +332,20 @@ body > p, body > h2 {
 }
 
 #tppclaimlink {
-    font-family: 'Merriweather Sans', sans-serif;
     display: none;
-    color: white;
-    font-size: 100%;
-    padding: 4px 16px;
-    box-sizing: border-box;
-    border: 1px solid #395483;
-    border-radius: 8px;
-    background: linear-gradient(to bottom, #4c70af, #436299);
 }
 
 #tppunclaimlink {
-    font-family: 'Merriweather Sans', sans-serif;
     display: none;
-    color: white;
-    font-size: 100%;
-    padding: 4px 16px;
-    box-sizing: border-box;
-    border: 1px solid #395483;
-    border-radius: 8px;
-    background: linear-gradient(to bottom, #4c70af, #436299);
 }
 
 p.note {
-    width: 800px;
     text-align: center;
     margin-left: 20px;
     font-size: 70%;
     color: #333;
 }
+
 
 #hintqueue {
     border-collapse: collapse;
@@ -376,14 +380,8 @@ p.note {
 .hqclaim { padding: 4px; }
 .hqclaim a {
     display: block;
-    color: white;
-    font-size: 100%;
-    margin: 0 20px 0 8px;
     padding: 4px 16px;
-    box-sizing: border-box;
-    border: 1px solid #395483;
-    border-radius: 8px;
-    background: linear-gradient(to bottom, #4c70af, #436299);
+    margin: 0 20px 0 8px;
 }
 
 .tabular {
@@ -401,7 +399,6 @@ p.note {
 
 #hinttimechange {
     margin-left: 20px;
-    font-size: 70%;
 }
 
 .ac label {

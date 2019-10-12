@@ -14,9 +14,9 @@
   <tr><th>username</th><td class=mono>{{team.username}}</td></tr>
   <tr><th></th><td><a href="/admin/become/{{team.username}}">become this team</a></td></tr>
   <tr><th>location</th><td>{{team.attrs.get("location", "Unknown")}}</td></tr>
-  <tr><th>fastpasses</th><td>
+  <tr><th class=center>fastpasses</th><td>
       <span id=tpfastpass></span>
-      <button id=bestowfastpass>Bestow fastpass</button>
+      <button id=bestowfastpass class=action>Bestow fastpass</button>
   </td></tr>
   <tr><th class=top>open puzzles (<span id=tpopencount></span>)</th>
     <td id=tpopenlist></td>
@@ -30,6 +30,17 @@
     </td>
   </tr>
 </table>
+
+<h2>Add note</h2>
+<div id="tpnotecontainer">
+  <textarea rows=6 id="tpnotetext"></textarea>
+  <div id="tpnotebuttons">
+    <button id="tpaddnote" class="action">Add note</button>
+    <span id="hspacer"></span>
+    <p class=note>Notes are not visible to teams, only to other Hunt HQ
+      staffers.<p>
+  </div>
+</div>
 
 <h2>Activity log</h2>
 <table id="tplog"></table>

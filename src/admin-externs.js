@@ -90,7 +90,7 @@ class LogEntry {
         /** @type{number} */
         this.when;
         /** @type{Array<string>} */
-        this.html;
+        this.htmls;
     }
 }
 
@@ -163,3 +163,22 @@ class BBLabelInfo {
         this.lands;
     }
 }
+
+class BBTeamData {
+    constructor() {
+        /** @type{number} */
+        this.score;
+        /** @type{number} */
+        this.score_change;
+        /** @type{string} */
+        this.name;
+        /** @type{string} */
+        this.username;
+        /** @type{string} */
+        this.svg;
+        /** @type{?Element} */
+        this.el;
+    }
+}
+
+

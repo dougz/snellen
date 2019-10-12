@@ -380,6 +380,11 @@ class Team(login.LoginUser):
       self.record_achievement(ach.name, delay)
       return True
 
+  @save_state
+  def add_admin_note(self, now, user_fullname, text):
+    self.admin_log.add(now, f"<b>{user_fullname}</b> noted: {text}")
+    self.invalidate()
+
   def get_land_data(self, land):
     items = []
     mapdata = {"base_url": land.base_img, "shortname": land.shortname}

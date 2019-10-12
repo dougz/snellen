@@ -175,7 +175,7 @@ class LogEntry {
         /** @type{number} */
         this.when;
         /** @type{Array<string>} */
-        this.html;
+        this.htmls;
     }
 }
 

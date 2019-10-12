@@ -163,6 +163,26 @@ class BecomeTeamHandler(util.AdminPageHandler):
       self.render("admin_become.html", team=team)
 
 
+class AddNoteHandler(util.AdminHandler):
+  def prepare(self):
+    self.args = json.loads(self.request.body)
+
+  @login.required("admin")
+  async def post(self):
+    username = self.args.get("team_username")
+    team = self.get_team(username)
+
+    text = self.args.get("note")
+    if not text:
+      raise tornado.web.HTTPError(http.client.BAD_REQUEST)
+    text = text.strip()
+    if text:
+      text = html.escape(text).replace("\n", "<br>")
+      team.add_admin_note(self.user.fullname, text)
+
+    self.set_status(http.client.NO_CONTENT.value)
+
+
 class HintReplyHandler(util.AdminHandler):
   def prepare(self):
     self.args = json.loads(self.request.body)
@@ -172,7 +192,7 @@ class HintReplyHandler(util.AdminHandler):
     username = self.args.get("team_username")
     team = self.get_team(username)
 
-    shortname = self.args.get("puzzle_id");
+    shortname = self.args.get("puzzle_id")
     puzzle = self.get_puzzle(shortname)
 
     text = self.args.get("text", "").strip()
@@ -452,6 +472,7 @@ def GetHandlers():
     (r"/admin/hintqueuedata$", HintQueueHandler),
     (r"/admin/hintreply$", HintReplyHandler),
     (r"/admin/hinttimechange$", HintTimeChangeHandler),
+    (r"/admin/addnote", AddNoteHandler),
 
     (r"/admin/puzzle_json/.*", PuzzleJsonHandler),
     (r"/admin/team_json/.*", TeamJsonHandler),

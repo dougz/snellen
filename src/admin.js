@@ -269,7 +269,7 @@ class A2020_HintQueue {
             var msg = response.queue[i];
             var td = goog.dom.createDom("TD", "hqtime counter", admin2020.time_formatter.duration(now-msg.when));
             td.setAttribute("data-since", msg.when);
-            var claimlink = goog.dom.createDom("A", {href: msg.claim, target: "_blank"}, "Claim");
+            var claimlink = goog.dom.createDom("A", {href: msg.claim, className: "action", target: "_blank"}, "Claim");
             if (msg.claimant) {
                 claimlink.style.visibility = "hidden";
             }
@@ -483,7 +483,7 @@ class A2020_Autocomplete {
 }
 
 function A2020_DisplayLog(el, log) {
-    if (log.length == 0) {
+    if (!log || log.length == 0) {
         el.innerHTML = "No activity.";
         return;
     }
@@ -505,6 +505,13 @@ function A2020_DisplayLog(el, log) {
     }
 }
 
+function A2020_expect_204(e) {
+    var code = e.target.getStatus();
+    if (code != 204) {
+        alert(e.target.getResponseText());
+    }
+}
+
 class A2020_TeamPage {
     constructor() {
         /** @type{Element} */
@@ -516,14 +523,22 @@ class A2020_TeamPage {
         /** @type{Element} */
         this.tplog = goog.dom.getElement("tplog");
 
-        var el = goog.dom.getElement("bestowfastpass");
+        var el;
+
+        el = goog.dom.getElement("bestowfastpass");
         goog.events.listen(el, goog.events.EventType.CLICK, function() {
-            goog.net.XhrIo.send("/admin/bestowfastpass/" + team_username, function(e) {
-                var code = e.target.getStatus();
-                if (code != 204) {
-                    alert(e.target.getResponseText());
-                }
-            });
+            goog.net.XhrIo.send("/admin/bestowfastpass/" + team_username, A2020_expect_204);
+        });
+
+        el = goog.dom.getElement("tpaddnote");
+        goog.events.listen(el, goog.events.EventType.CLICK, function() {
+            var el = goog.dom.getElement("tpnotetext");
+            var text = el.value;
+            if (!text) return;
+            goog.net.XhrIo.send("/admin/addnote", A2020_expect_204,
+                                "POST", admin2020.serializer.serialize({"team_username": team_username,
+                                                                        "note": text}));
+            el.value = "";
         });
 
         this.update();
@@ -561,13 +576,14 @@ class A2020_TeamPage {
             sp.setAttribute("data-since", op.open_time);
             el.appendChild(sp);
             el.appendChild(goog.dom.createTextNode(")"));
-            if (!op.answers_found) continue;
-            el.appendChild(goog.dom.createTextNode(" \u2014 "));
-            for (j = 0; j < op.answers_found.length; ++j) {
-                if (j > 0) {
-                    el.appendChild(goog.dom.createTextNode(", "));
+            if ("answers_found" in op) {
+                el.appendChild(goog.dom.createTextNode(" \u2014 "));
+                for (j = 0; j < op.answers_found.length; ++j) {
+                    if (j > 0) {
+                        el.appendChild(goog.dom.createTextNode(", "));
+                    }
+                    el.appendChild(goog.dom.createDom("SPAN", "answer", op.answers_found[j]));
                 }
-                el.appendChild(goog.dom.createDom("SPAN", "answer", op.answers_found[j]));
             }
         }
 
@@ -611,15 +627,9 @@ class A2020_PuzzlePage {
             goog.events.EventType.CLICK,
             function() {
                 var text = goog.dom.getElement("newhinttime").value;
-                goog.net.XhrIo.send(
-                    "/admin/hinttimechange",
-                    function(e) {
-                        var code = e.target.getStatus();
-                        if (code != 204) {
-                            alert(e.target.getResponseText());
-                        }
-                    }, "POST", admin2020.serializer.serialize({"puzzle_id": puzzle_id,
-                                                               "hint_time": text}));
+                goog.net.XhrIo.send("/admin/hinttimechange", A2020_expect_204, "POST",
+                                    admin2020.serializer.serialize({"puzzle_id": puzzle_id,
+                                                                    "hint_time": text}));
                 goog.dom.getElement("hinttimechange").style.display = "initial";
                 goog.dom.getElement("hinttimechangeentry").style.display = "none";
             });
@@ -671,7 +681,7 @@ class A2020_BigBoard {
         this.hintqueue = goog.dom.getElement("bbhintqueue");
         this.refresh_hintqueue();
 
-        this.team_data = null;
+        this.team_data = {};
         this.team_els = [];
 
         /** @type{Element} */
@@ -698,8 +708,10 @@ class A2020_BigBoard {
         }, this), "GET");
     }
 
+    /** @param{Object<string, BBTeamData>} data */
     update_all_teams(data) {
         this.team_data = data;
+        this.team_els = [];
 
         for (var i = 0; i < team_list.length; ++i) {
             var username = team_list[i][0];
@@ -711,15 +723,16 @@ class A2020_BigBoard {
             svg.innerHTML = d.svg;
 
             var el = goog.dom.createDom("DIV", "bb-row", score, name, svg);
-            el.setAttribute("data-username", username);
+            el.setAttribute("data-username", d.username);
 
-            this.team_data[username]["el"] = el;
+            d.el = el;
             this.team_els.push(el);
         }
 
         this.reorder_teams();
     }
 
+    /** @param{string} username */
     refresh_team(username) {
         // Can't refresh until we have the initial data.
         if (this.team_data === null) return;
@@ -733,10 +746,12 @@ class A2020_BigBoard {
         }, this), "GET");
     }
 
+    /** @param{string} username */
+    /** @param{BBTeamData} data */
     update_one_team(username, data) {
-        var el = this.team_data[username]["el"];
+        var el = this.team_data[username].el;
         this.team_data[username] = data;
-        this.team_data[username]["el"] = el;
+        this.team_data[username].el = el;
 
         var score = el.firstChild;
         score.innerHTML = "" + data.score;
@@ -785,6 +800,7 @@ class A2020_BigBoard {
         }, this), "GET");
     }
 
+    /** @param{BBHintQueue} data */
     update_hintqueue(data) {
         if (!data) return;
         this.hintqueue.innerHTML = "" + data.size + " (" + (data.size - data.claimed) + ")";
