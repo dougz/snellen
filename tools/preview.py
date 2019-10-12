@@ -118,6 +118,7 @@ class UploadHandler(tornado.web.RequestHandler):
                 "forest": "Enchanted Forest",
                 "space": "Spaceopolis",
                 "bigtop": "Big Top Carnival",
+                "movielot": "Penny Park Studios",
                 }
 
   def initialize(self, options):
