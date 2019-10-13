@@ -1,0 +1,19 @@
+[Unit]
+Description=Hunt 2020 Hat Venn-dor (badart)
+
+[Service]
+Type=simple
+Environment=HUNT2020_BASE=/sites/hunt2020
+Environment=PYTHONPATH=/sites/hunt2020/snellen/src
+WorkingDirectory=/sites/hunt2020/hat_venn_dor
+ExecStartPre=mkdir -p /run/sites
+ExecStart=/sites/hunt2020/hat_venn_dor/hat_venn_dor.py \
+  --socket_path /run/sites/hat_venn_dor \
+  --min_players=2
+
+# \
+#  --assets_json="${HUNT2020_BASE}/bts/puzzles/gallery_of_tomorrow.assets.json"
+
+[Install]
+WantedBy=hunt2020.target
+

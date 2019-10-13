@@ -8,7 +8,7 @@ WorkingDirectory=/sites/hunt2020/snellen
 ExecStartPre=mkdir -p /run/sites
 ExecStart=/sites/hunt2020/snellen/src/main.py \
   --socket_path /run/sites/snellen \
-  --event_dir "${HUNT2020_BASE}/bts" \
+  --event_dir "${HUNT2020_BASE}/test_event" \
   --template_path "${HUNT2020_BASE}/snellen/html" \
   --wait_proxies 5
 

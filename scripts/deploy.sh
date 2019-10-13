@@ -20,7 +20,7 @@ root="${t}/${version}"
 base="${t}/${version}${INSTALL_DIR}"
 debdir="${t}/${version}/DEBIAN"
 
-PUZZLE_SERVERS=(badart tugofwar tunnel_of_love)
+PUZZLE_SERVERS=(badart tugofwar tunnel_of_love hat_venn_dor)
 
 ##
 ## base server
@@ -50,6 +50,25 @@ PUZZLE_SERVERS=(badart tugofwar tunnel_of_love)
 (
     cd bts
     base="${base}/bts"
+    install -m 0755 -d "${base}"
+
+    for i in map_config.json teams.json admins.json; do
+	install -m 0644 $i "${base}/${i}"
+    done
+
+    install -m 0755 -d "${base}/puzzles"
+    for i in puzzles/*.json; do
+	install -m 0644 $i "${base}/${i}"
+    done
+)
+
+##
+## test_event
+##
+
+(
+    cd test_event
+    base="${base}/test_event"
     install -m 0755 -d "${base}"
 
     for i in map_config.json teams.json admins.json; do
