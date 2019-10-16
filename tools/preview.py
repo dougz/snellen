@@ -119,6 +119,7 @@ class UploadHandler(tornado.web.RequestHandler):
                 "space": "Spaceopolis",
                 "bigtop": "Big Top Carnival",
                 "movielot": "Penny Park Studios",
+                "balloons": "Balloon Vendor",
                 }
 
   def initialize(self, options):

@@ -40,7 +40,7 @@ def main():
     with open(options.local_zip, "wb") as f:
       f.write(temp)
 
-  r = requests.post(f"http://{options.preview_server}/upload",
+  r = requests.post(f"https://{options.preview_server}/upload",
                     headers={"Authorization": BASIC_AUTH},
                     files={"zip": temp,
                            "land": ("", options.land)})
