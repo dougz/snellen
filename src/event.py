@@ -243,7 +243,7 @@ def GetHandlers():
     (r"/", EventHomePage),
     (r"/log", ActivityLogPage),
     (r"/pins", AchievementPage),
-    (r"/fastpass$", FastPassPage),
+    (r"/pennypass$", FastPassPage),
     (r"/health_and_safety", HealthAndSafetyPage),
     (r"/land/([a-z0-9_]+)", LandMapPage),
     (r"/puzzle/([a-z0-9_]+)/?", PuzzlePage),
@@ -252,7 +252,7 @@ def GetHandlers():
     (r"/submit_cancel/([a-z][a-z0-9_]*)/(\d+)", SubmitCancelHandler),
     (r"/hintrequest", HintRequestHandler),
     (r"/hinthistory/([a-z][a-z0-9_]*)", HintHistoryHandler),
-    (r"/fastpass/([a-z][a-z0-9_]*)$", ApplyFastPassHandler),
+    (r"/pennypass/([a-z][a-z0-9_]*)$", ApplyFastPassHandler),
     (r"/js/log", ActivityLogDataHandler),
     (r"/js/pins", AchievementDataHandler),
   ]

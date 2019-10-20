@@ -526,8 +526,9 @@ class A2020_TeamPage {
         var el;
 
         el = goog.dom.getElement("bestowfastpass");
-        goog.events.listen(el, goog.events.EventType.CLICK, function() {
+        goog.events.listen(el, goog.events.EventType.CLICK, function(e) {
             goog.net.XhrIo.send("/admin/bestowfastpass/" + team_username, A2020_expect_204);
+            e.target.blur();
         });
 
         el = goog.dom.getElement("tpaddnote");

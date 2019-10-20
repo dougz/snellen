@@ -170,7 +170,7 @@ class H2020_Dispatcher {
     /** @param{Message} msg */
     receive_fastpass(msg) {
         hunt2020.toast_manager.add_toast(
-            "You've received a FastPass!", 6000, null);
+            "You've received a PennyPass!", 6000, null);
         if (hunt2020.fastpass) {
             hunt2020.fastpass.build(msg.fastpass);
         }
@@ -181,10 +181,10 @@ class H2020_Dispatcher {
     apply_fastpass(msg) {
         var text;
         if (msg.title) {
-            text = "A FastPass has been applied to <b>" + msg.land +
+            text = "A PennyPass has been applied to <b>" + msg.land +
                 "</b>, opening <b>" + msg.title + "</b>!";
         } else {
-            text = "A FastPass has been applied to <b>" + msg.land + "</b>!";
+            text = "A PennyPass has been applied to <b>" + msg.land + "</b>!";
         }
         hunt2020.toast_manager.add_toast(text, 6000, null);
         if (hunt2020.fastpass) {
@@ -1111,7 +1111,7 @@ class H2020_FastPass {
 
     /** @param{string} shortname */
     use(shortname) {
-        goog.net.XhrIo.send("/fastpass/" + shortname, function(e) {
+        goog.net.XhrIo.send("/pennypass/" + shortname, function(e) {
             var code = e.target.getStatus();
             if (code != 204) {
                 alert(e.target.getResponseText());

@@ -38,6 +38,10 @@ input, button, .emoji-input {
   opacity: 0.4;
 }
 
+#fpusablelist a {
+    cursor: pointer;
+}
+
 #topnav {
     font-family: 'Merriweather', sans-serif;
 

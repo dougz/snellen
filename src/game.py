@@ -547,7 +547,7 @@ class Team(login.LoginUser):
   def receive_fastpass(self, now, expire):
     self.fastpasses_available.append(now + expire)
     self.fastpasses_available.sort()
-    text = "Received a FastPass."
+    text = "Received a PennyPass."
     self.activity_log.add(now, text)
     self.admin_log.add(now, text)
     if not save_state.REPLAYING:
@@ -562,7 +562,7 @@ class Team(login.LoginUser):
     if not self.fastpasses_available: return
     self.fastpasses_available.pop(0)
     self.fastpasses_used[land] = self.fastpasses_used.get(land, 0) + 1
-    text = f'Used a FastPass on <b>{html.escape(land.title)}</b>.'
+    text = f'Used a PennyPass on <b>{html.escape(land.title)}</b>.'
     self.activity_log.add(now, text)
     self.admin_log.add(now, text)
     opened = self.compute_puzzle_beam(now)
