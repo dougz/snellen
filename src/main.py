@@ -119,6 +119,7 @@ async def main_server(options):
   loop.set_default_executor(concurrent.futures.ThreadPoolExecutor(max_workers=4))
   loop.create_task(game.Submission.realtime_process_submit_queue())
   loop.create_task(game.Puzzle.realtime_open_hints())
+  loop.create_task(game.Team.realtime_expire_fastpasses())
   loop.create_task(game.Global.STATE.flawless_check())
 
   print("Serving...")

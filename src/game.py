@@ -292,6 +292,8 @@ class Team(login.LoginUser):
   # If a puzzle was opened less than this long ago, it gets a "new!" tag.
   NEW_PUZZLE_SECONDS = 120  # 2 minutes
 
+  GLOBAL_FASTPASS_QUEUE = []
+
   cached_bb_label_info = None
 
   def __init__(self, username, info):
@@ -527,26 +529,42 @@ class Team(login.LoginUser):
       print(f"failed to cancel submit {submit_id} puzzle {shortname} for {self.username}")
       return
 
+  def get_fastpass_eligible_lands(self):
+    usable = []
+    for land in Land.ordered_lands:
+      if land not in self.open_lands: continue
+      for puzzle in land.puzzles:
+        st = self.puzzle_state[puzzle]
+        if st.state == PuzzleState.CLOSED:
+          usable.append(land)
+          break
+    return usable
+
   def get_fastpass_data(self):
     if self.fastpasses_available:
-      usable = []
-      for land in Land.ordered_lands:
-        if land not in self.open_lands: continue
-        for puzzle in land.puzzles:
-          st = self.puzzle_state[puzzle]
-          if st.state == PuzzleState.CLOSED:
-            usable.append({"shortname": land.shortname,
-                           "title": land.title})
-            break
+      usable = [{"shortname": land.shortname, "title": land.title}
+                for land in self.get_fastpass_eligible_lands()]
     else:
       usable = None
     return {"expire_time": self.fastpasses_available,
             "usable_lands": usable}
 
+  @classmethod
+  async def realtime_expire_fastpasses(cls):
+    gfq = cls.GLOBAL_FASTPASS_QUEUE
+    while True:
+      now = time.time()
+      while gfq and now >= gfq[0][0]:
+        team = heapq.heappop(gfq)[1]
+        while team.fastpasses_available and now >= team.fastpasses_available[0]:
+          team.apply_fastpass(None)
+      await asyncio.sleep(1.0)
+
   @save_state
   def receive_fastpass(self, now, expire):
     self.fastpasses_available.append(now + expire)
     self.fastpasses_available.sort()
+    heapq.heappush(self.GLOBAL_FASTPASS_QUEUE, (now+expire, self))
     text = "Received a PennyPass."
     self.activity_log.add(now, text)
     self.admin_log.add(now, text)
@@ -557,10 +575,18 @@ class Team(login.LoginUser):
 
   @save_state
   def apply_fastpass(self, now, land_name):
-    land = Land.BY_SHORTNAME.get(land_name)
-    if not land or not land.puzzles: return
+    if land_name is None:
+      usable = self.get_fastpass_eligible_lands()
+      if usable:
+        land = usable[0]
+      else:
+        land = None
+    else:
+      land = Land.BY_SHORTNAME.get(land_name)
+      if not land or not land.puzzles: return
     if not self.fastpasses_available: return
     self.fastpasses_available.pop(0)
+    if not land: return
     self.fastpasses_used[land] = self.fastpasses_used.get(land, 0) + 1
     text = f'Used a PennyPass on <b>{html.escape(land.title)}</b>.'
     self.activity_log.add(now, text)
