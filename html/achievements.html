@@ -10,7 +10,12 @@
 
   <ul id="pins">
     {% for ach in achievements %}
-    <li id="ach_{{ach.name}}" class="no"><img src="{{ach.url}}">{{ach.title}}<span id="achsub_{{ach.name}}"></span></li>
+    <li id="ach_{{ach.name}}" class="no">
+      <img src="{{ach.url}}">
+      <div>{{ach.title}}
+        <div id="achsub_{{ach.name}}" class="achsub"></div>
+      </div>
+    </li>
     {% end %}
   </ul>
 </div>

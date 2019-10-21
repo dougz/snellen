@@ -38,6 +38,13 @@ input, button, .emoji-input {
   opacity: 0.4;
 }
 
+#pins .achsub {
+    margin-top: 4px;
+    font-size: 70%;
+    font-style: italic;
+    color: #666;
+}
+
 #fpusablelist a {
     cursor: pointer;
 }

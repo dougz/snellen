@@ -1291,6 +1291,7 @@ class H2020_Achievements {
             var el = goog.dom.getElement("ach_" + e.name);
             if (!el) continue;
             goog.dom.classlist.addRemove(el, "no", "yes");
+            goog.dom.getElement("achsub_" + e.name).innerHTML = e.subtitle;
         }
     }
 }
