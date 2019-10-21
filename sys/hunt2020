@@ -71,6 +71,11 @@ server {
     root /sites/hunt2020/;
   }
 
+  # ox puzzle
+  location = /O.ooo {
+    return 301 https://big-test-solve.storage.googleapis.com/O.ooo;
+  }
+
   location ~ / {
     proxy_pass http://unix:/run/sites/snellen;
     proxy_set_header X-Real-IP $remote_addr;

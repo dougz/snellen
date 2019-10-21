@@ -729,6 +729,7 @@ class Team(login.LoginUser):
       out = ['<g fill="none">']
       lx = 0
       for land in Land.ordered_lands:
+        if land not in self.open_lands: break
         nx = 0
         ny = 2
         for p in land.puzzles:
@@ -815,7 +816,11 @@ class Team(login.LoginUser):
       if OPTIONS.open_all:
         open_count = 1000
       else:
-        if land in Land.ordered_lands[:2]:
+        if land.shortname == "polygon":
+          open_count = 3
+        elif land.shortname == "polygon2":
+          open_count = 2 if self.score >= 3 else 0
+        elif land in Land.ordered_lands[:2]:
           open_count = 3
         elif land.shortname == "space":
           open_count = 1 if self.score >= 8 else 0
