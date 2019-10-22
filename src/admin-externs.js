@@ -40,7 +40,7 @@ class TaskQueueItem {
         /** @type{string} */
         this.team;
         /** @type{string} */
-        this.puzzle;
+        this.what;
         /** @type{number} */
         this.when;
         /** @type{string} */

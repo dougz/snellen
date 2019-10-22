@@ -395,7 +395,7 @@ tr.submit-incorrect {
     border-top: 1px solid #999;
 }
 
-tr.submit-partial, tr.submit-extra {
+tr.submit-partial, tr.submit-extra, tr.submit-requested {
     background-color: #fdfd96;
     border-top: 1px solid #999;
 }
@@ -413,6 +413,7 @@ tr.submit-pending {
 tr.submit-correct .submit-state { color: #090 }
 tr.submit-incorrect .submit-state { color: #c00 }
 tr.submit-partial .submit-state { color: #990 }
+tr.submit-requested .submit-state { color: #990 }
 tr.submit-pending .submit-state { color: #666 }
 
 #submit_table tr.submit-extra td {

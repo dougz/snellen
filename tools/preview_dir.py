@@ -19,6 +19,8 @@ def main():
   parser.add_argument("input_dir")
   options = parser.parse_args()
 
+  scheme = "https" if ("." in options.preview_server) else "http"
+
   if options.input_dir.endswith(".zip"):
     temp = open(options.input_dir, "rb")
   else:
@@ -40,7 +42,7 @@ def main():
     with open(options.local_zip, "wb") as f:
       f.write(temp)
 
-  r = requests.post(f"https://{options.preview_server}/upload",
+  r = requests.post(f"{scheme}://{options.preview_server}/upload",
                     headers={"Authorization": BASIC_AUTH},
                     files={"zip": temp,
                            "land": ("", options.land)})

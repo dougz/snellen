@@ -57,14 +57,26 @@ class HintMessage:
       d["sender"] = self.parent.team.name
     return d
 
+class Task:
+  def __init__(self, when, team, taskname, text):
+    self.when = int(when)
+    self.team = team
+    self.taskname = taskname
+    self.text = text
+    self.key = team.username + "-" + taskname
+    self.claim = None
 
 class TaskQueue:
   def __init__(self):
-    # PuzzleStates with outstanding requests
+    # PuzzleStates with outstanding hint requests
     self.states = set()
+    self.tasks = {}
 
     self.cached_json = None
     self.cached_bbdata = None
+
+  def get_by_key(self, task_key):
+    return self.tasks.get(task_key)
 
   def build(self):
     for t in Team.all_teams():
@@ -75,15 +87,17 @@ class TaskQueue:
 
   def add(self, puzzle_state):
     self.states.add(puzzle_state)
-    self.cached_json = None
-    self.cached_bbdata = None
-    login.AdminUser.send_messages([{"method": "task_queue"}], flush=True)
+    self.change()
 
   def remove(self, puzzle_state):
     self.states.discard(puzzle_state)
-    self.cached_json = None
-    self.cached_bbdata = None
-    login.AdminUser.send_messages([{"method": "task_queue"}], flush=True)
+    self.change()
+
+  def add_task(self, when, team, taskname, text):
+    task = Task(when, team, taskname, text)
+    if task.key in self.tasks: return  # dups
+    self.tasks[task.key] = task
+    self.change()
 
   def change(self):
     self.cached_json = None
@@ -104,15 +118,13 @@ class TaskQueue:
     q = []
     for ps in self.states:
       ts = 0
-      text = "??"
       for h in reversed(ps.hints):
         if h.sender == ps.team:
           ts = h.when
-          text = h.text
         else:
           break
       q.append({"team": ps.team.name,
-                "puzzle": ps.puzzle.title,
+                "what": "Hint: " + ps.puzzle.title,
                 "when": ts,
                 "claimant": ps.claim.fullname if ps.claim else None,
                 "last_sender": ps.last_hq_sender.fullname if ps.last_hq_sender else None,
@@ -120,7 +132,17 @@ class TaskQueue:
                 "claim": f"/admin/openclaim/{ps.team.username}/{ps.puzzle.shortname}"})
       total += 1
       if ps.claim: claimed += 1
-    q.sort(key=lambda d: (d["when"], d["puzzle"]))
+    for task in self.tasks.values():
+      q.append({"team": task.team.name,
+                "what": task.text,
+                "when": task.when,
+                "claimant": task.claim.fullname if task.claim else None,
+                "key": task.key,
+                })
+      total += 1
+      if task.claim: claimed += 1
+
+    q.sort(key=lambda d: (d["when"], d["team"]))
 
     self.cached_json = json.dumps({"queue": q})
     self.cached_bbdata = {"size": total, "claimed": claimed}
@@ -175,6 +197,7 @@ class Submission:
   CORRECT = "correct"
   MOOT = "moot"
   CANCELLED = "cancelled"
+  REQUESTED = "requested"
 
   GLOBAL_SUBMIT_QUEUE = []
 
@@ -191,6 +214,7 @@ class Submission:
     self.sent_time = now
     self.submit_time = None
     self.extra_response = None
+    self.wrong_but_reasonable = None
 
   def __lt__(self, other):
     return self.submit_id < other.submit_id
@@ -209,7 +233,7 @@ class Submission:
     # Note that self is already in the submissions list (at the end)
     # when this is called.
     count = sum(1 for i in self.puzzle_state.submissions
-                if i.state in (self.PENDING, self.INCORRECT))
+                if i.state in (self.PENDING, self.INCORRECT) and not i.wrong_but_reasonable)
     return self.puzzle_state.open_time + (count-1) * self.PER_ANSWER_DELAY
 
   def check_answer(self, now):
@@ -219,9 +243,19 @@ class Submission:
       self.state = self.CORRECT
       self.extra_response = None
     elif answer in self.puzzle.incorrect_responses:
-      self.state = self.PARTIAL
-      self.extra_response = (
-        self.puzzle.incorrect_responses[answer] or "Keep going\u2026")
+      response = self.puzzle.incorrect_responses[answer]
+      if isinstance(response, str):
+        self.state = self.PARTIAL
+        self.extra_response = response
+      elif isinstance(response, (list, tuple)):
+        self.state = self.REQUESTED
+        self.extra_response = response[0]
+        Global.STATE.add_task(now, self.team.username, answer.lower(), response[1])
+      elif response is None:
+        self.state = self.INCORRECT
+        self.team.streak = []
+        self.team.last_incorrect_answer = now
+        self.wrong_but_reasonable = True
     else:
       self.state = self.INCORRECT
       self.team.streak = []
@@ -1073,6 +1107,16 @@ class Puzzle:
         self.display_answers = {"\U0001f3f4\u200d\u2620\ufe0f": "\U0001f3f4\u200d\u2620\ufe0f"}
         self.incorrect_responses = {}
         self.html_body = f"<p>The answer to this placeholder puzzle is a pirate flag.</p>"
+      elif pstr == "_task":
+        self.answers = {tag}
+        self.display_answers = {tag: tag}
+        self.incorrect_responses = {
+          "REDHERRING": "No, that's just a red herring.",
+          "POPCORN": ["The popcorn vendor is being dispatched to your location!",
+                      "Deliver popcorn"],
+          "WILDGUESS": None
+          }
+        self.html_body = f"<p>Submit <b>POPCORN</b> when you're ready for a visit from Hunt HQ.</p>"
       else:
         self.answers = {tag}
         self.display_answers = {tag: tag}
@@ -1181,7 +1225,10 @@ class Puzzle:
   @staticmethod
   def respace_text(text):
     if text is None: return None
-    return " ".join(text.split()).strip()
+    if isinstance(text, (list, tuple)):
+      return tuple(Puzzle.respace_text(t) for t in text)
+    else:
+      return " ".join(text.split()).strip()
 
   @classmethod
   async def realtime_open_hints(cls):
@@ -1244,6 +1291,23 @@ class Global:
     if timed and not save_state.REPLAYING:
       asyncio.create_task(self.notify_event_start())
     asyncio.create_task(login.AdminUser.flush_messages())
+
+  def add_task(self, now, team, taskname, text):
+    team = Team.get_by_username(team)
+    if not team: return
+    self.task_queue.add_task(now, team, taskname, text)
+
+  @save_state
+  def claim_task(self, now, task_key, username):
+    task = self.task_queue.get_by_key(task_key)
+    if not task: return
+    if username is None:
+      task.claim = None
+    else:
+      user = login.AdminUser.get_by_username(username)
+      if not user: return
+      task.claim = user
+    self.task_queue.change()
 
   async def notify_event_start(self):
     for team in Team.BY_USERNAME.values():

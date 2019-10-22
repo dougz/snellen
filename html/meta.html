@@ -79,7 +79,10 @@
 	  {% for i, (a, r) in enumerate(sorted(puzzle.incorrect_responses.items())) %}
 	  <p>
 	  <span class="mono b">{{a}}</span> &mdash;
-	  {% if r is None %}<i>default</i> (Keep going&hellip;){% else %}{% raw r %}{% end %}
+	  {% if r is None %}<i>incorrect (no penalty)</i>
+          {% elif isinstance(r, str) %}{% raw r %}
+          {% else %}<b>(reply)</b> {% raw r[0] %} <b>(task)</b> {% raw r[1] %}
+          {% end %}
 	  </p>
 	  {% end %}
 	</td>

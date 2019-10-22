@@ -154,13 +154,20 @@ class Puzzle:
               errors.append("Response trigger '{k}' not a string.")
             elif not k:
               errors.append("Response trigger is empty string.")
+
             if v is None:
-              pass
-            elif not isinstance(v, str):
-              errors.append("Response '{v}' not a string.")
-            elif not v:
-              errors.append("Response to '{k}' is empty string.")
-          self.incorrect_responses = responses
+              # incorrect but "honest guess"
+              self.incorrect_responses[k] = None
+            elif isinstance(v, str):
+              # partial progress
+              self.incorrect_responses[k] = v
+            elif isinstance(v, dict):
+              if set(v.keys()) == {"reply", "task"}:
+                self.incorrect_responses[k] = [v["reply"], v["task"]]
+              else:
+                errors.append("Bad response to '{k}'.")
+            else:
+              errors.append("Bad response to '{k}'.")
 
     if errors: raise PuzzleErrors(errors)
 

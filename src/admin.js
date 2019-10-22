@@ -267,12 +267,24 @@ class A2020_TaskQueue {
         var now = (new Date()).getTime() / 1000.0;
         for (var i = 0; i < response.queue.length; ++i) {
             var msg = response.queue[i];
+            console.log(msg);
             var td = goog.dom.createDom("TD", "tqtime counter", admin2020.time_formatter.duration(now-msg.when));
             td.setAttribute("data-since", msg.when);
-            var claimlink = goog.dom.createDom("A", {href: msg.claim, className: "action", target: "_blank"}, "Claim");
+            var claimlink = null;
+            if (msg.claim) {
+                claimlink = goog.dom.createDom("A", {href: msg.claim, className: "action", target: "_blank"}, "Claim");
+            } else if (msg.key) {
+                if (msg.claimant) {
+                    console.log("unclaim button");
+                    claimlink = goog.dom.createDom("BUTTON", "action", "Unclaim");
+                } else {
+                    claimlink = goog.dom.createDom("BUTTON", "action", "Claim");
+                }
+                goog.events.listen(claimlink, goog.events.EventType.CLICK,
+                                   goog.bind(this.claim_task, this, msg));
+            }
             var claim_el;
             if (msg.claimant) {
-                claimlink.style.visibility = "hidden";
                 claim_el = goog.dom.createDom("TD", {className: "tqclaimant"}, msg.claimant);
             } else if (msg.last_sender) {
                 claim_el = goog.dom.createDom("TD", {className: "tqlastsender"}, "(" + msg.last_sender + ")");
@@ -283,16 +295,23 @@ class A2020_TaskQueue {
                 "TR", null,
                 td,
                 goog.dom.createDom("TD", {className: "tqteam"}, msg.team),
-                goog.dom.createDom("TD", {className: "tqpuzzle"}, msg.puzzle),
+                goog.dom.createDom("TD", {className: "tqwhat"}, msg.what),
+                goog.dom.createDom("TD", {className: "tqclaim"}, claimlink),
                 goog.dom.createDom("TD", {className: "tqview"},
                                    goog.dom.createDom("A", {href: msg.target, target: "_blank"},
                                                       "View")),
-                goog.dom.createDom("TD", {className: "tqclaim"}, claimlink),
                 claim_el);
             this.tbody.appendChild(tr);
         }
         admin2020.counter.reread();
     }
+
+    claim_task(msg) {
+        var url = "/admin/" + (msg.claimant ? "unclaim" : "claim") + "task/" + msg.key;
+        console.log("claim url is", url);
+        goog.net.XhrIo.send(url, A2020_expect_204);
+    }
+
 }
 
 class A2020_TimeFormatter {

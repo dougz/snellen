@@ -321,6 +321,16 @@ class TaskQueueHandler(util.AdminHandler):
     self.set_header("Content-Type", "application/json")
     self.write(game.Global.STATE.task_queue.to_json())
 
+class TaskClaimHandler(util.AdminHandler):
+  @login.required("admin")
+  def get(self, un, task_key):
+    if un:
+      game.Global.STATE.claim_task(task_key, None)
+    else:
+      game.Global.STATE.claim_task(task_key, self.user.username)
+    self.set_status(http.client.NO_CONTENT.value)
+
+
 class HintClaimHandler(util.AdminHandler):
   @login.required("admin")
   def get(self, openpage, un, username, shortname):
@@ -477,6 +487,7 @@ def GetHandlers():
     (r"/admin/hintreply$", HintReplyHandler),
     (r"/admin/hinttimechange$", HintTimeChangeHandler),
     (r"/admin/addnote", AddNoteHandler),
+    (r"/admin/(un)?claimtask/([A-Za-z0-9-]+)$", TaskClaimHandler),
 
     (r"/admin/puzzle_json/.*", PuzzleJsonHandler),
     (r"/admin/team_json/.*", TeamJsonHandler),
