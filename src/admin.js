@@ -270,8 +270,14 @@ class A2020_HintQueue {
             var td = goog.dom.createDom("TD", "hqtime counter", admin2020.time_formatter.duration(now-msg.when));
             td.setAttribute("data-since", msg.when);
             var claimlink = goog.dom.createDom("A", {href: msg.claim, className: "action", target: "_blank"}, "Claim");
+            var claim_el;
             if (msg.claimant) {
                 claimlink.style.visibility = "hidden";
+                claim_el = goog.dom.createDom("TD", {className: "hqclaimant"}, msg.claimant);
+            } else if (msg.last_sender) {
+                claim_el = goog.dom.createDom("TD", {className: "hqlastsender"}, "(" + msg.last_sender + ")");
+            } else {
+                claim_el = null;
             }
             var tr = goog.dom.createDom(
                 "TR", null,
@@ -282,7 +288,7 @@ class A2020_HintQueue {
                                    goog.dom.createDom("A", {href: msg.target, target: "_blank"},
                                                       "View")),
                 goog.dom.createDom("TD", {className: "hqclaim"}, claimlink),
-                goog.dom.createDom("TD", {className: "hqclaimant"}, msg.claimant));
+                claim_el);
             this.tbody.appendChild(tr);
         }
         admin2020.counter.reread();

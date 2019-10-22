@@ -115,6 +115,7 @@ class HintQueue:
                 "puzzle": ps.puzzle.title,
                 "when": ts,
                 "claimant": ps.claim.fullname if ps.claim else None,
+                "last_sender": ps.last_hq_sender.fullname if ps.last_hq_sender else None,
                 "target": f"/admin/team/{ps.team.username}/puzzle/{ps.puzzle.shortname}",
                 "claim": f"/admin/openclaim/{ps.team.username}/{ps.puzzle.shortname}"})
       total += 1
@@ -144,7 +145,8 @@ class PuzzleState:
     self.answers_found = set()
     self.hints_available = False
     self.hints = []
-    self.claim = None  # AdminUser claiming hint response
+    self.last_hq_sender = None # AdminUser of most recent reply
+    self.claim = None          # AdminUser claiming hint response
     self.admin_log = Log()
 
   def recent_solve(self, now=None):
@@ -786,6 +788,7 @@ class Team(login.LoginUser):
       Global.STATE.hint_queue.add(state)
     else:
       sender = login.AdminUser.get_by_username(sender)
+      state.last_hq_sender = sender
       state.claim = None
       Global.STATE.hint_queue.remove(state)
       team_message["notify"] = True

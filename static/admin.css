@@ -377,6 +377,12 @@ p.note {
     text-overflow: ellipsis;
 }
 
+#hintqueue .hqlastsender {
+    width: 300px;
+    text-overflow: ellipsis;
+    color: #999;
+}
+
 .hqclaim { padding: 4px; }
 .hqclaim a {
     display: block;
