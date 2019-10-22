@@ -47,6 +47,7 @@ class AdminUser(LoginUser):
   message_mu = asyncio.Lock()
   message_serial = 1
   pending_messages = []
+  pending_updates = {}
 
   @save_state
   def __init__(self, now, username, password_hash, fullname, roles):
@@ -86,6 +87,12 @@ class AdminUser(LoginUser):
     return cls.BY_USERNAME.values()
 
   @classmethod
+  def notify_update(cls, team, puzzle=None, flush=False):
+    cls.pending_updates.setdefault(team, set()).add(puzzle)
+    if flush:
+      asyncio.create_task(cls.flush_messages())
+
+  @classmethod
   def send_messages(cls, objs, flush=False):
     cls.pending_messages.extend(objs)
     if flush:
@@ -93,8 +100,16 @@ class AdminUser(LoginUser):
 
   @classmethod
   async def flush_messages(cls):
-    if not cls.pending_messages: return
+    if not cls.pending_messages and not cls.pending_updates: return
     objs, cls.pending_messages = cls.pending_messages, []
+    for t, pp in cls.pending_updates.items():
+      if len(pp) > 1: pp.discard(None)
+      for p in pp:
+        d = {"method": "update", "team_username": t.username}
+        if p:
+          d["puzzle_id"] = p.shortname
+        objs.append(d)
+    cls.pending_updates = {}
     if isinstance(objs, list):
       strs = [json.dumps(o) for o in objs]
     async with cls.message_mu:

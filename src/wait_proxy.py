@@ -64,10 +64,11 @@ class ProxyWaitHandler(tornado.web.RequestHandler):
     proxy = Server.PROXIES[wpid]
 
     async with proxy.cv:
-      try:
-        await asyncio.wait_for(proxy.cv.wait(), PROXY_WAIT_TIMEOUT)
-      except asyncio.TimeoutError:
-        pass
+      if not proxy.q:
+        try:
+          await asyncio.wait_for(proxy.cv.wait(), PROXY_WAIT_TIMEOUT)
+        except asyncio.TimeoutError:
+          pass
 
       content, proxy.q = proxy.q, []
 

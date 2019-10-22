@@ -466,9 +466,11 @@ class Team(login.LoginUser):
           await asyncio.sleep(delay)
           self.send_messages(msg)
           await self.flush_messages()
+          self.invalidate()
         asyncio.create_task(future())
       else:
         self.send_messages(msg)
+        self.invalidate()
       return True
 
   @classmethod
@@ -679,11 +681,7 @@ class Team(login.LoginUser):
   def invalidate(self, puzzle=None, flush=True):
     if self.cached_bb_data:
       self.cached_bb_data = None
-    d = {"method": "update",
-         "team_username": self.username}
-    if puzzle:
-      d["puzzle_id"] = puzzle.shortname
-    login.AdminUser.send_messages([d], flush=flush)
+    login.AdminUser.notify_update(self, puzzle, flush=flush)
 
   BB_PUZZLE_COLOR = {PuzzleState.CLOSED: "#dddddd",
                      PuzzleState.OPEN: "#ffdd66",
