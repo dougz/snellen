@@ -347,44 +347,44 @@ p.note {
 }
 
 
-#hintqueue {
+#taskqueue {
     border-collapse: collapse;
 }
 
-#hintqueue th {
+#taskqueue th {
     background-color: #f8f8f8;
     text-align: left;
     padding: 4px;
 }
 
-#hintqueue .hqtime {
+#taskqueue .tqtime {
     width: 100px;
     text-overflow: ellipsis;
 }
 
-#hintqueue .hqteam {
+#taskqueue .tqteam {
     width: 300px;
     text-overflow: ellipsis;
 }
 
-#hintqueue .hqpuzzle {
+#taskqueue .tqpuzzle {
     width: 300px;
     text-overflow: ellipsis;
 }
 
-#hintqueue .hqclaimant {
+#taskqueue .tqclaimant {
     width: 300px;
     text-overflow: ellipsis;
 }
 
-#hintqueue .hqlastsender {
+#taskqueue .tqlastsender {
     width: 300px;
     text-overflow: ellipsis;
     color: #999;
 }
 
-.hqclaim { padding: 4px; }
-.hqclaim a {
+.tqclaim { padding: 4px; }
+.tqclaim a {
     display: block;
     padding: 4px 16px;
     margin: 0 20px 0 8px;

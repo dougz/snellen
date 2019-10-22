@@ -1,0 +1,21 @@
+{% extends "admin_base.html" %}
+{% block colorscheme %}color-home{% end %}
+
+{% block title %}Task queue{% end %}
+
+
+{% block content %}
+
+<table id="taskqueue">
+  <tr>
+    <th class=tqtime>Age</th>
+    <th class=tqteam>Team</th>
+    <th class=tqpuzzle>Puzzle</th>
+    <th>&nbsp;</th>
+    <th>&nbsp;</th>
+    <th class=tqclaimant>Claimed by</th>
+  </tr>
+  <tbody id="taskqueuedata"></tbody>
+</table>
+
+{% end %}

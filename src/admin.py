@@ -310,16 +310,16 @@ class StartEvent(util.AdminHandler):
     self.redirect("/admin")
 
 
-class HintQueuePage(util.AdminPageHandler):
+class TaskQueuePage(util.AdminPageHandler):
   @login.required("admin")
   def get(self):
-    self.render("admin_hint_queue.html")
+    self.render("admin_task_queue.html")
 
-class HintQueueHandler(util.AdminHandler):
+class TaskQueueHandler(util.AdminHandler):
   @login.required("admin")
   def get(self):
     self.set_header("Content-Type", "application/json")
-    self.write(game.Global.STATE.hint_queue.to_json())
+    self.write(game.Global.STATE.task_queue.to_json())
 
 class HintClaimHandler(util.AdminHandler):
   @login.required("admin")
@@ -333,14 +333,14 @@ class HintClaimHandler(util.AdminHandler):
         login.AdminUser.send_messages([{"method": "update",
                                         "team_username": team.username,
                                         "puzzle_id": puzzle.shortname}], flush=True)
-        game.Global.STATE.hint_queue.change()
+        game.Global.STATE.task_queue.change()
     else:
       if ps.claim is None:
         ps.claim = self.user
         login.AdminUser.send_messages([{"method": "update",
                                         "team_username": team.username,
                                         "puzzle_id": puzzle.shortname}], flush=True)
-        game.Global.STATE.hint_queue.change()
+        game.Global.STATE.task_queue.change()
 
     if openpage:
       self.redirect(f"/admin/team/{team.username}/puzzle/{puzzle.shortname}")
@@ -424,10 +424,10 @@ class BigBoardPage(util.AdminPageHandler):
     label_info = game.Team.bb_label_info()
     self.render("admin_bigboard.html", label_info=json.dumps({"lands": label_info}))
 
-class BigBoardHintQueueDataHandler(util.AdminHandler):
+class BigBoardTaskQueueDataHandler(util.AdminHandler):
   @login.required("admin")
   def get(self):
-    data = game.Global.STATE.bb_hint_queue_data()
+    data = game.Global.STATE.bb_task_queue_data()
     self.set_header("Content-Type", "application/json")
     self.write(json.dumps(data))
 
@@ -457,7 +457,7 @@ def GetHandlers():
     (r"/admin/bigboard$", BigBoardPage),
     (r"/admin/change_start$", ChangeStartPage),
     (r"/admin/confirm_change_start$", ConfirmChangeStartPage),
-    (r"/admin/hintqueue$", HintQueuePage),
+    (r"/admin/taskqueue$", TaskQueuePage),
     (r"/admin/puzzle/([a-z0-9_]+)$", PuzzlePage),
     (r"/admin/puzzles$", ListPuzzlesPage),
     (r"/admin/team/([a-z0-9_]+)$", TeamPage),
@@ -469,11 +469,11 @@ def GetHandlers():
     (r"/admin/(open)?(un)?claim/([a-z0-9_]+)/([a-z0-9_]+)$", HintClaimHandler),
     (r"/admin/become/([a-z0-9_]+)$", BecomeTeamHandler),
     (r"/admin/bestowfastpass/([a-z0-9_]+)$", BestowFastpassHandler),
-    (r"/admin/bb/hintqueue$", BigBoardHintQueueDataHandler),
+    (r"/admin/bb/taskqueue$", BigBoardTaskQueueDataHandler),
     (r"/admin/bb/team(/[a-z0-9_]+)?$", BigBoardTeamDataHandler),
     (r"/admin/change_password$", ChangePasswordHandler),
     (r"/admin/create_user$", CreateUserHandler),
-    (r"/admin/hintqueuedata$", HintQueueHandler),
+    (r"/admin/taskqueuedata$", TaskQueueHandler),
     (r"/admin/hintreply$", HintReplyHandler),
     (r"/admin/hinttimechange$", HintTimeChangeHandler),
     (r"/admin/addnote", AddNoteHandler),

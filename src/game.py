@@ -58,7 +58,7 @@ class HintMessage:
     return d
 
 
-class HintQueue:
+class TaskQueue:
   def __init__(self):
     # PuzzleStates with outstanding requests
     self.states = set()
@@ -77,18 +77,18 @@ class HintQueue:
     self.states.add(puzzle_state)
     self.cached_json = None
     self.cached_bbdata = None
-    login.AdminUser.send_messages([{"method": "hint_queue"}], flush=True)
+    login.AdminUser.send_messages([{"method": "task_queue"}], flush=True)
 
   def remove(self, puzzle_state):
     self.states.discard(puzzle_state)
     self.cached_json = None
     self.cached_bbdata = None
-    login.AdminUser.send_messages([{"method": "hint_queue"}], flush=True)
+    login.AdminUser.send_messages([{"method": "task_queue"}], flush=True)
 
   def change(self):
     self.cached_json = None
     self.cached_bbdata = None
-    login.AdminUser.send_messages([{"method": "hint_queue"}], flush=True)
+    login.AdminUser.send_messages([{"method": "task_queue"}], flush=True)
 
   def get_bb_data(self):
     if self.cached_bbdata is None:
@@ -783,12 +783,12 @@ class Team(login.LoginUser):
                     "puzzle_id": puzzle.shortname}
     if sender is None:
       sender = self
-      Global.STATE.hint_queue.add(state)
+      Global.STATE.task_queue.add(state)
     else:
       sender = login.AdminUser.get_by_username(sender)
       state.last_hq_sender = sender
       state.claim = None
-      Global.STATE.hint_queue.remove(state)
+      Global.STATE.task_queue.remove(state)
       team_message["notify"] = True
       team_message["title"] = puzzle.title
 
@@ -989,7 +989,7 @@ class Puzzle:
     self.url = f"/puzzle/{shortname}"
     self.admin_url = f"/admin/puzzle/{shortname}"
     self.points = 1
-    self.hints_available_time = 12 * 3600   # 12 hours
+    self.hints_available_time = 15 # 12 * 3600   # 12 hours
     self.emojify = False
     self.explanations = {}
     self.puzzle_log = Log()
@@ -1211,7 +1211,7 @@ class Global:
     self.stopping = False
     self.stop_cv = asyncio.Condition()
 
-    self.hint_queue = HintQueue()
+    self.task_queue = TaskQueue()
 
   async def stop_server(self):
     async with self.stop_cv:
@@ -1270,8 +1270,8 @@ class Global:
             asyncio.create_task(team.flush_messages())
       await asyncio.sleep(15)
 
-  def bb_hint_queue_data(self):
-    return self.hint_queue.get_bb_data()
+  def bb_task_queue_data(self):
+    return self.task_queue.get_bb_data()
 
 
 class Achievement:

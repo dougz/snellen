@@ -106,7 +106,7 @@ async def main_server(options):
 
   for team in game.Team.BY_USERNAME.values():
     team.discard_messages()
-  game.Global.STATE.hint_queue.build()
+  game.Global.STATE.task_queue.build()
 
   app = make_app(options, cfg["static"], autoreload=False)
 

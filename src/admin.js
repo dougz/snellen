@@ -64,7 +64,7 @@ class A2020_Waiter {
 class A2020_Dispatcher {
     constructor() {
         this.methods = {
-            "hint_queue": this.hint_queue,
+            "task_queue": this.task_queue,
             "update": this.update,
         }
     }
@@ -75,12 +75,12 @@ class A2020_Dispatcher {
     }
 
     /** @param{Message} msg */
-    hint_queue(msg) {
-        if (admin2020.hintqueue) {
-            admin2020.hintqueue.update_queue();
+    task_queue(msg) {
+        if (admin2020.taskqueue) {
+            admin2020.taskqueue.update_queue();
         }
         if (admin2020.bigboard) {
-            admin2020.bigboard.refresh_hintqueue();
+            admin2020.bigboard.refresh_taskqueue();
         }
     }
 
@@ -239,55 +239,55 @@ class A2020_TeamPuzzlePage {
     }
 }
 
-class A2020_HintQueue {
+class A2020_TaskQueue {
     constructor() {
         /** @type{Element|null} */
-        this.queue = goog.dom.getElement("hintqueue");
-        this.tbody = goog.dom.getElement("hintqueuedata");
+        this.queue = goog.dom.getElement("taskqueue");
+        this.tbody = goog.dom.getElement("taskqueuedata");
         this.update_queue();
     }
 
     update_queue() {
-        goog.net.XhrIo.send("/admin/hintqueuedata", goog.bind(function(e) {
+        goog.net.XhrIo.send("/admin/taskqueuedata", goog.bind(function(e) {
             var code = e.target.getStatus();
             if (code == 200) {
-                var response = /** @type{HintQueue} */ (e.target.getResponseJson());
+                var response = /** @type{TaskQueue} */ (e.target.getResponseJson());
                 this.render_queue(response);
             }
         }, this));
     }
 
-    /** @param{HintQueue} response */
+    /** @param{TaskQueue} response */
     render_queue(response) {
         if (response.queue.length == 0) {
-            this.tbody.innerHTML = "<tr><td colspan=6 style=\"padding: 20px;\">No hint requests are waiting.</td></tr>"
+            this.tbody.innerHTML = "<tr><td colspan=6 style=\"padding: 20px;\">No tasks are waiting.</td></tr>"
             return;
         }
         this.tbody.innerHTML = "";
         var now = (new Date()).getTime() / 1000.0;
         for (var i = 0; i < response.queue.length; ++i) {
             var msg = response.queue[i];
-            var td = goog.dom.createDom("TD", "hqtime counter", admin2020.time_formatter.duration(now-msg.when));
+            var td = goog.dom.createDom("TD", "tqtime counter", admin2020.time_formatter.duration(now-msg.when));
             td.setAttribute("data-since", msg.when);
             var claimlink = goog.dom.createDom("A", {href: msg.claim, className: "action", target: "_blank"}, "Claim");
             var claim_el;
             if (msg.claimant) {
                 claimlink.style.visibility = "hidden";
-                claim_el = goog.dom.createDom("TD", {className: "hqclaimant"}, msg.claimant);
+                claim_el = goog.dom.createDom("TD", {className: "tqclaimant"}, msg.claimant);
             } else if (msg.last_sender) {
-                claim_el = goog.dom.createDom("TD", {className: "hqlastsender"}, "(" + msg.last_sender + ")");
+                claim_el = goog.dom.createDom("TD", {className: "tqlastsender"}, "(" + msg.last_sender + ")");
             } else {
                 claim_el = null;
             }
             var tr = goog.dom.createDom(
                 "TR", null,
                 td,
-                goog.dom.createDom("TD", {className: "hqteam"}, msg.team),
-                goog.dom.createDom("TD", {className: "hqpuzzle"}, msg.puzzle),
-                goog.dom.createDom("TD", {className: "hqview"},
+                goog.dom.createDom("TD", {className: "tqteam"}, msg.team),
+                goog.dom.createDom("TD", {className: "tqpuzzle"}, msg.puzzle),
+                goog.dom.createDom("TD", {className: "tqview"},
                                    goog.dom.createDom("A", {href: msg.target, target: "_blank"},
                                                       "View")),
-                goog.dom.createDom("TD", {className: "hqclaim"}, claimlink),
+                goog.dom.createDom("TD", {className: "tqclaim"}, claimlink),
                 claim_el);
             this.tbody.appendChild(tr);
         }
@@ -685,8 +685,8 @@ class A2020_PuzzlePage {
 class A2020_BigBoard {
     constructor() {
         /** @type{Element} */
-        this.hintqueue = goog.dom.getElement("bbhintqueue");
-        this.refresh_hintqueue();
+        this.taskqueue = goog.dom.getElement("bbtaskqueue");
+        this.refresh_taskqueue();
 
         this.team_data = {};
         this.team_els = [];
@@ -797,27 +797,27 @@ class A2020_BigBoard {
         }
     }
 
-    refresh_hintqueue() {
-        goog.net.XhrIo.send("/admin/bb/hintqueue", goog.bind(function(e) {
+    refresh_taskqueue() {
+        goog.net.XhrIo.send("/admin/bb/taskqueue", goog.bind(function(e) {
             var code = e.target.getStatus();
             if (code != 200) {
                 alert(e.target.getResponseText());
             }
-            this.update_hintqueue(/** @type{BBHintQueue} */ (e.target.getResponseJson()));
+            this.update_taskqueue(/** @type{BBTaskQueue} */ (e.target.getResponseJson()));
         }, this), "GET");
     }
 
-    /** @param{BBHintQueue} data */
-    update_hintqueue(data) {
+    /** @param{BBTaskQueue} data */
+    update_taskqueue(data) {
         if (!data) return;
-        this.hintqueue.innerHTML = "" + data.size + " (" + (data.size - data.claimed) + ")";
+        this.taskqueue.innerHTML = "" + data.size + " (" + (data.size - data.claimed) + ")";
     }
 }
 
 var admin2020 = {
     waiter: null,
     counter: null,
-    hintqueue: null,
+    taskqueue: null,
     time_formatter: null,
     serializer: null,
     puzzle_select: null,
@@ -838,8 +838,8 @@ window.onload = function() {
 
     admin2020.counter = new A2020_Counter();
 
-    if (goog.dom.getElement("hintqueue")) {
-        admin2020.hintqueue = new A2020_HintQueue();
+    if (goog.dom.getElement("taskqueue")) {
+        admin2020.taskqueue = new A2020_TaskQueue();
     }
 
     var el;
@@ -874,7 +874,7 @@ window.onload = function() {
         admin2020.user_roles = new A2020_UserRoles()
     }
 
-    if (goog.dom.getElement("bbhintqueue")) {
+    if (goog.dom.getElement("bbtaskqueue")) {
         admin2020.bigboard = new A2020_BigBoard();
     }
 

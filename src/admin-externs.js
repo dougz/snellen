@@ -28,14 +28,14 @@ class Message {
     }
 }
 
-class HintQueue {
+class TaskQueue {
     constructor() {
-        /** @type{Array<HintQueueItem>} */
+        /** @type{Array<TaskQueueItem>} */
         this.queue;
     }
 }
 
-class HintQueueItem {
+class TaskQueueItem {
     constructor() {
         /** @type{string} */
         this.team;
@@ -52,7 +52,7 @@ class HintQueueItem {
     }
 }
 
-class BBHintQueue {
+class BBTaskQueue {
     constructor() {
         /** @type{?number} */
         this.size;
