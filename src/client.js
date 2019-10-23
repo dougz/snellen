@@ -76,6 +76,13 @@ class H2020_Waiter {
     }
 }
 
+function H2020_expect_204(e) {
+    var code = e.target.getStatus();
+    if (code != 204) {
+        alert(e.target.getResponseText());
+    }
+}
+
 class H2020_Dispatcher {
     constructor() {
         this.methods = {
@@ -1064,6 +1071,9 @@ class H2020_Counter {
 
 class H2020_FastPass {
     constructor() {
+        goog.events.listen(goog.dom.getElement("fpuse"), goog.events.EventType.CLICK,
+                           goog.bind(this.use, this));
+
         this.build(/** @type{FastPassState} */ (initial_json));
     }
 
@@ -1102,21 +1112,25 @@ class H2020_FastPass {
         e_ulist.innerHTML = "";
         for (var i = 0; i < data.usable_lands.length; ++i) {
             var u = data.usable_lands[i];
-            var a = goog.dom.createDom("A", null, u.title);
-            goog.events.listen(a, goog.events.EventType.CLICK,
-                               goog.bind(this.use, this, u.shortname));
-            e_ulist.appendChild(goog.dom.createDom("LI", null, a));
+            var b = goog.dom.createDom("INPUT", {id: "fpr_" + u.shortname, type: "radio", name: "land", value: u.shortname}, u.title);
+            var t = goog.dom.createDom("LABEL", {htmlFor: "fpr_" + u.shortname}, u.title);
+
+            e_ulist.appendChild(goog.dom.createDom("LI", null, b, t));
         }
     }
 
-    /** @param{string} shortname */
-    use(shortname) {
-        goog.net.XhrIo.send("/pennypass/" + shortname, function(e) {
-            var code = e.target.getStatus();
-            if (code != 204) {
-                alert(e.target.getResponseText());
+    use() {
+        var els = document.querySelectorAll("#fpusablelist input");
+        var shortname = null;
+        for (var i = 0; i < els.length; ++i) {
+            if (els[i].checked) {
+                shortname = els[i].value;
+                break;
             }
-        });
+        }
+        if (!shortname) return;
+        console.log("shortname is", shortname);
+        goog.net.XhrIo.send("/pennypass/" + shortname, H2020_expect_204);
     }
 }
 

@@ -141,7 +141,7 @@ class BestowFastpassHandler(util.AdminHandler):
   def get(self, username):
     team = self.get_team(username)
     if self.application.settings.get("debug"):
-      duration = 60  # 1 minute
+      duration = 180  # 1 minute
     else:
       duration = 2 * 3600  # 2 hours
     team.receive_fastpass(duration)
