@@ -1,5 +1,5 @@
 [Unit]
-Description=Hunt 2020 Hat Venn-dor (badart)
+Description=Hunt 2020 Hat Venn-dor (hat_venn_dor)
 
 [Service]
 Type=simple
@@ -9,10 +9,7 @@ WorkingDirectory=/sites/hunt2020/hat_venn_dor
 ExecStartPre=mkdir -p /run/sites
 ExecStart=/sites/hunt2020/hat_venn_dor/hat_venn_dor.py \
   --socket_path /run/sites/hat_venn_dor \
-  --min_players=2
-
-# \
-#  --assets_json="${HUNT2020_BASE}/bts/puzzles/gallery_of_tomorrow.assets.json"
+  --debug
 
 [Install]
 WantedBy=hunt2020.target

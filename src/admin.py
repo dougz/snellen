@@ -324,38 +324,34 @@ class TaskQueueHandler(util.AdminHandler):
 class TaskClaimHandler(util.AdminHandler):
   @login.required("admin")
   def get(self, un, task_key):
-    if un:
-      game.Global.STATE.claim_task(task_key, None)
-    else:
-      game.Global.STATE.claim_task(task_key, self.user.username)
+    if task_key.startswith("t-"):
+      if un:
+        game.Global.STATE.claim_task(task_key, None)
+      else:
+        game.Global.STATE.claim_task(task_key, self.user.username)
+    elif task_key.startswith("h-"):
+      _, username, shortname = task_key.split("-")
+      print(task_key, username, shortname)
+      team = self.get_team(username)
+      puzzle = self.get_puzzle(shortname)
+      ps = team.puzzle_state[puzzle]
+      if un:
+        if ps.claim:
+          ps.claim = None
+          team.invalidate(puzzle)
+          game.Global.STATE.task_queue.change()
+      else:
+        if ps.claim is None:
+          ps.claim = self.user
+          team.invalidate(puzzle)
+          game.Global.STATE.task_queue.change()
     self.set_status(http.client.NO_CONTENT.value)
 
-
-class HintClaimHandler(util.AdminHandler):
+class TaskCompleteHandler(util.AdminHandler):
   @login.required("admin")
-  def get(self, openpage, un, username, shortname):
-    team = self.get_team(username)
-    puzzle = self.get_puzzle(shortname)
-    ps = team.puzzle_state[puzzle]
-    if un:
-      if ps.claim:
-        ps.claim = None
-        login.AdminUser.send_messages([{"method": "update",
-                                        "team_username": team.username,
-                                        "puzzle_id": puzzle.shortname}], flush=True)
-        game.Global.STATE.task_queue.change()
-    else:
-      if ps.claim is None:
-        ps.claim = self.user
-        login.AdminUser.send_messages([{"method": "update",
-                                        "team_username": team.username,
-                                        "puzzle_id": puzzle.shortname}], flush=True)
-        game.Global.STATE.task_queue.change()
-
-    if openpage:
-      self.redirect(f"/admin/team/{team.username}/puzzle/{puzzle.shortname}")
-    else:
-      self.set_status(http.client.NO_CONTENT.value)
+  def get(self, un, task_key):
+    game.Global.STATE.complete_task(task_key, not not un)
+    self.set_status(http.client.NO_CONTENT.value)
 
 class HintTimeChangeHandler(util.AdminHandler):
   def prepare(self):
@@ -476,7 +472,6 @@ def GetHandlers():
     (r"/admin/users$", AdminUsersPage),
 
     (r"/admin/(set|clear)_role/([^/]+)/([^/]+)$", UpdateAdminRoleHandler),
-    (r"/admin/(open)?(un)?claim/([a-z0-9_]+)/([a-z0-9_]+)$", HintClaimHandler),
     (r"/admin/become/([a-z0-9_]+)$", BecomeTeamHandler),
     (r"/admin/bestowfastpass/([a-z0-9_]+)$", BestowFastpassHandler),
     (r"/admin/bb/taskqueue$", BigBoardTaskQueueDataHandler),
@@ -487,7 +482,8 @@ def GetHandlers():
     (r"/admin/hintreply$", HintReplyHandler),
     (r"/admin/hinttimechange$", HintTimeChangeHandler),
     (r"/admin/addnote", AddNoteHandler),
-    (r"/admin/(un)?claimtask/([A-Za-z0-9-]+)$", TaskClaimHandler),
+    (r"/admin/(un)?claim/([A-Za-z0-9_-]+)$", TaskClaimHandler),
+    (r"/admin/(un)?complete/([A-Za-z0-9_-]+)$", TaskCompleteHandler),
 
     (r"/admin/puzzle_json/.*", PuzzleJsonHandler),
     (r"/admin/team_json/.*", TeamJsonHandler),

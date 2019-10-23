@@ -63,7 +63,7 @@ class Task:
     self.team = team
     self.taskname = taskname
     self.text = text
-    self.key = team.username + "-" + taskname
+    self.key = "t-" + team.username + "-" + taskname
     self.claim = None
 
 class TaskQueue:
@@ -72,11 +72,30 @@ class TaskQueue:
     self.states = set()
     self.tasks = {}
 
+    self.pending_removal = {}
+
     self.cached_json = None
     self.cached_bbdata = None
 
   def get_by_key(self, task_key):
     return self.tasks.get(task_key)
+
+  def remove_by_key(self, task_key):
+    if self.tasks.pop(task_key, None):
+      self.change()
+
+  async def purge(self):
+    await asyncio.sleep(10.1)
+    now = time.time()
+    to_delete = []
+    for key, when in self.pending_removal.items():
+      if when <= now:
+        to_delete.append(key)
+    if to_delete:
+      for key in to_delete:
+        self.pending_removal.pop(key, None)
+        self.tasks.pop(key, None)
+      self.change()
 
   def build(self):
     for t in Team.all_teams():
@@ -128,17 +147,21 @@ class TaskQueue:
                 "when": ts,
                 "claimant": ps.claim.fullname if ps.claim else None,
                 "last_sender": ps.last_hq_sender.fullname if ps.last_hq_sender else None,
-                "target": f"/admin/team/{ps.team.username}/puzzle/{ps.puzzle.shortname}",
-                "claim": f"/admin/openclaim/{ps.team.username}/{ps.puzzle.shortname}"})
+                "key": "h-" + ps.team.username + "-" + ps.puzzle.shortname,
+                "target": f"/admin/team/{ps.team.username}/puzzle/{ps.puzzle.shortname}"})
+
       total += 1
       if ps.claim: claimed += 1
     for task in self.tasks.values():
-      q.append({"team": task.team.name,
-                "what": task.text,
-                "when": task.when,
-                "claimant": task.claim.fullname if task.claim else None,
-                "key": task.key,
-                })
+      d = {"team": task.team.name,
+           "what": task.text,
+           "when": task.when,
+           "claimant": task.claim.fullname if task.claim else None,
+           "key": task.key,
+      }
+      if task.key in self.pending_removal:
+        d["done_pending"] = True
+      q.append(d)
       total += 1
       if task.claim: claimed += 1
 
@@ -1307,6 +1330,15 @@ class Global:
       user = login.AdminUser.get_by_username(username)
       if not user: return
       task.claim = user
+    self.task_queue.change()
+
+  @save_state
+  def complete_task(self, now, task_key, undo):
+    if undo:
+      self.task_queue.pending_removal.pop(task_key, None)
+    else:
+      self.task_queue.pending_removal[task_key] = now + 10
+      asyncio.create_task(self.task_queue.purge())
     self.task_queue.change()
 
   async def notify_event_start(self):

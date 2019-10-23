@@ -40,6 +40,8 @@ class TaskQueueItem {
         /** @type{string} */
         this.team;
         /** @type{string} */
+        this.key;
+        /** @type{string} */
         this.what;
         /** @type{number} */
         this.when;
@@ -49,6 +51,8 @@ class TaskQueueItem {
         this.claim;
         /** @type{?string} */
         this.claimant;
+        /** @type{?boolean} */
+        this.done_pending;
     }
 }
 

@@ -160,6 +160,7 @@ div.buttons > a.red {
 .submission-correct { color: #4caf50; text-transform: uppercase; font-weight: bold; }
 .submission-incorrect { color: #af4c50; text-transform: uppercase; font-weight: bold; }
 .submission-partial { color: #d3c827; text-transform: uppercase; font-weight: bold; }
+.submission-requested { color: #d3c827; text-transform: uppercase; font-weight: bold; }
 .submission-queued { color: #999999; text-transform: uppercase; font-weight: bold; }
 
 hr {
@@ -274,13 +275,28 @@ body > p, body > h2 {
     color: white;
     font-size: 70%;
     padding: 0 8px;
-    margin: 4px 0 4px 0;
+    margin: 4px 8px 4px 0;
     box-sizing: border-box;
     border: 1px solid #395483;
     border-radius: 15px;
     background: linear-gradient(to bottom, #4c70af, #436299);
     outline: none;
 }
+
+.inlineminiaction {
+    font-family: 'Open Sans', 'Merriweather Sans', sans-serif;
+    color: white;
+    font-size: 70%;
+    padding: 0 8px;
+    margin: 0 0 0 8px;
+    box-sizing: border-box;
+    border: 1px solid #395483;
+    border-radius: 15px;
+    background: linear-gradient(to bottom, #4c70af, #436299);
+    outline: none;
+}
+
+.strike { text-decoration: line-through; }
 
 
 
@@ -372,6 +388,11 @@ p.note {
     text-overflow: ellipsis;
 }
 
+#taskqueue .tqclaim {
+    width: 120px;
+    text-align: center;
+}
+
 #taskqueue .tqclaimant {
     width: 300px;
     text-overflow: ellipsis;
@@ -384,10 +405,11 @@ p.note {
 }
 
 .tqclaim { padding: 4px; }
-.tqclaim a {
+.tqclaim a, .tqclaim button {
     display: block;
     padding: 4px 16px;
-    margin: 0 20px 0 8px;
+    margin: 0 8px 0 8px;
+    text-align: center;
 }
 
 .tabular {

@@ -142,14 +142,8 @@ class A2020_TeamPuzzlePage {
     }
 
     do_claim(which) {
-        goog.net.XhrIo.send(
-            "/admin/" + which + "/" + team_username + "/" + puzzle_id,
-            function(e) {
-                var code = e.target.getStatus();
-                if (code != 204) {
-                    alert(e.target.getResponseText());
-                }
-            });
+        goog.net.XhrIo.send("/admin/" + which + "/h-" + team_username + "-" + puzzle_id,
+                            A2020_expect_204);
     }
 
     submit() {
@@ -267,39 +261,50 @@ class A2020_TaskQueue {
         var now = (new Date()).getTime() / 1000.0;
         for (var i = 0; i < response.queue.length; ++i) {
             var msg = response.queue[i];
-            console.log(msg);
             var td = goog.dom.createDom("TD", "tqtime counter", admin2020.time_formatter.duration(now-msg.when));
             td.setAttribute("data-since", msg.when);
             var claimlink = null;
-            if (msg.claim) {
-                claimlink = goog.dom.createDom("A", {href: msg.claim, className: "action", target: "_blank"}, "Claim");
-            } else if (msg.key) {
-                if (msg.claimant) {
-                    console.log("unclaim button");
-                    claimlink = goog.dom.createDom("BUTTON", "action", "Unclaim");
-                } else {
-                    claimlink = goog.dom.createDom("BUTTON", "action", "Claim");
-                }
-                goog.events.listen(claimlink, goog.events.EventType.CLICK,
-                                   goog.bind(this.claim_task, this, msg));
+            if (msg.claimant) {
+                claimlink = goog.dom.createDom("BUTTON", "action", "Unclaim");
+            } else {
+                claimlink = goog.dom.createDom("BUTTON", "action", "Claim");
             }
-            var claim_el;
+            goog.events.listen(claimlink, goog.events.EventType.CLICK,
+                               goog.bind(this.claim_task, this, msg));
+
+            var claim_el = null;
             if (msg.claimant) {
                 claim_el = goog.dom.createDom("TD", {className: "tqclaimant"}, msg.claimant);
             } else if (msg.last_sender) {
                 claim_el = goog.dom.createDom("TD", {className: "tqlastsender"}, "(" + msg.last_sender + ")");
-            } else {
-                claim_el = null;
             }
+            var what_el = null;
+            if (msg.target) {
+                what_el = goog.dom.createDom("A", {href: msg.target, target: "_blank"}, msg.what);
+            } else {
+                what_el = goog.dom.createDom("SPAN", null, msg.what);
+            }
+
+            var done_el = null;
+            if (msg.key.charAt(0) == "t") {
+                if (msg.done_pending) {
+                    done_el = goog.dom.createDom("BUTTON", "inlineminiaction", "Not done");
+                    goog.dom.classlist.add(what_el, "strike");
+                    goog.events.listen(done_el, goog.events.EventType.CLICK,
+                                       goog.bind(this.uncomplete_task, this, msg));
+                } else {
+                    done_el = goog.dom.createDom("BUTTON", "inlineminiaction", "Done");
+                    goog.events.listen(done_el, goog.events.EventType.CLICK,
+                                       goog.bind(this.complete_task, this, msg));
+                }
+            }
+
             var tr = goog.dom.createDom(
                 "TR", null,
                 td,
                 goog.dom.createDom("TD", {className: "tqteam"}, msg.team),
-                goog.dom.createDom("TD", {className: "tqwhat"}, msg.what),
+                goog.dom.createDom("TD", {className: "tqwhat"}, what_el, done_el),
                 goog.dom.createDom("TD", {className: "tqclaim"}, claimlink),
-                goog.dom.createDom("TD", {className: "tqview"},
-                                   goog.dom.createDom("A", {href: msg.target, target: "_blank"},
-                                                      "View")),
                 claim_el);
             this.tbody.appendChild(tr);
         }
@@ -307,8 +312,17 @@ class A2020_TaskQueue {
     }
 
     claim_task(msg) {
-        var url = "/admin/" + (msg.claimant ? "unclaim" : "claim") + "task/" + msg.key;
-        console.log("claim url is", url);
+        var url = "/admin/" + (msg.claimant ? "unclaim" : "claim") + "/" + msg.key;
+        goog.net.XhrIo.send(url, A2020_expect_204);
+    }
+
+    complete_task(msg) {
+        var url = "/admin/complete/" + msg.key;
+        goog.net.XhrIo.send(url, A2020_expect_204);
+    }
+
+    uncomplete_task(msg) {
+        var url = "/admin/uncomplete/" + msg.key;
         goog.net.XhrIo.send(url, A2020_expect_204);
     }
 
