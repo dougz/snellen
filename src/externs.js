@@ -53,6 +53,8 @@ class Message {
         this.fastpass;
         /** @type{?MapData} */
         this.mapdata;
+        /** @type{?Array<string>} */
+        this.maps;
     }
 }
 
@@ -145,6 +147,10 @@ class MapData {
     constructor() {
         /** @type{?string} */
         this.base_url;
+        /** @type{number} */
+        this.width;
+        /** @type{number} */
+        this.height;
         /** @type{string} */
         this.shortname;
         /** @type{Array<MapItem>} */

@@ -21,11 +21,14 @@ class LandMapPage(util.TeamPageHandler):
     self.show_map(shortname)
 
   def show_map(self, shortname):
-    land = game.Land.BY_SHORTNAME.get(shortname, None)
-    if not land:
-      raise tornado.web.HTTPError(http.client.NOT_FOUND)
-    if land not in self.team.open_lands:
-      raise tornado.web.HTTPError(http.client.NOT_FOUND)
+    if shortname == "home":
+      land = game.Land.BY_SHORTNAME[self.team.map_mode]
+    else:
+      land = game.Land.BY_SHORTNAME.get(shortname, None)
+      if not land:
+        raise tornado.web.HTTPError(http.client.NOT_FOUND)
+      if land not in self.team.open_lands:
+        raise tornado.web.HTTPError(http.client.NOT_FOUND)
     self.land = land
     mapdata = self.team.get_land_data(land)
     json_data = "<script>var initial_json = """ + json.dumps(mapdata, indent=True) + ";</script>"
@@ -43,6 +46,22 @@ class LandMapPage(util.TeamPageHandler):
     return d
 
 
+class MapDataHandler(util.TeamHandler):
+  @login.required("team")
+  def get(self, shortname):
+    if shortname == "home":
+      land = game.Land.BY_SHORTNAME[self.team.map_mode]
+    else:
+      land = game.Land.BY_SHORTNAME.get(shortname, None)
+      if not land:
+        raise tornado.web.HTTPError(http.client.NOT_FOUND)
+      if land not in self.team.open_lands:
+        raise tornado.web.HTTPError(http.client.NOT_FOUND)
+    mapdata = self.team.get_land_data(land)
+    self.set_header("Content-Type", "application/json")
+    self.write(json.dumps(mapdata))
+
+
 class EventHomePage(LandMapPage):
   @login.required()
   def get(self):
@@ -52,7 +71,7 @@ class EventHomePage(LandMapPage):
                     open_time=game.Global.STATE.expected_start_time,
                     css=(self.static_content["notopen.css"],))
         return
-      self.show_map(self.team.map_mode)
+      self.show_map("home")
     elif self.user:
       self.redirect("/admin")
 
@@ -255,6 +274,7 @@ def GetHandlers():
     (r"/pennypass/([a-z][a-z0-9_]*)$", ApplyFastPassHandler),
     (r"/js/log", ActivityLogDataHandler),
     (r"/js/pins", AchievementDataHandler),
+    (r"/js/map/([a-z][a-z0-9_]+)$", MapDataHandler),
   ]
 
   return handlers

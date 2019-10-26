@@ -217,7 +217,7 @@ class H2020_Dispatcher {
     /** @param{Message} msg */
     update_map(msg) {
         if (hunt2020.map_draw) {
-            hunt2020.map_draw.draw_map(msg.mapdata);
+            hunt2020.map_draw.update_map(msg);
         }
     }
 }
@@ -862,6 +862,22 @@ class H2020_MapDraw {
         this.draw_map(mapdata);
     }
 
+    update_map(msg) {
+        for (var i = 0; i < msg.maps.length; ++i) {
+            if (msg.maps[i] == this.shortname) {
+                goog.net.XhrIo.send("/js/map/" + this.shortname,
+                                    goog.bind(this.receive_update, this));
+                break;
+            }
+        }
+    }
+
+    receive_update(e) {
+        if (e.target.getStatus() == 200) {
+            this.draw_map(e.target.getResponseJson());
+        }
+    }
+
     draw_map(mapdata) {
         if (this.shortname != mapdata.shortname) return;
 
@@ -873,6 +889,8 @@ class H2020_MapDraw {
             var el = goog.dom.createDom("IMG", {src: mapdata.base_url,
                                                 className: "base",
                                                 useMap: "#mapmap"});
+            this.map_el.style.width = "" + mapdata.width + "px";
+            this.map_el.style.height = "" + mapdata.height + "px";
             this.map_el.appendChild(el);
         }
 

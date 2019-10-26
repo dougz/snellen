@@ -396,6 +396,7 @@ class Team(login.LoginUser):
     self.fastpasses_used = {}
 
     self.cached_bb_data = None
+    self.cached_mapdata = {}
 
   def __repr__(self):
     return f"<Team {self.username}>"
@@ -417,9 +418,8 @@ class Team(login.LoginUser):
   async def flush_messages(self):
     """Flush the pending message queue, actually sending them to the team."""
     if self.dirty_lands:
-      for land in self.dirty_lands:
-        self.pending_messages.append({"method": "update_map",
-                                      "mapdata": self.get_land_data(land)})
+      self.pending_messages.append({"method": "update_map",
+                                    "maps": list(self.dirty_lands)})
       self.dirty_lands.clear()
 
     if not self.pending_messages: return
@@ -447,8 +447,16 @@ class Team(login.LoginUser):
     self.invalidate()
 
   def get_land_data(self, land):
+    if land in self.cached_mapdata:
+      print(f"mapdata cache hit {land.shortname}")
+      return self.cached_mapdata[land]
+    print(f"mapdata cache miss {land.shortname}")
+
     items = []
-    mapdata = {"base_url": land.base_img, "shortname": land.shortname}
+    mapdata = {"base_url": land.base_img,
+               "shortname": land.shortname,
+               "width": land.base_size[0],
+               "height": land.base_size[1]}
     now = time.time()
 
     for i in land.icons.values():
@@ -507,6 +515,7 @@ class Team(login.LoginUser):
     items.sort(key=lambda i: i[0])
     mapdata["items"] = [i[1] for i in items]
 
+    self.cached_mapdata[land] = mapdata
     return mapdata
 
   @save_state
@@ -676,7 +685,8 @@ class Team(login.LoginUser):
       self.open_puzzles.add(state)
       self.activity_log.add(now, puzzle.html + " opened.")
       self.admin_log.add(now, puzzle.admin_html + " opened.", team=self)
-      self.dirty_lands.add(puzzle.land)
+      self.dirty_lands.add(puzzle.land.shortname)
+      self.cached_mapdata.pop(puzzle.land, None)
 
   def solve_puzzle(self, puzzle, now):
     state = self.puzzle_state[puzzle]
@@ -696,7 +706,8 @@ class Team(login.LoginUser):
           "title": html.escape(puzzle.title),
           "audio": OPTIONS.static_content.get(puzzle.land.shortname + "/solve.mp3"),
           "score": self.score}])
-      self.dirty_lands.add(puzzle.land)
+      self.dirty_lands.add(puzzle.land.shortname)
+      self.cached_mapdata.pop(puzzle.land, None)
       self.activity_log.add(now, puzzle.html + " solved.")
       self.admin_log.add(now, puzzle.admin_html + " solved.", team=self)
       puzzle.puzzle_log.add(now, "Solved by <b>{team.name}</b>.", team=self)
@@ -866,10 +877,13 @@ class Team(login.LoginUser):
     opened = []
     locked = []
 
-    self.map_mode = "outer"
-    #self.map_mode = "inner_only"
+    self.map_mode = "inner_only"
     if self.score >= 2:
-      self.map_mode = "outer"
+      if self.map_mode != "outer":
+        self.map_mode = "outer"
+        self.dirty_lands.add("home")
+        self.cached_mapdata.pop(Land.BY_SHORTNAME["outer"], None)
+        self.cached_mapdata.pop(Land.BY_SHORTNAME["inner_only"], None)
     current_map = Land.BY_SHORTNAME[self.map_mode]
     if current_map not in self.open_lands:
       self.open_lands[current_map] = now
@@ -939,7 +953,9 @@ class Team(login.LoginUser):
           self.open_lands[st.puzzle.land] = now
           self.sorted_open_lands = [land for land in self.open_lands.keys() if land.land_order]
           self.sorted_open_lands.sort(key=lambda land: land.land_order)
-          self.dirty_lands.add(Land.BY_SHORTNAME["inner_only"])
+          self.dirty_lands.add("home")
+          self.cached_mapdata.pop(Land.BY_SHORTNAME["outer"], None)
+          self.cached_mapdata.pop(Land.BY_SHORTNAME["inner_only"], None)
 
     return opened
 
@@ -993,7 +1009,10 @@ class Land:
     print(f"  Adding land \"{shortname}\"...")
 
     self.BY_SHORTNAME[shortname] = self
-    self.shortname = shortname
+    if shortname in ("inner_only", "outer"):
+      self.shortname = "home"
+    else:
+      self.shortname = shortname
     self.title = cfg["title"]
     self.sortkey = (util.make_sortkey(self.title), id(self))
     self.logo = cfg.get("logo")
