@@ -85,9 +85,7 @@ def convert_map(shortname, d, options):
                            assignments[name]["headerimage"])
         oic["headerimage"] = upload_file(src, options)
 
-      for variant in ("locked", "unlocked", "solved",
-                      "unlocked_thumb", "solved_thumb",
-                      "unlocked_mask", "solved_mask"):
+      for variant in ("locked", "solved", "solved_mask", "under"):
         icon_image = os.path.join(options.input_assets, shortname,
                                   name + "_" + variant + ".png")
         if not os.path.exists(icon_image): continue

@@ -464,44 +464,47 @@ class Team(login.LoginUser):
         if ps.answers_found:
           d["answer"] = ", ".join(sorted(p.display_answers[a] for a in ps.answers_found))
 
+        d["icon_url"] = i.solved.url
+        d["mask_url"] = i.solved_mask.url
+        d["pos_x"], d["pos_y"] = i.solved.pos
+        d["width"], d["height"] = i.solved.size
+        if i.solved.poly: d["poly"] = i.solved.poly
+
         if ps.state == PuzzleState.OPEN:
           if "answer" in d: d["answer"] += ", \u2026"
-
           d["solved"] = False
-          if i.unlocked.url:
-            d["icon_url"] = i.unlocked.url
-            d["mask_url"] = i.unlocked_mask.url
-            d["pos_x"], d["pos_y"] = i.unlocked.pos
-            d["width"], d["height"] = i.unlocked.size
-            if i.unlocked.poly: d["poly"] = i.unlocked.poly
-
           if (now - ps.open_time < self.NEW_PUZZLE_SECONDS and
               ps.open_time != Global.STATE.event_start_time):
             d["new_open"] = ps.open_time + self.NEW_PUZZLE_SECONDS
 
         elif ps.state == PuzzleState.SOLVED:
           d["solved"] = True
-          if i.solved.url:
-            d["icon_url"] = i.solved.url
-            d["mask_url"] = i.solved_mask.url
-            d["pos_x"], d["pos_y"] = i.solved.pos
-            d["width"], d["height"] = i.solved.size
-            if i.solved.poly: d["poly"] = i.solved.poly
 
         items.append((p.sortkey, d))
+
       else:
         # This is a main map page (the items are other lands).
 
         if i.to_land not in self.open_lands: continue
         d = { "name": i.to_land.title,
               "url": i.to_land.url,
-              "icon_url": i.unlocked.url }
-        d["pos_x"], d["pos_y"] = i.unlocked.pos
-        d["width"], d["height"] = i.unlocked.size
-        if i.unlocked.poly: d["poly"] = i.unlocked.poly
+              "icon_url": i.solved.url,
+              "mask_url": i.solved_mask.url}
+        d["pos_x"], d["pos_y"] = i.solved.pos
+        d["width"], d["height"] = i.solved.size
+        d["poly"] = i.solved.poly
         items.append((i.to_land.sortkey, d))
 
-    items.sort()
+      if i.under:
+        dd = {"icon_url": i.under.url,
+              "pos_x": i.under.pos[0],
+              "pos_y": i.under.pos[1],
+              "width": i.under.size[0],
+              "height": i.under.size[1]}
+        # Sort these before any puzzle title
+        items.append((("@",), dd))
+
+    items.sort(key=lambda i: i[0])
     mapdata["items"] = [i[1] for i in items]
 
     return mapdata
@@ -859,12 +862,17 @@ class Team(login.LoginUser):
 
   def compute_puzzle_beam(self, now):
     #print("-----------------------------")
-    start_map = Land.BY_SHORTNAME["inner_only"]
-    if start_map not in self.open_lands:
-      self.open_lands[start_map] = now
 
     opened = []
     locked = []
+
+    self.map_mode = "outer"
+    #self.map_mode = "inner_only"
+    if self.score >= 2:
+      self.map_mode = "outer"
+    current_map = Land.BY_SHORTNAME[self.map_mode]
+    if current_map not in self.open_lands:
+      self.open_lands[current_map] = now
 
     open_count = 0
     leftover_count = 0
@@ -874,19 +882,26 @@ class Team(login.LoginUser):
       if OPTIONS.open_all:
         open_count = 1000
       else:
-        if land.shortname == "polygon":
-          open_count = 3
-        elif land.shortname == "polygon2":
-          open_count = 2 if self.score >= 3 else 0
-        elif land in Land.ordered_lands[:2]:
-          open_count = 3
-        elif land.shortname == "space":
-          open_count = 1 if self.score >= 8 else 0
-        elif land.shortname == "bigtop":
-          open_count = 1 if self.score >= 10 else 0
-        else:
-          print(f"DON'T KNOW WHEN TO OPEN {land_name}!")
-          continue
+        open_count = 2
+        # if land.shortname == "polygon":
+        #   open_count = 3
+        # elif land.shortname == "polygon2":
+        #   open_count = 2 if self.score >= 3 else 0
+        # elif land in Land.ordered_lands[:2]:
+        #   open_count = 3
+        # elif land.shortname == "space":
+        #   open_count = 1 if self.score >= 8 else 0
+        # elif land.shortname == "bigtop":
+        #   open_count = 1 if self.score >= 10 else 0
+        # elif land.shortname == "studios":
+        #   open_count = 1 if self.score >= 10 else 0
+        # elif land.shortname == "safari":
+        #   open_count = 1 if self.score >= 10 else 0
+        # elif land.shortname == "balloons":
+        #   open_count = 1 if self.score >= 10 else 0
+        # else:
+        #   print(f"DON'T KNOW WHEN TO OPEN {land.shortname}!")
+        #   continue
 
       open_count += self.fastpasses_used.get(land, 0)
 
@@ -957,12 +972,18 @@ class Icon:
     self.headerimage = d.get("headerimage")
 
     self.locked = Subicon(d.get("locked"))
-    self.unlocked = Subicon(d.get("unlocked"))
-    self.unlocked_mask = Subicon(d.get("unlocked_mask"))
-    self.unlocked_thumb = Subicon(d.get("unlocked_thumb"))
+    # self.unlocked = Subicon(d.get("unlocked"))
+    # self.unlocked_mask = Subicon(d.get("unlocked_mask"))
+    # self.unlocked_thumb = Subicon(d.get("unlocked_thumb"))
     self.solved = Subicon(d.get("solved"))
     self.solved_mask = Subicon(d.get("solved_mask"))
-    self.solved_thumb = Subicon(d.get("solved_thumb"))
+    #self.solved_thumb = Subicon(d.get("solved_thumb"))
+
+    s = d.get("under")
+    if s:
+      self.under = Subicon(s)
+    else:
+      self.under = None
 
 
 class Land:
@@ -1020,7 +1041,7 @@ class Land:
         by_land_order.append((land.land_order, land))
       for i in land.icons.values():
         if not i.puzzle:
-          i.to_land = cls.BY_SHORTNAME[i.name]
+          i.to_land = cls.BY_SHORTNAME.get(i.name)
 
     by_land_order.sort()
     cls.ordered_lands = [i[1] for i in by_land_order]

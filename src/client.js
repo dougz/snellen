@@ -569,17 +569,17 @@ class H2020_SubmitPanel {
 
         hunt2020.counter.reread();
 
-        if (response.overlay && !this.has_overlay) {
-            // actually the div containing the icon images
-            var thumb = goog.dom.getElement("thumb");
+        // if (response.overlay && !this.has_overlay) {
+        //     // actually the div containing the icon images
+        //     var thumb = goog.dom.getElement("thumb");
 
-            var el = goog.dom.createDom("IMG", {
-                src: response.overlay,
-                className: "icon"});
-            thumb.appendChild(el);
+        //     var el = goog.dom.createDom("IMG", {
+        //         src: response.overlay,
+        //         className: "icon"});
+        //     thumb.appendChild(el);
 
-            this.add_sparkle(thumb, response.width, response.height);
-        }
+        //     this.add_sparkle(thumb, response.width, response.height);
+        // }
 
         var t = goog.dom.getElement("submit_table_scroll");
         t.scrollTop = t.scrollHeight;
@@ -910,6 +910,10 @@ class H2020_MapDraw {
                 goog.events.listen(area, goog.events.EventType.MOUSELEAVE,
                                    goog.bind(this.item_leave, this, it));
             }
+
+            if (!it.answer && it.name) {
+                this.add_title(it);
+            }
         }
 
         if (it.name) {
@@ -938,6 +942,12 @@ class H2020_MapDraw {
             this.mask_el = mask_el;
         }
 
+        if (it.answer) {
+            this.highlight_el  = this.add_title(it);
+        }
+    }
+
+    add_title(it) {
         var ch = [it.name];
         if (it.answer) {
             ch.push(goog.dom.createDom("B", null,
@@ -951,7 +961,7 @@ class H2020_MapDraw {
         h.style.height = "" + it.height + "px";
 
         this.map_el.appendChild(h);
-        this.highlight_el = h;
+        return h;
     }
 
     item_leave(it) {

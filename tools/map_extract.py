@@ -81,110 +81,56 @@ def main():
                       default="#f8f8f8",
                       help="Background color for map")
 
-  parser.add_argument("bg_image",
-                      help="Background without any attractions")
-  parser.add_argument("bad_image",
-                      help="Broken attractions")
-  parser.add_argument("bad_html",
+  parser.add_argument("html",
                       help="Image map HTML")
-  parser.add_argument("good_image",
-                      help="Fixed attractions")
-  parser.add_argument("good_html",
-                      help="Image map HTML")
+  parser.add_argument("solved_image")
+  parser.add_argument("--under_image", default=None)
+
   options = parser.parse_args()
 
   assert options.background_color[0] == "#" and len(options.background_color) == 7
   options.background_color = tuple(int(options.background_color[i*2+1:i*2+3], 16) for i in range(3))
 
-  bg_image = Image.open(options.bg_image).convert("RGBA")
-  bad_map = get_polys(options.bad_html)
-  bad_image = Image.open(options.bad_image).convert("RGBA")
-  good_map = get_polys(options.good_html)
-  good_image = Image.open(options.good_image).convert("RGBA")
+  html_map = get_polys(options.html)
+  solved_image = Image.open(options.solved_image).convert("RGBA")
+  if options.under_image:
+    under_image = Image.open(options.under_image).convert("RGBA")
+    assert under_image.size == solved_image.size
+  else:
+    under_image = None
 
-  assert bg_image.size == bad_image.size
-  assert bg_image.size == good_image.size
-  assert set(bad_map.keys()) == set(good_map.keys())
-  size = bg_image.size
-
-  temp = Image.new("RGB", size, options.background_color)
-  temp.paste(bg_image, (0,0), bg_image)
-  bg_image = temp
+  size = solved_image.size
 
   icons = {}
 
-  for name, coords in bad_map.items():
+  for name, coords in html_map.items():
     out = {}
     icons[name] = out
 
-    bad_coords = coords
-    bad_patch = Patch(bad_image, bad_coords)
-
-    od = {}
-    out["unlocked"] = od
-    od["pos"] = bad_patch.origin
-    od["poly"] = bad_patch.coords_str
-    od["size"] = bad_patch.size
-    bad_patch.image.save(os.path.join(options.output_dir, f"{name}_unlocked.png"))
-
-    od = {}
-    out["unlocked_mask"] = od
-    od["pos"] = bad_patch.origin[:]
-    od["size"] = bad_patch.size[:]
-    bad_patch.highlight.save(os.path.join(options.output_dir, f"{name}_unlocked_mask.png"))
-
-    good_coords = good_map[name]
-    good_patch = Patch(good_image, good_coords)
+    solved_patch = Patch(solved_image, coords)
 
     od = {}
     out["solved"] = od
-    od["pos"] = good_patch.origin
-    od["poly"] = good_patch.coords_str
-    od["size"] = good_patch.size
-    good_patch.image.save(os.path.join(options.output_dir, f"{name}_solved.png"))
+    od["pos"] = solved_patch.origin
+    od["poly"] = solved_patch.coords_str
+    od["size"] = solved_patch.size
+    solved_patch.image.save(os.path.join(options.output_dir, f"{name}_solved.png"))
 
     od = {}
     out["solved_mask"] = od
-    od["pos"] = good_patch.origin[:]
-    od["size"] = good_patch.size[:]
-    good_patch.highlight.save(os.path.join(options.output_dir, f"{name}_solved_mask.png"))
+    od["pos"] = solved_patch.origin[:]
+    od["size"] = solved_patch.size[:]
+    solved_patch.highlight.save(os.path.join(options.output_dir, f"{name}_solved_mask.png"))
 
+    if under_image:
+      under_patch = Patch(under_image, coords)
 
-    tx0 = min(bad_patch.origin[0], good_patch.origin[0]) - THUMB_MARGIN
-    ty0 = min(bad_patch.origin[1], good_patch.origin[1]) - THUMB_MARGIN
-    tx1 = max(bad_patch.origin[0] + bad_patch.size[0],
-              good_patch.origin[0] + good_patch.size[0]) + THUMB_MARGIN
-    ty1 = max(bad_patch.origin[1] + bad_patch.size[1],
-              good_patch.origin[1] + good_patch.size[1]) + THUMB_MARGIN
-
-    if tx0 < 0: tx0 = 0
-    if ty0 < 0: ty0 = 0
-    if tx1 > size[0]: tx1 = size[0]
-    if ty1 > size[1]: ty1 = size[1]
-
-    temp = bg_image.copy()
-    temp.paste(bad_patch.image, tuple(bad_patch.origin), bad_patch.image)
-    bad_thumb = temp.crop((tx0, ty0, tx1, ty1))
-    if bad_thumb.size[1] > options.max_thumb_height:
-      bad_thumb = bad_thumb.resize((bad_thumb.size[0] * options.max_thumb_height // bad_thumb.size[1],
-                                    options.max_thumb_height), Image.LANCZOS)
-
-    od = {}
-    out["unlocked_thumb"] = od
-    od["size"] = list(bad_thumb.size)
-    bad_thumb.save(os.path.join(options.output_dir, f"{name}_unlocked_thumb.png"))
-
-    temp = bg_image.copy()
-    temp.paste(good_patch.image, tuple(good_patch.origin), good_patch.image)
-    good_thumb = temp.crop((tx0, ty0, tx1, ty1))
-    if good_thumb.size[1] > options.max_thumb_height:
-      good_thumb = good_thumb.resize((good_thumb.size[0] * options.max_thumb_height // good_thumb.size[1],
-                                    options.max_thumb_height), Image.LANCZOS)
-
-    od = {}
-    out["solved_thumb"] = od
-    od["size"] = list(good_thumb.size)
-    good_thumb.save(os.path.join(options.output_dir, f"{name}_solved_thumb.png"))
+      od = {}
+      out["under"] = od
+      od["pos"] = under_patch.origin
+      od["poly"] = under_patch.coords_str
+      od["size"] = under_patch.size
+      under_patch.image.save(os.path.join(options.output_dir, f"{name}_under.png"))
 
 
   y = { "icons": icons }

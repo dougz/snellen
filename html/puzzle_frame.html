@@ -18,9 +18,11 @@
   <button id="hintrequest">Send request</button>
 </div>
 <div id="submitpanel">
+  {% if thumb %}
   <div id="thumb" style="width: {{thumb.size[0]}}px; height: {{thumb.size[1]}}px;">
     <a href="{{puzzle.land.url}}"><img class="base" src="{{thumb.url}}"></img></a>
   </div>
+  {% end %}
   <div id="submitdata">
     <div id="submit_table_scroll">
       <table id="submit_table">

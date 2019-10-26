@@ -28,7 +28,7 @@ class LandMapPage(util.TeamPageHandler):
       raise tornado.web.HTTPError(http.client.NOT_FOUND)
     self.land = land
     mapdata = self.team.get_land_data(land)
-    json_data = "<script>var initial_json = """ + json.dumps(mapdata) + ";</script>"
+    json_data = "<script>var initial_json = """ + json.dumps(mapdata, indent=True) + ";</script>"
     self.render("land.html", land=land, json_data=json_data)
 
   def get_template_namespace(self):
@@ -52,7 +52,7 @@ class EventHomePage(LandMapPage):
                     open_time=game.Global.STATE.expected_start_time,
                     css=(self.static_content["notopen.css"],))
         return
-      self.show_map("inner_only")
+      self.show_map(self.team.map_mode)
     elif self.user:
       self.redirect("/admin")
 
@@ -69,11 +69,11 @@ class PuzzlePage(util.TeamPageHandler):
       print(f"no puzzle called {shortname}")
       raise tornado.web.HTTPError(http.client.NOT_FOUND)
 
-    if (state.state == game.PuzzleState.SOLVED and
-        not state.recent_solve()):
-      thumb = puzzle.icon.solved_thumb
-    else:
-      thumb = puzzle.icon.unlocked_thumb
+    # if (state.state == game.PuzzleState.SOLVED and
+    #     not state.recent_solve()):
+    #   thumb = puzzle.icon.solved_thumb
+    # else:
+    #   thumb = puzzle.icon.unlocked_thumb
 
     if puzzle.icon.headerimage:
       supertitle=f'<img src="{puzzle.icon.headerimage}"><br>'
@@ -81,7 +81,7 @@ class PuzzlePage(util.TeamPageHandler):
       supertitle=""
 
     self.puzzle = puzzle
-    self.render("puzzle_frame.html", thumb=thumb, supertitle=supertitle,
+    self.render("puzzle_frame.html", thumb=None, supertitle=supertitle,
                 solved=(state.state == state.SOLVED))
 
   def get_template_namespace(self):
@@ -196,9 +196,9 @@ class SubmitHistoryHandler(util.TeamHandler):
       d["correct"] = len(state.answers_found)
       d["total"] = len(state.puzzle.answers)
 
-    if state.recent_solve():
-      d["overlay"] = state.puzzle.icon.solved_thumb.url
-      d["width"], d["height"] = state.puzzle.icon.solved_thumb.size
+    # if state.recent_solve():
+    #   d["overlay"] = state.puzzle.icon.solved_thumb.url
+    #   d["width"], d["height"] = state.puzzle.icon.solved_thumb.size
 
     self.write(json.dumps(d))
 
