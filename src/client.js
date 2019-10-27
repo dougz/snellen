@@ -99,6 +99,7 @@ class H2020_Dispatcher {
             "apply_fastpass": this.apply_fastpass,
             "hints_open": this.hints_open,
             "update_map": this.update_map,
+            "update_header": this.update_header,
         }
     }
 
@@ -140,16 +141,37 @@ class H2020_Dispatcher {
     }
 
     /** @param{Message} msg */
+    update_header(msg) {
+        goog.dom.getElement("buzz").innerHTML = "Buzz: " + msg.score;
+
+        var el = goog.dom.getElement("landtags");
+        console.log(el);
+        el.innerHTML = "";
+        for (var i = 0; i < msg.lands.length; ++i) {
+            console.log(msg.lands[i][0]);
+            var a = goog.dom.createDom("A", {className: "landtag",
+                                             href: msg.lands[i][2]}, msg.lands[i][0]);
+            a.style.backgroundColor = msg.lands[i][1];
+            el.appendChild(a);
+        }
+
+        if (msg.to_go) {
+            var a = goog.dom.createDom("A", {
+                id: "nextland",
+                className: "landtag",
+                title: "Generate " + msg.to_go + " more buzz to unlock the next land!"}, "??");
+            el.appendChild(a);
+        }
+
+    }
+
+    /** @param{Message} msg */
     solve(msg) {
         if (msg.audio) {
             hunt2020.audio_manager.start(msg.audio);
         }
         hunt2020.toast_manager.add_toast(
             "<b>" + msg.title + "</b> was solved!", 6000, true);
-
-        if (msg.score) {
-            goog.dom.getElement("score").innerHTML = "" + msg.score;
-        }
 
         if (puzzle_id == msg.puzzle_id) {
             var el = goog.dom.getElement("submit");
@@ -1223,7 +1245,8 @@ window.onload = function() {
     hunt2020.audio_manager = new H2020_AudioManager();
     hunt2020.counter = new H2020_Counter();
 
-    hunt2020.waiter = new H2020_Waiter(new H2020_Dispatcher());
+    var dispatcher = new H2020_Dispatcher();
+    hunt2020.waiter = new H2020_Waiter(dispatcher);
     hunt2020.waiter.start();
 
     // Only present on the puzzle pages.
@@ -1264,6 +1287,10 @@ window.onload = function() {
     // Only present on the fastpass page.
     if (goog.dom.getElement("fphavenone")) {
         hunt2020.fastpass = new H2020_FastPass();
+    }
+
+    if (initial_header) {
+        dispatcher.update_header(initial_header);
     }
 }
 

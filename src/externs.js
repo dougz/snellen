@@ -29,6 +29,9 @@ var edb;
 /** @type{?Object} */
 var initial_json;
 
+/** @type{?Object} */
+var initial_header;
+
 class Message {
     constructor() {
         /** @type{string} */
@@ -55,6 +58,10 @@ class Message {
         this.mapdata;
         /** @type{?Array<string>} */
         this.maps;
+        /** @type{?Array<Array<string>>} */
+        this.lands;
+        /** @type{?number} */
+        this.to_go;
     }
 }
 

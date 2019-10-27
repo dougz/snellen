@@ -1,5 +1,6 @@
 import asyncio
 import collections
+import copy
 import datetime
 import hashlib
 import heapq
@@ -350,10 +351,31 @@ class Submission:
 
   @classmethod
   async def realtime_process_submit_queue(cls):
+    land_times = []
+    for land in Land.BY_SHORTNAME.values():
+      if land.open_at_time:
+        land_times.append(land.open_at_time)
+    land_times.sort(reverse=True)
+
     while True:
-      teams = cls.process_submit_queue(time.time())
+      now = time.time()
+      teams = cls.process_submit_queue(now)
       for team in teams:
         asyncio.create_task(team.flush_messages())
+
+      if Global.STATE.event_start_time:
+        rel = now - Global.STATE.event_start_time
+        beam = False
+        while land_times and rel > land_times[-1]:
+          beam = True
+          land_times.pop()
+        if beam:
+          print("recomputing all beams")
+          for team in Team.all_teams():
+            team.compute_puzzle_beam(now)
+            team.invalidate()
+            await team.flush_messages()
+
       await asyncio.sleep(1.0)
 
   @classmethod
@@ -405,6 +427,7 @@ class Team(login.LoginUser):
     for puzzle in Puzzle.all_puzzles():
       self.puzzle_state[puzzle] = PuzzleState(self, puzzle)
 
+    self.map_mode = "inner_only"
     self.open_lands = {}
     self.sorted_open_lands = []
     self.open_puzzles = set()    # PuzzleState objects
@@ -412,11 +435,13 @@ class Team(login.LoginUser):
     self.admin_log = Log()       # visible only to GC
     self.score = 0
     self.last_score_change = 0
+    self.score_to_go = None
 
     self.message_mu = asyncio.Lock()
     self.message_serial = 1
     self.pending_messages = []
     self.dirty_lands = set()
+    self.dirty_header = False
 
     self.achievements = {}
     self.streak = []
@@ -452,6 +477,11 @@ class Team(login.LoginUser):
       self.pending_messages.append({"method": "update_map",
                                     "maps": list(self.dirty_lands)})
       self.dirty_lands.clear()
+    if self.dirty_header:
+      d = copy.copy(self.get_header_data())
+      d["method"] = "update_header"
+      self.pending_messages.append(d)
+      self.dirty_header = False
 
     if not self.pending_messages: return
     objs, self.pending_messages = self.pending_messages, []
@@ -476,6 +506,13 @@ class Team(login.LoginUser):
   def add_admin_note(self, now, user_fullname, text):
     self.admin_log.add(now, f"<b>{user_fullname}</b> noted: {text}")
     self.invalidate()
+
+  def get_header_data(self):
+    d = {"score": self.score * 1000,
+         "lands": [[i.symbol, i.color, i.url] for i in self.sorted_open_lands],
+         "to_go": None if self.score_to_go is None else (self.score_to_go * 1000),
+         }
+    return d
 
   def get_land_data(self, land):
     if land in self.cached_mapdata:
@@ -729,6 +766,7 @@ class Team(login.LoginUser):
         if sub.state == sub.PENDING:
           sub.state = sub.MOOT
       self.score += puzzle.points
+      self.dirty_header = True
       self.last_score_change = now
       self.open_puzzles.remove(state)
       self.send_messages(
@@ -736,7 +774,7 @@ class Team(login.LoginUser):
           "puzzle_id": puzzle.shortname,
           "title": html.escape(puzzle.title),
           "audio": OPTIONS.static_content.get(puzzle.land.shortname + "/solve.mp3"),
-          "score": self.score}])
+        }])
       self.dirty_lands.add(puzzle.land.shortname)
       self.cached_mapdata.pop(puzzle.land, None)
       self.activity_log.add(now, puzzle.html + " solved.")
@@ -902,79 +940,44 @@ class Team(login.LoginUser):
                                     "team_username": self.username,
                                     "puzzle_id": puzzle.shortname}], flush=True)
 
+  # BEAM!
   def compute_puzzle_beam(self, now):
     #print("-----------------------------")
 
     opened = []
     locked = []
 
-    self.map_mode = "inner_only"
-    if self.score >= 2:
-      if self.map_mode != "outer":
-        self.map_mode = "outer"
-        self.dirty_lands.add("home")
-        self.cached_mapdata.pop(Land.BY_SHORTNAME["outer"], None)
-        self.cached_mapdata.pop(Land.BY_SHORTNAME["inner_only"], None)
-    current_map = Land.BY_SHORTNAME[self.map_mode]
-    if current_map not in self.open_lands:
-      self.open_lands[current_map] = now
+    min_score_to_go = None
 
-    open_count = 0
-    leftover_count = 0
+    since_start = now - Global.STATE.event_start_time
     for land in Land.ordered_lands:
       if not land.puzzles: continue
+
+      open_count = self.fastpasses_used.get(land, 0)
 
       if OPTIONS.open_all:
         open_count = 1000
       else:
-        open_count = 2
-        # if land.shortname == "polygon":
-        #   open_count = 3
-        # elif land.shortname == "polygon2":
-        #   open_count = 2 if self.score >= 3 else 0
-        # elif land in Land.ordered_lands[:2]:
-        #   open_count = 3
-        # elif land.shortname == "space":
-        #   open_count = 1 if self.score >= 8 else 0
-        # elif land.shortname == "bigtop":
-        #   open_count = 1 if self.score >= 10 else 0
-        # elif land.shortname == "studios":
-        #   open_count = 1 if self.score >= 10 else 0
-        # elif land.shortname == "safari":
-        #   open_count = 1 if self.score >= 10 else 0
-        # elif land.shortname == "balloons":
-        #   open_count = 1 if self.score >= 10 else 0
-        # else:
-        #   print(f"DON'T KNOW WHEN TO OPEN {land.shortname}!")
-        #   continue
+        if (self.score >= land.open_at_score or
+            since_start >= land.open_at_time):
+          open_count += land.initial_puzzles
 
-      open_count += self.fastpasses_used.get(land, 0)
-
-      #print(f"land {land_name} open_count {open_count}")
+      if open_count == 0:
+        to_go = land.open_at_score - self.score
+        if min_score_to_go is None or min_score_to_go > to_go:
+          min_score_to_go = to_go
+        continue
 
       for i, p in enumerate(land.puzzles):
-        if open_count <= 0:
-          locked.extend(land.puzzles[i:])
-          break
         if self.puzzle_state[p].state == PuzzleState.CLOSED:
-          self.open_puzzle(p, now)
-          opened.append(p)
+          if open_count > 0 or p.meta:
+            self.open_puzzle(p, now)
+            opened.append(p)
+          else:
+            break
         if self.puzzle_state[p].state == PuzzleState.OPEN:
           if not p.meta:
             open_count -= 1
-      leftover_count += open_count
-      #print("")
-
-    #print(f"leftovers {leftover_count}")
-    if leftover_count:
-      for p in locked:
-        if leftover_count <= 0: break
-        if self.puzzle_state[p].state == PuzzleState.CLOSED:
-          self.open_puzzle(p, now)
-          opened.append(p)
-        if self.puzzle_state[p].state == PuzzleState.OPEN:
-          if not p.meta:
-            leftover_count -= 1
 
     for st in self.puzzle_state.values():
       if st.state != PuzzleState.CLOSED:
@@ -987,6 +990,20 @@ class Team(login.LoginUser):
           self.dirty_lands.add("home")
           self.cached_mapdata.pop(Land.BY_SHORTNAME["outer"], None)
           self.cached_mapdata.pop(Land.BY_SHORTNAME["inner_only"], None)
+          self.dirty_header = True
+
+    # Check for the first outer land
+    if Land.BY_SHORTNAME["balloons"] in self.open_lands:
+      if self.map_mode != "outer":
+        self.map_mode = "outer"
+        self.dirty_lands.add("home")
+        self.cached_mapdata.pop(Land.BY_SHORTNAME["outer"], None)
+        self.cached_mapdata.pop(Land.BY_SHORTNAME["inner_only"], None)
+    current_map = Land.BY_SHORTNAME[self.map_mode]
+    if current_map not in self.open_lands:
+      self.open_lands[current_map] = now
+
+    self.score_to_go = min_score_to_go
 
     return opened
 
@@ -1039,6 +1056,8 @@ class Land:
   DEFAULT_GUESS_INTERVAL = 30  # 6 minutes
   DEFAULT_GUESS_MAX = 10
 
+  DEFAULT_INITIAL_PUZZLES = 2
+
   def __init__(self, shortname, cfg, event_dir):
     print(f"  Adding land \"{shortname}\"...")
 
@@ -1055,6 +1074,9 @@ class Land:
     self.color = cfg.get("color")
     self.guess_interval = cfg.get("guess_interval", self.DEFAULT_GUESS_INTERVAL)
     self.guess_max = cfg.get("guess_max", self.DEFAULT_GUESS_MAX)
+    self.open_at_score, self.open_at_time = cfg.get("open_at", (None, None))
+    if self.open_at_time: self.open_at_time *= 60
+    self.initial_puzzles = cfg.get("initial_puzzles", self.DEFAULT_INITIAL_PUZZLES)
 
     self.base_img = cfg["base_img"]
     self.base_size = cfg["base_size"]
@@ -1390,6 +1412,17 @@ class Global:
     if timed and not save_state.REPLAYING:
       asyncio.create_task(self.notify_event_start())
     asyncio.create_task(login.AdminUser.flush_messages())
+
+    for land in Land.BY_SHORTNAME.values():
+      if land.open_at_time:
+        asyncio.create_task(self.beam_all(land.open_at_time))
+
+  async def beam_all(self, delay):
+    await asyncio.sleep(delay + 1)
+    now = time.time()
+    for team in Team.all_teams():
+      team.compute_puzzle_beam(now)
+      await team.flush_messages()
 
   def add_task(self, now, team, taskname, text):
     team = Team.get_by_username(team)

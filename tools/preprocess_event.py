@@ -54,6 +54,7 @@ def convert_map(shortname, d, options):
   copyif("color")
   copyif("guess_interval")
   copyif("guess_max")
+  copyif("open_at")
   print(f"Parsing {shortname} \"{d['title']}\"...")
 
   base_img = os.path.join(options.input_assets, shortname,

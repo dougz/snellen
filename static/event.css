@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css?family=Merriweather+Sans:400,700,800&display=block');
 @import url('https://fonts.googleapis.com/css?family=Merriweather&display=block');
 @import url('https://fonts.googleapis.com/css?family=Inconsolata&display=block');
-@import url('https://fonts.googleapis.com/css?family=Open+Sans:600,700&display=block&text=0123456789');
+@import url('https://fonts.googleapis.com/css?family=Open+Sans:600,700&display=block&text=0123456789?');
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css');
 
 body {
@@ -202,12 +202,21 @@ a#submit:hover {
 }
 
 .landtag {
-    font-family: 'Merriweather Sans', sans-serif;
+    font-family: 'Open Sans', 'Merriweather Sans', sans-serif;
     font-size: 84%;
     font-weight: 700;
     color: white;
     padding: 1px 6px;
     border-radius: 4px;
+}
+
+#topnav .landtag {
+    margin-right: 12px;
+}
+
+#nextland.landtag {
+    width: 30px;
+    color: #ccc;
 }
 
 #log th { vertical-align: baseline; padding-right: 20px; text-align: right; color: #666; }

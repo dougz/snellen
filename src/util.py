@@ -1,6 +1,7 @@
 import asyncio
 import game
 import http
+import json
 import string
 import time
 import tornado.web
@@ -44,6 +45,7 @@ class TeamPageHandler(TeamHandler):
       script.append("var puzzle_id = null;\n")
 
     script.append(f"var waiter_id = {wid}; var received_serial = {serial};\n")
+    script.append(f"var initial_header = {json.dumps(self.team.get_header_data())};\n")
     script.append("</script>")
 
     if self.application.settings.get("debug"):
@@ -53,6 +55,7 @@ class TeamPageHandler(TeamHandler):
       script.append(f"""<script src="{self.static_content["client-compiled.js"]}"></script>""")
 
     d["css"] = [self.static_content["event.css"]]
+
 
     d["script"] = "".join(script)
     d["json_data"] = None
