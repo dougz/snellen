@@ -515,9 +515,9 @@ class H2020_SubmitPanel {
                 var response = /** @type{SubmissionHistory} */ (e.target.getResponseJson());
                 this.render_history(response);
                 if (response.allowed) {
-                    this.entry.style.display = "flex";
+                    this.entry.style.visibility = "visible";
                 } else {
-                    this.entry.style.display = "none";
+                    this.entry.style.visibility = "hidden";
                 }
             }
         }, this));

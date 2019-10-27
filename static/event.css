@@ -277,13 +277,13 @@ a#submit:hover {
 @keyframes slide {
     0% { height: 0px; visibility: hidden; border-bottom-width: 0px; }
     1% { visibility: visible; }
-    100% { height: 300px; visibility: visible; border-bottom-width: 2px; }
+    100% { height: 400px; visibility: visible; border-bottom-width: 2px; }
 }
 
 @keyframes slide2 {
     0% { height: 0px; visibility: hidden; border-bottom-width: 0px; }
     1% { visibility: visible; }
-    100% { height: 300px; visibility: visible; border-bottom-width: 2px; }
+    100% { height: 400px; visibility: visible; border-bottom-width: 2px; }
 }
 
 .panel-visible {
@@ -334,7 +334,6 @@ div#thumb .icon {
 }
 
 #submitdata {
-    height: 276px;
     margin: 12px;
     display: flex;
     flex-direction: column;
@@ -352,19 +351,28 @@ div#thumb .icon {
     border-collapse: collapse;
 }
 
+#submit_table thead, #submit_table tbody {
+    display: block;
+}
+
 #submit_table_scroll {
-    overflow-y: auto;
     flex-grow: 1000;
 }
 
+#submit_table tbody {
+    overflow-y: auto;
+    height: 220px;
+}
+
+
 #st_answer {
-    width: 70ex;
+    width: 640px;
 }
 #st_time {
-    width: 20ex;
+    width: 200px;
 }
 #st_result {
-    width: 16ex;
+    width: 160px;
 }
 #top_note {
     flex-grow: 1;
@@ -397,9 +405,11 @@ td.submit-answer {
     font-family: 'Inconsolata', monospace;
     font-weight: bold;
     color: black;
+    width: 640px;
 }
 td.submit-time {
     color: black;
+    width: 200px;
 }
 
 tr.submit-correct {
@@ -426,7 +436,12 @@ tr.submit-pending {
     border-top: 1px solid #999;
 }
 
-.submit-state { text-transform: uppercase; }
+td.submit-state {
+    text-transform: uppercase;
+    width: 160px;
+}
+
+
 tr.submit-correct .submit-state { color: #090 }
 tr.submit-incorrect .submit-state { color: #c00 }
 tr.submit-partial .submit-state { color: #990 }

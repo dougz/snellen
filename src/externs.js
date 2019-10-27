@@ -29,7 +29,7 @@ var edb;
 /** @type{?Object} */
 var initial_json;
 
-/** @type{?Object} */
+/** @type{?Message} */
 var initial_header;
 
 class Message {
