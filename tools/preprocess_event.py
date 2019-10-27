@@ -47,12 +47,13 @@ def get_image_size(path):
 
 def convert_map(shortname, d, options):
   out = {"title": d["title"]}
-  if "symbol" in d:
-    out["symbol"] = d["symbol"]
-  if "land_order" in d:
-    out["land_order"] = d["land_order"]
-  if "color" in d:
-    out["color"] = d["color"]
+  def copyif(k):
+    if k in d: out[k] = d[k]
+  copyif("symbol")
+  copyif("land_order")
+  copyif("color")
+  copyif("guess_interval")
+  copyif("guess_max")
   print(f"Parsing {shortname} \"{d['title']}\"...")
 
   base_img = os.path.join(options.input_assets, shortname,

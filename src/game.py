@@ -209,6 +209,7 @@ class PuzzleState:
     after = self.submissions[-count:]
     del self.submissions[-count:]
     for sub in after:
+      sub.check_time = None
       self.submissions.append(sub)
       sub.check_or_queue(now, log_queue=False)
 
@@ -224,7 +225,8 @@ class Submission:
 
   GLOBAL_SUBMIT_QUEUE = []
 
-  PER_ANSWER_DELAY = 360
+  PER_ANSWER_DELAY = 20
+  MAX_ACCUM = 4
 
   def __init__(self, now, submit_id, team, puzzle, answer):
     self.state = self.PENDING
@@ -236,6 +238,7 @@ class Submission:
     self.raw_answer = answer
     self.sent_time = now
     self.submit_time = None
+    self.check_time = None
     self.extra_response = None
     self.wrong_but_reasonable = None
 
@@ -255,9 +258,37 @@ class Submission:
   def compute_check_time(self):
     # Note that self is already in the submissions list (at the end)
     # when this is called.
-    count = sum(1 for i in self.puzzle_state.submissions
-                if i.state in (self.PENDING, self.INCORRECT) and not i.wrong_but_reasonable)
-    return self.puzzle_state.open_time + (count-1) * self.PER_ANSWER_DELAY
+
+    guess_interval = self.puzzle.land.guess_interval
+    guess_max = self.puzzle.land.guess_max
+
+    guesses = 0
+    last_ding = self.puzzle_state.open_time - guess_interval
+    for sub in self.puzzle_state.submissions[:-1]:
+      if not (sub.state in (self.PENDING, self.INCORRECT) and not sub.wrong_but_reasonable):
+        continue
+
+      interval = sub.check_time - last_ding
+      gotten = int(interval / guess_interval)
+      guesses += gotten
+      if guesses > guess_max: guesses = guess_max
+      #print(f"{sub.answer} {sub.check_time - sub.puzzle_state.open_time} {guesses}")
+      guesses -= 1
+      last_ding = sub.check_time
+
+    sub = self.puzzle_state.submissions[-1]
+    assert sub.check_time is None
+    interval = max(sub.sent_time - last_ding, 0)
+    gotten = int(interval / guess_interval)
+    guesses += gotten
+    if guesses > guess_max: guesses = guess_max
+    #print(f"** {sub.answer} {sub.sent_time - sub.puzzle_state.open_time:.3f}   {interval:.3f}: +{gotten} = {guesses}")
+
+    if guesses > 0:
+      return self.sent_time
+
+    return last_ding + (gotten+1) * guess_interval
+
 
   def check_answer(self, now):
     self.submit_time = now
@@ -1005,6 +1036,9 @@ class Icon:
 class Land:
   BY_SHORTNAME = {}
 
+  DEFAULT_GUESS_INTERVAL = 30  # 6 minutes
+  DEFAULT_GUESS_MAX = 10
+
   def __init__(self, shortname, cfg, event_dir):
     print(f"  Adding land \"{shortname}\"...")
 
@@ -1019,6 +1053,8 @@ class Land:
     self.symbol = cfg.get("symbol", None)
     self.land_order = cfg.get("land_order")
     self.color = cfg.get("color")
+    self.guess_interval = cfg.get("guess_interval", self.DEFAULT_GUESS_INTERVAL)
+    self.guess_max = cfg.get("guess_max", self.DEFAULT_GUESS_MAX)
 
     self.base_img = cfg["base_img"]
     self.base_size = cfg["base_size"]

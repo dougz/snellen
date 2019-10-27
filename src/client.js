@@ -16,11 +16,13 @@ class H2020_Waiter {
         /** @type{number} */
         this.serial = received_serial;
 
-        var e = sessionStorage.getItem("serial");
-        if (e) {
-            e = parseInt(e, 10);
-            if (e > this.serial) {
-                this.serial = e;
+        if (window.performance.navigation.type == 2) {
+            var e = sessionStorage.getItem("serial");
+            if (e) {
+                e = parseInt(e, 10);
+                if (e > this.serial) {
+                    this.serial = e;
+                }
             }
         }
 
@@ -1157,7 +1159,6 @@ class H2020_FastPass {
             }
         }
         if (!shortname) return;
-        console.log("shortname is", shortname);
         goog.net.XhrIo.send("/pennypass/" + shortname, H2020_expect_204);
     }
 }
