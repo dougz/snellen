@@ -232,30 +232,56 @@ a#submit:hover {
 
     z-index: 999;
     position: static;
-    overflow-y: inherit;
+
+    overflow-y: hidden;
     overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 #hinthistory {
+    flex-grow: 1;
+    margin: 12px;
+    color: #eee;
+    overflow-y: auto;
+    border: 1px solid #666;
+    background-color: #777;
+}
+
+#hinthistory #hintnone {
+    display: block;
+    font-weight: bold;
     margin: 20px;
     color: #eee;
 }
 
+#hinthistory dl {
+    margin: 0;
+}
+
 #hinthistory dt {
-    margin-top: 8px;
+    margin: 8px 8px 0 8px;
     color: #fff;
     font-weight: bold;
 }
 
 #hinthistory dd {
-    margin-top: 4px;
+    margin: 8px 0 16px 32px;
+    font-family: 'Inconsolata', monospace;
+    white-space: pre;
+}
+
+#hintentry {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin: 0 12px 12px 12px;
 }
 
 #hinttext {
-    font-family: 'Merriweather Sans', sans-serif;
-    margin: 0 20px;
-    width: 800px;
+    font-family: 'Inconsolata', monospace;
     padding: 8px;
+    flex-grow: 1;
 }
 
 #hintrequest {
@@ -264,14 +290,22 @@ a#submit:hover {
     color: white;
     font-size: 100%;
     padding: 8px 16px;
-    margin: 8px 0 8px 254px;
+    margin-left: 12px;
     box-sizing: border-box;
     border: 1px solid #395483;
     border-radius: 15px;
-    width: 332px;
+    /*width: 332px;*/
     background: linear-gradient(to bottom, #4c70af, #436299);
     outline: none;
+    flex-grow: 0;
 }
+
+#hintrequest:focus, #hintrequest:hover {
+    color: yellow;
+    border: 1px solid #819ac7;
+    background: linear-gradient(to bottom, #436299, #4c70af);
+}
+
 
 
 @keyframes slide {

@@ -312,6 +312,8 @@ body > p, body > h2 {
 
 #tpphinthistory dd {
     margin-top: 4px;
+    font-family: 'Inconsolata', sans-serif;
+    white-space: pre;
 }
 
 #tppreplycontainer {
@@ -322,7 +324,7 @@ body > p, body > h2 {
 }
 
 #tppreplytext {
-    font-family: 'Merriweather Sans', sans-serif;
+    font-family: 'Inconsolata', sans-serif;
     width: 100%;
     padding: 8px;
     resize: none;

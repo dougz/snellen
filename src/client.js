@@ -754,7 +754,7 @@ class H2020_HintPanel {
     render_history(response) {
         var ht = goog.dom.getElement("hinttext");
         if (response.history.length == 0) {
-            this.history.innerHTML = "You have not requested any hints.";
+            this.history.innerHTML = "<span id=hintnone>You have not requested any hints.</span>";
             ht.setAttribute(
                 "placeholder",
                 "Describe what you've tried, where you're stuck\u2026");

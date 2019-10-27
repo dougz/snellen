@@ -199,7 +199,7 @@ class HintReplyHandler(util.AdminHandler):
     shortname = self.args.get("puzzle_id")
     puzzle = self.get_puzzle(shortname)
 
-    text = self.args.get("text", "").strip()
+    text = self.args.get("text", "").rstrip()
     if not text:
       raise tornado.web.HTTPError(http.client.BAD_REQUEST)
     text = html.escape(text).replace("\n", "<br>")

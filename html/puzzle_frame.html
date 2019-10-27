@@ -14,8 +14,10 @@
 {% block midnav %}
 <div id="hintpanel">
   <div id="hinthistory"></div>
-  <textarea rows=3 id="hinttext"></textarea>
-  <button id="hintrequest">Send request</button>
+  <div id="hintentry">
+    <textarea rows=3 id="hinttext"></textarea>
+    <button id="hintrequest">Send request</button>
+  </div>
 </div>
 <div id="submitpanel">
   {% if thumb %}

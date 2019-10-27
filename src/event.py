@@ -234,7 +234,7 @@ class HintRequestHandler(util.TeamHandler):
 
   @login.required("team", on_fail=http.client.UNAUTHORIZED)
   def post(self):
-    text = self.args["text"].strip()
+    text = self.args["text"].rstrip()
     text = html.escape(text).replace("\n", "<br>")
     shortname = self.args["puzzle_id"]
     puzzle = game.Puzzle.get_by_shortname(shortname)
