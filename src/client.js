@@ -526,8 +526,14 @@ class H2020_SubmitPanel {
     /** @param{SubmissionHistory} response */
     render_history(response) {
         if (response.total) {
-            this.top_note.innerHTML = response.correct + "/" + response.total + " correct answers found";
-            this.top_note.style.display = "inline";
+            var t = response.total;
+            var c = response.correct;
+            this.top_note.innerHTML = "This puzzle has " + t + " answer" +
+                (t == 1 ? "" : "s") + ".  " +
+                (t == c ? "You have found them all!" :
+                 (c > 0 ? "You have found " + c + " so far.  " : "") +
+                 "Submit each answer separately.");
+            this.top_note.style.display = "initial";
         } else {
             this.top_note.style.display = "none";
         }

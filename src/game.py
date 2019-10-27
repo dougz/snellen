@@ -993,7 +993,7 @@ class Team(login.LoginUser):
           self.dirty_header = True
 
     # Check for the first outer land
-    if Land.BY_SHORTNAME["balloons"] in self.open_lands:
+    if Land.BY_SHORTNAME.get("balloons") in self.open_lands:
       if self.map_mode != "outer":
         self.map_mode = "outer"
         self.dirty_lands.add("home")

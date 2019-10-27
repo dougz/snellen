@@ -334,10 +334,18 @@ div#thumb .icon {
 }
 
 #submitdata {
-    height: 260px;
+    height: 276px;
+    margin: 12px;
     display: flex;
     flex-direction: column;
     align-items: stretch;
+}
+
+#submitinstr {
+    text-align: center;
+    color: #ccc;
+    font-size: 84%;
+    font-style: italic;
 }
 
 #submit_table {
@@ -350,7 +358,7 @@ div#thumb .icon {
 }
 
 #st_answer {
-    width: 40ex;
+    width: 70ex;
 }
 #st_time {
     width: 20ex;
@@ -362,7 +370,7 @@ div#thumb .icon {
     flex-grow: 1;
     text-align: center;
     color: white;
-
+    margin: 8px;
 }
 
 
@@ -382,9 +390,9 @@ div#thumb .icon {
 }
 
 td.submit-empty {
-    color: black;
+    color: #ccc;
+    font-style: italic;
 }
-;
 td.submit-answer {
     font-family: 'Inconsolata', monospace;
     font-weight: bold;
@@ -440,6 +448,7 @@ div#submitentry {
 #submitentry #answer, #submitentry #emoji-answer {
     font-size: 120%;
     font-family: 'Inconsolata', monospace;
+    font-weight: bold;
     margin: 8px 0 8px 8px;
     border: 1px solid white;
     border-top-left-radius: 15px;
