@@ -62,6 +62,8 @@ class Message {
         this.lands;
         /** @type{?number} */
         this.to_go;
+        /** @type{?string} */
+        this.video_url;
     }
 }
 

@@ -13,6 +13,9 @@ import login
 import util
 
 
+OPTIONS = None
+
+
 class LandMapPage(util.TeamPageHandler):
   RECENT_SECONDS = 10.0
 
@@ -131,6 +134,21 @@ class ActivityLogDataHandler(util.TeamHandler):
     d = {"log": self.team.activity_log.get_data()}
     self.set_header("Content-Type", "application/json")
     self.write(json.dumps(d))
+
+class VideosPage(util.TeamPageHandler):
+  @login.required("team")
+  def get(self):
+    self.session.visit_page("videos")
+    self.render("videos.html")
+
+class VideosDataHandler(util.TeamHandler):
+  @login.required("team")
+  def get(self):
+    urls = []
+    for i in range(1, self.team.videos+1):
+      urls.append(OPTIONS.static_content.get(f"video{i}.mp4"))
+    self.set_header("Content-Type", "application/json")
+    self.write(json.dumps(urls))
 
 class AchievementPage(util.TeamPageHandler):
   @login.required("team")
@@ -261,6 +279,7 @@ def GetHandlers():
   handlers = [
     (r"/", EventHomePage),
     (r"/log", ActivityLogPage),
+    (r"/videos", VideosPage),
     (r"/pins", AchievementPage),
     (r"/pennypass$", FastPassPage),
     (r"/health_and_safety", HealthAndSafetyPage),
@@ -274,6 +293,7 @@ def GetHandlers():
     (r"/pennypass/([a-z][a-z0-9_]*)$", ApplyFastPassHandler),
     (r"/js/log", ActivityLogDataHandler),
     (r"/js/pins", AchievementDataHandler),
+    (r"/js/videos", VideosDataHandler),
     (r"/js/map/([a-z][a-z0-9_]+)$", MapDataHandler),
   ]
 

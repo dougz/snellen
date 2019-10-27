@@ -876,3 +876,8 @@ div#map div.p b {
     /*animation-delay: 1.0s;*/
 }
 
+#videolist {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}

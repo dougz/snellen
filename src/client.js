@@ -100,6 +100,7 @@ class H2020_Dispatcher {
             "hints_open": this.hints_open,
             "update_map": this.update_map,
             "update_header": this.update_header,
+            "video": this.video,
         }
     }
 
@@ -145,10 +146,8 @@ class H2020_Dispatcher {
         goog.dom.getElement("buzz").innerHTML = "Buzz: " + msg.score;
 
         var el = goog.dom.getElement("landtags");
-        console.log(el);
         el.innerHTML = "";
         for (var i = 0; i < msg.lands.length; ++i) {
-            console.log(msg.lands[i][0]);
             var a = goog.dom.createDom("A", {className: "landtag",
                                              href: msg.lands[i][2]}, msg.lands[i][0]);
             a.style.backgroundColor = msg.lands[i][1];
@@ -163,6 +162,13 @@ class H2020_Dispatcher {
             el.appendChild(a);
         }
 
+    }
+
+    /** @param{Message} msg */
+    video(msg) {
+        hunt2020.toast_manager.add_toast(
+            "A new video is available!", 6000, false);
+        if (hunt2020.videos) hunt2020.videos.update();
     }
 
     /** @param{Message} msg */
@@ -1204,6 +1210,7 @@ var hunt2020 = {
     fastpass: null,
     activity: null,
     achievements: null,
+    videos: null,
 }
 
 /** @param{Node} e */
@@ -1285,6 +1292,11 @@ window.onload = function() {
         hunt2020.activity = new H2020_ActivityLog();
     }
 
+    // Only present on the activity log page.
+    if (goog.dom.getElement("videolist")) {
+        hunt2020.videos = new H2020_Videos();
+    }
+
     // Only present on the achievements page.
     if (goog.dom.getElement("pins")) {
         hunt2020.achievements = new H2020_Achievements();
@@ -1340,6 +1352,41 @@ class H2020_ActivityLog {
                                         goog.dom.createDom("TH", null, hunt2020.time_formatter.format(e.when)),
                                         td);
             this.log.appendChild(tr);
+        }
+    }
+}
+
+class H2020_Videos {
+    constructor() {
+        /** @type{Element} */
+        this.video_div = goog.dom.getElement("videolist");
+        this.update();
+    }
+
+    update() {
+        goog.net.XhrIo.send("/js/videos", goog.bind(function(e) {
+            var code = e.target.getStatus();
+            if (code == 200) {
+                this.build(e.target.getResponseJson());
+            } else {
+                alert(e.target.getResponseText());
+            }
+        }, this));
+    }
+
+    /** param{Array<string>} data */
+    build(data) {
+        console.log(data);
+        if (data.length == 0) {
+            this.video_div.innerHTML = "No videos available yet.";
+            return;
+        }
+        this.video_div.innerHTML = "";
+        for (var i = 0; i < data.length; ++i) {
+            var el = goog.dom.createDom("VIDEO", {className: "storyvideo",
+                                                  controls: true},
+                                        goog.dom.createDom("SOURCE", {src: data[i]}));
+            this.video_div.appendChild(el);
         }
     }
 }

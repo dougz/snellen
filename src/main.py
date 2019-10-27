@@ -179,6 +179,7 @@ def main():
   assert options.event_dir is not None, "Must specify --event_dir."
 
   game.OPTIONS = options
+  event.OPTIONS = options
 
   soft, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
   try:

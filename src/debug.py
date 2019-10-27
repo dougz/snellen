@@ -15,6 +15,8 @@ CONTENT_TYPES = {
   ".mp3": "audio/mpeg",
   ".m4a": "audio/m4a",
 
+  ".mp4": "video/mp4",
+
   ".js": "text/javascript; charset=utf-8",
   ".json": "text/javascript; charset=utf-8",
   ".txt": "text/plain; charset=utf-8",

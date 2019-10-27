@@ -436,6 +436,7 @@ class Team(login.LoginUser):
     self.score = 0
     self.last_score_change = 0
     self.score_to_go = None
+    self.videos = 0
 
     self.message_mu = asyncio.Lock()
     self.message_serial = 1
@@ -780,6 +781,13 @@ class Team(login.LoginUser):
       self.activity_log.add(now, puzzle.html + " solved.")
       self.admin_log.add(now, puzzle.admin_html + " solved.", team=self)
       puzzle.puzzle_log.add(now, "Solved by <b>{team.name}</b>.", team=self)
+
+      if puzzle.meta and self.videos < 5:
+        self.videos += 1
+        self.send_messages([
+          {"method": "video",
+           "video_url": OPTIONS.static_content.get(f"video{self.videos}.mp4"),
+          }])
 
       self.achieve(Achievement.solve_puzzle, now)
 
