@@ -1,6 +1,11 @@
 {% extends "admin_base.html" %}
 {% block colorscheme %}color-detail{% end %}
 
+{% block head %}
+{% if puzzle.for_ops_head %}{% raw puzzle.for_ops_head %}{% end %}
+{% end %}
+
+
 {% block title %}Team &times; Puzzle detail{% end %}
 
 {% block content %}
@@ -33,5 +38,8 @@
   reply.<p>
 </div>
 
+<div id="for_ops">
+  {% raw puzzle.for_ops_body %}
+</div>
 
 {% end %}
