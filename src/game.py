@@ -194,6 +194,7 @@ class PuzzleState:
     self.last_hq_sender = None # AdminUser of most recent reply
     self.claim = None          # AdminUser claiming hint response
     self.admin_log = Log()
+    self.keeper_answers = 0
 
   def recent_solve(self, now=None):
     if now is None:
@@ -338,6 +339,8 @@ class Submission:
       self.puzzle_state.answers_found.add(answer)
       if self.puzzle_state.answers_found == self.puzzle.answers:
         self.team.solve_puzzle(self.puzzle, now)
+      else:
+        self.team.compute_puzzle_beam(now)
 
     self.team.invalidate(self.puzzle)
 
@@ -436,7 +439,7 @@ class Team(login.LoginUser):
     self.score = 0
     self.last_score_change = 0
     self.score_to_go = None
-    self.videos = 0
+    self.videos = 1
 
     self.message_mu = asyncio.Lock()
     self.message_serial = 1
@@ -528,9 +531,22 @@ class Team(login.LoginUser):
                "height": land.base_size[1]}
     now = time.time()
 
-    for i in land.icons.values():
-      if i.puzzle:
-        # This is a land map page (the items are puzzles).
+    if land.shortname == "safari":
+      i = land.icons["sign"]
+      d = {"icon_url": i.solved.url,
+           "pos_x": i.solved.pos[0],
+           "pos_y": i.solved.pos[1],
+           "width": i.solved.size[0],
+           "height": i.solved.size[1]}
+      items.append((("@",), d))
+
+    if land.puzzles:
+      # This is a land map page (the items are puzzles).
+
+      keepers = []
+
+      for i in land.icons.values():
+        if not i.puzzle: continue
 
         p = i.puzzle
         ps = self.puzzle_state[p]
@@ -541,9 +557,16 @@ class Team(login.LoginUser):
         if ps.answers_found:
           d["answer"] = ", ".join(sorted(p.display_answers[a] for a in ps.answers_found))
 
+        if hasattr(p, "keeper_answers"):
+          # compute the position later
+          pos = (None, None)
+          keepers.append((p, d, i.solved.size))
+        else:
+          pos = i.solved.pos
+
         d["icon_url"] = i.solved.url
         d["mask_url"] = i.solved_mask.url
-        d["pos_x"], d["pos_y"] = i.solved.pos
+        d["pos_x"], d["pos_y"] = pos
         d["width"], d["height"] = i.solved.size
         if i.solved.poly: d["poly"] = i.solved.poly
 
@@ -559,7 +582,31 @@ class Team(login.LoginUser):
 
         items.append((p.sortkey, d))
 
-      else:
+        if i.under:
+          dd = {"icon_url": i.under.url,
+                "pos_x": i.under.pos[0],
+                "pos_y": i.under.pos[1],
+                "width": i.under.size[0],
+                "height": i.under.size[1]}
+          # Sort these before any puzzle title
+          items.append((("@",), dd))
+
+      if keepers:
+        KEEPER_PITCH = 44
+        keepers.sort(key=lambda x: x[0].keeper_order)
+        rx = 476 - KEEPER_PITCH * (len(keepers)-1)
+        for i, (_, d, (w, h)) in enumerate(keepers):
+          # position of the bottom center
+          cx = rx + i * KEEPER_PITCH * 2
+          cy = (327, 215)[(i+len(keepers))%2]
+          cx -= w // 2
+          cy -= h
+          d["pos_x"] = cx
+          d["pos_y"] = cy
+          d["poly"] = f"{cx},{cy},{cx+w},{cy},{cx+w},{cy+h},{cx},{cy+h}"
+
+    else:
+      for i in land.icons.values():
         # This is a main map page (the items are other lands).
 
         if i.to_land not in self.open_lands: continue
@@ -572,14 +619,14 @@ class Team(login.LoginUser):
         d["poly"] = i.solved.poly
         items.append((i.to_land.sortkey, d))
 
-      if i.under:
-        dd = {"icon_url": i.under.url,
-              "pos_x": i.under.pos[0],
-              "pos_y": i.under.pos[1],
-              "width": i.under.size[0],
-              "height": i.under.size[1]}
-        # Sort these before any puzzle title
-        items.append((("@",), dd))
+        if i.under:
+          dd = {"icon_url": i.under.url,
+                "pos_x": i.under.pos[0],
+                "pos_y": i.under.pos[1],
+                "width": i.under.size[0],
+                "height": i.under.size[1]}
+          # Sort these before any puzzle title
+          items.append((("@",), dd))
 
     items.sort(key=lambda i: i[0])
     mapdata["items"] = [i[1] for i in items]
@@ -987,6 +1034,22 @@ class Team(login.LoginUser):
           if not p.meta:
             open_count -= 1
 
+    safari = Land.BY_SHORTNAME.get("safari", None)
+    if safari and safari in self.open_lands:
+      answers = set()
+      for p in safari.puzzles:
+        answers.update(self.puzzle_state[p].answers_found)
+      for kp in safari.keepers:
+        kps = self.puzzle_state[kp]
+        if kps.state == PuzzleState.CLOSED:
+          count = sum(1 for a in kp.keeper_answers if a in answers)
+          if kps.keeper_answers == 0 and count >= kp.keeper_needed:
+            kps.keeper_answers = min(len(answers)+2, safari.total_keeper_answers)
+            print(f"{self.username} will open {kp.icon.name} at {kps.keeper_answers} answers")
+          if 0 < kps.keeper_answers <= len(answers):
+            print(f"{self.username} opening {kp.icon.name}")
+            self.open_puzzle(kp, now)
+
     for st in self.puzzle_state.values():
       if st.state != PuzzleState.CLOSED:
         if st.puzzle.land not in self.open_lands:
@@ -1089,13 +1152,16 @@ class Land:
     self.base_img = cfg["base_img"]
     self.base_size = cfg["base_size"]
 
-    if shortname == "inner_only":
+    if shortname in ("inner_only", "outer"):
       self.url = "/"
     else:
       self.url = "/land/" + shortname
 
     assignments = cfg.get("assignments", {})
 
+
+    self.total_keeper_answers = 0
+    self.keepers = []
     self.icons = {}
     for name, d in cfg.get("icons", {}).items():
       i = Icon(name, self, d)
@@ -1112,6 +1178,13 @@ class Land:
         p.icon = i
         i.puzzle = p
         p.meta = not not pd.get("meta")
+
+        if "answers" in pd:
+          self.keepers.append(p)
+          p.keeper_answers = pd["answers"]
+          p.keeper_needed = pd["needed"]
+          p.keeper_order = pd["order"]
+          self.total_keeper_answers += len(p.keeper_answers)
 
     self.puzzles = tuple(self.icons[i].puzzle for i in cfg.get("order", ()))
 
@@ -1130,7 +1203,6 @@ class Land:
 
     by_land_order.sort()
     cls.ordered_lands = [i[1] for i in by_land_order]
-    print(cls.ordered_lands)
 
 
 class Puzzle:
@@ -1197,6 +1269,7 @@ class Puzzle:
 
   PLACEHOLDER_MULTI_ANSWERS = ("ALFA BRAVO CHARLIE DELTA ECHO "
                                "FOXTROT GOLF HOTEL INDIA JULIETT").split()
+  PLACEHOLDER_MULTI_ANSWERS = ("BRETT BEERS ANGST BEING SEMINAR AIMLESS INHABIT TUT RENETT RTS FIG DEER ACM IAMB").split()
 
   @classmethod
   def placeholder_puzzle(cls, land, icon, pstr):
