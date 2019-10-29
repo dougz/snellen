@@ -515,6 +515,7 @@ class Team(login.LoginUser):
     d = {"score": self.score * 1000,
          "lands": [[i.symbol, i.color, i.url] for i in self.sorted_open_lands],
          "to_go": None if self.score_to_go is None else (self.score_to_go * 1000),
+         "passes": len(self.fastpasses_available),
          }
     return d
 
@@ -534,7 +535,8 @@ class Team(login.LoginUser):
     if land.shortname == "safari":
       io = land.icons["sign_overlay"]
       iod = {"icon_url": io.solved.url,
-             "xywh": io.solved.pos_size}
+             "xywh": io.solved.pos_size,
+             "name": "Each animal has up to <b>five</b> answers!  To see how many an animal has, click the SUBMIT button."}
 
       i = land.icons["sign"]
       d = {"icon_url": i.solved.url,
@@ -555,9 +557,6 @@ class Team(login.LoginUser):
         ps = self.puzzle_state[p]
         if ps.state == PuzzleState.CLOSED: continue
 
-        if ps.answers_found:
-          d["answer"] = ", ".join(sorted(p.display_answers[a] for a in ps.answers_found))
-
         if hasattr(p, "keeper_answers"):
           # compute the position later
           pos_size = None
@@ -571,6 +570,9 @@ class Team(login.LoginUser):
              "mask_url": i.solved_mask.url,
              "xywh": pos_size}
         if i.solved.poly: d["poly"] = i.solved.poly
+
+        if ps.answers_found:
+          d["answer"] = ", ".join(sorted(p.display_answers[a] for a in ps.answers_found))
 
         if ps.state == PuzzleState.OPEN:
           if "answer" in d: d["answer"] += ", \u2026"
@@ -755,6 +757,7 @@ class Team(login.LoginUser):
     if not save_state.REPLAYING:
       self.send_messages([{"method": "receive_fastpass", "fastpass": self.get_fastpass_data()}])
       asyncio.create_task(self.flush_messages())
+    self.dirty_header = True
     self.invalidate()
 
   @save_state
@@ -784,6 +787,7 @@ class Team(login.LoginUser):
         msg["title"] = opened[0].title
       self.send_messages([msg])
       asyncio.create_task(self.flush_messages())
+    self.dirty_header = True
     self.invalidate()
     return True
 
@@ -1267,7 +1271,7 @@ class Puzzle:
 
   PLACEHOLDER_MULTI_ANSWERS = ("ALFA BRAVO CHARLIE DELTA ECHO "
                                "FOXTROT GOLF HOTEL INDIA JULIETT").split()
-  PLACEHOLDER_MULTI_ANSWERS = ("BRETT BEERS ANGST BEING SEMINAR AIMLESS INHABIT TUT RENETT RTS FIG DEER ACM IAMB").split()
+  #PLACEHOLDER_MULTI_ANSWERS = ("BRETT BEERS ANGST BEING SEMINAR AIMLESS INHABIT TUT RENETT RTS FIG DEER ACM IAMB").split()
 
   @classmethod
   def placeholder_puzzle(cls, land, icon, pstr):

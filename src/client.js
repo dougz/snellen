@@ -145,6 +145,12 @@ class H2020_Dispatcher {
     update_header(msg) {
         goog.dom.getElement("buzz").innerHTML = "Buzz: " + msg.score;
 
+        if (msg.passes) {
+            goog.dom.getElement("navpass").innerHTML = "PennyPasses (" + msg.passes + ")";
+        } else {
+            goog.dom.getElement("navpass").innerHTML = "PennyPasses";
+        }
+
         var el = goog.dom.getElement("landtags");
         el.innerHTML = "";
         for (var i = 0; i < msg.lands.length; ++i) {
@@ -999,12 +1005,25 @@ class H2020_MapDraw {
     }
 
     special_item_enter(it) {
+        var hel = goog.dom.createDom("DIV");
+        hel.style.left = "" + it.special.xywh[0] + "px";
+        hel.style.top = "" + it.special.xywh[1] + "px";
+        this.highlight_el = hel;
+        this.map_el.appendChild(hel);
+
         var el = goog.dom.createDom("IMG", {
             src: it.special.icon_url, className: "icon"});
         el.style.left = "" + it.special.xywh[0] + "px";
         el.style.top = "" + it.special.xywh[1] + "px";
-        this.map_el.appendChild(el);
-        this.highlight_el = el;
+        hel.appendChild(el);
+
+        var h = goog.dom.createDom("DIV", {className: "psign"});
+        h.innerHTML = it.special.name;
+        h.style.left = "" + it.special.xywh[0] + "px";
+        h.style.top = "" + it.special.xywh[1] + "px";
+        h.style.width = "" + it.special.xywh[2] + "px";
+        h.style.height = "" + it.special.xywh[3] + "px";
+        hel.appendChild(h);
     }
 
     item_enter(it, mask_el) {

@@ -813,6 +813,23 @@ div#map div.p b {
     color: white;
 }
 
+div.psign {
+    position: absolute;
+    pointer-events: none;
+
+    font-family: 'Knewave', serif;
+    font-size: 120%;
+    font-weight: 400;
+    color: #000;
+    padding: 16px;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+div.psign b {
+    color: #c00;
+}
+
 .newopen {
     display: inline-block;
     background-color: #c00;
