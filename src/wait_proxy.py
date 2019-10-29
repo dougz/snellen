@@ -1,6 +1,7 @@
 import asyncio
 import collections
 import concurrent
+import contextlib
 import http.client
 import json
 import random
@@ -31,6 +32,7 @@ class Server:
     self.wpid = wpid
     self.cv = asyncio.Condition()
     self.q = []
+    self.last_stats = {}
 
   @classmethod
   def init_proxies(cls, count):
@@ -57,11 +59,17 @@ class Server:
     await cls.send_message("__EXIT", 0, [""])
     await asyncio.sleep(1.0)
 
+  @classmethod
+  def get_stats(cls):
+    return [p.last_stats for p in cls.PROXIES]
+
 
 class ProxyWaitHandler(tornado.web.RequestHandler):
-  async def get(self, wpid):
+  async def post(self, wpid):
     wpid = int(wpid)
     proxy = Server.PROXIES[wpid]
+
+    proxy.last_stats = json.loads(self.request.body)
 
     async with proxy.cv:
       if not proxy.q:
@@ -125,7 +133,8 @@ class Client:
       cookie_secret=self.options.cookie_secret)
 
     self.server = tornado.httpserver.HTTPServer(app)
-    socket = tornado.netutil.bind_unix_socket(f"{self.options.socket_path}_p{self.wpid}", mode=0o666, backlog=3072)
+    socket = tornado.netutil.bind_unix_socket(f"{self.options.socket_path}_p{self.wpid}",
+                                              mode=0o666, backlog=3072)
     self.server.add_socket(socket)
 
     print(f"proxy waiter #{self.wpid} listening")
@@ -146,8 +155,12 @@ class Client:
 
   async def get_messages(self):
     while True:
+      stats = ProxyTeam.team_stats()
+
       req = tornado.httpclient.HTTPRequest(
         f"http://localhost:{self.options.wait_proxy_port}/proxywait/{self.wpid}",
+        method="POST",
+        body=json.dumps(stats),
         connect_timeout=5.0,
         request_timeout=PROXY_WAIT_TIMEOUT+10)
       try:
@@ -218,8 +231,10 @@ class ProxyTeam:
 
   def __init__(self, team):
     self.team = team
+    self.username = team
     self.cv = asyncio.Condition()
     self.q = collections.deque()
+    self.wait_stats = {}
 
   def __str__(self):
     return f"<ProxyTeam {self.team}>"
@@ -254,6 +269,26 @@ class ProxyTeam:
         except asyncio.TimeoutError:
           return []
 
+  @contextlib.contextmanager
+  def track_wait(self, key):
+    key = key.decode("ascii")
+    ws = self.wait_stats
+    ws[key] = ws.get(key, 0) + 1
+    try:
+      yield
+    finally:
+      ws[key] -= 1
+      if not ws[key]:
+        ws.pop(key, None)
+
+  @classmethod
+  def team_stats(cls):
+    out = {}
+    for t in cls.BY_TEAM.values():
+      if t.wait_stats:
+        out[t.username] = t.wait_stats
+    return out
+
 
 class WaitHandler(tornado.web.RequestHandler):
   WAIT_TIMEOUT = 600
@@ -272,7 +307,8 @@ class WaitHandler(tornado.web.RequestHandler):
 
     timeout = self.WAIT_TIMEOUT + random.random() * self.WAIT_SMEAR
 
-    msgs = await team.await_new_messages(received_serial, timeout)
+    with team.track_wait(key):
+      msgs = await team.await_new_messages(received_serial, timeout)
 
     if False:
       if msgs:

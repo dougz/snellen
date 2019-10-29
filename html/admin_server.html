@@ -1,0 +1,14 @@
+{% extends "admin_base.html" %}
+{% block colorscheme %}color-home{% end %}
+
+{% block title %}Server stats{% end %}
+
+{% block content %}
+
+<table class=info>
+  <tr><th>waits</th><td id=stwaits></td></tr>
+  <tr><th>sessions</th><td id=stsessions></td></tr>
+  <tr><th>proxy load</th><td id=stproxies></td></tr>
+</table>
+
+{% end %}

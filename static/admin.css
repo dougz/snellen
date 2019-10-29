@@ -571,3 +571,7 @@ p.note {
     position: absolute;
     bottom: 0px;
 }
+
+.proxyload {
+    margin-right: 12px;
+}

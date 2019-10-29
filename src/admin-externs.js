@@ -148,7 +148,16 @@ class TeamPuzzlePageData {
     }
 }
 
-
+class ServerPageData {
+    constructor() {
+        /** @type{number} */
+        this.waits;
+        /** @type{number} */
+        this.sessions;
+        /** @type{Array<number>} */
+        this.proxy_waits;
+    }
+}
 
 class BBLandLabel {
     constructor() {

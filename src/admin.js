@@ -551,6 +551,45 @@ function A2020_expect_204(e) {
     }
 }
 
+class A2020_ServerPage {
+    constructor() {
+        /** @type{Element} */
+        this.waits = goog.dom.getElement("stwaits");
+        /** @type{Element} */
+        this.sessions = goog.dom.getElement("stsessions");
+        /** @type{Element} */
+        this.proxy_waits = goog.dom.getElement("stproxies");
+
+        this.update();
+
+        setInterval(goog.bind(this.update, this), 5000);
+    }
+
+    update() {
+        goog.net.XhrIo.send("/admin/js/server", goog.bind(function(e) {
+            var code = e.target.getStatus();
+            if (code == 200) {
+                this.build(e.target.getResponseJson());
+            } else {
+                alert(e.target.getResponseText());
+            }
+        }, this));
+    }
+
+    /** param{ServerPageData} data */
+    build(data) {
+        console.log(data);
+
+        this.waits.innerHTML = "" + data.waits;
+        this.sessions.innerHTML = "" + data.sessions;
+        this.proxy_waits.innerHTML = "";
+        for (var i = 0; i < data.proxy_waits.length; ++i) {
+            this.proxy_waits.appendChild(
+                goog.dom.createDom("SPAN", "proxyload", ""+data.proxy_waits[i]));
+        }
+    }
+}
+
 class A2020_TeamPage {
     constructor() {
         /** @type{Element} */
@@ -860,6 +899,7 @@ var admin2020 = {
     team_page: null,
     puzzle_page: null,
     team_puzzle_page: null,
+    server_page: null,
 }
 
 window.onload = function() {
@@ -909,6 +949,10 @@ window.onload = function() {
 
     if (goog.dom.getElement("bbtaskqueue")) {
         admin2020.bigboard = new A2020_BigBoard();
+    }
+
+    if (goog.dom.getElement("stwaits")) {
+        admin2020.server_page = new A2020_ServerPage();
     }
 
     if (team_username && !puzzle_id) {

@@ -34,6 +34,34 @@ class AdminUsersPage(util.AdminPageHandler):
                 users=login.AdminUser.all_users(),
                 user=self.user)
 
+class AdminServerPage(util.AdminPageHandler):
+  @login.required("admin")
+  def get(self):
+    self.render("admin_server.html")
+
+class ServerDataHandler(util.AdminHandler):
+  @login.required("admin")
+  def get(self):
+    stats = wait_proxy.Server.get_stats()
+
+    keys = set()
+    waits = 0
+    proxy_load = []
+    for p in stats:
+      proxy_waits = 0
+      for ts in p.values():
+        keys.update(ts.keys())
+        proxy_waits += sum(ts.values())
+      proxy_load.append(proxy_waits)
+      waits += proxy_waits
+
+    d = {"waits": waits,
+         "sessions": len(keys),
+         "proxy_waits": proxy_load}
+
+    self.set_header("Content-Type", "application/json")
+    self.write(json.dumps(d))
+
 class UpdateAdminRoleHandler(tornado.web.RequestHandler):
   @login.required(login.AdminRoles.CREATE_USERS)
   def get(self, action, username, role):
@@ -470,6 +498,7 @@ def GetHandlers():
     (r"/admin/team/([a-z0-9_]+)/puzzle/([a-z0-9_]+)$", TeamPuzzlePage),
     (r"/admin/teams$", ListTeamsPage),
     (r"/admin/users$", AdminUsersPage),
+    (r"/admin/server$", AdminServerPage),
 
     (r"/admin/(set|clear)_role/([^/]+)/([^/]+)$", UpdateAdminRoleHandler),
     (r"/admin/become/([a-z0-9_]+)$", BecomeTeamHandler),
@@ -490,6 +519,7 @@ def GetHandlers():
     (r"/admin/js/team/([a-z0-9_]+)$", TeamDataHandler),
     (r"/admin/js/puzzle/([a-z0-9_]+)$", PuzzleDataHandler),
     (r"/admin/js/teampuzzle/([a-z0-9_]+)/([a-z0-9_]+)$", TeamPuzzleDataHandler),
+    (r"/admin/js/server$", ServerDataHandler),
     ]
   return handlers
 
