@@ -9,7 +9,7 @@ WorkingDirectory=/sites/hunt2020/hat_venn_dor
 ExecStartPre=mkdir -p /run/sites
 ExecStart=/sites/hunt2020/hat_venn_dor/hat_venn_dor.py \
   --socket_path /run/sites/hat_venn_dor \
-  --debug
+  --assets_json="${HUNT2020_BASE}/test_event/puzzles/hat_venn_dor.assets.json"
 
 [Install]
 WantedBy=hunt2020.target
