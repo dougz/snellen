@@ -135,14 +135,8 @@ class MapItem {
         this.icon_url;
         /** @type{?string} */
         this.mask_url;
-        /** @type{?number} */
-        this.pos_x;
-        /** @type{?number} */
-        this.pos_y;
-        /** @type{?number} */
-        this.width;
-        /** @type{?number} */
-        this.height;
+        /** @type{Array<number>} */
+        this.xywh;
         /** @type{?string} */
         this.poly;
         /** @type{?string} */

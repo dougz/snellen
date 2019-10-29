@@ -942,18 +942,19 @@ class H2020_MapDraw {
             if (it.mask_url) {
                 mask_el = goog.dom.createDom("IMG", {
                     src: it.mask_url, className: "mask"});
-                mask_el.style.left = "" + it.pos_x + "px";
-                mask_el.style.top = "" + it.pos_y + "px";
+                mask_el.style.left = "" + it.xywh[0] + "px";
+                mask_el.style.top = "" + it.xywh[1] + "px";
                 this.map_el.appendChild(mask_el);
             }
 
             var el = goog.dom.createDom("IMG", {
                 src: it.icon_url, className: "icon"});
-            el.style.left = "" + it.pos_x + "px";
-            el.style.top = "" + it.pos_y + "px";
+            el.style.left = "" + it.xywh[0] + "px";
+            el.style.top = "" + it.xywh[1] + "px";
             this.map_el.appendChild(el);
 
             if (it.poly && it.name) {
+                console.log(it.name);
                 var area = goog.dom.createDom("AREA", {shape: "poly",
                                                        coords: it.poly,
                                                        href: it.url});
@@ -963,6 +964,8 @@ class H2020_MapDraw {
                                    goog.bind(this.item_enter, this, it, mask_el));
                 goog.events.listen(area, goog.events.EventType.MOUSELEAVE,
                                    goog.bind(this.item_leave, this, it));
+            } else {
+                console.log(it);
             }
 
             if (!it.answer && it.name) {
@@ -1009,10 +1012,10 @@ class H2020_MapDraw {
         }
 
         var h = goog.dom.createDom("DIV", {className: "p"}, ch);
-        h.style.left = "" + it.pos_x + "px";
-        h.style.top = "" + it.pos_y + "px";
-        h.style.width = "" + it.width + "px";
-        h.style.height = "" + it.height + "px";
+        h.style.left = "" + it.xywh[0] + "px";
+        h.style.top = "" + it.xywh[1] + "px";
+        h.style.width = "" + it.xywh[2] + "px";
+        h.style.height = "" + it.xywh[3] + "px";
 
         this.map_el.appendChild(h);
         return h;

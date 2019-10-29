@@ -534,10 +534,7 @@ class Team(login.LoginUser):
     if land.shortname == "safari":
       i = land.icons["sign"]
       d = {"icon_url": i.solved.url,
-           "pos_x": i.solved.pos[0],
-           "pos_y": i.solved.pos[1],
-           "width": i.solved.size[0],
-           "height": i.solved.size[1]}
+           "xywh": i.solved.pos_size,}
       items.append((("@",), d))
 
     if land.puzzles:
@@ -552,22 +549,21 @@ class Team(login.LoginUser):
         ps = self.puzzle_state[p]
         if ps.state == PuzzleState.CLOSED: continue
 
-        d = { "name": p.title, "url": p.url }
-
         if ps.answers_found:
           d["answer"] = ", ".join(sorted(p.display_answers[a] for a in ps.answers_found))
 
         if hasattr(p, "keeper_answers"):
           # compute the position later
-          pos = (None, None)
+          pos_size = None
           keepers.append((p, d, i.solved.size))
         else:
-          pos = i.solved.pos
+          pos_size = i.solved.pos_size
 
-        d["icon_url"] = i.solved.url
-        d["mask_url"] = i.solved_mask.url
-        d["pos_x"], d["pos_y"] = pos
-        d["width"], d["height"] = i.solved.size
+        d = {"name": p.title,
+             "url": p.url,
+             "icon_url": i.solved.url,
+             "mask_url": i.solved_mask.url,
+             "xywh": pos_size}
         if i.solved.poly: d["poly"] = i.solved.poly
 
         if ps.state == PuzzleState.OPEN:
@@ -584,10 +580,7 @@ class Team(login.LoginUser):
 
         if i.under:
           dd = {"icon_url": i.under.url,
-                "pos_x": i.under.pos[0],
-                "pos_y": i.under.pos[1],
-                "width": i.under.size[0],
-                "height": i.under.size[1]}
+                "xywh": i.under.pos_size}
           # Sort these before any puzzle title
           items.append((("@",), dd))
 
@@ -601,8 +594,7 @@ class Team(login.LoginUser):
           cy = (327, 215)[(i+len(keepers))%2]
           cx -= w // 2
           cy -= h
-          d["pos_x"] = cx
-          d["pos_y"] = cy
+          d["xywh"] = [cx, cy, w, h]
           d["poly"] = f"{cx},{cy},{cx+w},{cy},{cx+w},{cy+h},{cx},{cy+h}"
 
     else:
@@ -611,20 +603,16 @@ class Team(login.LoginUser):
 
         if i.to_land not in self.open_lands: continue
         d = { "name": i.to_land.title,
+              "xywh": i.solved.pos_size,
+              "poly": i.solved.poly,
               "url": i.to_land.url,
               "icon_url": i.solved.url,
               "mask_url": i.solved_mask.url}
-        d["pos_x"], d["pos_y"] = i.solved.pos
-        d["width"], d["height"] = i.solved.size
-        d["poly"] = i.solved.poly
         items.append((i.to_land.sortkey, d))
 
         if i.under:
           dd = {"icon_url": i.under.url,
-                "pos_x": i.under.pos[0],
-                "pos_y": i.under.pos[1],
-                "width": i.under.size[0],
-                "height": i.under.size[1]}
+                "xywh": i.under.pos_size}
           # Sort these before any puzzle title
           items.append((("@",), dd))
 
@@ -1080,18 +1068,21 @@ class Team(login.LoginUser):
 
 class Subicon:
   def __init__(self, d):
-    def tuplize(x):
-      if x is None: return None
-      return tuple(x)
-
     if d:
-      self.pos = tuplize(d.get("pos"))
-      self.size = tuplize(d["size"])
+      self.size = d["size"]
+      pos = d.get("pos")
+      if pos:
+        self.pos = pos
+        self.pos_size = pos + self.size
+      else:
+        self.pos = None
+        self.pos_size = [None, None] + self.size
       self.poly = d.get("poly")
       self.url = d["url"]
     else:
       self.pos = None
       self.size = None
+      self.pos_size = None
       self.poly = None
       self.url = None
 
@@ -1106,7 +1097,7 @@ class Icon:
     self.to_land = None
     self.headerimage = d.get("headerimage")
 
-    self.locked = Subicon(d.get("locked"))
+    #self.locked = Subicon(d.get("locked"))
     # self.unlocked = Subicon(d.get("unlocked"))
     # self.unlocked_mask = Subicon(d.get("unlocked_mask"))
     # self.unlocked_thumb = Subicon(d.get("unlocked_thumb"))
