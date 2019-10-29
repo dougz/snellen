@@ -954,7 +954,6 @@ class H2020_MapDraw {
             this.map_el.appendChild(el);
 
             if (it.poly && it.name) {
-                console.log(it.name);
                 var area = goog.dom.createDom("AREA", {shape: "poly",
                                                        coords: it.poly,
                                                        href: it.url});
@@ -964,8 +963,16 @@ class H2020_MapDraw {
                                    goog.bind(this.item_enter, this, it, mask_el));
                 goog.events.listen(area, goog.events.EventType.MOUSELEAVE,
                                    goog.bind(this.item_leave, this, it));
-            } else {
-                console.log(it);
+            } else if (it.poly && it.special) {
+                var area = goog.dom.createDom("AREA", {shape: "poly",
+                                                       coords: it.poly,
+                                                       href: it.url});
+                this.mapmap_el.appendChild(area);
+
+                goog.events.listen(area, goog.events.EventType.MOUSEENTER,
+                                   goog.bind(this.special_item_enter, this, it));
+                goog.events.listen(area, goog.events.EventType.MOUSELEAVE,
+                                   goog.bind(this.item_leave, this, it));
             }
 
             if (!it.answer && it.name) {
@@ -989,6 +996,15 @@ class H2020_MapDraw {
             el = goog.dom.createDom("LI", null, a);
             this.list_el.appendChild(el);
         }
+    }
+
+    special_item_enter(it) {
+        var el = goog.dom.createDom("IMG", {
+            src: it.special.icon_url, className: "icon"});
+        el.style.left = "" + it.special.xywh[0] + "px";
+        el.style.top = "" + it.special.xywh[1] + "px";
+        this.map_el.appendChild(el);
+        this.highlight_el = el;
     }
 
     item_enter(it, mask_el) {
@@ -1379,7 +1395,6 @@ class H2020_Videos {
 
     /** param{Array<string>} data */
     build(data) {
-        console.log(data);
         if (data.length == 0) {
             this.video_div.innerHTML = "No videos available yet.";
             return;

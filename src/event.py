@@ -34,7 +34,7 @@ class LandMapPage(util.TeamPageHandler):
         raise tornado.web.HTTPError(http.client.NOT_FOUND)
     self.land = land
     mapdata = self.team.get_land_data(land)
-    json_data = "<script>var initial_json = """ + json.dumps(mapdata, indent=True) + ";</script>"
+    json_data = "<script>var initial_json = """ + mapdata + ";</script>"
     self.render("land.html", land=land, json_data=json_data)
 
   def get_template_namespace(self):
@@ -62,7 +62,7 @@ class MapDataHandler(util.TeamHandler):
         raise tornado.web.HTTPError(http.client.NOT_FOUND)
     mapdata = self.team.get_land_data(land)
     self.set_header("Content-Type", "application/json")
-    self.write(json.dumps(mapdata))
+    self.write(mapdata)
 
 
 class EventHomePage(LandMapPage):

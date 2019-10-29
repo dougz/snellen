@@ -532,9 +532,15 @@ class Team(login.LoginUser):
     now = time.time()
 
     if land.shortname == "safari":
+      io = land.icons["sign_overlay"]
+      iod = {"icon_url": io.solved.url,
+             "xywh": io.solved.pos_size}
+
       i = land.icons["sign"]
       d = {"icon_url": i.solved.url,
-           "xywh": i.solved.pos_size,}
+           "xywh": i.solved.pos_size,
+           "poly": i.solved.poly,
+           "special": iod}
       items.append((("@",), d))
 
     if land.puzzles:
@@ -619,6 +625,7 @@ class Team(login.LoginUser):
     items.sort(key=lambda i: i[0])
     mapdata["items"] = [i[1] for i in items]
 
+    mapdata = json.dumps(mapdata)
     self.cached_mapdata[land] = mapdata
     return mapdata
 

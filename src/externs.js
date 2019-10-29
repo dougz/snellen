@@ -143,6 +143,8 @@ class MapItem {
         this.animate;
         /** @type{?number} */
         this.new_open;
+        /** @type{?MapItem} */
+        this.special;
     }
 }
 
