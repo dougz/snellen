@@ -64,6 +64,8 @@ class Message {
         this.to_go;
         /** @type{?string} */
         this.video_url;
+        /** @type{?string} */
+        this.thumb;
         /** @type{?number} */
         this.passes;
     }

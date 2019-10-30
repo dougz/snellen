@@ -30,13 +30,25 @@ class H2020_Waiter {
         this.backoff = 250;
         /** @type(H2020_Dispatcher) */
         this.dispatcher = dispatcher;
+        /** @type{boolean} */
+        this.saw_502 = false;
     }
 
     waitcomplete() {
+        if (this.xhr.getStatus() == 502) {
+            this.saw_502 = true;
+        }
+
         if (this.xhr.getStatus() == 401) {
+            var text;
+            if (this.saw_502) {
+                text = "Server connection lost."
+            } else {
+                text = "You have been logged out."
+            }
             hunt2020.toast_manager.add_toast(
-                "Server connection lost.  Please reload to continue.",
-                3600000, null, "salmon");
+                text + " Please reload to continue.",
+                3600000, null, "salmon", "/");
             return;
         }
 

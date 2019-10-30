@@ -1602,9 +1602,10 @@ class Achievement:
                 "Flawless",
                 "Submit no incorrect answers for six hours.")
 
+    # TODO(dougz): this currently requires no incorrect intervening answers
     Achievement("hot_streak",
                 "Hot streak",
-                "Submit three correct answers in a row within ten minutes.")
+                "Solve three puzzles within ten minutes.")
 
     Achievement("better_late_than_never",
                 "Better late than never",
