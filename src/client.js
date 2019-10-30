@@ -211,10 +211,14 @@ class H2020_Dispatcher {
 
     /** @param{Message} msg */
     open(msg) {
+        console.log(msg);
         hunt2020.toast_manager.add_toast(
             "<b>" + msg.title + "</b> is now open!", 6000, null, "blue",
             "/land/" + msg.land);
         if (hunt2020.activity) hunt2020.activity.update();
+        if (hunt2020.fastpass) {
+            hunt2020.fastpass.build(msg.fastpass);
+        }
     }
 
     /** @param{Message} msg */
@@ -1190,7 +1194,14 @@ class H2020_Counter {
 
 class H2020_FastPass {
     constructor() {
-        goog.events.listen(goog.dom.getElement("fpuse"), goog.events.EventType.CLICK,
+        /** @type{?string} */
+        this.sel_shortname = null;
+        /** @type{?Element} */
+        this.sel_div = null;
+
+        /** @type{Element} */
+        this.use_button = goog.dom.getElement("fpuse");
+        goog.events.listen(this.use_button, goog.events.EventType.CLICK,
                            goog.bind(this.use, this));
 
         this.build(/** @type{FastPassState} */ (initial_json));
@@ -1227,28 +1238,57 @@ class H2020_FastPass {
         e_none.style.display = "none";
         e_some.style.display = "initial";
 
-        var e_ulist = goog.dom.getElement("fpusablelist");
-        e_ulist.innerHTML = "";
+        var e_icons = goog.dom.getElement("fpicons");
+        e_icons.innerHTML = "";
+        this.sel_div = null;
         for (var i = 0; i < data.usable_lands.length; ++i) {
             var u = data.usable_lands[i];
-            var b = goog.dom.createDom("INPUT", {id: "fpr_" + u.shortname, type: "radio", name: "land", value: u.shortname}, u.title);
-            var t = goog.dom.createDom("LABEL", {htmlFor: "fpr_" + u.shortname}, u.title);
+            var d = goog.dom.createDom("DIV", "fpselect");
+            if (u.url) {
+                d.appendChild(goog.dom.createDom("IMG", {className: "fpicon",
+                                                         src: u.url}));
+            }
+            d.appendChild(goog.dom.createDom("DIV", {className: "fptitle"}, u.title));
+            e_icons.appendChild(d);
 
-            e_ulist.appendChild(goog.dom.createDom("LI", null, b, t));
+            if (u.shortname == this.sel_shortname) {
+                goog.dom.classlist.add(d, "fpselected");
+                this.sel_div = d;
+            }
+
+            goog.events.listen(d, goog.events.EventType.CLICK,
+                               goog.bind(this.selectland, this, d, u.shortname));
+        }
+        if (this.sel_div) {
+            this.use_button.disabled = false;
+        } else {
+            this.sel_shortname = null;
+            this.use_button.disabled = true;
         }
     }
 
-    use() {
-        var els = document.querySelectorAll("#fpusablelist input");
-        var shortname = null;
-        for (var i = 0; i < els.length; ++i) {
-            if (els[i].checked) {
-                shortname = els[i].value;
-                break;
-            }
+    selectland(div, shortname) {
+        if (this.sel_div) {
+            goog.dom.classlist.remove(this.sel_div, "fpselected");
         }
-        if (!shortname) return;
-        goog.net.XhrIo.send("/pennypass/" + shortname, H2020_expect_204);
+        if (this.sel_shortname == shortname) {
+            this.sel_div = null;
+            this.sel_shortname = null;
+            this.use_button.disabled = true;
+            return;
+        }
+        this.sel_div = div;
+        this.sel_shortname = shortname;
+        this.use_button.disabled = false;
+        goog.dom.classlist.add(div, "fpselected");
+    }
+
+    use() {
+        if (!this.sel_shortname) return;
+        goog.net.XhrIo.send("/pennypass/" + this.sel_shortname, H2020_expect_204);
+        goog.dom.classlist.remove(this.sel_div, "fpselected");
+        this.sel_div = null;
+        this.sel_shortname = null;
     }
 }
 

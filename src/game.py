@@ -728,8 +728,13 @@ class Team(login.LoginUser):
 
   def get_fastpass_data(self):
     if self.fastpasses_available:
-      usable = [{"shortname": land.shortname, "title": land.title}
-                for land in self.get_fastpass_eligible_lands()]
+      usable = []
+      for land in self.get_fastpass_eligible_lands():
+        d = {"shortname": land.shortname,
+             "title": land.title}
+        icon = OPTIONS.static_content.get(land.shortname + "/fastpass.png")
+        if icon: d["url"] = icon
+        usable.append(d)
     else:
       usable = None
     return {"expire_time": self.fastpasses_available,
@@ -1054,10 +1059,6 @@ class Team(login.LoginUser):
     for st in self.puzzle_state.values():
       if st.state != PuzzleState.CLOSED:
         if st.puzzle.land not in self.open_lands:
-          if now != Global.STATE.event_start_time:
-            self.send_messages([{"method": "open",
-                                 "title": html.escape(st.puzzle.land.title),
-                                 "land": st.puzzle.land.shortname}])
           self.open_lands[st.puzzle.land] = now
           self.sorted_open_lands = [land for land in self.open_lands.keys() if land.land_order]
           self.sorted_open_lands.sort(key=lambda land: land.land_order)
@@ -1065,6 +1066,11 @@ class Team(login.LoginUser):
           self.cached_mapdata.pop(Land.BY_SHORTNAME["outer"], None)
           self.cached_mapdata.pop(Land.BY_SHORTNAME["inner_only"], None)
           self.dirty_header = True
+          if now != Global.STATE.event_start_time:
+            self.send_messages([{"method": "open",
+                                 "title": html.escape(st.puzzle.land.title),
+                                 "land": st.puzzle.land.shortname,
+                                 "fastpass": self.get_fastpass_data()}])
 
     # Check for the first outer land
     if Land.BY_SHORTNAME.get("balloons") in self.open_lands:

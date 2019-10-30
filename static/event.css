@@ -45,9 +45,78 @@ input, button, .emoji-input {
     color: #666;
 }
 
-#fpusablelist a {
-    cursor: pointer;
+#fpusable {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: stretch;
 }
+
+
+#fpicons {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: stretch;
+    flex-wrap: wrap;
+}
+
+.fpselect {
+    margin: 24px 24px 0 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: stretch;
+}
+
+.fpselected .fptitle {
+    background: linear-gradient(to bottom, #ffff00, #ff8000);
+    color: black;
+}
+
+.fptitle {
+    margin: 12px 0;
+    text-align: center;
+    font-weight: bold;
+    font-size: 120%;
+    padding: 8px;
+    border: 1px solid #395483;
+    border-radius: 20px;
+}
+
+#fpfinal {
+    display: flex;
+    justify-content: center;
+    margin-top: 48px;
+}
+
+#fpuse {
+    display: block;
+    font-family: 'Merriweather Sans', sans-serif;
+    font-weight: bold;
+    color: white;
+    font-size: 144%;
+    padding: 8px 16px;
+    box-sizing: border-box;
+    border: 1px solid #395483;
+    border-radius: 15px;
+    width: 800px;
+    background: linear-gradient(to bottom, #4c70af, #436299);
+    outline: none;
+    align-self: center;
+    text-align: center;
+}
+
+#fpuse:hover {
+    color: yellow;
+}
+
+#fpuse:disabled {
+    background: #eee;
+    color: #ccc;
+    border: 1px solid #ccc;
+}
+
 
 #topnav {
     font-family: 'Merriweather', sans-serif;

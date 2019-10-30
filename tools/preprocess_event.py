@@ -126,7 +126,7 @@ def convert_static_files(out, options, lands):
       if fn.startswith("land_") and fn.endswith(".png"):
         to_convert.append((os.path.join(land, fn), os.path.join(land_dir, fn)))
 
-    for xfn in ("land.css", "solve.mp3"):
+    for xfn in ("land.css", "solve.mp3", "fastpass.png"):
       fn = os.path.join(options.input_assets, land, xfn)
       if os.path.exists(fn):
         to_convert.append((os.path.join(land, xfn), fn))

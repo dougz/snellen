@@ -173,6 +173,8 @@ class Land {
         this.shortname;
         /** @type{string} */
         this.title;
+        /** @type{?string} */
+        this.url;
     }
 }
 
