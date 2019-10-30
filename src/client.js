@@ -173,7 +173,7 @@ class H2020_Dispatcher {
     /** @param{Message} msg */
     video(msg) {
         hunt2020.toast_manager.add_toast(
-            "A new video is available!", 6000, false);
+            "A new video is available!<br><img class=videothumb src=\"" + msg.thumb + "\">", 6000, false);
         if (hunt2020.videos) hunt2020.videos.update();
     }
 

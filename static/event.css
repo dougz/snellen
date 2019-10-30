@@ -898,3 +898,7 @@ div.psign b {
     flex-direction: column;
     align-items: center;
 }
+
+.videothumb {
+    margin-top: 12px;
+}

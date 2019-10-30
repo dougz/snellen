@@ -148,6 +148,11 @@ def convert_static_files(out, options, lands):
                      ("video3.mp4", f"{base}/media/video3.mp4"),
                      ("video4.mp4", f"{base}/media/video4.mp4"),
                      ("video5.mp4", f"{base}/media/video5.mp4"),
+                     ("thumb1.png", f"{base}/media/thumb1.png"),
+                     ("thumb2.png", f"{base}/media/thumb2.png"),
+                     ("thumb3.png", f"{base}/media/thumb3.png"),
+                     ("thumb4.png", f"{base}/media/thumb4.png"),
+                     ("thumb5.png", f"{base}/media/thumb5.png"),
                      ])
 
   for fn in os.listdir(os.path.join(options.input_assets, "achievements")):

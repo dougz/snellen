@@ -833,6 +833,7 @@ class Team(login.LoginUser):
         self.send_messages([
           {"method": "video",
            "video_url": OPTIONS.static_content.get(f"video{self.videos}.mp4"),
+           "thumb": OPTIONS.static_content.get(f"thumb{self.videos}.png"),
           }])
 
       self.achieve(Achievement.solve_puzzle, now)
