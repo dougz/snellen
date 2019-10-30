@@ -570,7 +570,7 @@ class A2020_ServerPage {
             var code = e.target.getStatus();
             if (code == 200) {
                 this.build(e.target.getResponseJson());
-            } else {
+            } else if (code != 502) {
                 alert(e.target.getResponseText());
             }
         }, this));
