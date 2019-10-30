@@ -1073,7 +1073,7 @@ class Team(login.LoginUser):
                                  "fastpass": self.get_fastpass_data()}])
 
     # Check for the first outer land
-    if Land.BY_SHORTNAME.get("balloons") in self.open_lands:
+    if Land.BY_SHORTNAME.get("studios") in self.open_lands:
       if self.map_mode != "outer":
         self.map_mode = "outer"
         self.dirty_lands.add("home")

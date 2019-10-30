@@ -55,6 +55,7 @@ def convert_map(shortname, d, options):
   copyif("guess_interval")
   copyif("guess_max")
   copyif("open_at")
+  copyif("initial_puzzles")
   print(f"Parsing {shortname} \"{d['title']}\"...")
 
   base_img = os.path.join(options.input_assets, shortname,
