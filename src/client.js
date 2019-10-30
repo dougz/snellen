@@ -124,7 +124,8 @@ class H2020_Dispatcher {
         if (msg.notify) {
             hunt2020.toast_manager.add_toast(
                 "Hunt HQ has replied to your hint request on <b>" +
-                    msg.title + "</b>.", 6000, null, "salmon");
+                    msg.title + "</b>.", 6000, null, "salmon",
+                "/puzzle/" + msg.puzzle_id);
         }
     }
 
@@ -173,7 +174,8 @@ class H2020_Dispatcher {
     /** @param{Message} msg */
     video(msg) {
         hunt2020.toast_manager.add_toast(
-            "A new video is available!<br><img class=videothumb src=\"" + msg.thumb + "\">", 6000, false);
+            "A new video is available!<br><img class=videothumb src=\"" + msg.thumb + "\">",
+            6000, false, "blue", "/videos");
         if (hunt2020.videos) hunt2020.videos.update();
     }
 
@@ -183,7 +185,7 @@ class H2020_Dispatcher {
             hunt2020.audio_manager.start(msg.audio);
         }
         hunt2020.toast_manager.add_toast(
-            "<b>" + msg.title + "</b> was solved!", 6000, true);
+            "<b>" + msg.title + "</b> was solved!", 6000, true, "blue", "/puzzle/" + msg.puzzle_id);
 
         if (puzzle_id == msg.puzzle_id) {
             var el = goog.dom.getElement("submit");
@@ -198,14 +200,15 @@ class H2020_Dispatcher {
     /** @param{Message} msg */
     open(msg) {
         hunt2020.toast_manager.add_toast(
-            "<b>" + msg.title + "</b> is now open!", 6000);
+            "<b>" + msg.title + "</b> is now open!", 6000, null, "blue",
+            "/land/" + msg.land);
         if (hunt2020.activity) hunt2020.activity.update();
     }
 
     /** @param{Message} msg */
     achieve(msg) {
         hunt2020.toast_manager.add_toast(
-            "You received the <b>" + msg.title + "</b> pin!", 6000, null, "gold");
+            "You received the <b>" + msg.title + "</b> pin!", 6000, null, "gold", "/pins");
         if (hunt2020.activity) hunt2020.activity.update();
         if (hunt2020.achievements) hunt2020.achievements.update();
     }
@@ -213,7 +216,7 @@ class H2020_Dispatcher {
     /** @param{Message} msg */
     receive_fastpass(msg) {
         hunt2020.toast_manager.add_toast(
-            "You've received a PennyPass!", 6000, null);
+            "You've received a PennyPass!", 6000, null, "blue", "/pennypass");
         if (hunt2020.fastpass) {
             hunt2020.fastpass.build(msg.fastpass);
         }
@@ -223,13 +226,8 @@ class H2020_Dispatcher {
     /** @param{Message} msg */
     apply_fastpass(msg) {
         var text;
-        if (msg.title) {
-            text = "A PennyPass has been applied to <b>" + msg.land +
-                "</b>, opening <b>" + msg.title + "</b>!";
-        } else {
-            text = "A PennyPass has been applied to <b>" + msg.land + "</b>!";
-        }
-        hunt2020.toast_manager.add_toast(text, 6000, null);
+        text = "A PennyPass has been applied to <b>" + msg.title + "</b>!";
+        hunt2020.toast_manager.add_toast(text, 6000, null, "blue", "/land/" + msg.land);
         if (hunt2020.fastpass) {
             hunt2020.fastpass.build(msg.fastpass);
         }
@@ -842,7 +840,7 @@ class H2020_ToastManager {
         this.serial = 0;
     }
 
-    add_toast(message, timeout, audio, color="blue") {
+    add_toast(message, timeout, audio, color="blue", click_to="") {
         this.serial += 1;
         var tt = goog.dom.createDom("DIV");
         tt.innerHTML = message;
@@ -863,6 +861,13 @@ class H2020_ToastManager {
         this.toasts += 1;
         this.toasts_div.appendChild(t);
         setTimeout(goog.bind(this.expire_toast, this, t), timeout);
+
+        if (click_to) {
+            tt.style.cursor = "pointer";
+            goog.events.listen(tt, goog.events.EventType.CLICK, function(e) {
+                window.location = click_to;
+            });
+        }
     }
 
     expire_toast(t) {

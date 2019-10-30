@@ -781,10 +781,11 @@ class Team(login.LoginUser):
     opened = self.compute_puzzle_beam(now)
     if not save_state.REPLAYING:
       msg = {"method": "apply_fastpass",
-             "land": land.title,
+             "land": land.shortname,
+             "title": land.title,
              "fastpass": self.get_fastpass_data()}
-      if len(opened) == 1:
-        msg["title"] = opened[0].title
+      # if len(opened) == 1:
+      #   msg["title"] = opened[0].title
       self.send_messages([msg])
       asyncio.create_task(self.flush_messages())
     self.dirty_header = True
@@ -1054,7 +1055,9 @@ class Team(login.LoginUser):
       if st.state != PuzzleState.CLOSED:
         if st.puzzle.land not in self.open_lands:
           if now != Global.STATE.event_start_time:
-            self.send_messages([{"method": "open", "title": html.escape(st.puzzle.land.title)}])
+            self.send_messages([{"method": "open",
+                                 "title": html.escape(st.puzzle.land.title),
+                                 "land": st.puzzle.land.shortname}])
           self.open_lands[st.puzzle.land] = now
           self.sorted_open_lands = [land for land in self.open_lands.keys() if land.land_order]
           self.sorted_open_lands.sort(key=lambda land: land.land_order)
