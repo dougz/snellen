@@ -156,7 +156,7 @@ class H2020_Dispatcher {
 
     /** @param{Message} msg */
     update_header(msg) {
-        goog.dom.getElement("buzz").innerHTML = "Buzz: " + msg.score;
+        goog.dom.getElement("buzz").innerHTML = msg.score;
 
         if (msg.passes) {
             goog.dom.getElement("navpass").innerHTML = "PennyPasses (" + msg.passes + ")";
