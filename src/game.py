@@ -521,9 +521,9 @@ class Team(login.LoginUser):
 
   def get_land_data(self, land):
     if land in self.cached_mapdata:
-      print(f"mapdata cache hit {land.shortname}")
+      print(f" mapdata cache hit: {self.username} {land.shortname}")
       return self.cached_mapdata[land]
-    print(f"mapdata cache miss {land.shortname}")
+    print(f"mapdata cache miss: {self.username} {land.shortname}")
 
     items = []
     mapdata = {"base_url": land.base_img,
@@ -557,18 +557,18 @@ class Team(login.LoginUser):
         ps = self.puzzle_state[p]
         if ps.state == PuzzleState.CLOSED: continue
 
-        if hasattr(p, "keeper_answers"):
-          # compute the position later
-          pos_size = None
-          keepers.append((p, d, i.solved.size))
-        else:
-          pos_size = i.solved.pos_size
-
         d = {"name": p.title,
              "url": p.url,
              "icon_url": i.solved.url,
-             "mask_url": i.solved_mask.url,
-             "xywh": pos_size}
+             "mask_url": i.solved_mask.url}
+
+        if hasattr(p, "keeper_answers"):
+          # compute the position later
+          d["xywh"] = None
+          keepers.append((p.keeper_order, d, i.solved.size))
+        else:
+          d["xywh"] = i.solved.pos_size
+
         if i.solved.poly: d["poly"] = i.solved.poly
 
         if ps.answers_found:
@@ -594,7 +594,7 @@ class Team(login.LoginUser):
 
       if keepers:
         KEEPER_PITCH = 44
-        keepers.sort(key=lambda x: x[0].keeper_order)
+        keepers.sort(key=lambda x: x[0])
         rx = 476 - KEEPER_PITCH * (len(keepers)-1)
         for i, (_, d, (w, h)) in enumerate(keepers):
           # position of the bottom center
@@ -1004,6 +1004,7 @@ class Team(login.LoginUser):
   # BEAM!
   def compute_puzzle_beam(self, now):
     #print("-----------------------------")
+    open_all = (OPTIONS.open_all or self.username == "leftout")
 
     opened = []
     locked = []
@@ -1016,7 +1017,7 @@ class Team(login.LoginUser):
 
       open_count = self.fastpasses_used.get(land, 0)
 
-      if OPTIONS.open_all:
+      if open_all:
         open_count = 1000
       else:
         if (self.score >= land.open_at_score or
@@ -1041,20 +1042,30 @@ class Team(login.LoginUser):
             open_count -= 1
 
     safari = Land.BY_SHORTNAME.get("safari", None)
-    if safari and safari in self.open_lands:
+    if safari and (safari in self.open_lands or open_all):
       answers = set()
+      keepers_solved = 0
       for p in safari.puzzles:
         answers.update(self.puzzle_state[p].answers_found)
       for kp in safari.keepers:
         kps = self.puzzle_state[kp]
-        if kps.state == PuzzleState.CLOSED:
-          count = sum(1 for a in kp.keeper_answers if a in answers)
-          if kps.keeper_answers == 0 and count >= kp.keeper_needed:
-            kps.keeper_answers = min(len(answers)+2, safari.total_keeper_answers)
-            print(f"{self.username} will open {kp.icon.name} at {kps.keeper_answers} answers")
-          if 0 < kps.keeper_answers <= len(answers):
-            print(f"{self.username} opening {kp.icon.name}")
+        if kps.state == PuzzleState.SOLVED:
+          keepers_solved += 1
+        elif kps.state == PuzzleState.CLOSED:
+          if open_all:
             self.open_puzzle(kp, now)
+          else:
+            count = sum(1 for a in kp.keeper_answers if a in answers)
+            if kps.keeper_answers == 0 and count >= kp.keeper_needed:
+              kps.keeper_answers = min(len(answers)+2, safari.total_keeper_answers)
+              print(f"{self.username} will open {kp.icon.name} at {kps.keeper_answers} answers")
+            if 0 < kps.keeper_answers <= len(answers):
+              print(f"{self.username} opening {kp.icon.name}")
+              self.open_puzzle(kp, now)
+      meta = Puzzle.get_by_shortname("safari_adventure")
+      if (meta and self.puzzle_state[meta].state == PuzzleState.CLOSED and
+          (keepers_solved >= 5 or open_all)):
+        self.open_puzzle(meta, now)
 
     for st in self.puzzle_state.values():
       if st.state != PuzzleState.CLOSED:
@@ -1236,10 +1247,11 @@ class Puzzle:
     self.url = f"/puzzle/{shortname}"
     self.admin_url = f"/admin/puzzle/{shortname}"
     self.points = 1
-    self.hints_available_time = 15 # 12 * 3600   # 12 hours
+    self.hints_available_time = 12 * 3600   # 12 hours
     self.emojify = False
     self.explanations = {}
     self.puzzle_log = Log()
+    self.zip_version = None
 
     self.solve_durations = {}
     self.fastest_solver = None
@@ -1371,6 +1383,7 @@ class Puzzle:
     self.oncall = j["oncall"]
     self.authors = j["authors"]
     self.puzzletron_id = j["puzzletron_id"]
+    self.zip_version = j.get("zip_version")
     self.max_queued = j.get("max_queued", self.DEFAULT_MAX_QUEUED)
 
     self.answers = set()

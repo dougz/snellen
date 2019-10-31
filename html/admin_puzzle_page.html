@@ -26,6 +26,7 @@
     <th>puzzletron</th>
     <td><a href="https://ptron.teamleftout.org/puzzle.php?pid={{puzzle.puzzletron_id}}">{{puzzle.puzzletron_id}}</a>
   </tr>
+  <tr><th>zip version</th><td class=mono>{% if puzzle.zip_version %}{{puzzle.zip_version}}{% end %}</td></tr>
   <tr>
     {% set answers = sorted(list(puzzle.display_answers.values())) %}
     {% if len(answers) == 1 %}

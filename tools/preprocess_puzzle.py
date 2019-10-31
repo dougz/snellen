@@ -29,9 +29,10 @@ class Puzzle:
 
   SPECIAL_FILES = {METADATA_FILE, PUZZLE_HTML, SOLUTION_HTML, STATIC_PUZZLE_HTML, FOR_OPS_HTML}
 
-  def __init__(self, zip_data, options, include_solutions=False):
+  def __init__(self, zip_data, options, include_solutions=False, filename=None):
     self.prefix = common.hash_name(zip_data)
     z = zipfile.ZipFile(io.BytesIO(zip_data))
+    self.zip_version = filename
 
     errors = []
 
@@ -284,6 +285,7 @@ class Puzzle:
     d = {}
     for n in ("shortname title oncall puzzletron_id max_queued "
               "answers incorrect_responses emojify authors "
+              "zip_version "
               "html_head html_body for_ops_head for_ops_body").split():
       v = getattr(self, n)
       if v is not None: d[n] = v
@@ -325,7 +327,7 @@ def main():
     with open(zipfn, "rb") as f:
       zip_data = f.read()
       try:
-        p = Puzzle(zip_data, options)
+        p = Puzzle(zip_data, options, filename=os.path.basename(zipfn))
         p.save(puzzle_dir)
       except PuzzleErrors as e:
         print(f"{zipfn} had {len(e.errors)} error(s):")
