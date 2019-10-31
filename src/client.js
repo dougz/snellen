@@ -982,8 +982,8 @@ class H2020_MapDraw {
 
             if (it.poly && it.name) {
                 var area = goog.dom.createDom("AREA", {shape: "poly",
-                                                       coords: it.poly,
-                                                       href: it.url});
+                                                       coords: it.poly});
+                if (it.url) area.href = it.url;
                 this.mapmap_el.appendChild(area);
 
                 goog.events.listen(area, goog.events.EventType.MOUSEENTER,
@@ -992,8 +992,8 @@ class H2020_MapDraw {
                                    goog.bind(this.item_leave, this, it));
             } else if (it.poly && it.special) {
                 var area = goog.dom.createDom("AREA", {shape: "poly",
-                                                       coords: it.poly,
-                                                       href: it.url});
+                                                       coords: it.poly});
+                if (it.url) area.href = it.url;
                 this.mapmap_el.appendChild(area);
 
                 goog.events.listen(area, goog.events.EventType.MOUSEENTER,
