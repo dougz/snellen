@@ -56,6 +56,8 @@ def convert_map(shortname, d, options):
   copyif("guess_max")
   copyif("open_at")
   copyif("initial_puzzles")
+  copyif("order")
+  copyif("additional_order")
   print(f"Parsing {shortname} \"{d['title']}\"...")
 
   base_img = os.path.join(options.input_assets, shortname,
@@ -69,8 +71,6 @@ def convert_map(shortname, d, options):
     url = upload_file(src_image, options)
     out["logo"] = url
 
-  if "order" in d:
-    out["order"] = d["order"]
   assignments = d.get("assignments", {})
   if assignments:
     out["assignments"] = assignments

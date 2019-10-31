@@ -903,7 +903,7 @@ class Team(login.LoginUser):
       land_offsets.append(d)
       nx = 0
       ny = 2
-      for p in land.puzzles:
+      for p in land.all_puzzles:
         if not p.meta:
           cx = nx * 15 + 7
           cy = ny * 15 + 7
@@ -934,7 +934,7 @@ class Team(login.LoginUser):
         if land not in self.open_lands: break
         nx = 0
         ny = 2
-        for p in land.puzzles:
+        for p in land.all_puzzles:
           ps = self.puzzle_state[p]
           if p.meta:
             if ps.state == PuzzleState.CLOSED:
@@ -944,10 +944,17 @@ class Team(login.LoginUser):
           else:
             cx = nx * 15 + 7
             cy = ny * 15 + 7
-            if ps.state == PuzzleState.CLOSED:
-              out.append(f'<circle cx="{lx+cx}" cy="{cy}" r="5" stroke="{self.BB_PUZZLE_COLOR[ps.state]}"/>')
+            if p in land.additional_puzzles:
+              # safari keepers
+              if ps.state == PuzzleState.CLOSED:
+                out.append(f'<rect x="{lx+cx-4}" y="{cy-4}" width="8" height="8" stroke="{self.BB_PUZZLE_COLOR[ps.state]}"/>')
+              else:
+                out.append(f'<rect x="{lx+cx-5}" y="{cy-5}" width="10" height="10" fill="{self.BB_PUZZLE_COLOR[ps.state]}"/>')
             else:
-              out.append(f'<circle cx="{lx+cx}" cy="{cy}" r="6" fill="{self.BB_PUZZLE_COLOR[ps.state]}"/>')
+              if ps.state == PuzzleState.CLOSED:
+                out.append(f'<circle cx="{lx+cx}" cy="{cy}" r="5" stroke="{self.BB_PUZZLE_COLOR[ps.state]}"/>')
+              else:
+                out.append(f'<circle cx="{lx+cx}" cy="{cy}" r="6" fill="{self.BB_PUZZLE_COLOR[ps.state]}"/>')
 
             if nx == 0:
               nx = 1
@@ -1211,6 +1218,8 @@ class Land:
           self.total_keeper_answers += len(p.keeper_answers)
 
     self.puzzles = tuple(self.icons[i].puzzle for i in cfg.get("order", ()))
+    self.additional_puzzles = tuple(self.icons[i].puzzle for i in cfg.get("additional_order", ()))
+    self.all_puzzles = self.additional_puzzles + self.puzzles
 
   def __repr__(self):
     return f"<Land \"{self.title}\">"
