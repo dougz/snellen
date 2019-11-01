@@ -682,7 +682,7 @@ class Team(login.LoginUser):
 
     state = self.puzzle_state[puzzle]
     if state.state != state.OPEN:
-      print(f"puzzle {shortname} {state.state} for {self.username}")
+      print(f"submit_answer: puzzle {shortname} {state.state} for {self.username}")
       return
 
     pending = sum(1 for s in state.submissions if s.state == s.PENDING)
@@ -708,7 +708,7 @@ class Team(login.LoginUser):
 
     state = self.puzzle_state[puzzle]
     if state.state != state.OPEN:
-      print(f"puzzle {shortname} {state.state} for {self.username}")
+      print(f"cancel_submission: puzzle {shortname} {state.state} for {self.username}")
       return False
 
     for i, sub in enumerate(state.submissions):
@@ -1443,8 +1443,9 @@ class Puzzle:
     self.hints_available_time = new_time
     admin_user = login.AdminUser.get_by_username(admin_user)
     self.puzzle_log.add(now, f"Hint time set to {util.format_duration(new_time)} by {admin_user.fullname}.")
-    self.maybe_open_hints(now)
-    self.invalidate()
+    if not save_state.REPLAYING:
+      self.maybe_open_hints(now)
+      self.invalidate()
 
   def invalidate(self, flush=True):
     d = {"method": "update",
