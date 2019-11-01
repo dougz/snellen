@@ -617,6 +617,12 @@ class Team(login.LoginUser):
               "url": i.to_land.url,
               "icon_url": i.solved.url,
               "mask_url": i.solved_mask.url}
+        if i.to_land.meta_puzzle:
+          p = i.to_land.meta_puzzle
+          ps = self.puzzle_state[p]
+          if ps.state == PuzzleState.SOLVED:
+            d["solved"] = True
+            d["answer"] = ", ".join(sorted(p.display_answers[a] for a in ps.answers_found))
         items.append((i.to_land.sortkey, d))
 
         if i.under:
@@ -831,6 +837,10 @@ class Team(login.LoginUser):
         }])
       self.dirty_lands.add(puzzle.land.shortname)
       self.cached_mapdata.pop(puzzle.land, None)
+      if puzzle.meta:
+        current_map = Land.BY_SHORTNAME[self.map_mode]
+        self.cached_mapdata.pop(current_map, None)
+        self.dirty_lands.add("home")
       self.activity_log.add(now, puzzle.html + " solved.")
       self.admin_log.add(now, puzzle.admin_html + " solved.", team=self)
       puzzle.puzzle_log.add(now, "Solved by <b>{team.name}</b>.", team=self)
@@ -1190,10 +1200,11 @@ class Land:
 
     assignments = cfg.get("assignments", {})
 
-
     self.total_keeper_answers = 0
     self.keepers = []
     self.icons = {}
+    self.meta_puzzle = None
+
     for name, d in cfg.get("icons", {}).items():
       i = Icon(name, self, d)
       self.icons[name] = i
@@ -1209,6 +1220,8 @@ class Land:
         p.icon = i
         i.puzzle = p
         p.meta = not not pd.get("meta")
+        if p.meta:
+          self.meta_puzzle = p
 
         if "answers" in pd:
           self.keepers.append(p)
