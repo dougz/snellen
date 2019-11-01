@@ -81,7 +81,7 @@ server {
 
   # ox puzzle
   location = /O.ooo {
-    return 301 https://big-test-solve.storage.googleapis.com/O.ooo;
+    return 301 https://assets.pennypark.fun/O.ooo;
   }
 
   location ~ / {

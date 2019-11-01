@@ -44,6 +44,8 @@ def main():
   y_pos = 0
 
   out_json = []
+  names = set()
+  actual_count = 0
 
   for groupname, emojis in in_json:
     print(groupname)
@@ -52,32 +54,50 @@ def main():
     out_json.append((groupname, outemojis))
 
     for title, text, url in emojis:
+      if title.endswith(" suit"): continue
+
       if not url:
-        outemojis.append((title, text))
+        print(f"missing url for: {title}")
         continue
       fn = os.path.basename(url)
       cache_path = os.path.join(options.cache_dir, fn)
       if os.path.exists(cache_path):
-        icon = Image.open(cache_path)
+        with open(cache_path, "rb") as f:
+          data = f.read()
       else:
         print(f"  fetching {url}")
         r = requests.get(url)
-        r.raise_for_status()
+        data = r.content
+        if r.status_code == 404:
+          print(f"skipping {title}")
+          data = b""
+        else:
+          r.raise_for_status()
         with open(cache_path, "wb") as f:
-          f.write(r.content)
-        icon = Image.open(io.BytesIO(r.content))
+          f.write(data)
+      if not data: continue
+      icon = Image.open(io.BytesIO(data))
 
       icon = icon.convert("RGBA")
       icon = icon.resize((OUTSIZE, OUTSIZE), Image.LANCZOS)
 
       out.paste(icon, (x_pos*OUTSIZE, y_pos*OUTSIZE))
+
+      if title in names:
+        print(f"duplicate: {title}")
+      names.add(title)
       outemojis.append((title, text, x_pos, y_pos))
+      actual_count += 1
 
       x_pos += 1
       if x_pos >= WIDTH:
         x_pos = 0
         y_pos += 1
 
+  rows = y_pos+1 if x_pos else y_pos
+  out = out.crop((0, 0, OUTSIZE*WIDTH, OUTSIZE*rows))
+  print(f"trimmed to {out.size}")
+  print(f"outputting {actual_count} emojis")
 
   out.save(options.output_png)
   with open(options.output_json, "w") as f:
