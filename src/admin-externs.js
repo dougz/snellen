@@ -71,6 +71,10 @@ class OpenPuzzle {
         this.shortname;
         /** @type{string} */
         this.title;
+        /** @type{string} */
+        this.symbol;
+        /** @type{string} */
+        this.color;
         /** @type{number} */
         this.open_time;
         /** @type{?Array<string>} */

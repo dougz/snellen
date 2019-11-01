@@ -673,11 +673,18 @@ class A2020_TeamPage {
             if (i > 0) {
                 el.appendChild(goog.dom.createDom("BR"));
             }
+            var sp = goog.dom.createDom("SPAN", "landtag", op.symbol);
+            sp.style.backgroundColor = op.color;
+            el.appendChild(sp);
+
+            el.appendChild(goog.dom.createTextNode(" "));
+
             el.appendChild(goog.dom.createDom(
                 "A", {href: "/admin/team/" + team_username + "/puzzle/" + op.shortname},
                 op.title));
+
             el.appendChild(goog.dom.createTextNode(" ("));
-            var sp = goog.dom.createDom("SPAN", "counter");
+            sp = goog.dom.createDom("SPAN", "counter");
             sp.setAttribute("data-since", op.open_time);
             el.appendChild(sp);
             el.appendChild(goog.dom.createTextNode(")"));

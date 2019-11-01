@@ -96,13 +96,16 @@ class TeamDataHandler(util.AdminHandler):
       if s.state == s.OPEN:
         d = {"shortname": s.puzzle.shortname,
              "open_time": s.open_time,
-             "title": s.puzzle.title}
+             "title": s.puzzle.title,
+             "symbol": s.puzzle.land.symbol,
+             "color": s.puzzle.land.color}
         if s.answers_found:
           af = list(s.answers_found)
           af.sort()
           d["answers_found"] = af
-        open_list.append(d)
-    open_list.sort(key=lambda d: (d["open_time"], d["title"]))
+        open_list.append(((s.puzzle.land.land_order, s.open_time, s.puzzle.title), d))
+    open_list.sort()
+    open_list = [i[1] for i in open_list]
 
     d = {"open_puzzles": open_list,
          "fastpasses": team.fastpasses_available,

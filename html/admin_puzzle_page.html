@@ -13,6 +13,10 @@
 <table class=info>
   <tr><th>title</th><td class=h1>{{puzzle.title}}</td></tr>
   <tr><th>shortname</th><td class=mono>{{puzzle.shortname}}</td></tr>
+  <tr><th>land</th><td>
+      <span class="landtag" style="background-color: {{puzzle.land.color}};">{{puzzle.land.symbol}}</span>
+      {{puzzle.land.title}}
+  </td></tr>
   <tr><th>oncall</th><td>{{puzzle.oncall}}</td></tr>
   <tr>
     <th class=top>author(s)</th>
