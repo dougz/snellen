@@ -85,8 +85,8 @@ class TaskQueue:
     if self.tasks.pop(task_key, None):
       self.change()
 
-  async def purge(self):
-    await asyncio.sleep(10.1)
+  async def purge(self, after):
+    await asyncio.sleep(after+.1)
     now = time.time()
     to_delete = []
     for key, when in self.pending_removal.items():
@@ -160,8 +160,8 @@ class TaskQueue:
            "claimant": task.claim.fullname if task.claim else None,
            "key": task.key,
       }
-      if task.key in self.pending_removal:
-        d["done_pending"] = True
+      w = self.pending_removal.get(task.key)
+      if w: d["done_pending"] = w
       q.append(d)
       total += 1
       if task.claim: claimed += 1
@@ -1562,8 +1562,8 @@ class Global:
     if undo:
       self.task_queue.pending_removal.pop(task_key, None)
     else:
-      self.task_queue.pending_removal[task_key] = now + 10
-      asyncio.create_task(self.task_queue.purge())
+      self.task_queue.pending_removal[task_key] = now + 20
+      asyncio.create_task(self.task_queue.purge(20))
     self.task_queue.change()
 
   async def notify_event_start(self):

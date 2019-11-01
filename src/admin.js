@@ -261,8 +261,9 @@ class A2020_TaskQueue {
         var now = (new Date()).getTime() / 1000.0;
         for (var i = 0; i < response.queue.length; ++i) {
             var msg = response.queue[i];
-            var td = goog.dom.createDom("TD", "tqtime counter", admin2020.time_formatter.duration(now-msg.when));
-            td.setAttribute("data-since", msg.when);
+            var tqtime = goog.dom.createDom("TD", "tqtime counter", admin2020.time_formatter.duration(now-msg.when));
+            tqtime.setAttribute("data-since", msg.when);
+            var tqteam = goog.dom.createDom("TD", {className: "tqteam"}, msg.team);
             var claimlink = null;
             if (msg.claimant) {
                 claimlink = goog.dom.createDom("BUTTON", "action", "Unclaim");
@@ -288,12 +289,17 @@ class A2020_TaskQueue {
             var done_el = null;
             if (msg.key.charAt(0) == "t") {
                 if (msg.done_pending) {
-                    done_el = goog.dom.createDom("BUTTON", "inlineminiaction", "Not done");
+                    done_el = goog.dom.createDom("BUTTON", "inlineminiaction", "Undo done ");
+                    var counter = goog.dom.createDom("SPAN", "counter");
+                    counter.setAttribute("data-until-secs", ""+msg.done_pending);
+                    done_el.appendChild(counter);
                     goog.dom.classlist.add(what_el, "strike");
+                    goog.dom.classlist.add(tqtime, "strike");
+                    goog.dom.classlist.add(tqteam, "strike");
                     goog.events.listen(done_el, goog.events.EventType.CLICK,
                                        goog.bind(this.uncomplete_task, this, msg));
                 } else {
-                    done_el = goog.dom.createDom("BUTTON", "inlineminiaction", "Done");
+                    done_el = goog.dom.createDom("BUTTON", "inlineminiaction", "Mark done");
                     goog.events.listen(done_el, goog.events.EventType.CLICK,
                                        goog.bind(this.complete_task, this, msg));
                 }
@@ -301,8 +307,8 @@ class A2020_TaskQueue {
 
             var tr = goog.dom.createDom(
                 "TR", null,
-                td,
-                goog.dom.createDom("TD", {className: "tqteam"}, msg.team),
+                tqtime,
+                tqteam,
                 goog.dom.createDom("TD", {className: "tqwhat"}, what_el, done_el),
                 goog.dom.createDom("TD", {className: "tqclaim"}, claimlink),
                 claim_el);
@@ -383,6 +389,14 @@ class A2020_Counter {
                     var d = until - now;
                     if (d < 0) d = 0;
                     el.innerHTML = admin2020.time_formatter.duration(d);
+                }
+                else {
+                    until = el.getAttribute("data-until-secs");
+                    if (until) {
+                        var d = until - now;
+                        if (d < 0) d = 0;
+                        el.innerHTML = "" + Math.round(d);
+                    }
                 }
             }
         }
@@ -578,8 +592,6 @@ class A2020_ServerPage {
 
     /** param{ServerPageData} data */
     build(data) {
-        console.log(data);
-
         this.waits.innerHTML = "" + data.waits;
         this.sessions.innerHTML = "" + data.sessions;
         this.proxy_waits.innerHTML = "";
