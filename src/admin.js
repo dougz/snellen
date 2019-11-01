@@ -111,6 +111,10 @@ class A2020_TeamPuzzlePage {
 
         /** @type{Element} */
         this.history = goog.dom.getElement("tpphinthistory");
+        /** @type{Element} */
+        this.replycontainer = goog.dom.getElement("tppreplycontainer");
+        /** @type{Element} */
+        this.for_ops = goog.dom.getElement("for_ops");
 
         /** @type{Element} */
         this.claim = goog.dom.getElement("tpphintclaim");
@@ -197,34 +201,44 @@ class A2020_TeamPuzzlePage {
             this.tppsolve.innerHTML = "\u2014";
         }
 
+        console.log(data);
+        console.log(this.replycontainer);
+        if (data.hints_open) {
+            this.replycontainer.style.display = "initial";
+            this.for_ops.style.display = "block";
 
-        if (data.claim) {
-            this.claim.style.display = "inline";
-            this.claim.innerHTML = "Claimed by " + data.claim;
-            this.claimlink.style.display = "none";
-            this.unclaimlink.style.display = "inline-block";
-        } else {
-            this.claim.style.display = "none";
-            this.claimlink.style.display = "inline-block";
-            this.unclaimlink.style.display = "none";
-        }
-
-        if (data.history.length == 0) {
-            this.history.innerHTML = "Team has not requested any hints.";
-        } else {
-            this.history.innerHTML = "";
-            var dl = goog.dom.createDom("DL");
-            for (var i = 0; i < data.history.length; ++i) {
-                var msg = data.history[i];
-                var dt = goog.dom.createDom(
-                    "DT", null,
-                    "At " + admin2020.time_formatter.format(msg.when) + ", " + msg.sender + " wrote:");
-                var dd = goog.dom.createDom("DD", null);
-                dd.innerHTML = msg.text;
-                dl.appendChild(dt);
-                dl.appendChild(dd);
+            if (data.claim) {
+                this.claim.style.display = "inline";
+                this.claim.innerHTML = "Claimed by " + data.claim;
+                this.claimlink.style.display = "none";
+                this.unclaimlink.style.display = "inline-block";
+            } else {
+                this.claim.style.display = "none";
+                this.claimlink.style.display = "inline-block";
+                this.unclaimlink.style.display = "none";
             }
-            this.history.appendChild(dl);
+
+            if (data.history.length == 0) {
+                this.history.innerHTML = "<i>Team has not requested any hints.</i>";
+            } else {
+                this.history.innerHTML = "";
+                var dl = goog.dom.createDom("DL");
+                for (var i = 0; i < data.history.length; ++i) {
+                    var msg = data.history[i];
+                    var dt = goog.dom.createDom(
+                        "DT", null,
+                        "At " + admin2020.time_formatter.format(msg.when) + ", " + msg.sender + " wrote:");
+                    var dd = goog.dom.createDom("DD", null);
+                    dd.innerHTML = msg.text;
+                    dl.appendChild(dt);
+                    dl.appendChild(dd);
+                }
+                this.history.appendChild(dl);
+            }
+        } else {
+            this.history.innerHTML = "<i>Hints are not available for this team and puzzle.</i>";
+            this.replycontainer.style.display = "none";
+            this.for_ops.style.display = "none";
         }
 
         A2020_DisplayLog(this.tpplog, data.log);

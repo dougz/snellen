@@ -145,6 +145,8 @@ class TeamPuzzlePageData {
         this.solve_time;
         /** @type{Array<LogEntry>} */
         this.log;
+        /** @type{boolean} */
+        this.hints_open;
     }
 }
 
