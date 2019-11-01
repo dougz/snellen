@@ -169,16 +169,24 @@ class H2020_Dispatcher {
         for (var i = 0; i < msg.lands.length; ++i) {
             var a = goog.dom.createDom("A", {className: "landtag",
                                              href: msg.lands[i][2]}, msg.lands[i][0]);
+            a.style.position = "relative";
             a.style.backgroundColor = msg.lands[i][1];
             el.appendChild(a);
+
+            var tip = goog.dom.createDom("DIV", "landtip", msg.lands[i][3]);
+            a.appendChild(tip);
         }
 
         if (msg.to_go) {
             var a = goog.dom.createDom("A", {
                 id: "nextland",
-                className: "landtag",
-                title: "Generate " + msg.to_go + " more buzz to unlock the next land!"}, "??");
+                className: "landtag"}, "??");
+            a.style.position = "relative";
             el.appendChild(a);
+
+            var tip = goog.dom.createDom("DIV", "landtip");
+            tip.innerHTML = "Generate <b>" + msg.to_go + "</b> more buzz to unlock the next land!";
+            a.appendChild(tip);
         }
 
     }

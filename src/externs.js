@@ -68,6 +68,8 @@ class Message {
         this.thumb;
         /** @type{?number} */
         this.passes;
+        /** @type{?string} */
+        this.stuff;
     }
 }
 

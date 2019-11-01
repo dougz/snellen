@@ -283,9 +283,31 @@ a#submit:hover {
     margin-right: 12px;
 }
 
+.landtip {
+    display: none;
+}
+a:hover > .landtip {
+    display: block;
+    position: absolute;
+    width: 220px;
+    text-align: center;
+    padding: 4px;
+    border-bottom-right-radius: 16px;
+    border-bottom-left-radius: 16px;
+    border: 2px solid black;
+    border-top: none;
+    background-color: #666;
+    left: -110px;
+    top: 30px;
+}
+
 #nextland.landtag {
     width: 30px;
     color: #ccc;
+}
+
+.landtip b {
+    color: white;
 }
 
 #log th { vertical-align: baseline; padding-right: 20px; text-align: right; color: #666; }

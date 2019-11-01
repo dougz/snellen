@@ -514,8 +514,10 @@ class Team(login.LoginUser):
   def get_header_data(self):
     d = {"score": f"Buzz: {self.score * 1000:,}"
          if self.score < 15 else f"Wonder: {self.score*10000:,}",
-         "lands": [[i.symbol, i.color, i.url] for i in self.sorted_open_lands],
-         "to_go": None if self.score_to_go is None else (self.score_to_go * 1000),
+         "stuff": "buzz" if self.score < 15 else "wonder",
+         "lands": [[i.symbol, i.color, i.url, i.title] for i in self.sorted_open_lands],
+         "to_go": None if self.score_to_go is None else (self.score_to_go *
+                                                         (1000 if self.score < 15 else 1000)),
          "passes": len(self.fastpasses_available),
          }
     return d
