@@ -520,6 +520,13 @@ class Team(login.LoginUser):
                                                          (1000 if self.score < 15 else 1000)),
          "passes": len(self.fastpasses_available),
          }
+    if self.score_to_go:
+      if self.score < 15:
+        num = self.score_to_go * 1000
+        d["to_go"] = f"<b>{num:,}</b> more buzz"
+      else:
+        num = self.score_to_go * 10000
+        d["to_go"] = f"<b>{num:,}</b> more wonder"
     return d
 
   def get_land_data(self, land):

@@ -185,7 +185,7 @@ class H2020_Dispatcher {
             el.appendChild(a);
 
             var tip = goog.dom.createDom("DIV", "landtip");
-            tip.innerHTML = "Generate <b>" + msg.to_go + "</b> more buzz to unlock the next land!";
+            tip.innerHTML = "Generate " + msg.to_go + " to unlock the next land!";
             a.appendChild(tip);
         }
 

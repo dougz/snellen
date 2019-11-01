@@ -60,7 +60,7 @@ class Message {
         this.maps;
         /** @type{?Array<Array<string>>} */
         this.lands;
-        /** @type{?number} */
+        /** @type{?string} */
         this.to_go;
         /** @type{?string} */
         this.video_url;
