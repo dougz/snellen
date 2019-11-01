@@ -229,7 +229,7 @@ class SubmitHistoryHandler(util.TeamHandler):
     d = {"allowed": submit_allowed,
          "history": [sub.json_dict() for sub in state.submissions],
          }
-    if len(state.puzzle.answers) > 1:
+    if len(state.puzzle.answers) > 1 or state.puzzle.land.shortname == "safari":
       d["correct"] = len(state.answers_found)
       d["total"] = len(state.puzzle.answers)
 

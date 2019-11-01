@@ -554,11 +554,14 @@ class H2020_SubmitPanel {
         if (response.total) {
             var t = response.total;
             var c = response.correct;
-            this.top_note.innerHTML = "This puzzle has " + t + " answer" +
-                (t == 1 ? "" : "s") + ".  " +
+            if (t == 1) {
+                this.top_note.innerHTML = "This puzzle has a single answer.";
+            } else {
+                this.top_note.innerHTML = "This puzzle has " + t + " answers.  " +
                 (t == c ? "You have found them all!" :
                  (c > 0 ? "You have found " + c + " so far.  " : "") +
                  "Submit each answer separately.");
+            }
             this.top_note.style.display = "initial";
         } else {
             this.top_note.style.display = "none";
