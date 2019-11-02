@@ -3,9 +3,6 @@ var puzzle_id;
 /** @type{?string} */
 var team_username;
 
-/** @type{number} */
-var waiter_id;
-
 /** @type{?Array<Array<string>>} */
 var puzzle_list;
 /** @type{?Array<Array<string>>} */

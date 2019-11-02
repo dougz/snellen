@@ -44,7 +44,7 @@ class TeamPageHandler(TeamHandler):
       d["puzzle"] = None
       script.append("var puzzle_id = null;\n")
 
-    script.append(f"var waiter_id = {wid}; var received_serial = {serial};\n")
+    script.append(f"var wid = {wid}; var received_serial = {serial};\n")
     script.append(f"var initial_header = {json.dumps(self.team.get_header_data())};\n")
     script.append("</script>")
 
@@ -121,7 +121,7 @@ class AdminPageHandler(AdminHandler):
 
     d["css"] = self.static_content["admin.css"]
     d["home"] = self.static_content["home.svg"]
-    d["script"] += f"<script>var waiter_id = {wid}; var received_serial = {serial};</script>\n"
+    d["script"] += f"<script>var wid = {wid}; var received_serial = {serial};</script>\n"
     d["json_data"] = None
     d["team_username"] = (f'"{self.pageteam.username}"') if self.pageteam else "null"
     d["puzzle_id"] = (f'"{self.pagepuzzle.shortname}"') if self.pagepuzzle else "null"

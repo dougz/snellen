@@ -1,14 +1,8 @@
 /** @type{?string} */
 var puzzle_id;
 
-/** @type{Array<Object>} */
-var log_entries;
-
 /** @type{?function()} */
 var puzzle_init;
-
-/** @type{number} */
-var waiter_id;
 
 /** @type{Storage} */
 var localStorage;

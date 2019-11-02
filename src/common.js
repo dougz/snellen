@@ -153,7 +153,7 @@ class Common_Waiter {
             // }
 
             setTimeout(goog.bind(this.xhr.send, this.xhr,
-                                 this.base_url + "/" + waiter_id + "/" + this.serial),
+                                 this.base_url + "/" + wid + "/" + this.serial),
                        this.backoff);
             return;
         }
@@ -170,14 +170,14 @@ class Common_Waiter {
         sessionStorage.setItem("serial", this.serial.toString());
 
         setTimeout(goog.bind(this.xhr.send, this.xhr,
-                             this.base_url + "/" + waiter_id + "/" + this.serial),
+                             this.base_url + "/" + wid + "/" + this.serial),
                    Math.random() * 250);
     }
 
     start() {
         goog.events.listen(this.xhr, goog.net.EventType.COMPLETE,
                            goog.bind(this.waitcomplete, this));
-        this.xhr.send(this.base_url + "/" + waiter_id + "/" + this.serial);
+        this.xhr.send(this.base_url + "/" + wid + "/" + this.serial);
     }
 }
 
