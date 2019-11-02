@@ -297,7 +297,7 @@ a:hover > .landtip {
     border: 2px solid black;
     border-top: none;
     background-color: #666;
-    left: -110px;
+    left: -105px;
     top: 30px;
 }
 
@@ -895,7 +895,7 @@ div#map div.p {
     color: #eeeeee;
     pointer-events: none;
     text-align: center;
-    text-shadow: 2px 2px 5px black;
+    text-shadow: 0 0 4px black;
 }
 
 div#map div.p b {
