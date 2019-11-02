@@ -895,7 +895,7 @@ div#map div.p {
     color: #eeeeee;
     pointer-events: none;
     text-align: center;
-    text-shadow: 0 0 4px black;
+    text-shadow: 2px 2px 5px black;
 }
 
 div#map div.p b {
