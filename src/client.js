@@ -7,88 +7,6 @@ goog.require("goog.style");
 goog.require("goog.net.XhrIo");
 goog.require("goog.ui.ModalPopup");
 goog.require("goog.json.Serializer");
-goog.require("goog.i18n.DateTimeFormat");
-
-class H2020_Waiter {
-    constructor(dispatcher) {
-        /** @type{goog.net.XhrIo} */
-        this.xhr = new goog.net.XhrIo();
-        /** @type{number} */
-        this.serial = received_serial;
-
-        if (window.performance.navigation.type == 2) {
-            var e = sessionStorage.getItem("serial");
-            if (e) {
-                e = parseInt(e, 10);
-                if (e > this.serial) {
-                    this.serial = e;
-                }
-            }
-        }
-
-        /** @type{number} */
-        this.backoff = 250;
-        /** @type(H2020_Dispatcher) */
-        this.dispatcher = dispatcher;
-        /** @type{boolean} */
-        this.saw_502 = false;
-    }
-
-    waitcomplete() {
-        if (this.xhr.getStatus() == 502) {
-            this.saw_502 = true;
-        }
-
-        if (this.xhr.getStatus() == 401) {
-            var text;
-            if (this.saw_502) {
-                text = "Server connection lost."
-            } else {
-                text = "You have been logged out."
-            }
-            hunt2020.toast_manager.add_toast(
-                text + " Please reload to continue.",
-                3600000, null, "salmon", "/");
-            return;
-        }
-
-        if (this.xhr.getStatus() != 200) {
-            this.backoff = Math.min(10000, Math.floor(this.backoff*1.5));
-
-            // // XXX cancel early for development
-            // if (this.backoff > 1000) {
-            //  console.log("aborting retries");
-            //  return;
-            // }
-
-            setTimeout(goog.bind(this.xhr.send, this.xhr,
-                                 "/wait/" + waiter_id + "/" + this.serial),
-                       this.backoff);
-            return;
-        }
-
-        this.backoff = 250;
-
-        var msgs = /** @type{Array<Object>} */ (this.xhr.getResponseJson());
-        for (var i = 0; i < msgs.length; ++i) {
-            this.serial = /** @type{number} */ (msgs[i][0]);
-            var msg = /** @type{Message} */ (msgs[i][1]);
-            this.dispatcher.dispatch(msg);
-        }
-
-        sessionStorage.setItem("serial", this.serial.toString());
-
-        setTimeout(goog.bind(this.xhr.send, this.xhr,
-                             "/wait/" + waiter_id + "/" + this.serial),
-                   Math.random() * 250);
-    }
-
-    start() {
-        goog.events.listen(this.xhr, goog.net.EventType.COMPLETE,
-                           goog.bind(this.waitcomplete, this));
-        this.xhr.send("/wait/" + waiter_id + "/" + this.serial);
-    }
-}
 
 function H2020_expect_204(e) {
     var code = e.target.getStatus();
@@ -1301,7 +1219,7 @@ window.onload = function() {
     hunt2020.audio_manager = new H2020_AudioManager();
 
     var dispatcher = new H2020_Dispatcher();
-    hunt2020.waiter = new H2020_Waiter(dispatcher);
+    hunt2020.waiter = new Common_Waiter(dispatcher, "/wait", received_serial);
     hunt2020.waiter.start();
 
     // Only present on the puzzle pages.
