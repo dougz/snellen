@@ -50,6 +50,7 @@ class TeamPageHandler(TeamHandler):
 
     if self.application.settings.get("debug"):
       script.append("""<script src="/closure/goog/base.js"></script>\n"""
+                    """<script src="/debug/snellen/src/common.js"></script>"""
                     """<script src="/debug/snellen/src/client.js"></script>""")
     else:
       script.append(f"""<script src="{self.static_content["client-compiled.js"]}"></script>""")
@@ -113,6 +114,7 @@ class AdminPageHandler(AdminHandler):
 
     if self.application.settings.get("debug"):
       d["script"] = ("""<script src="/closure/goog/base.js"></script>\n"""
+                     """<script src="/debug/snellen/src/common.js"></script>"""
                      """<script src="/debug/snellen/src/admin.js"></script>""")
     else:
       d["script"] = f"""<script src="{self.static_content["admin-compiled.js"]}"></script>"""

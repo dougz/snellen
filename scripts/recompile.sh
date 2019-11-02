@@ -4,6 +4,7 @@ mkdir -p "$HUNT2020_BASE/snellen/bin"
 
 "$HUNT2020_BASE/snellen/external/closure/bin/calcdeps.py" \
     -i "$HUNT2020_BASE/snellen/src/client.js" \
+    -i "$HUNT2020_BASE/snellen/src/common.js" \
     -p "$HUNT2020_BASE/snellen/external/closure/" \
     --output_file "$HUNT2020_BASE/snellen/bin/client-compiled.js" \
     -o compiled \
@@ -15,6 +16,7 @@ mkdir -p "$HUNT2020_BASE/snellen/bin"
 
 "$HUNT2020_BASE/snellen/external/closure/bin/calcdeps.py" \
     -i "$HUNT2020_BASE/snellen/src/admin.js" \
+    -i "$HUNT2020_BASE/snellen/src/common.js" \
     -p "$HUNT2020_BASE/snellen/external/closure/" \
     --output_file "$HUNT2020_BASE/snellen/bin/admin-compiled.js" \
     -o compiled \

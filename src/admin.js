@@ -348,75 +348,6 @@ class A2020_TaskQueue {
 
 }
 
-class A2020_TimeFormatter {
-    constructor() {
-        this.formatter = new goog.i18n.DateTimeFormat("EEE h:mm:ss aa");
-    }
-    format(t) {
-        var d = new Date(t * 1000);
-        var txt = this.formatter.format(d);
-        var l = txt.length;
-        return txt.substr(0, l-2) + txt.substr(l-2, 2).toLowerCase();
-    }
-    duration(s) {
-        var hr = Math.trunc(s/3600);
-        s -= hr*3600;
-        var min = Math.trunc(s/60);
-        var sec = Math.trunc(s%60);
-        if (hr > 0) {
-            return "" + hr + ":" + (""+min).padStart(2, "0") + ":" + (""+sec).padStart(2, "0");
-        } else {
-            return "" + min + ":" + (""+sec).padStart(2, "0");
-        }
-    }
-}
-
-class A2020_Counter {
-    constructor() {
-        this.timer = null;
-        this.els = [];
-        this.reread();
-    }
-
-    reread() {
-        if (this.timer) {
-            clearInterval(this.timer);
-            this.timer = null;
-        }
-        this.els = document.querySelectorAll(".counter");
-        if (this.els.length > 0) {
-            this.timer = setInterval(goog.bind(this.update, this), 1000);
-        }
-        this.update();
-    }
-
-    update() {
-        var now = (new Date()).getTime() / 1000.0;
-        for (var i = 0; i < this.els.length; ++i) {
-            var el = this.els[i];
-            var since = el.getAttribute("data-since");
-            if (since) {
-                el.innerHTML = admin2020.time_formatter.duration(now-since);
-            } else {
-                var until = el.getAttribute("data-until");
-                if (until) {
-                    var d = until - now;
-                    if (d < 0) d = 0;
-                    el.innerHTML = admin2020.time_formatter.duration(d);
-                }
-                else {
-                    until = el.getAttribute("data-until-secs");
-                    if (until) {
-                        var d = until - now;
-                        if (d < 0) d = 0;
-                        el.innerHTML = "" + Math.round(d);
-                    }
-                }
-            }
-        }
-    }
-}
-
 class A2020_UserRoles {
     constructor() {
         var cbs = document.querySelectorAll("table#user-roles input[type='checkbox']");
@@ -940,9 +871,8 @@ window.onload = function() {
     admin2020.waiter = new A2020_Waiter(new A2020_Dispatcher());
     admin2020.waiter.start();
 
-    admin2020.time_formatter = new A2020_TimeFormatter();
-
-    admin2020.counter = new A2020_Counter();
+    admin2020.time_formatter = new Common_TimeFormatter();
+    admin2020.counter = new Common_Counter(admin2020.time_formatter);
 
     if (goog.dom.getElement("taskqueue")) {
         admin2020.taskqueue = new A2020_TaskQueue();
