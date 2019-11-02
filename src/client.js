@@ -1219,7 +1219,11 @@ window.onload = function() {
     hunt2020.audio_manager = new H2020_AudioManager();
 
     var dispatcher = new H2020_Dispatcher();
-    hunt2020.waiter = new Common_Waiter(dispatcher, "/wait", received_serial);
+    hunt2020.waiter = new Common_Waiter(
+        dispatcher, "/wait",
+        function(text) {
+            hunt2020.toast_manager.add_toast(text, 36000000, null, "salmon", "/");
+        });
     hunt2020.waiter.start();
 
     // Only present on the puzzle pages.

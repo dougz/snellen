@@ -812,7 +812,11 @@ var admin2020 = {
 
 window.onload = function() {
     admin2020.serializer = new goog.json.Serializer();
-    admin2020.waiter = new Common_Waiter(new A2020_Dispatcher(), "/wait", received_serial);
+    admin2020.waiter = new Common_Waiter(
+        new A2020_Dispatcher(), "/wait",
+        function(text) {
+            alert(text);
+        });
     admin2020.waiter.start();
 
     admin2020.time_formatter = new Common_TimeFormatter();

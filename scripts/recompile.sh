@@ -10,6 +10,7 @@ mkdir -p "$HUNT2020_BASE/snellen/bin"
     -o compiled \
     -c "$HUNT2020_BASE/snellen/external/closure-compiler.jar" \
     -f '--compilation_level' -f 'ADVANCED_OPTIMIZATIONS' \
+    -f '--externs' -f "$HUNT2020_BASE/snellen/src/common-externs.js" \
     -f '--externs' -f "$HUNT2020_BASE/snellen/src/externs.js" \
     -f '--rename_variable_prefix' -f 'H'
 
@@ -22,6 +23,7 @@ mkdir -p "$HUNT2020_BASE/snellen/bin"
     -o compiled \
     -c "$HUNT2020_BASE/snellen/external/closure-compiler.jar" \
     -f '--compilation_level' -f 'ADVANCED_OPTIMIZATIONS' \
+    -f '--externs' -f "$HUNT2020_BASE/snellen/src/common-externs.js" \
     -f '--externs' -f "$HUNT2020_BASE/snellen/src/admin-externs.js"
 
 

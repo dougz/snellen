@@ -97,14 +97,17 @@ class Common_Waiter {
     /** @param{Object} dispatcher */
     /** @param{string} base_url */
     /** @param{number} start_serial */
-    constructor(dispatcher, base_url, start_serial) {
+    /** @param{function(string)} notify_fn */
+    constructor(dispatcher, base_url, notify_fn) {
         /** @type{string} */
         this.base_url = base_url;
+
+        this.notify_fn = notify_fn;
 
         /** @type{goog.net.XhrIo} */
         this.xhr = new goog.net.XhrIo();
         /** @type{number} */
-        this.serial = start_serial;
+        this.serial = received_serial;
 
         if (window.performance.navigation.type == 2) {
             var e = sessionStorage.getItem("serial");
@@ -132,13 +135,11 @@ class Common_Waiter {
         if (this.xhr.getStatus() == 401) {
             var text;
             if (this.saw_502) {
-                text = "Server connection lost."
+                text = "Server connection lost. Please reload to continue."
             } else {
-                text = "You have been logged out."
+                text = "You have been logged out. Please reload to continue."
             }
-            hunt2020.toast_manager.add_toast(
-                text + " Please reload to continue.",
-                3600000, null, "salmon", "/");
+            this.notify_fn(text);
             return;
         }
 
