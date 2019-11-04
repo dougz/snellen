@@ -1221,7 +1221,7 @@ window.onload = function() {
 
     var dispatcher = new H2020_Dispatcher();
     hunt2020.waiter = new Common_Waiter(
-        dispatcher, "/wait",
+        dispatcher, "/wait", received_serial, sessionStorage,
         function(text) {
             hunt2020.toast_manager.add_toast(text, 36000000, null, "salmon", "/");
         });

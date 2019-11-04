@@ -97,20 +97,20 @@ class Common_Waiter {
     /** @param{Object} dispatcher */
     /** @param{string} base_url */
     /** @param{number} start_serial */
-    /** @param{function(string)} notify_fn */
-    constructor(dispatcher, base_url, notify_fn) {
-        /** @type{string} */
+    /** @param{?Storage} storage */
+    /** @param{?function(string)} notify_fn */
+    constructor(dispatcher, base_url, start_serial, storage, notify_fn) {
+        this.dispatcher = dispatcher;
         this.base_url = base_url;
-
         this.notify_fn = notify_fn;
+        this.storage = storage;
+        this.serial = start_serial;
 
         /** @type{goog.net.XhrIo} */
         this.xhr = new goog.net.XhrIo();
-        /** @type{number} */
-        this.serial = received_serial;
 
-        if (window.performance.navigation.type == 2) {
-            var e = sessionStorage.getItem("serial");
+        if (storage && window.performance.navigation.type == 2) {
+            var e = storage.getItem("serial");
             if (e) {
                 e = parseInt(e, 10);
                 if (e > this.serial) {
@@ -121,8 +121,6 @@ class Common_Waiter {
 
         /** @type{number} */
         this.backoff = 250;
-        /** @type(Object) */
-        this.dispatcher = dispatcher;
         /** @type{boolean} */
         this.saw_502 = false;
     }
@@ -167,7 +165,9 @@ class Common_Waiter {
             this.dispatcher.dispatch(msg);
         }
 
-        sessionStorage.setItem("serial", this.serial.toString());
+        if (this.storage) {
+            this.storage.setItem("serial", this.serial.toString());
+        }
 
         setTimeout(goog.bind(this.xhr.send, this.xhr,
                              this.base_url + "/" + wid + "/" + this.serial),

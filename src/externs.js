@@ -20,6 +20,12 @@ var initial_json;
 /** @type{?Message} */
 var initial_header;
 
+/** @type{number} */
+var received_serial;
+
+/** @type{Storage} */
+var sessionStorage;
+
 class Message {
     constructor() {
         /** @type{string} */

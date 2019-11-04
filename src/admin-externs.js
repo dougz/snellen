@@ -11,6 +11,12 @@ var team_list;
 /** @type{BBLabelInfo} */
 var label_info;
 
+/** @type{number} */
+var received_serial;
+
+/** @type{Storage} */
+var sessionStorage;
+
 class Message {
     constructor() {
         /** @type{string} */
