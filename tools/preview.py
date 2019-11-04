@@ -121,6 +121,7 @@ class UploadHandler(tornado.web.RequestHandler):
                 "movielot": "Penny Park Studios",
                 "balloons": "Balloon Vendor",
                 "safari": "Safari Adventure",
+                "cascade": "Cascade Bay",
                 }
 
   def initialize(self, options):
