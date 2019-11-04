@@ -7,89 +7,6 @@ goog.require("goog.style");
 goog.require("goog.net.XhrIo");
 goog.require("goog.ui.ModalPopup");
 goog.require("goog.json.Serializer");
-goog.require("goog.i18n.DateTimeFormat");
-
-class H2020_Waiter {
-    constructor(dispatcher) {
-        /** @type{goog.net.XhrIo} */
-        this.xhr = new goog.net.XhrIo();
-        /** @type{number} */
-        this.serial = received_serial;
-
-        if (window.performance.navigation.type == 2) {
-            var e = sessionStorage.getItem("serial");
-            if (e) {
-                e = parseInt(e, 10);
-                if (e > this.serial) {
-                    this.serial = e;
-                }
-            }
-        }
-
-        /** @type{number} */
-        this.backoff = 250;
-        /** @type(H2020_Dispatcher) */
-        this.dispatcher = dispatcher;
-        /** @type{boolean} */
-        this.saw_502 = false;
-    }
-
-    waitcomplete() {
-        if (this.xhr.getStatus() == 502) {
-            this.saw_502 = true;
-        }
-
-        if (this.xhr.getStatus() == 401) {
-            var text;
-            if (this.saw_502) {
-                text = "Server connection lost."
-            } else {
-                text = "You have been logged out."
-            }
-            hunt2020.toast_manager.add_toast(
-                text + " Please reload to continue.",
-                3600000, null, "salmon", "/");
-            return;
-        }
-
-        if (this.xhr.getStatus() != 200) {
-            this.backoff = Math.min(10000, Math.floor(this.backoff*1.5));
-
-            // // XXX cancel early for development
-            // if (this.backoff > 1000) {
-            //  console.log("aborting retries");
-            //  return;
-            // }
-
-            setTimeout(goog.bind(this.xhr.send, this.xhr,
-                                 "/wait/" + waiter_id + "/" + this.serial),
-                       this.backoff);
-            return;
-        }
-
-        this.backoff = 250;
-
-        var msgs = /** @type{Array<Object>} */ (this.xhr.getResponseJson());
-        console.log("got " + msgs.length + " messages");
-        for (var i = 0; i < msgs.length; ++i) {
-            this.serial = /** @type{number} */ (msgs[i][0]);
-            var msg = /** @type{Message} */ (msgs[i][1]);
-            this.dispatcher.dispatch(msg);
-        }
-
-        sessionStorage.setItem("serial", this.serial.toString());
-
-        setTimeout(goog.bind(this.xhr.send, this.xhr,
-                             "/wait/" + waiter_id + "/" + this.serial),
-                   Math.random() * 250);
-    }
-
-    start() {
-        goog.events.listen(this.xhr, goog.net.EventType.COMPLETE,
-                           goog.bind(this.waitcomplete, this));
-        this.xhr.send("/wait/" + waiter_id + "/" + this.serial);
-    }
-}
 
 function H2020_expect_204(e) {
     var code = e.target.getStatus();
@@ -278,23 +195,6 @@ class H2020_Dispatcher {
         if (hunt2020.map_draw) {
             hunt2020.map_draw.update_map(msg);
         }
-    }
-}
-
-class H2020_TimeFormatter {
-    constructor() {
-        this.formatter = new goog.i18n.DateTimeFormat("EEE h:mm:ss aa");
-    }
-    format(t) {
-        var d = new Date(t * 1000);
-        var txt = this.formatter.format(d);
-        var l = txt.length;
-        return txt.substr(0, l-2) + txt.substr(l-2, 2).toLowerCase();
-    }
-    duration(s) {
-        var min = Math.trunc(s/60);
-        var sec = Math.trunc(s%60);
-        return "" + min + ":" + (""+sec).padStart(2, "0");
     }
 }
 
@@ -1157,53 +1057,6 @@ class H2020_AudioManager {
     }
 }
 
-class H2020_Counter {
-    constructor() {
-        this.timer = null;
-        this.els = [];
-        this.reread();
-    }
-
-    reread() {
-        if (this.timer) {
-            clearInterval(this.timer);
-            this.timer = null;
-        }
-        this.els = document.querySelectorAll(".counter");
-        if (this.els.length > 0) {
-            this.timer = setInterval(goog.bind(this.update, this), 1000);
-        }
-        this.update();
-    }
-
-    update() {
-        var dirty = false;
-        var now = (new Date()).getTime() / 1000.0;
-        for (var i = 0; i < this.els.length; ++i) {
-            var el = this.els[i];
-            var since = el.getAttribute("data-since");
-            if (since) {
-                el.innerHTML = hunt2020.time_formatter.duration(now-since);
-            } else {
-                var until = el.getAttribute("data-until");
-                if (until) {
-                    var d = until - now;
-                    if (d < 0) d = 0;
-                    el.innerHTML = hunt2020.time_formatter.duration(d);
-                } else {
-                    var expires = el.getAttribute("data-expires");
-
-                    if (expires && now > parseFloat(expires)) {
-                        el.parentNode.removeChild(el);
-                        dirty = true;
-                    }
-                }
-            }
-        }
-        if (dirty) this.reread();
-    }
-}
-
 class H2020_FastPass {
     constructor() {
         /** @type{?string} */
@@ -1360,13 +1213,18 @@ function emoji_builder(e, ev) {
 
 
 window.onload = function() {
-    hunt2020.time_formatter = new H2020_TimeFormatter();
+    hunt2020.time_formatter = new Common_TimeFormatter();
+    hunt2020.counter = new Common_Counter(hunt2020.time_formatter);
+
     hunt2020.toast_manager = new H2020_ToastManager();
     hunt2020.audio_manager = new H2020_AudioManager();
-    hunt2020.counter = new H2020_Counter();
 
     var dispatcher = new H2020_Dispatcher();
-    hunt2020.waiter = new H2020_Waiter(dispatcher);
+    hunt2020.waiter = new Common_Waiter(
+        dispatcher, "/wait",
+        function(text) {
+            hunt2020.toast_manager.add_toast(text, 36000000, null, "salmon", "/");
+        });
     hunt2020.waiter.start();
 
     // Only present on the puzzle pages.

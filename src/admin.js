@@ -4,62 +4,6 @@ goog.require("goog.events");
 goog.require("goog.events.KeyCodes");
 goog.require("goog.net.XhrIo");
 goog.require("goog.json.Serializer");
-goog.require("goog.i18n.DateTimeFormat");
-
-class A2020_Waiter {
-    constructor(dispatcher) {
-        /** @type{goog.net.XhrIo} */
-        this.xhr = new goog.net.XhrIo();
-        /** @type{number} */
-        this.serial = received_serial;
-        /** @type{number} */
-        this.backoff = 250;
-
-        /** @type(A2020_Dispatcher) */
-        this.dispatcher = dispatcher;
-    }
-
-    waitcomplete() {
-        if (this.xhr.getStatus() == 401) {
-            alert("Server connection lost; please reload.");
-            return;
-        }
-
-        if (this.xhr.getStatus() != 200) {
-            this.backoff = Math.min(10000, Math.floor(this.backoff*1.5));
-
-            // // XXX cancel early for development
-            // if (this.backoff > 1000) {
-            //  console.log("aborting retries");
-            //  return;
-            // }
-
-            setTimeout(goog.bind(this.xhr.send, this.xhr,
-                                 "/wait/" + waiter_id + "/" + this.serial),
-                       this.backoff);
-            return;
-        }
-
-        this.backoff = 250;
-
-        var msgs = /** @type{Array<Object>} */ (this.xhr.getResponseJson());
-        for (var i = 0; i < msgs.length; ++i) {
-            this.serial = /** @type{number} */ (msgs[i][0]);
-            var msg = /** @type{Message} */ (msgs[i][1]);
-            this.dispatcher.dispatch(msg);
-        }
-
-        setTimeout(goog.bind(this.xhr.send, this.xhr,
-                             "/wait/" + waiter_id + "/" + this.serial),
-                   Math.random() * 250);
-    }
-
-    start() {
-        goog.events.listen(this.xhr, goog.net.EventType.COMPLETE,
-                           goog.bind(this.waitcomplete, this));
-        this.xhr.send("/wait/" + waiter_id + "/" + this.serial);
-    }
-}
 
 class A2020_Dispatcher {
     constructor() {
@@ -346,75 +290,6 @@ class A2020_TaskQueue {
         goog.net.XhrIo.send(url, A2020_expect_204);
     }
 
-}
-
-class A2020_TimeFormatter {
-    constructor() {
-        this.formatter = new goog.i18n.DateTimeFormat("EEE h:mm:ss aa");
-    }
-    format(t) {
-        var d = new Date(t * 1000);
-        var txt = this.formatter.format(d);
-        var l = txt.length;
-        return txt.substr(0, l-2) + txt.substr(l-2, 2).toLowerCase();
-    }
-    duration(s) {
-        var hr = Math.trunc(s/3600);
-        s -= hr*3600;
-        var min = Math.trunc(s/60);
-        var sec = Math.trunc(s%60);
-        if (hr > 0) {
-            return "" + hr + ":" + (""+min).padStart(2, "0") + ":" + (""+sec).padStart(2, "0");
-        } else {
-            return "" + min + ":" + (""+sec).padStart(2, "0");
-        }
-    }
-}
-
-class A2020_Counter {
-    constructor() {
-        this.timer = null;
-        this.els = [];
-        this.reread();
-    }
-
-    reread() {
-        if (this.timer) {
-            clearInterval(this.timer);
-            this.timer = null;
-        }
-        this.els = document.querySelectorAll(".counter");
-        if (this.els.length > 0) {
-            this.timer = setInterval(goog.bind(this.update, this), 1000);
-        }
-        this.update();
-    }
-
-    update() {
-        var now = (new Date()).getTime() / 1000.0;
-        for (var i = 0; i < this.els.length; ++i) {
-            var el = this.els[i];
-            var since = el.getAttribute("data-since");
-            if (since) {
-                el.innerHTML = admin2020.time_formatter.duration(now-since);
-            } else {
-                var until = el.getAttribute("data-until");
-                if (until) {
-                    var d = until - now;
-                    if (d < 0) d = 0;
-                    el.innerHTML = admin2020.time_formatter.duration(d);
-                }
-                else {
-                    until = el.getAttribute("data-until-secs");
-                    if (until) {
-                        var d = until - now;
-                        if (d < 0) d = 0;
-                        el.innerHTML = "" + Math.round(d);
-                    }
-                }
-            }
-        }
-    }
 }
 
 class A2020_UserRoles {
@@ -937,12 +812,15 @@ var admin2020 = {
 
 window.onload = function() {
     admin2020.serializer = new goog.json.Serializer();
-    admin2020.waiter = new A2020_Waiter(new A2020_Dispatcher());
+    admin2020.waiter = new Common_Waiter(
+        new A2020_Dispatcher(), "/wait",
+        function(text) {
+            alert(text);
+        });
     admin2020.waiter.start();
 
-    admin2020.time_formatter = new A2020_TimeFormatter();
-
-    admin2020.counter = new A2020_Counter();
+    admin2020.time_formatter = new Common_TimeFormatter();
+    admin2020.counter = new Common_Counter(admin2020.time_formatter);
 
     if (goog.dom.getElement("taskqueue")) {
         admin2020.taskqueue = new A2020_TaskQueue();

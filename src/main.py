@@ -157,7 +157,7 @@ def main():
   parser.add_argument("--default_credentials",
                       help="Fill username/password field automatically.")
   parser.add_argument("--start_delay",
-                      type=int, default=30,
+                      type=int, default=None,
                       help=("Seconds to count down before starting event."))
 
   # wait proxy configuration
@@ -173,6 +173,12 @@ def main():
 
   assert options.template_path is not None, "Must specify --template_path."
   assert options.event_dir is not None, "Must specify --event_dir."
+
+  if options.start_delay is None:
+    if options.debug:
+      options.start_delay = 30
+    else:
+      options.start_delay = 3600
 
   game.OPTIONS = options
   event.OPTIONS = options
