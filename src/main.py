@@ -111,9 +111,8 @@ async def main_server(options):
   app = make_app(options, cfg["static"], autoreload=False)
 
   server = tornado.httpserver.HTTPServer(app)
-  sockets = [tornado.netutil.bind_unix_socket(options.socket_path, mode=0o666, backlog=3072)]
-  sockets.extend(tornado.netutil.bind_sockets(options.wait_proxy_port, address="localhost"))
-  server.add_sockets(sockets)
+  socket = tornado.netutil.bind_sockets(options.base_port, address="localhost")
+  server.add_sockets(socket)
 
   loop = asyncio.get_event_loop()
   loop.set_default_executor(concurrent.futures.ThreadPoolExecutor(max_workers=4))
@@ -145,9 +144,6 @@ def main():
                       help="Secret used to create session cookies.")
   parser.add_argument("-e", "--event_dir",
                       help="Path to event content.")
-  parser.add_argument("-s", "--socket_path",
-                      default="/tmp/snellen",
-                      help="Socket for proxy to reach this server.")
 
   # debugging flags
   parser.add_argument("--start_event", action="store_true",
@@ -168,7 +164,7 @@ def main():
   parser.add_argument("-w", "--wait_proxies",
                       type=int, default=2,
                       help="Number of wait proxy servers to start.")
-  parser.add_argument("--wait_proxy_port",
+  parser.add_argument("--base_port",
                       type=int, default=2020,
                       help=("Port for communicating between wait proxy "
                             "and main server"))

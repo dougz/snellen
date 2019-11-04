@@ -133,9 +133,8 @@ class Client:
       cookie_secret=self.options.cookie_secret)
 
     self.server = tornado.httpserver.HTTPServer(app)
-    socket = tornado.netutil.bind_unix_socket(f"{self.options.socket_path}_p{self.wpid}",
-                                              mode=0o666, backlog=3072)
-    self.server.add_socket(socket)
+    socket = tornado.netutil.bind_sockets(self.options.base_port + self.wpid + 1, address="localhost")
+    self.server.add_sockets(socket)
 
     print(f"proxy waiter #{self.wpid} listening")
     await self.fetch()
@@ -158,7 +157,7 @@ class Client:
       stats = ProxyTeam.team_stats()
 
       req = tornado.httpclient.HTTPRequest(
-        f"http://localhost:{self.options.wait_proxy_port}/proxywait/{self.wpid}",
+        f"http://localhost:{self.options.base_port}/proxywait/{self.wpid}",
         method="POST",
         body=json.dumps(stats),
         connect_timeout=5.0,
@@ -191,7 +190,7 @@ class Client:
       if team and expiration > time.time(): return team
 
     req = tornado.httpclient.HTTPRequest(
-      f"http://localhost:{self.options.wait_proxy_port}/checksession/{key}",
+      f"http://localhost:{self.options.base_port}/checksession/{key}",
       connect_timeout=5.0,
       request_timeout=10.0)
     try:
@@ -201,7 +200,7 @@ class Client:
         d = json.loads(reply)
         team = d["group"]
         expiration = d["expire"]
-        expiration -= WaitHandler.WAIT_TIMEOUT + WaitHandler.WAIT_SMEAR
+        expiration -= WaitHandler.WAIT_TIMEOUT
         size = d.get("size", None)
         self.session_cache[(key, wid)] = (team, expiration, size)
         return team
@@ -291,8 +290,7 @@ class ProxyTeam:
 
 
 class WaitHandler(tornado.web.RequestHandler):
-  WAIT_TIMEOUT = 600
-  WAIT_SMEAR = 60
+  WAIT_TIMEOUT = 60
 
   def initialize(self, proxy_client):
     self.proxy_client = proxy_client
@@ -305,7 +303,7 @@ class WaitHandler(tornado.web.RequestHandler):
     wid = int(wid)
     received_serial = int(received_serial)
 
-    timeout = self.WAIT_TIMEOUT + random.random() * self.WAIT_SMEAR
+    timeout = (self.WAIT_TIMEOUT-1) * random.uniform(0.9, 1.0)
 
     with team.track_wait(key):
       msgs = await team.await_new_messages(received_serial, timeout)

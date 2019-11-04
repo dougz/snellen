@@ -70,6 +70,7 @@ class H2020_Waiter {
         this.backoff = 250;
 
         var msgs = /** @type{Array<Object>} */ (this.xhr.getResponseJson());
+        console.log("got " + msgs.length + " messages");
         for (var i = 0; i < msgs.length; ++i) {
             this.serial = /** @type{number} */ (msgs[i][0]);
             var msg = /** @type{Message} */ (msgs[i][1]);
@@ -118,6 +119,7 @@ class H2020_Dispatcher {
 
     /** @param{Message} msg */
     dispatch(msg) {
+        console.log(msg);
         this.methods[msg.method](msg);
     }
 
@@ -219,7 +221,6 @@ class H2020_Dispatcher {
 
     /** @param{Message} msg */
     open(msg) {
-        console.log(msg);
         hunt2020.toast_manager.add_toast(
             "<b>" + msg.title + "</b> is now open!", 6000, null, "blue",
             "/land/" + msg.land);

@@ -72,8 +72,8 @@ class ScrumApp:
       scrum_app=self)
 
     self.server = tornado.httpserver.HTTPServer(app)
-    socket = tornado.netutil.bind_unix_socket(options.socket_path, mode=0o666, backlog=3072)
-    self.server.add_socket(socket)
+    socket = tornado.netutil.bind_sockets(options.listen_port, address="localhost")
+    self.server.add_sockets(socket)
 
   def start(self):
     ioloop = tornado.ioloop.IOLoop.current()
