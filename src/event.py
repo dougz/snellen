@@ -46,6 +46,9 @@ class LandMapPage(util.TeamPageHandler):
         css = f"{self.land.shortname}/land.css"
         if css in self.static_content:
           d["css"].append(self.static_content[css])
+    d["script"] += """
+    <script src="https://twemoji.maxcdn.com/v/latest/twemoji.min.js" crossorigin="anonymous"></script>
+    """
     return d
 
 

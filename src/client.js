@@ -929,8 +929,12 @@ class H2020_MapDraw {
             a.push(goog.dom.createDom("A", {href: it.url}, it.name));
             if (it.answer) {
                 a.push(" \u2014 ");
-                a.push(goog.dom.createDom("SPAN", {className: it.solved ? "solved" : "unsolved"},
-                                          it.answer));
+                var aa = goog.dom.createDom("SPAN", {className: it.solved ? "solved" : "unsolved"},
+                                            it.answer);
+                if (typeof twemoji !== 'undefined') {
+                    aa = twemoji.parse(aa);
+                }
+                a.push(aa);
             }
             el = goog.dom.createDom("LI", null, a);
             this.list_el.appendChild(el);
@@ -975,8 +979,11 @@ class H2020_MapDraw {
     add_title(it) {
         var ch = [it.name];
         if (it.answer) {
-            ch.push(goog.dom.createDom("B", null,
-                                       goog.dom.createTextNode(it.answer)));
+            var a = goog.dom.createDom("B", null, goog.dom.createTextNode(it.answer));
+            if (typeof twemoji !== 'undefined') {
+                a = twemoji.parse(a);
+            }
+            ch.push(a);
         }
 
         var h = goog.dom.createDom("DIV", {className: "p"}, ch);
