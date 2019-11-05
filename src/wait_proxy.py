@@ -2,6 +2,7 @@ import asyncio
 import collections
 import concurrent
 import contextlib
+import copy
 import http.client
 import json
 import random
@@ -129,7 +130,7 @@ class Client:
     self.client = tornado.httpclient.AsyncHTTPClient()
 
     app = tornado.web.Application(
-      [(r"/wait/(\d+)/(\d+)", WaitHandler, {"proxy_client": self})],
+      [(r"/wait/(\d+)/(\d+)(?:/(\d+))?", WaitHandler, {"proxy_client": self})],
       cookie_secret=self.options.cookie_secret)
 
     self.server = tornado.httpserver.HTTPServer(app)
@@ -143,8 +144,10 @@ class Client:
     # Give main server time to start up.
     await asyncio.sleep(2.0)
 
+    snapshot = {}
     while True:
-      msgs = await self.get_messages()
+      msgs = await self.get_messages(snapshot)
+      snapshot = copy.copy(ProxyTeam.team_stats())
       for team, items in msgs:
         if team == "__EXIT":
           print(f"proxy waiter #{self.wpid} exiting")
@@ -152,10 +155,8 @@ class Client:
         team = ProxyTeam.get_team(team)
         await team.send_messages(items)
 
-  async def get_messages(self):
+  async def get_messages(self, stats):
     while True:
-      stats = ProxyTeam.team_stats()
-
       req = tornado.httpclient.HTTPRequest(
         f"http://localhost:{self.options.base_port}/proxywait/{self.wpid}",
         method="POST",
@@ -200,7 +201,7 @@ class Client:
         d = json.loads(reply)
         team = d["group"]
         expiration = d["expire"]
-        expiration -= WaitHandler.WAIT_TIMEOUT
+        expiration -= WaitHandler.MAX_WAIT_TIMEOUT
         size = d.get("size", None)
         self.session_cache[(key, wid)] = (team, expiration, size)
         return team
@@ -290,20 +291,27 @@ class ProxyTeam:
 
 
 class WaitHandler(tornado.web.RequestHandler):
-  WAIT_TIMEOUT = 60
+  MIN_WAIT_TIMEOUT = 10
+  MAX_WAIT_TIMEOUT = 300
 
   def initialize(self, proxy_client):
     self.proxy_client = proxy_client
 
-  async def get(self, wid, received_serial):
+  async def get(self, wid, received_serial, suggested_timeout):
     key = self.get_secure_cookie(login.Session.COOKIE_NAME)
     team = await self.proxy_client.check_session(key, wid)
     team = ProxyTeam.get_team(team)
 
     wid = int(wid)
     received_serial = int(received_serial)
+    if suggested_timeout is None:
+      suggested_timeout = self.MAX_WAIT_TIMEOUT
+    else:
+      suggested_timeout = int(suggested_timeout)
 
-    timeout = (self.WAIT_TIMEOUT-1) * random.uniform(0.9, 1.0)
+    timeout = min(max(suggested_timeout, self.MIN_WAIT_TIMEOUT),
+                  self.MAX_WAIT_TIMEOUT)
+    timeout = timeout * random.uniform(0.9, 1.0)
 
     with team.track_wait(key):
       msgs = await team.await_new_messages(received_serial, timeout)

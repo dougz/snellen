@@ -64,7 +64,7 @@ class ScrumApp:
     self.client = tornado.httpclient.AsyncHTTPClient()
 
     if hasattr(options, "wait_url"):
-      r = f"/{options.wait_url}/(\\d+)/(\\d+)"
+      r = f"/{options.wait_url}/(\\d+)/(\\d+)(?:/\\d+)?"
       handlers = [(r, WaitHandler, {"scrum_app": self})] + handlers
     app = tornado.web.Application(
       handlers,

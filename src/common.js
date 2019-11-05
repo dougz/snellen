@@ -120,19 +120,29 @@ class Common_Waiter {
         }
 
         /** @type{number} */
-        this.backoff = 250;
+        this.retry_backoff = 250;
         /** @type{boolean} */
-        this.saw_502 = false;
+        this.saw_error = false;
+
+        /** @type{number} */
+        this.respond_deadline = 10;
+
+        goog.events.listen(this.xhr, goog.net.EventType.COMPLETE,
+                           goog.bind(this.waitcomplete, this));
+    }
+
+    start() {
+        this.send();
     }
 
     waitcomplete() {
-        if (this.xhr.getStatus() == 502) {
-            this.saw_502 = true;
+        if (this.xhr.getStatus() >= 500) {
+            this.saw_error = true;
         }
 
         if (this.xhr.getStatus() == 401) {
             var text;
-            if (this.saw_502) {
+            if (this.saw_error) {
                 text = "Server connection lost. Please reload to continue."
             } else {
                 text = "You have been logged out. Please reload to continue."
@@ -142,21 +152,12 @@ class Common_Waiter {
         }
 
         if (this.xhr.getStatus() != 200) {
-            this.backoff = Math.min(10000, Math.floor(this.backoff*1.5));
-
-            // // XXX cancel early for development
-            // if (this.backoff > 1000) {
-            //  console.log("aborting retries");
-            //  return;
-            // }
-
-            setTimeout(goog.bind(this.xhr.send, this.xhr,
-                                 this.base_url + "/" + wid + "/" + this.serial),
-                       this.backoff);
+            this.retry_backoff = Math.min(10000, Math.floor(
+                this.retry_backoff*(1.4 + Math.random() * 0.2)));
+            setTimeout(goog.bind(this.send, this), this.retry_backoff);
             return;
         }
-
-        this.backoff = 250;
+        this.retry_backoff = 250;
 
         var msgs = /** @type{Array<Object>} */ (this.xhr.getResponseJson());
         for (var i = 0; i < msgs.length; ++i) {
@@ -165,19 +166,25 @@ class Common_Waiter {
             this.dispatcher.dispatch(msg);
         }
 
+        if (msgs.length == 0) {
+            this.respond_deadline = Math.round(this.respond_deadline * 1.5);
+            if (this.respond_deadline > 300) {
+                this.respond_deadline = 300;
+            }
+        } else {
+            this.respond_deadline = 10;
+        }
+
         if (this.storage) {
             this.storage.setItem("serial", this.serial.toString());
         }
 
-        setTimeout(goog.bind(this.xhr.send, this.xhr,
-                             this.base_url + "/" + wid + "/" + this.serial),
-                   Math.random() * 250);
+        setTimeout(goog.bind(this.send, this), Math.random() * 250);
     }
 
-    start() {
-        goog.events.listen(this.xhr, goog.net.EventType.COMPLETE,
-                           goog.bind(this.waitcomplete, this));
-        this.xhr.send(this.base_url + "/" + wid + "/" + this.serial);
+    send() {
+        this.xhr.send(this.base_url + "/" + wid + "/" + this.serial +
+                      "/" + this.respond_deadline);
     }
 }
 
