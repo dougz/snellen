@@ -3,11 +3,6 @@
 
 {% block title %}Home{% end %}
 
-{% block head %}
-<script src="{{puzzle_json_url}}"></script>
-<script src="{{team_json_url}}"></script>
-{% end %}
-
 {% block content %}
 <ul id="mainmenu">
   {% if not game_state.event_start_time and user.has_role("control_event") %}

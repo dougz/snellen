@@ -833,7 +833,7 @@ window.onload = function() {
         admin2020.puzzle_select = new A2020_Autocomplete(
             el, puzzle_list,
             function(shortname) {
-                if (team_username) {
+                if (team_username && !el.getAttribute("data-top")) {
                     window.location.href = "/admin/team/" + team_username + "/puzzle/" + shortname;
                 } else {
                     window.location.href = "/admin/puzzle/" + shortname;
@@ -846,11 +846,29 @@ window.onload = function() {
         admin2020.team_select = new A2020_Autocomplete(
             el, team_list,
             function(username) {
-                if (puzzle_id) {
+                if (puzzle_id && !el.getAttribute("data-top")) {
                     window.location.href = "/admin/team/" + username + "/puzzle/" + puzzle_id;
                 } else {
                     window.location.href = "/admin/team/" + username;
                 }
+            });
+    }
+
+    el = goog.dom.getElement("navpuzzleselect");
+    if (el) {
+        admin2020.puzzle_select = new A2020_Autocomplete(
+            el, puzzle_list,
+            function(shortname) {
+                window.location.href = "/admin/puzzle/" + shortname;
+            });
+    }
+
+    el = goog.dom.getElement("navteamselect");
+    if (el) {
+        admin2020.team_select = new A2020_Autocomplete(
+            el, team_list,
+            function(username) {
+                window.location.href = "/admin/team/" + username;
             });
     }
 
