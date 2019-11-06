@@ -176,7 +176,7 @@ def explain_unicode(s):
     out.append(" ")
     out.append(hex(ord(k)))
     out.append("\u00a0(")
-    out.append(unicodedata.name(k))
+    out.append(unicodedata.name(k, "??"))
     out.append(")")
   if ascii: return None
   return "".join(out[1:])
