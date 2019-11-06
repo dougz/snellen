@@ -69,17 +69,14 @@ class MapDataHandler(util.TeamHandler):
 
 
 class EventHomePage(LandMapPage):
-  @login.required()
+  @login.required("team")
   def get(self):
-    if self.team:
-      if not game.Global.STATE.event_start_time:
-        self.render("not_started.html",
-                    open_time=game.Global.STATE.expected_start_time,
-                    css=(self.static_content["notopen.css"],))
-        return
-      self.show_map("home")
-    elif self.user:
-      self.redirect("/admin")
+    if not game.Global.STATE.event_start_time:
+      self.render("not_started.html",
+                  open_time=game.Global.STATE.expected_start_time,
+                  css=(self.static_content["notopen.css"],))
+      return
+    self.show_map("home")
 
 
 class PuzzlePage(util.TeamPageHandler):

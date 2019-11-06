@@ -122,15 +122,17 @@ class AdminUser(LoginUser):
 class Session:
   BY_KEY = {}
   SESSION_TIMEOUT = 3600   # seconds
-  COOKIE_NAME = "SESSION"
+  ADMIN_COOKIE_NAME = "ADMINSESSION"
+  PLAYER_COOKIE_NAME = "SESSION"
 
   VARZ = {
     }
 
-  def __init__(self, user=None, *caps):
+  def __init__(self, cookie_name, *caps):
+    self.cookie_name = cookie_name
     self.key = base64.urlsafe_b64encode(os.urandom(18))
     self.BY_KEY[self.key] = self
-    self.user = user
+    self.user = None
     self.pending_become = None
     self.team = None
     self.capabilities = set(caps)
@@ -141,7 +143,7 @@ class Session:
     self.msg_cv = asyncio.Condition()
 
   def set_cookie(self, req):
-    req.set_secure_cookie(self.COOKIE_NAME, self.key)
+    req.set_secure_cookie(self.cookie_name, self.key)
 
   def visit_page(self, page):
     self.pages_visited.add(page)
@@ -150,8 +152,8 @@ class Session:
       self.team.achieve_now(game.Achievement.digital_explorer, delay=1.5)
 
   @classmethod
-  def from_request(cls, req):
-    key = req.get_secure_cookie(cls.COOKIE_NAME)
+  def from_request(cls, req, cookie_name):
+    key = req.get_secure_cookie(cookie_name)
     if not key: return None
     return cls.BY_KEY.get(key)
 
@@ -161,10 +163,10 @@ class Session:
     return x
 
   @classmethod
-  def delete_from_request(cls, req):
-    key = req.get_secure_cookie(cls.COOKIE_NAME)
+  def delete_from_request(cls, req, cookie_name):
+    key = req.get_secure_cookie(cookie_name)
     if key:
-      req.clear_cookie(cls.COOKIE_NAME)
+      req.clear_cookie(cookie_name)
       session = cls.BY_KEY.pop(key, None)
       if session:
         if session.team: session.team.detach_session(session)
@@ -184,8 +186,7 @@ class required:
   def bounce(self, req):
     if self.on_fail is not None:
       raise tornado.web.HTTPError(self.on_fail)
-    session = Session(None)
-    session.set_cookie(req)
+    print(f"bounce to /login")
     if req.request.uri == "/":
       req.redirect("/login")
     else:
@@ -194,13 +195,14 @@ class required:
   def __call__(self, func):
     @functools.wraps(func)
     def wrapped_func(req, *args, **kwargs):
-      session = Session.from_request(req)
+      cookie_name = Session.PLAYER_COOKIE_NAME if self.cap == "team" else Session.ADMIN_COOKIE_NAME
+      session = Session.from_request(req, cookie_name)
       if not session:
         return self.bounce(req)
       now = time.time()
       if now > session.expires:
         print(f"session {session.key} has expired")
-        Session.delete_from_request(req)
+        Session.delete_from_request(req, cookie_name)
         return self.bounce(req)
       if self.clear_become: session.pending_become = None
       if self.cap and self.cap not in session.capabilities:
@@ -229,7 +231,6 @@ class Login(tornado.web.RequestHandler):
     cls.static_content = static_content
 
   def get(self):
-    session = Session.from_request(self)
     target = self.get_argument("redirect_to", None)
     bad_login = self.get_argument("bad_login", None)
 
@@ -251,12 +252,6 @@ class Login(tornado.web.RequestHandler):
 
 class LoginSubmit(tornado.web.RequestHandler):
   async def post(self):
-    # Find the browser's existing session or create a new one.
-    session = Session.from_request(self)
-    if not session:
-      session = Session(None)
-      session.set_cookie(self)
-
     username = self.get_argument("username", None)
     password = self.get_argument("password", None)
     target = self.get_argument("target", None)
@@ -269,6 +264,9 @@ class LoginSubmit(tornado.web.RequestHandler):
     if team:
       allowed = await team.check_password(password)
       if allowed:
+        session = Session(Session.PLAYER_COOKIE_NAME)
+        session.set_cookie(self)
+
         session.team = team
         session.capabilities = {"team"}
         session.was_admin = False
@@ -276,23 +274,26 @@ class LoginSubmit(tornado.web.RequestHandler):
         self.redirect(target or "/")
       else:
         self.redirect("/login?" + urllib.parse.urlencode(err_d))
-      return
+    else:
+      user = AdminUser.get_by_username(username)
+      if user:
+        allowed = await user.check_password(password)
+        if allowed:
+          session = Session(Session.ADMIN_COOKIE_NAME)
+          session.set_cookie(self)
 
-    user = AdminUser.get_by_username(username)
-    if user:
-      allowed = await user.check_password(password)
-      if allowed:
-        session.user = user
-        session.capabilities = user.roles
-        session.was_admin = True
-        self.redirect("/admin")
-        return
-    self.redirect("/login?" + urllib.parse.urlencode(err_d))
+          session.user = user
+          session.capabilities = user.roles
+          session.was_admin = True
+          self.redirect(target or "/admin")
+        else:
+          self.redirect("/login?" + urllib.parse.urlencode(err_d))
 
 
 class Logout(tornado.web.RequestHandler):
-  def get(self):
-    session = Session.from_request(self)
+  def get(self, admin):
+    cookie_name = Session.ADMIN_COOKIE_NAME if admin else Session.PLAYER_COOKIE_NAME
+    session = Session.from_request(self, cookie_name)
     if (session and session.team and
         game.Global.STATE.event_start_time and
         not session.was_admin):
@@ -300,7 +301,7 @@ class Logout(tornado.web.RequestHandler):
 
     # Uncookie the browser, delete the session, send them back to the
     # login page.
-    Session.delete_from_request(self)
+    Session.delete_from_request(self, cookie_name)
     self.redirect("/login")
 
 
@@ -314,6 +315,6 @@ def GetHandlers():
     (r"/login", Login),
     (r"/login_submit", LoginSubmit),
     (r"/no_access", NoAccess),
-    (r"/logout", Logout),
+    (r"/(admin/)?logout", Logout),
   ]
 

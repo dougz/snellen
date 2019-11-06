@@ -185,13 +185,16 @@ class BecomeTeamHandler(util.AdminPageHandler):
     team = self.get_team(username)
 
     if self.session.pending_become == team:
-      self.session.team = team
-      self.session.user = None
-      self.session.capabilities = {"team"}
-      self.session.was_admin = True
-      self.session.next_msg_serial = 1
       self.session.pending_become = None
-      team.attach_session(self.session)
+
+      # Create a new player session for this team.
+      session = login.Session(login.Session.PLAYER_COOKIE_NAME)
+      session.team = team
+      session.capabilities = {"team"}
+      session.was_admin = True
+      team.attach_session(session)
+      session.set_cookie(self)
+
       self.redirect("/")
     else:
       self.session.pending_become = team

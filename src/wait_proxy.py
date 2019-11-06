@@ -130,7 +130,7 @@ class Client:
     self.client = tornado.httpclient.AsyncHTTPClient()
 
     app = tornado.web.Application(
-      [(r"/wait/(\d+)/(\d+)(?:/(\d+))?", WaitHandler, {"proxy_client": self})],
+      [(r"/(admin)?wait/(\d+)/(\d+)(?:/(\d+))?", WaitHandler, {"proxy_client": self})],
       cookie_secret=self.options.cookie_secret)
 
     self.server = tornado.httpserver.HTTPServer(app)
@@ -297,8 +297,9 @@ class WaitHandler(tornado.web.RequestHandler):
   def initialize(self, proxy_client):
     self.proxy_client = proxy_client
 
-  async def get(self, wid, received_serial, suggested_timeout):
-    key = self.get_secure_cookie(login.Session.COOKIE_NAME)
+  async def get(self, admin, wid, received_serial, suggested_timeout):
+    cookie_name = login.Session.ADMIN_COOKIE_NAME if admin else login.Session.PLAYER_COOKIE_NAME
+    key = self.get_secure_cookie(cookie_name)
     team = await self.proxy_client.check_session(key, wid)
     team = ProxyTeam.get_team(team)
 
