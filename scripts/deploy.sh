@@ -115,16 +115,19 @@ done
 install -m 0644 "snellen/sys/hunt2020.target" "${root}/lib/systemd/system/hunt2020.target"
 
 ##
+## haproxy config
+##
+
+install -m 0755 -d "${root}/etc/haproxy"
+install -m 0755 "snellen/sys/haproxy.cfg" "${root}/etc/haproxy/haproxy-hunt2020.cfg"
+
+##
 ## nginx config
 ##
 
 install -m 0755 -d "${root}/etc/nginx/sites-available"
 install -m 0755 -d "${root}/etc/nginx/sites-enabled"
 install -m 0644 "snellen/sys/hunt2020" "${root}/etc/nginx/sites-available/hunt2020"
-install -m 0644 "snellen/sys/hunt2020-stub" "${root}/etc/nginx/sites-available/hunt2020-stub"
-install -m 0644 "snellen/sys/ssl_params_only" "${root}/etc/nginx/ssl_params_only"
-install -m 0755 -d "${root}/var/www/ssl"
-install -m 0644 "snellen/sys/dhparam.pem" "${root}/var/www/ssl/dhparam.pem"
 
 ##
 ## misc system tuning
@@ -157,12 +160,12 @@ cat >"$debdir"/postinst <<EOF
 
 if [[ -e /etc/nginx/sites-enabled/hunt2020 ]]; then
   echo "Leaving hunt2020 site enabled"
-elif [[ -e /etc/nginx/sites-enabled/hunt2020-stub ]]; then
-  echo "Leaving hunt2020-stub site enabled"
 else
-  ln -s ../sites-available/hunt2020-stub /etc/nginx/sites-enabled/hunt2020-stub
-  echo "Enabling hunt2020-stub site"
+  ln -s ../sites-available/hunt2020 /etc/nginx/sites-enabled/hunt2020
+  echo "Enabling hunt2020 site"
 fi
+
+systemctl reload haproxy
 
 systemctl daemon-reload
 EOF

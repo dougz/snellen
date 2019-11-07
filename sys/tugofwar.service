@@ -6,9 +6,7 @@ Type=simple
 Environment=HUNT2020_BASE=/sites/hunt2020
 Environment=PYTHONPATH=/sites/hunt2020/snellen/src
 WorkingDirectory=/sites/hunt2020/tugofwar
-ExecStartPre=mkdir -p /run/sites
-ExecStart=/sites/hunt2020/tugofwar/tugofwar.py \
-  --socket_path /run/sites/tugofwar
+ExecStart=/sites/hunt2020/tugofwar/tugofwar.py
 
 [Install]
 WantedBy=hunt2020.target

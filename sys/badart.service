@@ -6,9 +6,7 @@ Type=simple
 Environment=HUNT2020_BASE=/sites/hunt2020
 Environment=PYTHONPATH=/sites/hunt2020/snellen/src
 WorkingDirectory=/sites/hunt2020/badart
-ExecStartPre=mkdir -p /run/sites
 ExecStart=/sites/hunt2020/badart/badart.py \
-  --socket_path /run/sites/badart \
   --assets_json="${HUNT2020_BASE}/bts/puzzles/gallery_of_tomorrow.assets.json"
 
 [Install]

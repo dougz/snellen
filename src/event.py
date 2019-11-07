@@ -69,7 +69,7 @@ class MapDataHandler(util.TeamHandler):
 
 
 class EventHomePage(LandMapPage):
-  @login.required("team")
+  @login.required("team", require_start=False)
   def get(self):
     if not game.Global.STATE.event_start_time:
       self.render("not_started.html",

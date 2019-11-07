@@ -6,9 +6,7 @@ Type=simple
 Environment=HUNT2020_BASE=/sites/hunt2020
 Environment=PYTHONPATH=/sites/hunt2020/snellen/src
 WorkingDirectory=/sites/hunt2020/hat_venn_dor
-ExecStartPre=mkdir -p /run/sites
 ExecStart=/sites/hunt2020/hat_venn_dor/hat_venn_dor.py \
-  --socket_path /run/sites/hat_venn_dor \
   --assets_json="${HUNT2020_BASE}/test_event/puzzles/hat_venn_dor.assets.json"
 
 [Install]
