@@ -112,6 +112,10 @@ class TeamPageData {
         this.fastpasses;
         /** @type{Array<LogEntry>} */
         this.log;
+        /** @type{string} */
+        this.svg;
+        /** @type{number} */
+        this.score;
     }
 }
 

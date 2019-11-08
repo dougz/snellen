@@ -3,6 +3,10 @@
 
 {% block title %}Team detail{% end %}
 
+{% block head %}
+<script>var label_info = {% raw label_info %};</script>
+{% end %}
+
 {% block content %}
 
 <table class=info>
@@ -15,6 +19,10 @@
       <span id=tpfastpass></span>
       <button id=bestowfastpass class=action>Bestow PennyPass</button>
   </td></tr>
+  <tr><th>score</th><td id="tpscore"></td></tr>
+  <tr><th>progress</th>
+    <td><div id="tplandlabels"></div><div id="tpsvg"></div></td>
+  </tr>
   <tr><th class=top>open puzzles (<span id=tpopencount></span>)</th>
     <td id=tpopenlist></td>
   </tr>

@@ -506,6 +506,10 @@ class A2020_TeamPage {
         this.tpfastpass = goog.dom.getElement("tpfastpass");
         /** @type{Element} */
         this.tplog = goog.dom.getElement("tplog");
+        /** @type{Element} */
+        this.tpsvg = goog.dom.getElement("tpsvg");
+        /** @type{Element} */
+        this.tpscore = goog.dom.getElement("tpscore");
 
         var el;
 
@@ -525,6 +529,17 @@ class A2020_TeamPage {
                                                                         "note": text}));
             el.value = "";
         });
+
+        var div = goog.dom.getElement("tplandlabels");
+        for (var i = 0; i < label_info.lands.length; ++i) {
+            var land = label_info.lands[i];
+            var sp = goog.dom.createDom(
+                "SPAN",
+                {className: "landtag bblandtaghead",
+                 style: "background-color: " + land.color + "; left: " + land.left + "px;"},
+                land.symbol);
+            div.appendChild(sp);
+        }
 
         this.update();
     }
@@ -593,6 +608,9 @@ class A2020_TeamPage {
         }
 
         A2020_DisplayLog(this.tplog, data.log);
+
+        this.tpsvg.innerHTML = data.svg;
+        this.tpscore.innerHTML = "" + data.score;
 
         admin2020.counter.reread();
     }

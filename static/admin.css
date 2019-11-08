@@ -643,6 +643,13 @@ p.note {
     height: 20px;
 }
 
+#tplandlabels {
+    display: block;
+    position: relative;
+    height: 20px;
+    margin-bottom: 8px;
+}
+
 .bblandtaghead {
     position: absolute;
     bottom: 0px;

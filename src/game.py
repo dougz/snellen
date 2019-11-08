@@ -866,6 +866,7 @@ class Team(login.LoginUser):
         current_map = Land.BY_SHORTNAME[self.map_mode]
         self.cached_mapdata.pop(current_map, None)
         self.dirty_lands.add("home")
+      self.invalidate(puzzle)
       self.activity_log.add(now, puzzle.html + " solved.")
       self.admin_log.add(now, puzzle.admin_html + " solved.", team=self)
       puzzle.puzzle_log.add(now, "Solved by <b>{team.name}</b>.", team=self)

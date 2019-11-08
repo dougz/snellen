@@ -84,7 +84,8 @@ class TeamPage(util.AdminPageHandler):
   @login.required("admin")
   def get(self, username):
     self.get_team(username)
-    self.render("admin_team_page.html")
+    label_info = game.Team.bb_label_info()
+    self.render("admin_team_page.html", label_info=json.dumps({"lands": label_info}))
 
 class TeamDataHandler(util.AdminHandler):
   @login.required("admin")
@@ -109,7 +110,9 @@ class TeamDataHandler(util.AdminHandler):
 
     d = {"open_puzzles": open_list,
          "fastpasses": team.fastpasses_available,
-         "log": team.admin_log.get_data()}
+         "log": team.admin_log.get_data(),
+         "svg": team.bb_data()["svg"],
+         "score": team.score}
 
     self.set_header("Content-Type", "application/json")
     self.write(json.dumps(d))
