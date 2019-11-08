@@ -25,6 +25,8 @@ class Message {
         this.team_username;
         /** @type{?string} */
         this.puzzle_id;
+        /** @type{?string} */
+        this.favicon;
     }
 }
 

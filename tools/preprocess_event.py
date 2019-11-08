@@ -154,6 +154,18 @@ def convert_static_files(out, options, lands):
                      ("thumb3.png", f"{base}/media/thumb3.png"),
                      ("thumb4.png", f"{base}/media/thumb4.png"),
                      ("thumb5.png", f"{base}/media/thumb5.png"),
+                     ("admin_fav_green/favicon-32x32.png",
+                      f"{base}/snellen/static/admin_fav_green/favicon-32x32.png"),
+                     ("admin_fav_green/favicon-16x16.png",
+                      f"{base}/snellen/static/admin_fav_green/favicon-16x16.png"),
+                     ("admin_fav_amber/favicon-32x32.png",
+                      f"{base}/snellen/static/admin_fav_amber/favicon-32x32.png"),
+                     ("admin_fav_amber/favicon-16x16.png",
+                      f"{base}/snellen/static/admin_fav_amber/favicon-16x16.png"),
+                     ("admin_fav_red/favicon-32x32.png",
+                      f"{base}/snellen/static/admin_fav_red/favicon-32x32.png"),
+                     ("admin_fav_red/favicon-16x16.png",
+                      f"{base}/snellen/static/admin_fav_red/favicon-16x16.png"),
                      ])
 
   for fn in os.listdir(os.path.join(options.input_assets, "achievements")):

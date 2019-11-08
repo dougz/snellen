@@ -26,6 +26,11 @@ class A2020_Dispatcher {
         if (admin2020.bigboard) {
             admin2020.bigboard.refresh_taskqueue();
         }
+
+        var links = document.querySelectorAll("link[rel*='icon']");
+        for (var i = 0; i < links.length; ++i) {
+            links[i].href = msg.favicon["s" + links[i].getAttribute("sizes")];
+        }
     }
 
     /** @param{Message} msg */

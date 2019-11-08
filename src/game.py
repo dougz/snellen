@@ -122,7 +122,15 @@ class TaskQueue:
   def change(self):
     self.cached_json = None
     self.cached_bbdata = None
-    login.AdminUser.send_messages([{"method": "task_queue"}], flush=True)
+    self.cached_favicon = None
+    self.to_json()
+
+    login.AdminUser.send_messages([
+      {"method": "task_queue",
+       "favicon": {
+         "s32x32": OPTIONS.static_content[f"admin_fav_{self.cached_favicon}/favicon-32x32.png"],
+         "s16x16": OPTIONS.static_content[f"admin_fav_{self.cached_favicon}/favicon-16x16.png"]
+       }}], flush=True)
 
   def get_bb_data(self):
     if self.cached_bbdata is None:
@@ -170,6 +178,14 @@ class TaskQueue:
 
     self.cached_json = json.dumps({"queue": q})
     self.cached_bbdata = {"size": total, "claimed": claimed}
+
+    if total > 0:
+      if claimed < total:
+        self.cached_favicon = "red"
+      else:
+        self.cached_favicon = "amber"
+    else:
+      self.cached_favicon = "green"
 
     return self.cached_json
 
