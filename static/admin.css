@@ -365,7 +365,7 @@ body > p, body > h2 {
 #tpphinthistory dd {
     margin-top: 4px;
     font-family: 'Inconsolata', sans-serif;
-    white-space: pre;
+    white-space: pre-wrap;
 }
 
 #tppreplycontainer {

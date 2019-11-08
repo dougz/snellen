@@ -361,7 +361,7 @@ a:hover > .landtip {
 #hinthistory dd {
     margin: 8px 0 16px 32px;
     font-family: 'Inconsolata', monospace;
-    white-space: pre;
+    white-space: pre-wrap;
 }
 
 #hintentry {
