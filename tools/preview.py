@@ -123,6 +123,7 @@ class UploadHandler(tornado.web.RequestHandler):
                 "safari": "Safari Adventure",
                 "cascade": "Cascade Bay",
                 "witch": "Witch's Hollow",
+                "canyon": "Cactus Canyon",
                 }
 
   def initialize(self, options):
