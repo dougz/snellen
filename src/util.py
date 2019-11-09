@@ -114,24 +114,26 @@ class AdminPageHandler(AdminHandler):
       d["expected_launch"] = st.expected_start_time
     d["format_duration"] = format_duration
 
-    if self.application.settings.get("debug"):
-      d["script"] = ("""<script src="/closure/goog/base.js"></script>\n"""
-                     """<script src="/debug/snellen/src/common.js"></script>"""
-                     """<script src="/debug/snellen/src/twemoji.js"></script>"""
-                     """<script src="/debug/snellen/src/admin.js"></script>""")
-    else:
-      d["script"] = f"""<script src="{self.static_content["admin-compiled.js"]}"></script>"""
-
-    d["css"] = self.static_content["admin.css"]
-    d["home"] = self.static_content["home.svg"]
-
     script = ["<script>"]
     script.append(f"""var wid = {wid};\n""")
     script.append(f"""var received_serial = {serial};""")
     script.append(f"""var eurl = "{self.static_content["emoji"]}";\n""")
     script.append(f"""var edb = "{self.static_content["emoji.json"]}";\n""")
     script.append("</script>")
-    d["script"] += "".join(script)
+
+
+    if self.application.settings.get("debug"):
+      script.append("""<script src="/closure/goog/base.js"></script>\n"""
+                    """<script src="/debug/snellen/src/common.js"></script>"""
+                    """<script src="/debug/snellen/src/twemoji.js"></script>"""
+                    """<script src="/debug/snellen/src/admin.js"></script>""")
+    else:
+      script.append(f"""<script src="{self.static_content["admin-compiled.js"]}"></script>""")
+
+    d["css"] = self.static_content["admin.css"]
+    d["home"] = self.static_content["home.svg"]
+
+    d["script"] = "".join(script)
 
     d["json_data"] = None
     d["team_username"] = (f'"{self.pageteam.username}"') if self.pageteam else "null"

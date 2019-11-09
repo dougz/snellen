@@ -150,8 +150,6 @@ class A2020_TeamPuzzlePage {
             this.tppsolve.innerHTML = "\u2014";
         }
 
-        console.log(data);
-        console.log(this.replycontainer);
         if (data.hints_open) {
             this.replycontainer.style.display = "initial";
             this.for_ops.style.display = "block";
@@ -191,6 +189,8 @@ class A2020_TeamPuzzlePage {
         }
 
         A2020_DisplayLog(this.tpplog, data.log);
+
+        twemoji.parse(goog.dom.getElement("content"));
 
         admin2020.counter.reread();
     }
@@ -612,6 +612,8 @@ class A2020_TeamPage {
         this.tpsvg.innerHTML = data.svg;
         this.tpscore.innerHTML = "" + data.score;
 
+        twemoji.parse(goog.dom.getElement("content"));
+
         admin2020.counter.reread();
     }
 }
@@ -680,6 +682,8 @@ class A2020_PuzzlePage {
         }
 
         A2020_DisplayLog(this.pplog, data.log);
+
+        twemoji.parse(goog.dom.getElement("content"));
 
         admin2020.counter.reread();
     }

@@ -51,8 +51,10 @@
     <td>
       {% for i, (a, r) in enumerate(sorted(puzzle.incorrect_responses.items())) %}
       <p>
-	<span class="mono b">{{a}}</span> &mdash;
+	<span class="mono b">{{a}}</span>
+        &mdash;
 	{% if r is None %}<i>default</i> (Keep going&hellip;){% else %}{% raw r %}{% end %}
+        {% if a in puzzle.explanations %}<br/><span class="explain">{{puzzle.explanations[a]}}</span>{% end %}
       </p>
       {% end %}
     </td>
