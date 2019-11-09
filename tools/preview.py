@@ -124,6 +124,7 @@ class UploadHandler(tornado.web.RequestHandler):
                 "cascade": "Cascade Bay",
                 "witch": "Witch's Hollow",
                 "canyon": "Cactus Canyon",
+                "yesterday": "YesterdayLand",
                 }
 
   def initialize(self, options):
