@@ -237,6 +237,8 @@ def main():
   output["static"] = {}
   convert_static_files(output["static"], options, output["maps"].keys())
 
+  output["static"]["emoji"] = f"https://{options.public_host}/emoji/"
+
   with open(output_file, "w") as f:
     json.dump(output, f, sort_keys=True, indent=2)
 

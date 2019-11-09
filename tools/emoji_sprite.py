@@ -17,14 +17,23 @@ def main():
 
   parser = argparse.ArgumentParser(
     description="Join emoji image into sprite.")
-  parser.add_argument("--cache_dir",
-                      default=os.path.join(os.getenv("HUNT2020_BASE"),
-                                           "snellen/assets/emoji_cache"),
-                      help="Directory for caching downloaded source emoji.")
+  parser.add_argument("--base_dir", help="Directory with inputs to process.")
+  parser.add_argument("--overlay_dir", help="Directory to receive output.")
   parser.add_argument("input_json")
   parser.add_argument("output_json")
   parser.add_argument("output_png")
   options = parser.parse_args()
+
+  hunt2020_base = os.getenv("HUNT2020_BASE")
+  assert hunt2020_base
+
+  if not options.base_dir:
+    options.base_dir = os.path.join(hunt2020_base, "twemoji/assets/72x72")
+  if not options.overlay_dir:
+    options.overlay_dir = os.path.join(hunt2020_base, "snellen/static/overlay")
+
+  all_files = set(os.listdir(options.base_dir))
+  overlay_files = set(os.listdir(options.overlay_dir))
 
   with open(options.input_json) as f:
     in_json = json.load(f)
@@ -53,30 +62,21 @@ def main():
     outemojis = []
     out_json.append((groupname, outemojis))
 
-    for title, text, url in emojis:
+    for title, text, _ in emojis:
       if title.endswith(" suit"): continue
 
-      if not url:
-        print(f"missing url for: {title}")
-        continue
-      fn = os.path.basename(url)
-      cache_path = os.path.join(options.cache_dir, fn)
-      if os.path.exists(cache_path):
-        with open(cache_path, "rb") as f:
-          data = f.read()
+      fn = "-".join(f"{ord(k):x}" for k in text) + ".png"
+      print(text, fn)
+
+      if fn in overlay_files:
+        src_fn = os.path.join(options.overlay_dir, fn)
+      elif fn in all_files:
+        src_fn = os.path.join(options.base_dir, fn)
       else:
-        print(f"  fetching {url}")
-        r = requests.get(url)
-        data = r.content
-        if r.status_code == 404:
-          print(f"skipping {title}")
-          data = b""
-        else:
-          r.raise_for_status()
-        with open(cache_path, "wb") as f:
-          f.write(data)
-      if not data: continue
-      icon = Image.open(io.BytesIO(data))
+        print(f"No input {fn}.")
+        continue
+
+      icon = Image.open(src_fn)
 
       icon = icon.convert("RGBA")
       icon = icon.resize((OUTSIZE, OUTSIZE), Image.LANCZOS)

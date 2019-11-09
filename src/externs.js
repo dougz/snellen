@@ -13,6 +13,9 @@ var open_time;
 // emoji database URL
 /** @type{?string} */
 var edb;
+// emoji images base URL
+/** @type{?string} */
+var eurl;
 
 /** @type{?Object} */
 var initial_json;

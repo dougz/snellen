@@ -36,7 +36,7 @@ CONTENT_TYPES = {
   ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 }
 
-object_cache = set()
+object_cache = {}
 
 def load_object_cache(bucket, creds):
   page_token = None
@@ -55,10 +55,12 @@ def load_object_cache(bucket, creds):
     d = json.loads(r.content)
     if "items" not in d: break
     for i in d["items"]:
-      object_cache.add(i["name"])
+      object_cache[i["name"]] = i["md5Hash"]
 
     page_token = d.get("nextPageToken")
     if not page_token: break
+
+  return object_cache
 
 
 def upload_object(source, bucket, path, content_type, data, creds, update=False):

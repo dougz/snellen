@@ -17,6 +17,13 @@ var received_serial;
 /** @type{Storage} */
 var sessionStorage;
 
+// emoji database URL
+/** @type{?string} */
+var edb;
+// emoji images base URL
+/** @type{?string} */
+var eurl;
+
 class Message {
     constructor() {
         /** @type{string} */

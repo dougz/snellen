@@ -58,11 +58,15 @@ async def main_server(options):
     cfg = json.load(f)
 
   static_content = {}
-  for key, (url, path) in cfg["static"].items():
-    if options.debug:
-      static_content[key] = "/debug/" + path
+  for key, v in cfg["static"].items():
+    if isinstance(v, str):
+      static_content[key] = v
     else:
-      static_content[key] = url
+      url, path = v
+      if options.debug:
+        static_content[key] = "/debug/" + path
+      else:
+        static_content[key] = url
 
   for shortname, d in cfg["maps"].items():
     game.Land(shortname, d, options.event_dir)

@@ -46,9 +46,6 @@ class LandMapPage(util.TeamPageHandler):
         css = f"{self.land.shortname}/land.css"
         if css in self.static_content:
           d["css"].append(self.static_content[css])
-    d["script"] += """
-    <script src="https://twemoji.maxcdn.com/v/latest/twemoji.min.js" crossorigin="anonymous"></script>
-    """
     return d
 
 
@@ -112,13 +109,6 @@ class PuzzlePage(util.TeamPageHandler):
     css = f"{land.shortname}/land.css"
     if css in self.static_content:
       d["css"].append(self.static_content[css])
-    if self.puzzle.emojify:
-      # TODO: consider hosting (or implementing) twemoji locally
-      d["script"] += """
-        <script src="https://twemoji.maxcdn.com/v/latest/twemoji.min.js" crossorigin="anonymous"></script>
-        """
-      d["script"] += f"""<script>var edb = "{self.static_content["emoji.json"]}";</script>"""
-
     return d
 
 
