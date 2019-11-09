@@ -164,11 +164,13 @@ class Puzzle:
               self.incorrect_responses[k] = v
             elif isinstance(v, dict):
               if set(v.keys()) == {"reply", "task"}:
-                self.incorrect_responses[k] = [v["reply"], v["task"]]
+                self.incorrect_responses[k] = [v["reply"], v["task"], None]
+              elif set(v.keys()) == {"reply", "task", "task_url"}:
+                self.incorrect_responses[k] = [v["reply"], v["task"], v["task_url"]]
               else:
-                errors.append("Bad response to '{k}'.")
+                errors.append(f"Bad response to '{k}'.")
             else:
-              errors.append("Bad response to '{k}'.")
+              errors.append(f"Bad response to '{k}'.")
 
     if errors: raise PuzzleErrors(errors)
 
@@ -180,8 +182,22 @@ class Puzzle:
       if k.startswith("solution/"):
         restricted_asset_map[k] = None
 
-    self.for_ops_head, self.for_ops_body = self.parse_html(
-      z, strip_shortname, errors, Puzzle.FOR_OPS_HTML, restricted_asset_map)
+    if "for_ops_url" in y:
+      self.for_ops_url = y["for_ops_url"]
+    else:
+      soup = self.make_soup(z, strip_shortname, Puzzle.FOR_OPS_HTML)
+      ok = True
+      for t in soup.find_all():
+        if t.name not in {"html", "head", "body", "a"}:
+          ok = False
+          break
+      if ok:
+        ok = (len(soup.find_all("a")) == 1)
+      if not ok:
+        errors.append("Replace for_ops.html with a for_ops_url.")
+      else:
+        a = soup.find_all("a")[0]
+        self.for_ops_url = a["href"]
 
     if has_static:
       self.static_puzzle_head, self.static_puzzle_body = self.parse_html(
@@ -262,15 +278,19 @@ class Puzzle:
             else:
               errors.append(f"{fn} can't refer to {v}")
 
-
-  def parse_html(self, z, strip_shortname, errors, fn, asset_map):
+  def make_soup(self, z, strip_shortname, fn):
     if strip_shortname:
       zfn = strip_shortname + fn
     else:
       zfn = fn
     try:
-      soup = bs4.BeautifulSoup(z.read(zfn).decode("utf-8"), features="html5lib")
+      return bs4.BeautifulSoup(z.read(zfn).decode("utf-8"), features="html5lib")
     except KeyError:
+      return None
+
+  def parse_html(self, z, strip_shortname, errors, fn, asset_map):
+    soup = self.make_soup(z, strip_shortname, fn)
+    if not soup:
       errors.append(f"Required file {fn} is missing.")
       return None, None
     self.rewrite_html(soup, asset_map, fn, errors)
@@ -286,7 +306,7 @@ class Puzzle:
     for n in ("shortname title oncall puzzletron_id max_queued "
               "answers incorrect_responses emojify authors "
               "zip_version "
-              "html_head html_body for_ops_head for_ops_body").split():
+              "html_head html_body for_ops_url").split():
       v = getattr(self, n)
       if v is not None: d[n] = v
     return d

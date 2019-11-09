@@ -228,15 +228,7 @@ class UploadHandler(tornado.web.RequestHandler):
 
       p.puzzle_url = f"https://{self.options.public_host}/{path}"
 
-      path = f"html/{p.prefix}/for_ops.html"
-      puzzle_html = self.render_string("preview_for_ops.html",
-                                       **d)
-      common.upload_object("for_ops.html",
-                           self.options.bucket, path,
-                           common.CONTENT_TYPES[".html"],
-                           puzzle_html, self.options.credentials, update=True)
-
-      p.for_ops_url = f"https://{self.options.public_host}/{path}"
+      p.for_ops_url = p.pp.for_ops_url
 
       path = f"html/{p.prefix}/meta.html"
       meta_html = self.render_string("meta.html",
