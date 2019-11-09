@@ -76,6 +76,8 @@ def main():
         print(f"No input {fn}.")
         continue
 
+      if os.stat(src_fn).st_size == 0: continue
+
       icon = Image.open(src_fn)
 
       icon = icon.convert("RGBA")

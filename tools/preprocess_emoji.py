@@ -67,13 +67,17 @@ def main():
 
   already = common.load_object_cache(options.bucket, options.credentials)
 
-  all_files = os.listdir(options.base_dir)
+  base_files = set(os.listdir(options.base_dir))
   overlay_files = set(os.listdir(options.overlay_dir))
+
+  all_files = base_files | overlay_files
 
   skipped = 0
   for fn in all_files:
     if fn in overlay_files:
       src_path = os.path.join(options.overlay_dir, fn)
+      if os.stat(src_path).st_size == 0:
+        src_path = os.path.join(options.base_dir, fn)
     else:
       src_path = os.path.join(options.base_dir, fn)
     tgt_path = os.path.join("emoji", fn)

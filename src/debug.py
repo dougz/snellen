@@ -47,7 +47,7 @@ class DebugPathHandler(tornado.web.RequestHandler):
     _, ext = os.path.splitext(path)
     mime = CONTENT_TYPES[ext]
     self.set_header("Content-Type", mime)
-    print(f"DEBUG ACCESS: {base}/{path}")
+    #print(f"DEBUG ACCESS: {base}/{path}")
     with open(f"{base}/{path}", "rb") as f:
       data = f.read()
     if ext == ".css":

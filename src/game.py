@@ -311,6 +311,11 @@ class Submission:
   def check_answer(self, now):
     self.submit_time = now
     answer = self.answer
+    print(util.explain_unicode(answer))
+    for k in self.puzzle.answers:
+      print(" a: " + util.explain_unicode(k))
+    for k in self.puzzle.incorrect_responses:
+      print(" i: " + util.explain_unicode(k))
     if answer in self.puzzle.answers:
       self.state = self.CORRECT
       self.extra_response = None
