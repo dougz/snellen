@@ -59,11 +59,12 @@ class HintMessage:
     return d
 
 class Task:
-  def __init__(self, when, team, taskname, text):
+  def __init__(self, when, team, taskname, text, url):
     self.when = int(when)
     self.team = team
     self.taskname = taskname
     self.text = text
+    self.url = url
     self.key = "t-" + team.username + "-" + taskname
     self.claim = None
 
@@ -113,8 +114,8 @@ class TaskQueue:
     self.states.discard(puzzle_state)
     self.change()
 
-  def add_task(self, when, team, taskname, text):
-    task = Task(when, team, taskname, text)
+  def add_task(self, when, team, taskname, text, url):
+    task = Task(when, team, taskname, text, url)
     if task.key in self.tasks: return  # dups
     self.tasks[task.key] = task
     self.change()
@@ -164,6 +165,7 @@ class TaskQueue:
     for task in self.tasks.values():
       d = {"team": task.team.name,
            "what": task.text,
+           "target": task.url,
            "when": task.when,
            "claimant": task.claim.fullname if task.claim else None,
            "key": task.key,
@@ -311,11 +313,6 @@ class Submission:
   def check_answer(self, now):
     self.submit_time = now
     answer = self.answer
-    print(util.explain_unicode(answer))
-    for k in self.puzzle.answers:
-      print(" a: " + util.explain_unicode(k))
-    for k in self.puzzle.incorrect_responses:
-      print(" i: " + util.explain_unicode(k))
     if answer in self.puzzle.answers:
       self.state = self.CORRECT
       self.extra_response = None
@@ -327,7 +324,8 @@ class Submission:
       elif isinstance(response, (list, tuple)):
         self.state = self.REQUESTED
         self.extra_response = response[0]
-        Global.STATE.add_task(now, self.team.username, answer.lower(), response[1])
+        Global.STATE.add_task(now, self.team.username, answer.lower(),
+                              response[1], response[2])
       elif response is None:
         self.state = self.INCORRECT
         self.team.streak = []
@@ -1418,8 +1416,7 @@ class Puzzle:
       self.html_body = f"<p>The answers to this placeholder puzzle are the first {count} letters of the NATO phonetic alphabet.</p>"
 
     self.html_head = None
-    self.for_ops_head = None
-    self.for_ops_body = "<p>Teams should not need hints on this one.</p>"
+    self.for_ops_url = "https://isotropic.org/"
 
     self.post_init(land, icon)
     return self
@@ -1454,8 +1451,7 @@ class Puzzle:
 
     self.html_head = j.get("html_head")
     self.html_body = j["html_body"]
-    self.for_ops_head = j.get("for_ops_head")
-    self.for_ops_body = j.get("for_ops_body")
+    self.for_ops_url = j.get("for_ops_url", None)
 
     self.post_init(land, icon)
     return self
@@ -1585,10 +1581,10 @@ class Global:
       team.compute_puzzle_beam(now)
       await team.flush_messages()
 
-  def add_task(self, now, team, taskname, text):
+  def add_task(self, now, team, taskname, text, url):
     team = Team.get_by_username(team)
     if not team: return
-    self.task_queue.add_task(now, team, taskname, text)
+    self.task_queue.add_task(now, team, taskname, text, url)
 
   @save_state
   def claim_task(self, now, task_key, username):

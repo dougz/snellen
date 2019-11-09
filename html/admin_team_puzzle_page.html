@@ -1,11 +1,6 @@
 {% extends "admin_base.html" %}
 {% block colorscheme %}color-detail{% end %}
 
-{% block head %}
-{% if puzzle.for_ops_head %}{% raw puzzle.for_ops_head %}{% end %}
-{% end %}
-
-
 {% block title %}Team &times; Puzzle detail{% end %}
 
 {% block content %}
@@ -20,6 +15,14 @@
   <tr><th>state</th><td id="tppstate"></td></tr>
   <tr><th>open time</th><td id="tppopen"></td></tr>
   <tr><th>solve time</th><td id="tppsolve"></td></tr>
+  <tr><th>hunt ops info</th><td>
+      {% if puzzle.for_ops_url %}
+      <a href="{{puzzle.for_ops_url}}">link</a>
+      {% else %}
+      <p>No hunt ops information for this puzzle!</p>
+      {% end %}
+    </td>
+  </tr>
 </table>
 
 <h2>Submission log</h2>
@@ -39,10 +42,6 @@
   <p class=note>All replies appear to teams as coming from "Hunt HQ",
   not you personally.  Teams can't see which HQ staffer wrote any
   reply.<p>
-</div>
-
-<div id="for_ops">
-  {% raw puzzle.for_ops_body %}
 </div>
 
 {% end %}

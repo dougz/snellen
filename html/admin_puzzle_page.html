@@ -1,10 +1,6 @@
 {% extends "admin_base.html" %}
 {% block colorscheme %}color-puzzle{% end %}
 
-{% block head %}
-{% if puzzle.for_ops_head %}{% raw puzzle.for_ops_head %}{% end %}
-{% end %}
-
 {% block title %}Puzzle detail{% end %}
 
 {% block content %}
@@ -79,11 +75,16 @@
       </div>
     </td>
   </tr>
+  <tr><th>hunt ops info</th><td>
+      {% if puzzle.for_ops_url %}
+      <a href="{{puzzle.for_ops_url}}">link</a>
+      {% else %}
+      <p>No hunt ops information for this puzzle!</p>
+      {% end %}
+    </td>
+  </tr>
 </table>
 
-<div id="for_ops">
-  {% raw puzzle.for_ops_body %}
-</div>
 
 <h2>Puzzle activity log</h2>
 <table id="pplog"></table>
