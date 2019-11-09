@@ -52,6 +52,12 @@ class A2020_Dispatcher {
     }
 }
 
+class A2020_PuzzleListPage {
+    constructor() {
+        twemoji.parse(goog.dom.getElement("content"));
+        console.log("hello, world");
+    }
+}
 
 class A2020_TeamPuzzlePage {
     constructor() {
@@ -835,6 +841,7 @@ var admin2020 = {
     puzzle_page: null,
     team_puzzle_page: null,
     server_page: null,
+    puzzle_list_page: null,
 }
 
 window.onload = function() {
@@ -919,6 +926,10 @@ window.onload = function() {
     }
     if (puzzle_id && team_username) {
         admin2020.team_puzzle_page = new A2020_TeamPuzzlePage();
+    }
+
+    if (goog.dom.getElement("pllist")) {
+        admin2020.puzzle_list_page = new A2020_PuzzleListPage();
     }
 }
 

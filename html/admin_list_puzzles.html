@@ -5,12 +5,19 @@
 
 {% block content %}
 
-<ul>
+<ul id="pllist">
   {% for land in lands %}
   <h3>{{land.title}} <span class="landtag" style="background-color: {{land.color}}">{{land.symbol}}</span></h3>
   <ul>
     {% for p in land.all_puzzles %}
-    <li><span class=mono>{{p.shortname}}</span>: <a href="/admin/puzzle/{{p.shortname}}">{{p.title}}</a></li>
+    <li><span class=mono>{{p.shortname}}</span>: <a href="/admin/puzzle/{{p.shortname}}">{{p.title}}</a><br>
+      {% set answers = sorted(list(p.display_answers.values())) %}
+      {% for i, a in enumerate(answers) %}
+      {% if i > 0 %}<br/>{% end %}
+      <b>{{a}}</b>
+      {% if a in p.explanations %}<br/><span class="explain">{{p.explanations[a]}}</span>{% end %}
+      {% end %}
+    </li>
     {% end %}
   </ul>
   {% end %}
