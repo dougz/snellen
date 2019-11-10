@@ -65,7 +65,7 @@ class MapDataHandler(util.TeamHandler):
     self.write(mapdata)
 
 
-class EventHomePage(LandMapPage):
+class PlayerHomePage(LandMapPage):
   @login.required("team", require_start=False)
   def get(self):
     if not game.Global.STATE.event_start_time:
@@ -152,6 +152,17 @@ class AchievementDataHandler(util.TeamHandler):
     ach = [{"name": a.name, "subtitle": a.subtitle} for a in self.team.achievements]
     self.set_header("Content-Type", "application/json")
     self.write(json.dumps(ach))
+
+class EventsPage(util.TeamPageHandler):
+  @login.required("team")
+  def get(self):
+    self.session.visit_page("events")
+    self.render("events.html")
+
+class EventsDataHandler(util.TeamHandler):
+  @login.required("team")
+  def get(self):
+    self.write(json.dumps({}))
 
 class FastPassPage(util.TeamPageHandler):
   @login.required("team")
@@ -267,10 +278,11 @@ class HintHistoryHandler(util.TeamHandler):
 
 def GetHandlers():
   handlers = [
-    (r"/", EventHomePage),
+    (r"/", PlayerHomePage),
     (r"/log", ActivityLogPage),
     (r"/videos", VideosPage),
     (r"/pins", AchievementPage),
+    (r"/events", EventsPage),
     (r"/pennypass$", FastPassPage),
     (r"/health_and_safety", HealthAndSafetyPage),
     (r"/land/([a-z0-9_]+)", LandMapPage),

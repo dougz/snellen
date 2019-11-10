@@ -198,8 +198,6 @@ def main():
   parser.add_argument("--public_host", help="Hostname for assets in urls.")
   parser.add_argument("--skip_upload", action="store_true",
                       help="Don't actually upload to GCS.")
-  parser.add_argument("--static_only", action="store_true",
-                      help="Don't process map; just upload static assets.")
   options = parser.parse_args()
 
   assert os.getenv("HUNT2020_BASE")
@@ -217,27 +215,26 @@ def main():
     y = yaml.safe_load(f)
 
   for land in y.keys():
+    if land == "events": continue
     print(f"Loading assets/{land}/land.yaml...")
     with open(os.path.join(options.input_dir, "assets", land, "land.yaml")) as f:
       y[land].update(yaml.safe_load(f))
 
   output_file = os.path.join(options.output_dir, "map_config.json")
 
-  if options.static_only:
-    with open(output_file) as f:
-      output = json.load(f)
-  else:
-    output = {}
+  output = {}
 
-  if not options.static_only:
-    output["maps"] = {}
-    for shortname, d in y.items():
-      output["maps"][shortname] = convert_map(shortname, d, options)
+  output["maps"] = {}
+  for shortname, d in y.items():
+    if shortname == "events": continue
+    output["maps"][shortname] = convert_map(shortname, d, options)
 
   output["static"] = {}
   convert_static_files(output["static"], options, output["maps"].keys())
 
   output["static"]["emoji"] = f"https://{options.public_host}/emoji/"
+
+  output["events"] = y.get("events", {})
 
   with open(output_file, "w") as f:
     json.dump(output, f, sort_keys=True, indent=2)

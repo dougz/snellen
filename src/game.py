@@ -1744,3 +1744,24 @@ class Achievement:
     Achievement("come_back",
                 "Come back!",
                 "Log out of the hunt server before the coin is found.")
+
+class Event:
+  ALL_EVENTS = []
+
+  def __init__(self, shortname, d):
+    self.shortname = shortname
+    self.title = d["title"]
+    self.location = d["location"]
+    self.display_answer = d["answer"]
+    self.answer = Puzzle.canonicalize_answer(self.display_answer)
+    self.order = d["order"]
+    self.text = d["text"]
+
+    self.ALL_EVENTS.append(self)
+
+  @classmethod
+  def post_init(cls):
+    cls.ALL_EVENTS.sort(key=lambda ev: ev.order)
+
+
+
