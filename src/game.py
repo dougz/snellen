@@ -1447,6 +1447,9 @@ class Puzzle:
     self.zip_version = j.get("zip_version")
     self.max_queued = j.get("max_queued", self.DEFAULT_MAX_QUEUED)
 
+    if "incorrect_responses" in j and "responses" not in j:
+      j["responses"] = j.pop("incorrect_responses")
+
     self.answers = set()
     self.display_answers = {}
     for a in j["answers"]:
