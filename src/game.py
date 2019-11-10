@@ -322,6 +322,7 @@ class Submission:
         # alternate correct answer
         self.state = self.CORRECT
         self.extra_response = None
+        answer = self.puzzle.answers[0]
       elif isinstance(response, str):
         # partial-progress response
         self.state = self.PARTIAL

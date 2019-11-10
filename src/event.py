@@ -192,12 +192,6 @@ class SubmitHandler(util.TeamHandler):
   @login.required("team", on_fail=http.client.UNAUTHORIZED)
   def post(self):
     answer = self.args["answer"]
-
-    # Worst-case option for entering a single-emoji answer: enter the
-    # code point preceded by "U+" (eg, "U+1F460").
-    answer = re.sub(r"[Uu]\+([0-9a-fA-F]{4,5})",
-                    lambda m: chr(int(m.group(1), 16)), answer)
-
     shortname = self.args["puzzle_id"]
     puzzle = game.Puzzle.get_by_shortname(shortname)
     if not puzzle: raise tornado.web.HTTPError(http.client.NOT_FOUND)
