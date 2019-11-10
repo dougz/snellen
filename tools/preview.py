@@ -271,6 +271,7 @@ class UploadHandler(tornado.web.RequestHandler):
       for i, err in enumerate(e.errors):
         data.append(f"{i+1}: {err}")
       data = "\n".join(data)
+      data = data.encode("utf-8")
 
       common.upload_object("errors",
                            self.options.bucket, path,

@@ -460,6 +460,7 @@ class H2020_SubmitPanel {
 
     /** @param{SubmissionHistory} response */
     render_history(response) {
+        console.log(response);
         if (response.total) {
             var t = response.total;
             var c = response.correct;
@@ -482,7 +483,7 @@ class H2020_SubmitPanel {
             this.table.appendChild(
                 goog.dom.createDom("TR", null,
                                    goog.dom.createDom("TD", {className: "submit-empty", colSpan: 3},
-                                                      "No submissions for this puzzle.")));
+                                                      "Nothing submitted yet.")));
         }
 
         var cancelsub = function(sub) {
@@ -1234,23 +1235,26 @@ window.onload = function() {
         });
     hunt2020.waiter.start();
 
-    // Only present on the puzzle pages.
+    // Present on the puzzle pages and the events page.
     var a = goog.dom.getElement("submit");
     if (a) {
         hunt2020.submit_panel = new H2020_SubmitPanel();
         goog.events.listen(a, goog.events.EventType.CLICK,
                            goog.bind(hunt2020.submit_panel.toggle, hunt2020.submit_panel));
 
+        var e = goog.dom.getElement("emoji-picker-body");
+        if (e) {
+            goog.net.XhrIo.send(edb, goog.bind(emoji_builder, null, e));
+        }
+    }
+
+    if (puzzle_id && puzzle_id != "events") {
         a = goog.dom.getElement("hinttoggle");
         hunt2020.hint_panel = new H2020_HintPanel();
         goog.events.listen(a, goog.events.EventType.CLICK,
                            goog.bind(hunt2020.hint_panel.toggle, hunt2020.hint_panel));
 
-        var e = goog.dom.getElement("emoji-picker-body");
-        if (e) {
-            goog.net.XhrIo.send(edb, goog.bind(emoji_builder, null, e));
-        }
-        if (puzzle_id && puzzle_init) puzzle_init();
+        if (puzzle_init) puzzle_init();
     }
 
     // Only present on the map pages.

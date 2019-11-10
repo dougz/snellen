@@ -366,6 +366,8 @@ class Submission:
 
     if self.state == self.CORRECT:
       self.puzzle_state.answers_found.add(answer)
+      fn = getattr(self.puzzle, "on_correct_answer", None)
+      if fn: fn(now, self.team)
       if self.puzzle_state.answers_found == self.puzzle.answers:
         self.team.solve_puzzle(self.puzzle, now)
       else:
@@ -797,6 +799,9 @@ class Team(login.LoginUser):
       await asyncio.sleep(1.0)
 
   @save_state
+  def bestow_fastpass(self, now, expire):
+    self.receive_fastpass(now, expire)
+
   def receive_fastpass(self, now, expire):
     self.fastpasses_available.append(now + expire)
     self.fastpasses_available.sort()
@@ -849,10 +854,11 @@ class Team(login.LoginUser):
       state.state = state.OPEN
       state.open_time = now
       self.open_puzzles.add(state)
-      self.activity_log.add(now, puzzle.html + " opened.")
-      self.admin_log.add(now, puzzle.admin_html + " opened.", team=self)
-      self.dirty_lands.add(puzzle.land.shortname)
-      self.cached_mapdata.pop(puzzle.land, None)
+      if puzzle.land.land_order < 1000:
+        self.activity_log.add(now, puzzle.html + " opened.")
+        self.admin_log.add(now, puzzle.admin_html + " opened.", team=self)
+        self.dirty_lands.add(puzzle.land.shortname)
+        self.cached_mapdata.pop(puzzle.land, None)
 
   def solve_puzzle(self, puzzle, now):
     state = self.puzzle_state[puzzle]
@@ -1126,6 +1132,7 @@ class Team(login.LoginUser):
 
     for st in self.puzzle_state.values():
       if st.state != PuzzleState.CLOSED:
+        if st.puzzle.land.land_order >= 1000: continue
         if st.puzzle.land not in self.open_lands:
           self.open_lands[st.puzzle.land] = now
           self.sorted_open_lands = [land for land in self.open_lands.keys() if land.land_order]
@@ -1385,7 +1392,6 @@ class Puzzle:
       self.title = pstr
     self.oncall = "nobody@example.org"
     self.puzzletron_id = -1
-    self.version = 0
     self.authors = ["A. Computer"]
 
     self.max_queued = 10
@@ -1579,6 +1585,7 @@ class Global:
     print(f"starting event at {now}")
     for team in Team.BY_USERNAME.values():
       team.compute_puzzle_beam(self.event_start_time)
+      team.open_puzzle(Event.PUZZLE, now)
       team.invalidate(flush=False)
     if timed and not save_state.REPLAYING:
       asyncio.create_task(self.notify_event_start())
@@ -1765,6 +1772,7 @@ class Event:
   def __init__(self, shortname, d):
     self.shortname = shortname
     self.title = d["title"]
+    self.time = d["time"]
     self.location = d["location"]
     self.display_answer = d["answer"]
     self.answer = Puzzle.canonicalize_answer(self.display_answer)
@@ -1773,9 +1781,38 @@ class Event:
 
     self.ALL_EVENTS.append(self)
 
+  class EventLand:
+    shortname = "events"
+    title = "Events"
+    symbol = "Ev"
+    color = "#000000"
+    land_order = 1000
+    guess_interval = 30
+    guess_max = 4
+
   @classmethod
   def post_init(cls):
     cls.ALL_EVENTS.sort(key=lambda ev: ev.order)
 
+    p = Puzzle("events")
+    cls.PUZZLE = p
 
+    p.oncall = ""
+    p.puzzletron_id = -1
+    p.authors = ["Left Out"]
 
+    p.title = "Events"
+    p.answers = [e.answer for e in cls.ALL_EVENTS]
+    p.display_answers = dict((e.answer, e.display_answer) for e in cls.ALL_EVENTS)
+    p.responses = {}
+    p.html_body = None
+    p.html_head = None
+    p.for_ops_url = ""
+    p.max_queued = Puzzle.DEFAULT_MAX_QUEUED
+
+    def on_correct_answer(now, team):
+      team.receive_fastpass(now, 300)
+
+    p.on_correct_answer = on_correct_answer
+
+    p.post_init(cls.EventLand(), None)

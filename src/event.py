@@ -157,7 +157,8 @@ class EventsPage(util.TeamPageHandler):
   @login.required("team")
   def get(self):
     self.session.visit_page("events")
-    self.render("events.html")
+    self.puzzle = game.Event.PUZZLE
+    self.render("events.html", events=game.Event.ALL_EVENTS)
 
 class EventsDataHandler(util.TeamHandler):
   @login.required("team")
@@ -195,9 +196,7 @@ class SubmitHandler(util.TeamHandler):
     shortname = self.args["puzzle_id"]
     puzzle = game.Puzzle.get_by_shortname(shortname)
     if not puzzle: raise tornado.web.HTTPError(http.client.NOT_FOUND)
-
     submit_id = self.team.next_submit_id()
-
     result = self.team.submit_answer(submit_id, shortname, answer)
     if result:
       self.write(result)
@@ -224,7 +223,8 @@ class SubmitHistoryHandler(util.TeamHandler):
     d = {"allowed": submit_allowed,
          "history": [sub.json_dict() for sub in state.submissions],
          }
-    if len(state.puzzle.answers) > 1 or state.puzzle.land.shortname == "safari":
+    if ((len(state.puzzle.answers) > 1 or state.puzzle.land.shortname == "safari")
+        and state.puzzle.land.land_order < 1000):
       d["correct"] = len(state.answers_found)
       d["total"] = len(state.puzzle.answers)
 

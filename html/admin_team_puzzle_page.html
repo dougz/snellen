@@ -6,11 +6,11 @@
 {% block content %}
 
 <table class=info>
-  <tr><th>team</th><td class=h1><a href="/admin/team/{{team.username}}">{{team.name}}</a>
+  <tr><th>team</th><td class=h1><a href="/admin/team/{{team.username}}">{{team.name}}</a></td></tr>
+  <tr><th>puzzle</th><td class=h1><a href="/admin/puzzle/{{puzzle.shortname}}">{{puzzle.title}}</a>
       &nbsp;
       <span class="landtag" style="background-color: {{puzzle.land.color}};">{{puzzle.land.symbol}}</span>
   </td></tr>
-  <tr><th>puzzle</th><td class=h1><a href="/admin/puzzle/{{puzzle.shortname}}">{{puzzle.title}}</a></td></tr>
 
   <tr><th>state</th><td id="tppstate"></td></tr>
   <tr><th>open time</th><td id="tppopen"></td></tr>

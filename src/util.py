@@ -42,7 +42,7 @@ class TeamPageHandler(TeamHandler):
       )
     else:
       d["puzzle"] = None
-      script.append("var puzzle_id = null;\n")
+      script.append(f"var puzzle_id = null;\n")
 
     script.append(f"""var wid = {wid}; var received_serial = {serial};\n""")
     script.append(f"""var initial_header = {json.dumps(self.team.get_header_data())};\n""")

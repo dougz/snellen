@@ -2,9 +2,42 @@
 
 {% block title %}Events{% end %}
 
+{% block topnav_extraright %}
+<a id="submit">Submit</a>
+{% end %}
+
+{% block midnav %}
+<div id="submitpanel">
+  <div id="submitdata">
+    <div id="submit_table_scroll">
+      <table id="submit_table">
+        <thead>
+          <tr><th id="st_answer">Submission</th><th id="st_time">Submit time</th><th id="st_result">Result</th></tr>
+        </thead>
+        <tbody id="submit_table_body">
+        </tbody>
+      </table>
+    </div>
+    <div id="submitentry">
+      <input type=text maxlength=40 id="answer" name="answer">
+      <button id="submitsubmit">Submit</button>
+    </div>
+    <span id="top_note"></span>
+    <span id="submitinstr">When you attend an event you'll receive an answer.  Enter it here to receive your reward!</span>
+  </div>
+</div>
+{% end %}
+
+
 {% block content %}
 <div id="content">
   <h1 id="pagetitle">Events</h1>
+
+  {% for e in events %}
+  <h3>{{e.title}}</h3>
+  <p>{% raw e.location %}<br>{% raw e.time %}</p>
+  <p>{% raw e.text %}</p>
+  {% end %}
 
 </div>
 

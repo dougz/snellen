@@ -178,7 +178,7 @@ class BestowFastpassHandler(util.AdminHandler):
       duration = 180  # 1 minute
     else:
       duration = 2 * 3600  # 2 hours
-    team.receive_fastpass(duration)
+    team.bestow_fastpass(duration)
     self.set_status(http.client.NO_CONTENT.value)
 
 
