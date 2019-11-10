@@ -316,17 +316,24 @@ class Submission:
     if answer in self.puzzle.answers:
       self.state = self.CORRECT
       self.extra_response = None
-    elif answer in self.puzzle.incorrect_responses:
-      response = self.puzzle.incorrect_responses[answer]
-      if isinstance(response, str):
+    elif answer in self.puzzle.responses:
+      response = self.puzzle.responses[answer]
+      if response is True:
+        # alternate correct answer
+        self.state = self.CORRECT
+        self.extra_response = None
+      elif isinstance(response, str):
+        # partial-progress response
         self.state = self.PARTIAL
         self.extra_response = response
       elif isinstance(response, (list, tuple)):
+        # task for HQ
         self.state = self.REQUESTED
         self.extra_response = response[0]
         Global.STATE.add_task(now, self.team.username, answer.lower(),
                               response[1], response[2])
       elif response is None:
+        # incorrect but "honest guess"
         self.state = self.INCORRECT
         self.team.streak = []
         self.team.last_incorrect_answer = now
@@ -336,6 +343,7 @@ class Submission:
       self.team.streak = []
       self.team.last_incorrect_answer = now
 
+    if self.state == self.INCORRECT:
       same_answer = self.puzzle.incorrect_answers.setdefault(answer, set())
       same_answer.add(self.team)
       if len(same_answer) > 10:
@@ -343,6 +351,7 @@ class Submission:
           if t.achieve(Achievement.youre_all_wrong, now):
             if t is not self.team:
               asyncio.create_task(t.flush_messages())
+
     self.puzzle_state.requeue_pending(now)
 
     msg = (f'Submitted <b>{html.escape(self.raw_answer)}</b>: '
@@ -1326,7 +1335,7 @@ class Puzzle:
       if ex:
         self.explanations[a] = ex
         self.emojify = True
-    for a in self.incorrect_responses.keys():
+    for a in self.responses.keys():
       ex = util.explain_unicode(a)
       if ex:
         self.explanations[a] = ex
@@ -1383,12 +1392,12 @@ class Puzzle:
       if pstr == "_emoji":
         self.answers = {"\U0001f3f4\u200d\u2620\ufe0f"}
         self.display_answers = {"\U0001f3f4\u200d\u2620\ufe0f": "\U0001f3f4\u200d\u2620\ufe0f"}
-        self.incorrect_responses = {}
+        self.responses = {}
         self.html_body = f"<p>The answer to this placeholder puzzle is a pirate flag.</p>"
       elif pstr == "_task":
         self.answers = {tag}
         self.display_answers = {tag: tag}
-        self.incorrect_responses = {
+        self.responses = {
           "REDHERRING": "No, that's just a red herring.",
           "POPCORN": ["The popcorn vendor is being dispatched to your location!",
                       "Deliver popcorn"],
@@ -1398,21 +1407,21 @@ class Puzzle:
       else:
         self.answers = {tag}
         self.display_answers = {tag: tag}
-        self.incorrect_responses = {}
+        self.responses = {}
         self.html_body = (f"<p>The answer to this placeholder puzzle is <b>{tag}</b>.</p>"
                           f"<div style=\"height: {height}px;\"></div><p>Hello.</p>")
     else:
       self.answers = set()
       self.display_answers = {}
-      self.incorrect_responses = {}
+      self.responses = {}
       for i in cls.PLACEHOLDER_MULTI_ANSWERS[:count]:
         self.answers.add(i)
         self.display_answers[i] = i
         # har de har har.
         if i == "ALFA":
-          self.incorrect_responses["ALPHA"] = "With the <i>correct</i> spelling, please."
+          self.responses["ALPHA"] = "With the <i>correct</i> spelling, please."
         if i == "JULIETT":
-          self.incorrect_responses["JULIET"] = "With the <i>correct</i> spelling, please."
+          self.responses["JULIET"] = "With the <i>correct</i> spelling, please."
       self.html_body = f"<p>The answers to this placeholder puzzle are the first {count} letters of the NATO phonetic alphabet.</p>"
 
     self.html_head = None
@@ -1445,9 +1454,9 @@ class Puzzle:
       self.display_answers[a] = disp
       self.answers.add(a)
 
-    self.incorrect_responses = dict(
+    self.responses = dict(
         (self.canonicalize_answer(k), self.respace_text(v))
-        for (k, v) in j["incorrect_responses"].items())
+        for (k, v) in j["responses"].items())
 
     self.html_head = j.get("html_head")
     self.html_body = j["html_body"]
@@ -1503,6 +1512,7 @@ class Puzzle:
   @staticmethod
   def respace_text(text):
     if text is None: return None
+    if text is True: return True
     if isinstance(text, (list, tuple)):
       return tuple(Puzzle.respace_text(t) for t in text)
     else:

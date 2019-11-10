@@ -64,6 +64,10 @@ class Puzzle:
       ex = util.explain_unicode(a)
       if ex:
         self.pp.explanations[a] = ex
+    for a in self.pp.responses:
+      ex = util.explain_unicode(a)
+      if ex:
+        self.pp.explanations[a] = ex
 
 
 

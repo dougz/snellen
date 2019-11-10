@@ -72,20 +72,23 @@
         </td>
       </tr>
 
-      {% if puzzle.incorrect_responses %}
+      {% if puzzle.responses %}
       <tr>
-	<th class=top>incorrect responses</th>
+	<th class=top>responses</th>
 	<td>
-	  {% for i, (a, r) in enumerate(sorted(puzzle.incorrect_responses.items())) %}
+	  {% for i, (a, r) in enumerate(sorted(puzzle.responses.items())) %}
 	  <p>
-	  <span class="mono b">{{a}}</span> &mdash;
-	  {% if r is None %}<i>incorrect (no penalty)</i>
-          {% elif isinstance(r, str) %}{% raw r %}
-          {% else %}<b>(reply)</b> {% raw r[0] %} <b>(task)</b>
-          {% if r[2] %}<a href="{% raw r[2] %}">{% raw r[1] %}</a>
-          {% else %}{% raw r[1] %}
-          {% end %}
-          {% end %}
+	    <span class="mono b">{{a}}
+              {% if a in puzzle.explanations %}<br/><span class="explain">{{puzzle.explanations[a]}}</span>{% end %}
+            </span> &mdash;
+	    {% if r is None %}<i>incorrect (no penalty)</i>
+            {% elif r is True %}<i>alternate correct answer</i>
+            {% elif isinstance(r, str) %}{% raw r %}
+            {% else %}<b>(reply)</b> {% raw r[0] %} <b>(task)</b>
+            {% if r[2] %}<a href="{% raw r[2] %}">{% raw r[1] %}</a>
+            {% else %}{% raw r[1] %}
+            {% end %}
+            {% end %}
 	  </p>
 	  {% end %}
 	</td>

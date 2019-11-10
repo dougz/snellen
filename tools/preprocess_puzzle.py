@@ -143,7 +143,7 @@ class Puzzle:
           elif not a:
             errors.append(f"Author can't be an empty string.")
 
-    self.incorrect_responses = {}
+    self.responses = {}
     if "response" in y or "responses" in y:
       responses = self.get_plural(y, "response", errors)
       if responses is not None:
@@ -152,21 +152,28 @@ class Puzzle:
         else:
           for k, v in responses.items():
             if not isinstance(k, str):
-              errors.append("Response trigger '{k}' not a string.")
+              errors.append(f"Response trigger '{k}' not a string.")
             elif not k:
               errors.append("Response trigger is empty string.")
 
             if v is None:
               # incorrect but "honest guess"
-              self.incorrect_responses[k] = None
+              self.responses[k] = None
+            elif v is True:
+              # also counts as correct, if there is a single answer
+              if len(self.answers) != 1:
+                errors.append(
+                  "Alternate correct response works only with single-answer puzzles.")
+              else:
+                self.responses[k] = True
             elif isinstance(v, str):
               # partial progress
-              self.incorrect_responses[k] = v
+              self.responses[k] = v
             elif isinstance(v, dict):
               if set(v.keys()) == {"reply", "task"}:
-                self.incorrect_responses[k] = [v["reply"], v["task"], None]
+                self.responses[k] = [v["reply"], v["task"], None]
               elif set(v.keys()) == {"reply", "task", "task_url"}:
-                self.incorrect_responses[k] = [v["reply"], v["task"], v["task_url"]]
+                self.responses[k] = [v["reply"], v["task"], v["task_url"]]
               else:
                 errors.append(f"Bad response to '{k}'.")
             else:
@@ -304,7 +311,7 @@ class Puzzle:
   def json_dict(self):
     d = {}
     for n in ("shortname title oncall puzzletron_id max_queued "
-              "answers incorrect_responses emojify authors "
+              "answers responses emojify authors "
               "zip_version "
               "html_head html_body for_ops_url").split():
       v = getattr(self, n)
