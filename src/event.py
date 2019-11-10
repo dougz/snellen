@@ -154,7 +154,7 @@ class AchievementDataHandler(util.TeamHandler):
     self.write(json.dumps(ach))
 
 class EventsPage(util.TeamPageHandler):
-  @login.required("team")
+  @login.required("team", require_start=False)
   def get(self):
     self.session.visit_page("events")
     self.puzzle = game.Event.PUZZLE

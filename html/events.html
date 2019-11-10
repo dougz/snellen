@@ -3,10 +3,13 @@
 {% block title %}Events{% end %}
 
 {% block topnav_extraright %}
+{% if park_open %}
 <a id="submit">Submit</a>
+{% end %}
 {% end %}
 
 {% block midnav %}
+{% if park_open %}
 <div id="submitpanel">
   <div id="submitdata">
     <div id="submit_table_scroll">
@@ -26,6 +29,7 @@
     <span id="submitinstr">When you attend an event you'll receive an answer.  Enter it here to receive your reward!</span>
   </div>
 </div>
+{% end %}
 {% end %}
 
 
