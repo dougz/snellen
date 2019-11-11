@@ -713,3 +713,115 @@ p.note {
     font-weight: bold;
     padding: 4px 16px;
 }
+
+
+
+#submit_table {
+    border-collapse: collapse;
+}
+
+#submit_table thead, #submit_table tbody {
+    display: block;
+}
+
+#submit_table_scroll {
+    flex-grow: 1000;
+}
+
+#submit_table tbody {
+    overflow-y: auto;
+    height: 220px;
+}
+
+
+#st_answer {
+    width: 640px;
+}
+#st_time {
+    width: 200px;
+}
+#st_result {
+    width: 160px;
+}
+#top_note {
+    flex-grow: 1;
+    text-align: center;
+    color: white;
+    margin: 8px;
+}
+
+#tppsubmit {
+    border-collapse: collapse;
+}
+
+#tppsubmit td {
+    vertical-align: middle;
+    padding: 4px 8px;
+}
+#tppsubmit th {
+    color: white;
+    font-weight: bold;
+    background-color: #666;
+    text-align: left;
+    padding: 8px;
+}
+#tppsubmit tr.submit-extra {
+    border-top: none;
+}
+
+td.submit-empty {
+    color: #ccc;
+    font-style: italic;
+}
+td.submit-answer {
+    font-family: 'Inconsolata', monospace;
+    font-weight: bold;
+    color: black;
+    width: 640px;
+}
+td.submit-time {
+    color: black;
+    width: 200px;
+}
+
+tr.submit-correct {
+    background-color: #ddffdd;
+    border-top: 1px solid #999;
+}
+
+tr.submit-incorrect {
+    background-color: #fee;
+    border-top: 1px solid #999;
+}
+
+tr.submit-partial, tr.submit-extra, tr.submit-requested {
+    background-color: #fdfd96;
+    border-top: 1px solid #999;
+}
+
+tr.submit-extra {
+    background-color: #fdfd96;
+}
+
+tr.submit-pending {
+    background-color: #dddddd;
+    border-top: 1px solid #999;
+}
+
+td.submit-state {
+    text-transform: uppercase;
+    width: 160px;
+}
+
+
+tr.submit-correct .submit-state { color: #090 }
+tr.submit-incorrect .submit-state { color: #c00 }
+tr.submit-partial .submit-state { color: #990 }
+tr.submit-requested .submit-state { color: #990 }
+tr.submit-pending .submit-state { color: #666 }
+
+#tppsubmit tr.submit-extra td {
+    padding-left: 32px;
+}
+
+

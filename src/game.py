@@ -274,6 +274,7 @@ class Submission:
         self.puzzle_state.admin_log.add(now, "Queued <b>" + html.escape(self.raw_answer) + "</b>")
       heapq.heappush(self.GLOBAL_SUBMIT_QUEUE, (self.check_time, self))
       self.team.achieve(Achievement.scattershot, now)
+      self.team.invalidate(self.puzzle)
 
   def compute_check_time(self):
     # Note that self is already in the submissions list (at the end)
@@ -757,6 +758,7 @@ class Team(login.LoginUser):
         state.admin_log.add(now, "Canceled queued <b>" + html.escape(sub.raw_answer) + "</b>")
         state.submissions.pop(i)
         state.requeue_pending(now)
+        self.invalidate(puzzle)
         break
     else:
       print(f"failed to cancel submit {submit_id} puzzle {shortname} for {self.username}")

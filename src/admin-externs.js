@@ -148,6 +148,23 @@ class HintMessage {
     }
 }
 
+class Submission {
+    constructor() {
+        /** @type{?number} */
+        this.submit_time;
+        /** @type{number} */
+        this.check_time;
+        /** @type{string} */
+        this.answer;
+        /** @type{string} */
+        this.state;
+        /** @type{string} */
+        this.response;
+        /** @type{number} */
+        this.submit_id;
+    }
+}
+
 class TeamPuzzlePageData {
     constructor() {
         /** @type{Array<HintMessage>} */
@@ -160,8 +177,8 @@ class TeamPuzzlePageData {
         this.open_time;
         /** @type{?number} */
         this.solve_time;
-        /** @type{Array<LogEntry>} */
-        this.log;
+        /** @type{Array<Submission>} */
+        this.submits;
         /** @type{boolean} */
         this.hints_open;
     }

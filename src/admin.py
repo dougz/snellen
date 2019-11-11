@@ -158,9 +158,9 @@ class TeamPuzzleDataHandler(util.AdminHandler):
       raise tornado.web.HTTPError(http.client.NOT_FOUND)
 
     d = {"history": [msg.json_dict(for_admin=True) for msg in ps.hints],
+         "submits": [sub.json_dict() for sub in ps.submissions],
          "hints_open": ps.hints_available,
-         "state": ps.state,
-         "log": ps.admin_log.get_data()}
+         "state": ps.state}
     if ps.open_time: d["open_time"] = ps.open_time
     if ps.solve_time: d["solve_time"] = ps.solve_time
     if ps.claim:

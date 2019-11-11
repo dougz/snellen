@@ -68,8 +68,6 @@ class A2020_TeamPuzzlePage {
         this.history = goog.dom.getElement("tpphinthistory");
         /** @type{Element} */
         this.replycontainer = goog.dom.getElement("tppreplycontainer");
-        /** @type{Element} */
-        this.for_ops = goog.dom.getElement("for_ops");
 
         /** @type{Element} */
         this.claim = goog.dom.getElement("tpphintclaim");
@@ -87,7 +85,9 @@ class A2020_TeamPuzzlePage {
         this.tppsolve = goog.dom.getElement("tppsolve");
 
         /** @type{Element} */
-        this.tpplog = goog.dom.getElement("tpplog");
+        this.tppsubmithead = goog.dom.getElement("tppsubmithead");
+        /** @type{Element} */
+        this.tppsubmitbody = goog.dom.getElement("tppsubmitbody");
 
         goog.events.listen(goog.dom.getElement("tpphintreply"),
                            goog.events.EventType.CLICK, goog.bind(this.submit, this));
@@ -158,7 +158,6 @@ class A2020_TeamPuzzlePage {
 
         if (data.hints_open) {
             this.replycontainer.style.display = "initial";
-            this.for_ops.style.display = "block";
 
             if (data.claim) {
                 this.claim.style.display = "inline";
@@ -191,10 +190,52 @@ class A2020_TeamPuzzlePage {
         } else {
             this.history.innerHTML = "<i>Hints are not available for this team and puzzle.</i>";
             this.replycontainer.style.display = "none";
-            this.for_ops.style.display = "none";
         }
 
-        A2020_DisplayLog(this.tpplog, data.log);
+        var tr = null;
+        this.tppsubmitbody.innerHTML = "";
+        if (data.submits.length == 0) {
+            this.tppsubmitbody.appendChild(
+                goog.dom.createDom("TD", {className: "submit-empty", colSpan: 3}, "No submissions yet."));
+            this.tppsubmithead.style.display = "none";
+        } else {
+            this.tppsubmithead.style.display = "table-header-group";
+        }
+        for (var i = 0; i < data.submits.length; ++i) {
+            var sub = data.submits[i];
+            var el = null;
+            if (sub.state == "pending") {
+                el = goog.dom.createDom("SPAN", {className: "counter submit-timer"});
+                el.setAttribute("data-until", sub.check_time)
+            }
+
+            var time_el = null;
+            if (sub.state == "pending") {
+                time_el = el;
+            } else {
+                time_el = admin2020.time_formatter.format(sub.submit_time);
+            }
+
+            tr = goog.dom.createDom(
+                "TR", {className: "submit-" + sub.state},
+                goog.dom.createDom("TD", {className: "submit-answer"},
+                                   sub.answer),
+                goog.dom.createDom("TD", {className: "submit-time"}, time_el),
+                goog.dom.createDom("TD", {className: "submit-state"},
+                                   goog.dom.createDom("SPAN", null,
+                                                      sub.state)));
+            if (typeof twemoji !== 'undefined') {
+              tr = twemoji.parse(tr);
+            }
+            this.tppsubmitbody.appendChild(tr);
+
+            if (sub.response) {
+                var td = goog.dom.createDom("TD", {colSpan: 3});
+                td.innerHTML = sub.response;
+                tr = goog.dom.createDom("TR", {className: "submit-extra"}, td);
+                this.tppsubmitbody.appendChild(tr);
+            }
+        }
 
         twemoji.parse(goog.dom.getElement("content"));
 
