@@ -449,6 +449,8 @@ class Team(login.LoginUser):
   cached_bb_label_info = None
 
   def __init__(self, username, info):
+    username = username.lower()
+
     assert username not in self.BY_USERNAME
     self.BY_USERNAME[username] = self
 

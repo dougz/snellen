@@ -51,7 +51,7 @@ class AdminUser(LoginUser):
 
   @save_state
   def __init__(self, now, username, password_hash, fullname, roles):
-    self.username = username
+    self.username = username.lower()
     self.password_hash = password_hash.encode("ascii")
     self.fullname = fullname
     self.roles = set(roles)
@@ -255,6 +255,8 @@ class LoginSubmit(tornado.web.RequestHandler):
     username = self.get_argument("username", None)
     password = self.get_argument("password", None)
     target = self.get_argument("target", None)
+
+    if username: username = username.lower()
 
     err_d = {"bad_login": 1}
     if target:
