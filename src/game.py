@@ -1033,6 +1033,8 @@ class Team(login.LoginUser):
     ps = self.puzzle_state[puzzle]
     if ps.hints_available: return
     ps.hints_available = True
+    self.activity_log.add(now, f"Hints available for {puzzle.html}.")
+    self.admin_log.add(now, f"Hints available for {puzzle.admin_html}.")
     msg = [{"method": "hints_open", "puzzle_id": puzzle.shortname, "title": puzzle.title}]
     self.send_messages(msg)
 
