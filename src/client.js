@@ -554,26 +554,26 @@ class H2020_SubmitPanel {
         t.scrollTop = t.scrollHeight;
     }
 
-    add_sparkle(parent, width, height) {
-        var div = goog.dom.createDom("DIV", {className: "icon"});
-        div.style.width = "" + width + "px";
-        div.style.height = "" + height + "px";
+    // add_sparkle(parent, width, height) {
+    //     var div = goog.dom.createDom("DIV", {className: "icon"});
+    //     div.style.width = "" + width + "px";
+    //     div.style.height = "" + height + "px";
 
-        var star = '<path class="star" d="M0 -1L.5877 .809 -.9511 -.309 .9511 -.309 -.5877 .809Z" />';
-        var fivestar = star;
-        for (var i = 1; i < 5; ++i) {
-            fivestar += `<g transform="rotate(${i*72})">` + star + "</g>";
-        }
-        var scale = Math.min(width, height) * 0.4;
+    //     var star = '<path class="star" d="M0 -1L.5877 .809 -.9511 -.309 .9511 -.309 -.5877 .809Z" />';
+    //     var fivestar = star;
+    //     for (var i = 1; i < 5; ++i) {
+    //         fivestar += `<g transform="rotate(${i*72})">` + star + "</g>";
+    //     }
+    //     var scale = Math.min(width, height) * 0.4;
 
-        var html = `<svg width="${width}" height="${height}">` +
-            `<g transform="translate(${width/2},${height/2}) scale(${scale})" fill="yellow">` +
-            fivestar + '<g transform="scale(0.5) rotate(36)">' + fivestar +
-            "</g></g></svg>";
-        div.innerHTML = html;
+    //     var html = `<svg width="${width}" height="${height}">` +
+    //         `<g transform="translate(${width/2},${height/2}) scale(${scale})" fill="yellow">` +
+    //         fivestar + '<g transform="scale(0.5) rotate(36)">' + fivestar +
+    //         "</g></g></svg>";
+    //     div.innerHTML = html;
 
-        parent.appendChild(div);
-    }
+    //     parent.appendChild(div);
+    // }
 
     submit() {
         var answer = this.input.value;
@@ -915,7 +915,7 @@ class H2020_MapDraw {
                                    goog.bind(this.item_leave, this, it));
             }
 
-            if (!it.answer && it.name) {
+            if (!it.solved && it.name) {
                 this.add_title(it);
             }
         }

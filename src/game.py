@@ -375,6 +375,8 @@ class Submission:
       if self.puzzle_state.answers_found == self.puzzle.answers:
         self.team.solve_puzzle(self.puzzle, now)
       else:
+        self.team.dirty_lands.add(self.puzzle.land.shortname)
+        self.team.cached_mapdata.pop(self.puzzle.land, None)
         self.team.compute_puzzle_beam(now)
 
     self.team.invalidate(self.puzzle)
@@ -625,7 +627,6 @@ class Team(login.LoginUser):
           if (now - ps.open_time < self.NEW_PUZZLE_SECONDS and
               ps.open_time != Global.STATE.event_start_time):
             d["new_open"] = ps.open_time + self.NEW_PUZZLE_SECONDS
-
         elif ps.state == PuzzleState.SOLVED:
           d["solved"] = True
 
