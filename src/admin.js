@@ -725,7 +725,7 @@ class A2020_DotLabeler {
                     style: "left: " + x + "px; top: " + y + "px;"}, title);
                 document.body.appendChild(this.tooltip);
 
-                this.tooltip_timer = setTimeout(goog.bind(this.remove_tooltip, this), 1500);
+                this.tooltip_timer = setTimeout(goog.bind(this.remove_tooltip, this), 1000);
                 break;
             }
         }

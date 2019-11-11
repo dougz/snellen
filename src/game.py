@@ -983,7 +983,7 @@ class Team(login.LoginUser):
         "username": self.username,
         }
 
-      out = ['<g fill="none">']
+      out = ['<g fill="none" stroke-width="3">']
       lx = 0
       for land in Land.ordered_lands:
         if land not in self.open_lands: break
@@ -991,15 +991,16 @@ class Team(login.LoginUser):
         ny = 2
         for p in land.all_puzzles:
           ps = self.puzzle_state[p]
+          used_hints = "-hint" if ps.hints else ""
           if p.meta:
-            out.append(f'<circle cx="{lx+14.5}" cy="14.5" r="12" class="bb-{ps.state} bbp-{p.bbid}"/>')
+            out.append(f'<circle cx="{lx+14.5}" cy="14.5" r="12" class="bb-{ps.state}{used_hints} bbp-{p.bbid}"/>')
           else:
             cx = nx * 15 + 7
             cy = ny * 15 + 7
             if p in land.additional_puzzles:
-              out.append(f'<rect x="{lx+cx-4}" y="{cy-4}" width="8" height="8" class="bb-{ps.state} bbp-{p.bbid}"/>')
+              out.append(f'<rect x="{lx+cx-4}" y="{cy-4}" width="8" height="8" class="bb-{ps.state}{used_hints} bbp-{p.bbid}"/>')
             else:
-              out.append(f'<circle cx="{lx+cx}" cy="{cy}" r="5" class="bb-{ps.state} bbp-{p.bbid}"/>')
+              out.append(f'<circle cx="{lx+cx}" cy="{cy}" r="5" class="bb-{ps.state}{used_hints} bbp-{p.bbid}"/>')
 
             if nx == 0:
               nx = 1
@@ -1048,6 +1049,9 @@ class Team(login.LoginUser):
 
     msg = HintMessage(state, now, sender, text)
     state.hints.append(msg)
+
+    if len(state.hints) == 1:
+      self.invalidate(puzzle)
 
     self.send_messages([team_message])
     login.AdminUser.send_messages([{"method": "update",

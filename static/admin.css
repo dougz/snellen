@@ -697,6 +697,14 @@ p.note {
     fill: #157f1f;
     stroke: #157f1f
 }
+.bb-open-hint {
+    fill: #ffdd66;
+    stroke: #b0413e;
+}
+.bb-solved-hint {
+    fill: #157f1f;
+    stroke: #2f441d
+}
 
 .bbtooltip {
     position: absolute;
