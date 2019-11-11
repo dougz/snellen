@@ -366,6 +366,9 @@ class Submission:
     self.puzzle.puzzle_log.add(now, msg)
 
     if self.state == self.CORRECT:
+      if len(self.puzzle.answers) > 1:
+        self.team.activity_log.add(now, f"Got answer <b>{html.escape(answer)}</b> for {self.puzzle.html}.")
+        self.team.admin_log.add(now, f"Got answer <b>{html.escape(answer)}</b> for {self.puzzle.admin_html}.")
       self.puzzle_state.answers_found.add(answer)
       fn = getattr(self.puzzle, "on_correct_answer", None)
       if fn: fn(now, self.team)
