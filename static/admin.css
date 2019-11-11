@@ -684,3 +684,24 @@ p.note {
 .proxyload {
     margin-right: 12px;
 }
+
+.bb-closed {
+    fill: white;
+    stroke: #ddd;
+}
+.bb-open {
+    fill: #ffdd66;
+    stroke: #ffdd66;
+}
+.bb-solved {
+    fill: #157f1f;
+    stroke: #157f1f
+}
+
+.bbtooltip {
+    position: absolute;
+    background-color: #161370;
+    color: white;
+    font-weight: bold;
+    padding: 4px 16px;
+}

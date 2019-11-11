@@ -992,24 +992,14 @@ class Team(login.LoginUser):
         for p in land.all_puzzles:
           ps = self.puzzle_state[p]
           if p.meta:
-            if ps.state == PuzzleState.CLOSED:
-              out.append(f'<circle cx="{lx+14.5}" cy="14.5" r="12" stroke="{self.BB_PUZZLE_COLOR[ps.state]}"/>')
-            else:
-              out.append(f'<circle cx="{lx+14.5}" cy="14.5" r="13" fill="{self.BB_PUZZLE_COLOR[ps.state]}"/>')
+            out.append(f'<circle cx="{lx+14.5}" cy="14.5" r="12" class="bb-{ps.state} bbp-{p.bbid}"/>')
           else:
             cx = nx * 15 + 7
             cy = ny * 15 + 7
             if p in land.additional_puzzles:
-              # safari keepers
-              if ps.state == PuzzleState.CLOSED:
-                out.append(f'<rect x="{lx+cx-4}" y="{cy-4}" width="8" height="8" stroke="{self.BB_PUZZLE_COLOR[ps.state]}"/>')
-              else:
-                out.append(f'<rect x="{lx+cx-5}" y="{cy-5}" width="10" height="10" fill="{self.BB_PUZZLE_COLOR[ps.state]}"/>')
+              out.append(f'<rect x="{lx+cx-4}" y="{cy-4}" width="8" height="8" class="bb-{ps.state} bbp-{p.bbid}"/>')
             else:
-              if ps.state == PuzzleState.CLOSED:
-                out.append(f'<circle cx="{lx+cx}" cy="{cy}" r="5" stroke="{self.BB_PUZZLE_COLOR[ps.state]}"/>')
-              else:
-                out.append(f'<circle cx="{lx+cx}" cy="{cy}" r="6" fill="{self.BB_PUZZLE_COLOR[ps.state]}"/>')
+              out.append(f'<circle cx="{lx+cx}" cy="{cy}" r="5" class="bb-{ps.state} bbp-{p.bbid}"/>')
 
             if nx == 0:
               nx = 1
@@ -1299,10 +1289,9 @@ class Land:
 
 class Puzzle:
   BY_SHORTNAME = {}
-
   DEFAULT_MAX_QUEUED = 3
-
   PLACEHOLDER_COUNT = 0
+  NEXT_BBID = 1
 
   def __init__(self, shortname):
     if not re.match(r"^[a-z][a-z0-9_]*$", shortname):
@@ -1332,6 +1321,8 @@ class Puzzle:
     self.land = land
     self.icon = icon
     self.sortkey = (util.make_sortkey(self.title), id(self))
+    self.bbid = Puzzle.NEXT_BBID
+    Puzzle.NEXT_BBID += 1
 
     self.html = (f'<a href="{self.url}"><span class=puzzletitle>{html.escape(self.title)}</span></a> '
                  f'<span class="landtag" style="background-color: {land.color};">{land.symbol}</span>')

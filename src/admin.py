@@ -427,7 +427,7 @@ class PuzzleJsonHandler(util.AdminHandler):
   def build(cls):
     out = []
     for p in game.Puzzle.all_puzzles():
-      out.append([p.shortname, p.title])
+      out.append([p.shortname, p.title, p.bbid])
     out.sort()
     cls.body = "var puzzle_list = " + json.dumps(out) + ";\n"
     h = hashlib.md5(cls.body.encode("utf-8")).hexdigest()[:12]

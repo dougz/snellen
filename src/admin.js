@@ -547,6 +547,9 @@ class A2020_TeamPage {
             div.appendChild(sp);
         }
 
+
+        this.dot_labeler = new A2020_DotLabeler(this.tpsvg);
+
         this.update();
     }
 
@@ -695,6 +698,51 @@ class A2020_PuzzlePage {
     }
 }
 
+class A2020_DotLabeler {
+    constructor(click_div) {
+        this.tooltip = null;
+        this.tooltip_timer = null;
+        this.by_bbid = {};
+        for (var i = 0; i < puzzle_list.length; ++i) {
+            this.by_bbid[""+puzzle_list[i][2]] = puzzle_list[i][1];
+        }
+        goog.events.listen(click_div, goog.events.EventType.CLICK,
+                           goog.bind(this.on_click, this));
+    }
+
+    on_click(e) {
+        this.remove_tooltip();
+        var classes = goog.dom.classlist.get(e.target);
+        for (var i = 0; i < classes.length; ++i) {
+            var k = classes[i];
+            if (k.startsWith("bbp-")) {
+                var title = this.by_bbid[k.substring(4)];
+                var x = e.clientX + window.pageXOffset + 4;
+                var y = e.clientY + window.pageYOffset - 32;
+                if (y < 100) y += 36;
+                this.tooltip = goog.dom.createDom("DIV", {
+                    className: "bbtooltip",
+                    style: "left: " + x + "px; top: " + y + "px;"}, title);
+                document.body.appendChild(this.tooltip);
+
+                this.tooltip_timer = setTimeout(goog.bind(this.remove_tooltip, this), 1500);
+                break;
+            }
+        }
+    }
+
+    remove_tooltip() {
+        if (this.tooltip_timer) {
+            clearTimeout(this.tooltip_timer);
+            this.tooltip_timer = null;
+        }
+        if (this.tooltip) {
+            this.tooltip.remove();
+            this.tooltip = null;
+        }
+    }
+}
+
 class A2020_BigBoard {
     constructor() {
         /** @type{Element} */
@@ -726,6 +774,8 @@ class A2020_BigBoard {
             }
             this.update_all_teams(e.target.getResponseJson());
         }, this), "GET");
+
+        this.dot_labeler = new A2020_DotLabeler(this.teamdiv);
     }
 
     /** @param{Object<string, BBTeamData>} data */
