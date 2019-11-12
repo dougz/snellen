@@ -26,9 +26,7 @@ class Log:
     self.entries = []
     self.data = []
 
-  def add(self, when, html, **kwargs):
-    if kwargs:
-      html = html.format(**kwargs)
+  def add(self, when, html):
     if self.entries and when == self.entries[0].when:
       self.entries[0].htmls.append(html)
     else:
@@ -211,8 +209,16 @@ class PuzzleState:
     self.hints = []
     self.last_hq_sender = None # AdminUser of most recent reply
     self.claim = None          # AdminUser claiming hint response
-    self.admin_log = Log()
     self.keeper_answers = 0
+
+    self.admin_url = f"/admin/team/{team.username}/puzzle/{puzzle.shortname}"
+    self.admin_html_puzzle = (
+      f'<a href="{self.admin_url}">{html.escape(puzzle.title)}</a> '
+      f'<span class="landtag" style="background-color: {puzzle.land.color};">{puzzle.land.symbol}</span>')
+
+
+    self.admin_html_team = f'<a href="{self.admin_url}">{html.escape(team.name)}</a>'
+
 
   def recent_solve(self, now=None):
     if now is None:
@@ -231,7 +237,7 @@ class PuzzleState:
     for sub in after:
       sub.check_time = None
       self.submissions.append(sub)
-      sub.check_or_queue(now, log_queue=False)
+      sub.check_or_queue(now)
 
 
 class Submission:
@@ -265,13 +271,11 @@ class Submission:
   def __lt__(self, other):
     return self.submit_id < other.submit_id
 
-  def check_or_queue(self, now, log_queue=True):
+  def check_or_queue(self, now):
     self.check_time = self.compute_check_time()
     if self.check_time <= self.sent_time:
       self.check_answer(self.sent_time)
     else:
-      if log_queue:
-        self.puzzle_state.admin_log.add(now, "Queued <b>" + html.escape(self.raw_answer) + "</b>")
       heapq.heappush(self.GLOBAL_SUBMIT_QUEUE, (self.check_time, self))
       self.team.achieve(Achievement.scattershot, now)
       self.team.invalidate(self.puzzle)
@@ -356,19 +360,17 @@ class Submission:
 
     self.puzzle_state.requeue_pending(now)
 
-    msg = (f'Submitted <b>{html.escape(self.raw_answer)}</b>: '
-           f'<span class="submission-{self.state}">{self.state}</span>')
+    msg = (f'{self.puzzle_state.admin_html_team} submitted <b>{html.escape(self.raw_answer)}</b>: '
+           f'<span class="submission-{self.state}">{self.state}</span>.')
     explain = util.explain_unicode(self.raw_answer)
     if explain:
       msg += "<br><span class=explain>" + html.escape(explain) + "</span>"
-    self.puzzle_state.admin_log.add(now, msg)
-    msg = "<b>" + html.escape(self.team.name) + "</b> s" + msg[1:]
     self.puzzle.puzzle_log.add(now, msg)
 
     if self.state == self.CORRECT:
       if len(self.puzzle.answers) > 1:
         self.team.activity_log.add(now, f"Got answer <b>{html.escape(answer)}</b> for {self.puzzle.html}.")
-        self.team.admin_log.add(now, f"Got answer <b>{html.escape(answer)}</b> for {self.puzzle.admin_html}.")
+        self.team.admin_log.add(now, f"Got answer <b>{html.escape(answer)}</b> for {self.puzzle_state.admin_html_puzzle}.")
       self.puzzle_state.answers_found.add(answer)
       fn = getattr(self.puzzle, "on_correct_answer", None)
       if fn: fn(now, self.team)
@@ -496,6 +498,9 @@ class Team(login.LoginUser):
 
     self.cached_bb_data = None
     self.cached_mapdata = {}
+
+    self.admin_url = f"/admin/team/{username}"
+    self.admin_html = f'<a href="{self.admin_url}">{html.escape(self.name)}</a>'
 
   def __repr__(self):
     return f"<Team {self.username}>"
@@ -761,7 +766,6 @@ class Team(login.LoginUser):
     for i, sub in enumerate(state.submissions):
       if sub.submit_id == submit_id and sub.state == sub.PENDING:
         sub.state = sub.CANCELLED
-        state.admin_log.add(now, "Canceled queued <b>" + html.escape(sub.raw_answer) + "</b>")
         state.submissions.pop(i)
         state.requeue_pending(now)
         self.invalidate(puzzle)
@@ -863,8 +867,9 @@ class Team(login.LoginUser):
       state.open_time = now
       self.open_puzzles.add(state)
       if puzzle.land.land_order < 1000:
-        self.activity_log.add(now, puzzle.html + " opened.")
-        self.admin_log.add(now, puzzle.admin_html + " opened.", team=self)
+        puzzle.puzzle_log.add(now, f"Opened by {state.admin_html_team}.")
+        self.activity_log.add(now, f"{puzzle.html} opened.")
+        self.admin_log.add(now, f"{state.admin_html_puzzle} opened.")
         self.dirty_lands.add(puzzle.land.shortname)
         self.cached_mapdata.pop(puzzle.land, None)
 
@@ -894,9 +899,9 @@ class Team(login.LoginUser):
         self.cached_mapdata.pop(current_map, None)
         self.dirty_lands.add("home")
       self.invalidate(puzzle)
-      self.activity_log.add(now, puzzle.html + " solved.")
-      self.admin_log.add(now, puzzle.admin_html + " solved.", team=self)
-      puzzle.puzzle_log.add(now, "Solved by <b>{team.name}</b>.", team=self)
+      puzzle.puzzle_log.add(now, f"Solved by {state.admin_html_team}.")
+      self.activity_log.add(now, f"{puzzle.html} solved.")
+      self.admin_log.add(now, f"{state.admin_html_puzzle} solved.")
 
       if puzzle.meta and self.videos < 5:
         self.videos += 1
@@ -1033,8 +1038,9 @@ class Team(login.LoginUser):
     ps = self.puzzle_state[puzzle]
     if ps.hints_available: return
     ps.hints_available = True
+    puzzle.puzzle_log.add(now, f"Hints available to {ps.admin_html_team}.")
     self.activity_log.add(now, f"Hints available for {puzzle.html}.")
-    self.admin_log.add(now, f"Hints available for {puzzle.admin_html}.")
+    self.admin_log.add(now, f"Hints available for {ps.admin_html_puzzle}.")
     msg = [{"method": "hints_open", "puzzle_id": puzzle.shortname, "title": puzzle.title}]
     self.send_messages(msg)
 
@@ -1049,6 +1055,14 @@ class Team(login.LoginUser):
     if sender is None:
       sender = self
       Global.STATE.task_queue.add(state)
+      if state.hints:
+        puzzle.puzzle_log.add(now, f"{state.admin_html_team} requested a followup hint.")
+        self.activity_log.add(now, f"Requested a followup hint on {puzzle.html}.")
+        self.admin_log.add(now, f"Requested a followup hint on {state.admin_html_puzzle}.")
+      else:
+        puzzle.puzzle_log.add(now, f"{state.admin_html_team} requested a hint.")
+        self.activity_log.add(now, f"Requested a hint on {puzzle.html}.")
+        self.admin_log.add(now, f"Requested a hint on {state.admin_html_puzzle}.")
     else:
       sender = login.AdminUser.get_by_username(sender)
       state.last_hq_sender = sender
@@ -1057,11 +1071,14 @@ class Team(login.LoginUser):
       team_message["notify"] = True
       team_message["title"] = puzzle.title
 
+      puzzle.puzzle_log.add(now, f"<b>{sender.fullname}</b> replied to hint request from {state.admin_html_team}.")
+      self.activity_log.add(now, f"Hunt HQ replied to hint request on {puzzle.html}.")
+      self.admin_log.add(now, f"<b>{sender.fullname}</b> replied to hint request on {state.admin_html_puzzle}.")
+
     msg = HintMessage(state, now, sender, text)
     state.hints.append(msg)
 
-    if len(state.hints) == 1:
-      self.invalidate(puzzle)
+    self.invalidate(puzzle)
 
     self.send_messages([team_message])
     login.AdminUser.send_messages([{"method": "update",
@@ -1340,8 +1357,8 @@ class Puzzle:
 
     self.html = (f'<a href="{self.url}"><span class=puzzletitle>{html.escape(self.title)}</span></a> '
                  f'<span class="landtag" style="background-color: {land.color};">{land.symbol}</span>')
-    self.admin_html = (f'<a href="/admin/team/{{team.username}}/puzzle/{self.shortname}"><span class=puzzletitle>{html.escape(self.title)}</span></a> '
-                       f'<span class="landtag" style="background-color: {land.color};">{land.symbol}</span>')
+    self.admin_html = (f'<a href="{self.admin_url}"><span class=puzzletitle>{html.escape(self.title)}</span></a> '
+                 f'<span class="landtag" style="background-color: {land.color};">{land.symbol}</span>')
 
     for a in self.answers:
       ex = util.explain_unicode(a)

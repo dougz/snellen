@@ -58,6 +58,7 @@ class H2020_Dispatcher {
                     msg.title + "</b>.", 6000, null, "salmon",
                 "/puzzle/" + msg.puzzle_id);
         }
+        if (hunt2020.activity) hunt2020.activity.update();
     }
 
     /** @param{Message} msg */
