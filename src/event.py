@@ -103,14 +103,6 @@ class PuzzlePage(util.TeamPageHandler):
     self.render("puzzle_frame.html", thumb=None, supertitle=supertitle,
                 solved=(state.state == state.SOLVED))
 
-  def get_template_namespace(self):
-    land = self.puzzle.land
-    d = super().get_template_namespace()
-    css = f"{land.shortname}/land.css"
-    if css in self.static_content:
-      d["css"].append(self.static_content[css])
-    return d
-
 
 class ActivityLogPage(util.TeamPageHandler):
   @login.required("team")

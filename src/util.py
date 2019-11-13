@@ -33,6 +33,9 @@ class TeamPageHandler(TeamHandler):
 
     script = ["<script>"]
 
+    d["css"] = [self.static_content["event.css"]]
+    style_css = None
+
     if hasattr(self, "puzzle"):
       d["puzzle"] = self.puzzle
       d["state"] = self.team.puzzle_state[self.puzzle]
@@ -40,9 +43,16 @@ class TeamPageHandler(TeamHandler):
         f'var puzzle_id = "{self.puzzle.shortname}";\n'
         "var puzzle_init = null;\n"
       )
+
+      style_css = self.puzzle.land.shortname + "/land.css"
     else:
       d["puzzle"] = None
       script.append(f"var puzzle_id = null;\n")
+
+    if style_css in self.static_content:
+      d["css"].append(self.static_content[style_css])
+    else:
+      d["css"].append(self.static_content["default.css"])
 
     script.append(f"""var wid = {wid}; var received_serial = {serial};\n""")
     script.append(f"""var initial_header = {json.dumps(self.team.get_header_data())};\n""")
@@ -57,8 +67,6 @@ class TeamPageHandler(TeamHandler):
                     """<script src="/debug/snellen/src/client.js"></script>""")
     else:
       script.append(f"""<script src="{self.static_content["client-compiled.js"]}"></script>""")
-
-    d["css"] = [self.static_content["event.css"]]
 
     d["script"] = "".join(script)
     d["json_data"] = None
@@ -130,7 +138,7 @@ class AdminPageHandler(AdminHandler):
     else:
       script.append(f"""<script src="{self.static_content["admin-compiled.js"]}"></script>""")
 
-    d["css"] = self.static_content["admin.css"]
+    d["css"] = [self.static_content["admin.css"]]
     d["home"] = self.static_content["home.svg"]
 
     d["script"] = "".join(script)

@@ -1454,6 +1454,8 @@ class Puzzle:
       self.html_body = f"<p>The answers to this placeholder puzzle are the first {count} letters of the NATO phonetic alphabet.</p>"
 
     self.html_head = None
+    self.solution_head = None
+    self.solution_body = "The solution goes here."
     self.for_ops_url = "https://isotropic.org/"
 
     self.post_init(land, icon)

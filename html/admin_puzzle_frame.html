@@ -1,0 +1,23 @@
+{% extends "admin_base.html" %}
+{% block colorscheme %}color-content{% end %}
+
+{% block title %}{{puzzle.title}}{% end %}
+
+{% block head %}
+{% if puzzle.html_head %}{% raw puzzle.html_head %}{% end %}
+{% end %}
+
+
+{% block nonnav %}
+<div id="nonnav">
+  <a href="{{puzzle.land.url}}"><h1 id="landtitle">{{puzzle.land.title}}</h1></a>
+
+  <div id="content">
+
+    <h2 id="puzzletitle"><div id=vspace></div>{% raw supertitle %}{{puzzle.title}}</h2>
+    <div id="puzz">
+      {% raw puzzle.html_body %}
+    </div>
+  </div>
+</div>
+{% end %}

@@ -5,7 +5,9 @@
     <link rel="icon" type="image/png" sizes="16x16" href="{{favicon16}}">
     <meta name="viewport" content="width=1200, initial-scale=0">
     <title>{% block title %}{% end %}</title>
-    <link rel=stylesheet href="{{css}}">
+    {% for c in css %}
+    <link rel=stylesheet href="{{c}}">
+    {% end %}
     {% if script %}{% raw script %}{% end %}
     {% if json_data %}{% raw json_data %}{% end %}
     {% block head %}{% end %}
@@ -55,9 +57,11 @@
       {% end %}
     </div>
 
-    <div id="content">
+    {% block nonnav %}
+    <div id="admincontent">
       {% block content %}{% end %}
     </div>
+    {% end %}
   </body>
 </html>
 

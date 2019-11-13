@@ -29,7 +29,7 @@ class Puzzle:
 
   SPECIAL_FILES = {METADATA_FILE, PUZZLE_HTML, SOLUTION_HTML, STATIC_PUZZLE_HTML, FOR_OPS_HTML}
 
-  def __init__(self, zip_data, options, include_solutions=False, filename=None):
+  def __init__(self, zip_data, options, include_solutions=True, filename=None):
     self.prefix = common.hash_name(zip_data)
     z = zipfile.ZipFile(io.BytesIO(zip_data))
     self.zip_version = filename
@@ -184,11 +184,6 @@ class Puzzle:
     self.upload_assets(z, options, include_solutions, strip_shortname,
                        y.get("obfuscate_assets", False))
 
-    restricted_asset_map = self.asset_map.copy()
-    for k, v in self.asset_map.items():
-      if k.startswith("solution/"):
-        restricted_asset_map[k] = None
-
     if "for_ops_url" in y:
       self.for_ops_url = y["for_ops_url"]
     else:
@@ -212,12 +207,8 @@ class Puzzle:
     else:
       self.static_puzzle_head, self.static_puzzle_body = None, None
 
-    for k, v in self.asset_map.items():
-      if k.startswith("ops/"):
-        restricted_asset_map[k] = None
-
     self.html_head, self.html_body = self.parse_html(
-      z, strip_shortname, errors, Puzzle.PUZZLE_HTML, restricted_asset_map)
+      z, strip_shortname, errors, Puzzle.PUZZLE_HTML, self.asset_map)
 
     if include_solutions:
       self.solution_head, self.solution_body = self.parse_html(
@@ -263,7 +254,9 @@ class Puzzle:
 
       data = z.read(n)
       if obfuscate:
-        path = common.hash_name(data) + ext
+        path = f"{self.prefix}/{self.shortname}/{common.hash_name(data) + ext}"
+      elif nn.startswith("solution/"):
+        path = f"{self.prefix}/{self.shortname}/solution/{common.hash_name(data) + ext}"
       else:
         path = f"{self.prefix}/{self.shortname}/{nn}"
 
@@ -313,7 +306,8 @@ class Puzzle:
     for n in ("shortname title oncall puzzletron_id max_queued "
               "answers responses emojify authors "
               "zip_version "
-              "html_head html_body for_ops_url").split():
+              "html_head html_body solution_head solution_body "
+              "for_ops_url").split():
       v = getattr(self, n)
       if v is not None: d[n] = v
     return d

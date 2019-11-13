@@ -138,6 +138,7 @@ def convert_static_files(out, options, lands):
                      ("client-compiled.js", f"{base}/snellen/bin/client-compiled.js"),
                      ("admin.css", f"{base}/snellen/static/admin.css"),
                      ("event.css", f"{base}/snellen/static/event.css"),
+                     ("default.css", f"{base}/snellen/static/default.css"),
                      ("login.css", f"{base}/snellen/static/login.css"),
                      ("notopen.css", f"{base}/snellen/static/notopen.css"),
                      ("logo.png", f"{base}/snellen/static/logo.png"),

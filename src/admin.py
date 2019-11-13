@@ -117,6 +117,33 @@ class TeamDataHandler(util.AdminHandler):
     self.set_header("Content-Type", "application/json")
     self.write(json.dumps(d))
 
+class PuzzleContentPage(util.AdminPageHandler):
+  @login.required("admin")
+  def get(self, shortname):
+    puzzle = game.Puzzle.get_by_shortname(shortname)
+    if not puzzle:
+      print(f"no puzzle called {shortname}")
+      raise tornado.web.HTTPError(http.client.NOT_FOUND)
+
+    if puzzle.icon.headerimage:
+      supertitle=f'<img src="{puzzle.icon.headerimage}"><br>'
+    else:
+      supertitle=""
+
+    self.pagepuzzle = puzzle
+    self.render("admin_puzzle_frame.html", supertitle=supertitle)
+
+  def get_template_namespace(self):
+    land = self.pagepuzzle.land
+    d = super().get_template_namespace()
+    css = f"{land.shortname}/land.css"
+    if css in self.static_content:
+      d["css"].append(self.static_content[css])
+    else:
+      d["css"].append(self.static_content["default.css"])
+    return d
+
+
 class PuzzlePage(util.AdminPageHandler):
   @login.required("admin")
   def get(self, shortname):
@@ -502,6 +529,7 @@ def GetHandlers():
     (r"/admin/confirm_change_start$", ConfirmChangeStartPage),
     (r"/admin/taskqueue$", TaskQueuePage),
     (r"/admin/puzzle/([a-z0-9_]+)$", PuzzlePage),
+    (r"/admin/showpuzzle/([a-z0-9_]+)$", PuzzleContentPage),
     (r"/admin/puzzles$", ListPuzzlesPage),
     (r"/admin/team/([a-z0-9_]+)$", TeamPage),
     (r"/admin/team/([a-z0-9_]+)/puzzle/([a-z0-9_]+)$", TeamPuzzlePage),
