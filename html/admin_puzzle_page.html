@@ -6,7 +6,17 @@
 {% block content %}
 
 <table class=info>
-  <tr><th>title</th><td class=h1>{{puzzle.title}}</td></tr>
+  <tr><th>title</th>
+    <td class=h1>{{puzzle.title}}<br>
+      <a class="content" href="/admin/show/puzzle/{{puzzle.shortname}}">&#x25b6; puzzle</a>
+      <a class="content" href="/admin/show/solution/{{puzzle.shortname}}">&#x25b6; solution</a>
+      {% if puzzle.for_ops_url %}
+      <a class="content" href="{{puzzle.for_ops_url}}">&#x25b6; hunt ops</a>
+      {% else %}
+      <span>MISSING hunt ops info!</span>
+      {% end %}
+    </td>
+  </tr>
   <tr><th>shortname</th><td class=mono>{{puzzle.shortname}}</td></tr>
   <tr><th>land</th><td>
       <span class="landtag" style="background-color: {{puzzle.land.color}};">{{puzzle.land.symbol}}</span>
@@ -81,18 +91,6 @@
         <input class="ac-select-input"></input>
         <div class="ac-select-dropdown"></div>
       </div>
-    </td>
-  </tr>
-  <tr>
-    <th>view puzzle</th>
-    <td><a href="/admin/showpuzzle/{{puzzle.shortname}}">link</a></td>
-  </tr>
-  <tr><th>hunt ops info</th><td>
-      {% if puzzle.for_ops_url %}
-      <a href="{{puzzle.for_ops_url}}">link</a>
-      {% else %}
-      <p>No hunt ops information for this puzzle!</p>
-      {% end %}
     </td>
   </tr>
 </table>

@@ -4,7 +4,7 @@
 {% block title %}{{puzzle.title}}{% end %}
 
 {% block head %}
-{% if puzzle.html_head %}{% raw puzzle.html_head %}{% end %}
+{% if head %}{% raw head %}{% end %}
 {% end %}
 
 
@@ -16,7 +16,7 @@
 
     <h2 id="puzzletitle"><div id=vspace></div>{% raw supertitle %}{{puzzle.title}}</h2>
     <div id="puzz">
-      {% raw puzzle.html_body %}
+      {% raw body %}
     </div>
   </div>
 </div>

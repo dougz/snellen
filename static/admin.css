@@ -49,6 +49,20 @@ td.h1 {
     vertical-align: baseline;
 }
 
+td.h1 a.content {
+    font-family: 'Merriweather Sans', sans-serif;
+    display: inline-block;
+    color: white;
+    font-size: 59%;
+    padding: 4px 12px;
+    margin: 8px 8px 8px 0;
+    box-sizing: border-box;
+    border: 1px solid #a32f80;
+    border-radius: 15px;
+    background: linear-gradient(to bottom, #ba63a0, #8f2970);
+    outline: none;
+}
+
 /* #5d5c61  #379683  #7395ae  #557a95  #b1a296 */
 
 .lightblue { background-color: #7395ae; }

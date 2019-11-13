@@ -119,7 +119,7 @@ class TeamDataHandler(util.AdminHandler):
 
 class PuzzleContentPage(util.AdminPageHandler):
   @login.required("admin")
-  def get(self, shortname):
+  def get(self, which, shortname):
     puzzle = game.Puzzle.get_by_shortname(shortname)
     if not puzzle:
       print(f"no puzzle called {shortname}")
@@ -131,7 +131,15 @@ class PuzzleContentPage(util.AdminPageHandler):
       supertitle=""
 
     self.pagepuzzle = puzzle
-    self.render("admin_puzzle_frame.html", supertitle=supertitle)
+    if which == "puzzle":
+      head = puzzle.html_head
+      body = puzzle.html_body
+    else:
+      head = puzzle.solution_head
+      body = puzzle.solution_body
+
+    self.render("admin_puzzle_frame.html", supertitle=supertitle,
+                head=head, body=body)
 
   def get_template_namespace(self):
     land = self.pagepuzzle.land
@@ -529,7 +537,7 @@ def GetHandlers():
     (r"/admin/confirm_change_start$", ConfirmChangeStartPage),
     (r"/admin/taskqueue$", TaskQueuePage),
     (r"/admin/puzzle/([a-z0-9_]+)$", PuzzlePage),
-    (r"/admin/showpuzzle/([a-z0-9_]+)$", PuzzleContentPage),
+    (r"/admin/show/(puzzle|solution)/([a-z0-9_]+)$", PuzzleContentPage),
     (r"/admin/puzzles$", ListPuzzlesPage),
     (r"/admin/team/([a-z0-9_]+)$", TeamPage),
     (r"/admin/team/([a-z0-9_]+)/puzzle/([a-z0-9_]+)$", TeamPuzzlePage),

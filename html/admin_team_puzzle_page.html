@@ -10,6 +10,15 @@
   <tr><th>puzzle</th><td class=h1><a href="/admin/puzzle/{{puzzle.shortname}}">{{puzzle.title}}</a>
       &nbsp;
       <span class="landtag" style="background-color: {{puzzle.land.color}};">{{puzzle.land.symbol}}</span>
+      <br>
+      <a class="content" href="/admin/show/puzzle/{{puzzle.shortname}}">&#x25b6; puzzle</a>
+      <a class="content" href="/admin/show/solution/{{puzzle.shortname}}">&#x25b6; solution</a>
+      {% if puzzle.for_ops_url %}
+      <a class="content" href="{{puzzle.for_ops_url}}">&#x25b6; hunt ops</a>
+      {% else %}
+      <span>MISSING hunt ops info!</span>
+      {% end %}
+    </td>
   </td></tr>
 
   <tr><th>state</th><td id="tppstate"></td></tr>

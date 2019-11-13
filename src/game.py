@@ -1494,6 +1494,8 @@ class Puzzle:
 
     self.html_head = j.get("html_head")
     self.html_body = j["html_body"]
+    self.solution_head = j.get("solution_head")
+    self.solution_body = j.get("solution_body", "(MISSING SOLUTION)")
     self.for_ops_url = j.get("for_ops_url", None)
 
     self.post_init(land, icon)
