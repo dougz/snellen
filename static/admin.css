@@ -458,6 +458,10 @@ body > p, body > h2 {
     width: 332px;
 }
 
+#tpphintnoreply {
+    margin-left: 20px;
+}
+
 #tpphintclaim {
     margin: 0 20px;
 }

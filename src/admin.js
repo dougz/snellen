@@ -90,7 +90,9 @@ class A2020_TeamPuzzlePage {
         this.tppsubmitbody = goog.dom.getElement("tppsubmitbody");
 
         goog.events.listen(goog.dom.getElement("tpphintreply"),
-                           goog.events.EventType.CLICK, goog.bind(this.submit, this));
+                           goog.events.EventType.CLICK, goog.bind(this.submit, this, true));
+        goog.events.listen(goog.dom.getElement("tpphintnoreply"),
+                           goog.events.EventType.CLICK, goog.bind(this.submit, this, false));
 
         goog.events.listen(this.claimlink, goog.events.EventType.CLICK,
                            goog.bind(this.do_claim, this, "claim"));
@@ -105,18 +107,20 @@ class A2020_TeamPuzzlePage {
                             A2020_expect_204);
     }
 
-    submit() {
-        var text = this.textarea.value;
-        if (text == "") return;
-        this.textarea.value = "";
+    submit(has_reply) {
+        var d = {"team_username": team_username, "puzzle_id": puzzle_id};
+        if (has_reply) {
+            var text = this.textarea.value;
+            if (text == "") return;
+            this.textarea.value = "";
+            d["text"] = text;
+        }
         goog.net.XhrIo.send("/admin/hintreply", function(e) {
             var code = e.target.getStatus();
             if (code != 204) {
                 alert(e.target.getResponseText());
             }
-        }, "POST", admin2020.serializer.serialize({"team_username": team_username,
-                                                   "puzzle_id": puzzle_id,
-                                                   "text": text}));
+        }, "POST", admin2020.serializer.serialize(d));
     }
 
     update() {

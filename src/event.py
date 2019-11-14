@@ -259,7 +259,7 @@ class HintHistoryHandler(util.TeamHandler):
     if not state:
       raise tornado.web.HTTPError(http.client.NOT_FOUND)
 
-    d = {"history": [msg.json_dict() for msg in state.hints]}
+    d = {"history": [msg.json_dict() for msg in state.hints if not msg.admin_only]}
     self.write(json.dumps(d))
 
 def GetHandlers():

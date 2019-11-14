@@ -38,12 +38,13 @@ class Log:
 
 
 class HintMessage:
-  def __init__(self, parent, when, sender, text):
+  def __init__(self, parent, when, sender, text, admin_only):
     self.parent = parent  # PuzzleState
     self.when = when
     # sender is either a Team or an AdminUser
     self.sender = sender
     self.text = text
+    self.admin_only = admin_only
 
   def json_dict(self, for_admin=False):
     d = {"when": self.when, "text": self.text}
@@ -1045,6 +1046,25 @@ class Team(login.LoginUser):
     self.send_messages(msg)
 
   @save_state
+  def hint_no_reply(self, now, puzzle, sender):
+    puzzle = Puzzle.get_by_shortname(puzzle)
+    if not puzzle: return
+    state = self.puzzle_state[puzzle]
+
+    sender = login.AdminUser.get_by_username(sender)
+    state.claim = None
+    Global.STATE.task_queue.remove(state)
+
+    self.admin_log.add(now, f"<b>{sender.fullname}</b> marked hint request on {state.admin_html_puzzle} as not needing reply.")
+
+    msg = HintMessage(state, now, sender, "(no reply needed)", True)
+    state.hints.append(msg)
+
+    login.AdminUser.send_messages([{"method": "update",
+                                    "team_username": self.username,
+                                    "puzzle_id": puzzle.shortname}], flush=True)
+
+  @save_state
   def add_hint_text(self, now, puzzle, sender, text):
     puzzle = Puzzle.get_by_shortname(puzzle)
     if not puzzle: return
@@ -1075,7 +1095,7 @@ class Team(login.LoginUser):
       self.activity_log.add(now, f"Hunt HQ replied to hint request on {puzzle.html}.")
       self.admin_log.add(now, f"<b>{sender.fullname}</b> replied to hint request on {state.admin_html_puzzle}.")
 
-    msg = HintMessage(state, now, sender, text)
+    msg = HintMessage(state, now, sender, text, False)
     state.hints.append(msg)
 
     self.invalidate(puzzle)

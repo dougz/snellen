@@ -271,14 +271,15 @@ class HintReplyHandler(util.AdminHandler):
     shortname = self.args.get("puzzle_id")
     puzzle = self.get_puzzle(shortname)
 
-    text = self.args.get("text", "").rstrip()
-    if not text:
-      raise tornado.web.HTTPError(http.client.BAD_REQUEST)
-    text = html.escape(text).replace("\n", "<br>")
+    text = self.args.get("text", None)
+    if text:
+      text = text.rstrip()
+      text = html.escape(text).replace("\n", "<br>")
+      team.add_hint_text(shortname, self.session.user.username, text)
+    else:
+      team.hint_no_reply(shortname, self.session.user.username)
 
-    team.add_hint_text(shortname, self.session.user.username, text)
     await team.flush_messages()
-    await login.AdminUser.flush_messages()
     self.set_status(http.client.NO_CONTENT.value)
 
 
