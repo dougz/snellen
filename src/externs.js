@@ -148,6 +148,8 @@ class MapItem {
         this.new_open;
         /** @type{?MapItem} */
         this.special;
+        /** @type{?boolean} */
+        this.spaceafter;
     }
 }
 

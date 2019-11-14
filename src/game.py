@@ -602,7 +602,7 @@ class Team(login.LoginUser):
            "xywh": i.solved.pos_size,
            "poly": i.solved.poly,
            "special": iod}
-      items.append((("@",), d))
+      items.append(((-1, "@",), d))
 
     if land.puzzles:
       # This is a land map page (the items are puzzles).
@@ -648,7 +648,7 @@ class Team(login.LoginUser):
           dd = {"icon_url": i.under.url,
                 "xywh": i.under.pos_size}
           # Sort these before any puzzle title
-          items.append((("@",), dd))
+          items.append(((-1, "@",), dd))
 
       if keepers:
         KEEPER_PITCH = 44
@@ -689,6 +689,9 @@ class Team(login.LoginUser):
           items.append((("@",), dd))
 
     items.sort(key=lambda i: i[0])
+    for i, (sk, d) in enumerate(items):
+      if i < len(items)-1 and sk[0] != items[i+1][0][0]:
+        d["spaceafter"] = True
     mapdata["items"] = [i[1] for i in items]
 
     mapdata = json.dumps(mapdata)
@@ -1308,9 +1311,9 @@ class Land:
       if "puzzle" in pd:
         p = pd["puzzle"]
         if OPTIONS.placeholders or p.startswith("_"):
-          p = Puzzle.placeholder_puzzle(self, i, p)
+          p = Puzzle.placeholder_puzzle(p)
         else:
-          p = Puzzle.from_json(self, i, os.path.join(event_dir, "puzzles", p + ".json"))
+          p = Puzzle.from_json(os.path.join(event_dir, "puzzles", p + ".json"))
         p.land = self
         p.icon = i
         i.puzzle = p
@@ -1324,6 +1327,8 @@ class Land:
           p.keeper_needed = pd["needed"]
           p.keeper_order = pd["order"]
           self.total_keeper_answers += len(p.keeper_answers)
+
+        p.post_init(self, i)
 
     self.puzzles = tuple(self.icons[i].puzzle for i in cfg.get("order", ()))
     self.additional_puzzles = tuple(self.icons[i].puzzle for i in cfg.get("additional_order", ()))
@@ -1383,7 +1388,13 @@ class Puzzle:
   def post_init(self, land, icon):
     self.land = land
     self.icon = icon
-    self.sortkey = (util.make_sortkey(self.title), id(self))
+    if self.meta:
+      group = 0
+    elif hasattr(self, "keeper_answers"):
+      group = 1
+    else:
+      group = 2
+    self.sortkey = (group, util.make_sortkey(self.title), id(self))
     self.bbid = Puzzle.NEXT_BBID
     Puzzle.NEXT_BBID += 1
 
@@ -1419,7 +1430,7 @@ class Puzzle:
   #PLACEHOLDER_MULTI_ANSWERS = ("BRETT BEERS ANGST BEING SEMINAR AIMLESS INHABIT TUT RENETT RTS FIG DEER ACM IAMB").split()
 
   @classmethod
-  def placeholder_puzzle(cls, land, icon, pstr):
+  def placeholder_puzzle(cls, pstr):
     cls.PLACEHOLDER_COUNT += 1
     number = cls.PLACEHOLDER_COUNT
 
@@ -1490,11 +1501,10 @@ class Puzzle:
     self.solution_body = "The solution goes here."
     self.for_ops_url = "https://isotropic.org/"
 
-    self.post_init(land, icon)
     return self
 
   @classmethod
-  def from_json(cls, land, icon, path):
+  def from_json(cls, path):
     shortname = os.path.splitext(os.path.basename(path))[0]
     with open(path) as f:
       j = json.load(f)
@@ -1530,9 +1540,7 @@ class Puzzle:
     self.solution_body = j.get("solution_body", "(MISSING SOLUTION)")
     self.for_ops_url = j.get("for_ops_url", None)
 
-    self.post_init(land, icon)
     return self
-
 
   @classmethod
   def get_by_shortname(cls, shortname):
@@ -1867,6 +1875,7 @@ class Event:
     p.html_head = None
     p.for_ops_url = ""
     p.max_queued = Puzzle.DEFAULT_MAX_QUEUED
+    p.meta = False
 
     def on_correct_answer(now, team):
       team.receive_fastpass(now, 300)

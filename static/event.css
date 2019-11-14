@@ -926,10 +926,14 @@ div.psign b {
     border-radius: 6px;
 }
 
-.itemlist {
+#maplist {
     width: 600px;
     margin-left: auto;
     margin-right: auto;
+}
+
+#maplist li.spaceafter {
+    margin-bottom: 16px;
 }
 
 #landtitle {

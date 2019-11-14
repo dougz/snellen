@@ -826,7 +826,7 @@ class H2020_MapDraw {
         /** @type{Element} */
         this.mapmap_el = goog.dom.getElement("mapmap");
         /** @type{Element} */
-        this.list_el = goog.dom.getElement("list");
+        this.list_el = goog.dom.getElement("maplist");
 
         /** @type{?Element} */
         this.highlight_el = null;
@@ -938,7 +938,7 @@ class H2020_MapDraw {
                 }
                 a.push(aa);
             }
-            el = goog.dom.createDom("LI", null, a);
+            el = goog.dom.createDom("LI", it.spaceafter ? "spaceafter" : null, a);
             this.list_el.appendChild(el);
         }
     }
