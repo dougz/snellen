@@ -8,6 +8,7 @@ import html
 import json
 import os
 import re
+import statistics
 import string
 import time
 import unicodedata
@@ -350,6 +351,7 @@ class Submission:
       self.team.streak = []
       self.team.last_incorrect_answer = now
 
+    self.puzzle.submitted_teams.add(self.team)
     if self.state == self.INCORRECT:
       same_answer = self.puzzle.incorrect_answers.setdefault(answer, set())
       same_answer.add(self.team)
@@ -358,6 +360,8 @@ class Submission:
           if t.achieve(Achievement.youre_all_wrong, now):
             if t is not self.team:
               asyncio.create_task(t.flush_messages())
+      self.puzzle.incorrect_counts = [(len(v), k) for (k, v) in self.puzzle.incorrect_answers.items()]
+      self.puzzle.incorrect_counts.sort(key=lambda x: (-x[0], x[1]))
 
     self.puzzle_state.requeue_pending(now)
 
@@ -867,6 +871,7 @@ class Team(login.LoginUser):
       state.state = state.OPEN
       state.open_time = now
       self.open_puzzles.add(state)
+      puzzle.open_teams.add(self)
       if puzzle.land.land_order < 1000:
         puzzle.puzzle_log.add(now, f"Opened by {state.admin_html_team}.")
         self.activity_log.add(now, f"{puzzle.html} opened.")
@@ -900,9 +905,6 @@ class Team(login.LoginUser):
         self.cached_mapdata.pop(current_map, None)
         self.dirty_lands.add("home")
       self.invalidate(puzzle)
-      puzzle.puzzle_log.add(now, f"Solved by {state.admin_html_team}.")
-      self.activity_log.add(now, f"{puzzle.html} solved.")
-      self.admin_log.add(now, f"{state.admin_html_puzzle} solved.")
 
       if puzzle.meta and self.videos < 5:
         self.videos += 1
@@ -916,6 +918,7 @@ class Team(login.LoginUser):
 
       solve_duration = state.solve_time - state.open_time
       puzzle.solve_durations[self] = solve_duration
+      puzzle.median_solve_duration = statistics.median(puzzle.solve_durations.values())
       if (puzzle.fastest_solver is None or
           puzzle.solve_durations[puzzle.fastest_solver] > solve_duration):
         # a new record
@@ -924,6 +927,11 @@ class Team(login.LoginUser):
           asyncio.create_task(puzzle.fastest_solver.flush_messages())
         puzzle.fastest_solver = self
         self.achieve(Achievement.champion, now)
+
+      durtxt = util.format_duration(solve_duration)
+      puzzle.puzzle_log.add(now, f"Solved by {state.admin_html_team} ({durtxt}).")
+      self.activity_log.add(now, f"{puzzle.html} solved.")
+      self.admin_log.add(now, f"{state.admin_html_puzzle} solved ({durtxt}).")
 
       if solve_duration < 60:
         self.achieve(Achievement.speed_demon, now)
@@ -1362,9 +1370,13 @@ class Puzzle:
     self.puzzle_log = Log()
     self.zip_version = None
 
-    self.solve_durations = {}
+    self.median_solve_duration = None
+    self.solve_durations = {}     # {team: duration}
     self.fastest_solver = None
-    self.incorrect_answers = {}
+    self.incorrect_answers = {}   # {answer: {teams}}
+    self.incorrect_counts = []    # [count: answer]
+    self.open_teams = set()
+    self.submitted_teams = set()
 
     save_state.add_instance("Puzzle:" + shortname, self)
 

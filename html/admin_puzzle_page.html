@@ -8,10 +8,10 @@
 <table class=info>
   <tr><th>title</th>
     <td class=h1>{{puzzle.title}}<br>
-      <a class="content" href="/admin/show/puzzle/{{puzzle.shortname}}">&#x25b6; puzzle</a>
-      <a class="content" href="/admin/show/solution/{{puzzle.shortname}}">&#x25b6; solution</a>
+      <a class="content" href="/admin/show/puzzle/{{puzzle.shortname}}">&#x25b6;&#xfe0e; puzzle</a>
+      <a class="content" href="/admin/show/solution/{{puzzle.shortname}}">&#x25b6;&#xfe0e; solution</a>
       {% if puzzle.for_ops_url %}
-      <a class="content" href="{{puzzle.for_ops_url}}">&#x25b6; hunt ops</a>
+      <a class="content" href="{{puzzle.for_ops_url}}">&#x25b6;&#xfe0e; hunt ops</a>
       {% else %}
       <span>MISSING hunt ops info!</span>
       {% end %}
@@ -82,9 +82,15 @@
       <a id=hinttimechange class="miniaction">Change</a>
   </td></tr>
 
-  <tr><th class=top>solves (<span id="ppsolvecount"></span>)</th>
-    <td id="ppsolvelist"></td>
+  <tr><th>team counts</th>
+    <td>
+      open <span id="ppopencount" class="b"></span> &nbsp;&nbsp;
+      submitted <span id="ppsubmittedcount" class="b"></span> &nbsp;&nbsp;
+      solved <span id="ppsolvedcount" class="b"></span>
+    </td>
   </tr>
+  <tr><th>median solve</th><td id="ppmediansolve"></td></tr>
+  <tr><th>incorrect submissions</th><td id="ppbadsubmit"></td></tr>
   <tr><th class=center>go to team</th>
     <td>
       <div id="teamselect" class="ac-select">

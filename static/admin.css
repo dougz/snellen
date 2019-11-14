@@ -880,4 +880,13 @@ tr.submit-pending .submit-state { color: #666 }
     padding-left: 32px;
 }
 
+.badsubmitcount {
+    font-weight: bold;
+}
+
+.badsubmit {
+    font-family: 'Inconsolata', monospace;
+    font-weight: bold;
+}
+
 

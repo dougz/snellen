@@ -163,12 +163,11 @@ class PuzzleDataHandler(util.AdminHandler):
   def get(self, shortname):
     puzzle = self.get_puzzle(shortname)
 
-    solves = []
-    for team, d in puzzle.solve_durations.items():
-      solves.append({"username": team.username, "name": team.name, "duration": d})
-    solves.sort(key=lambda d: d["duration"])
-
-    d = {"solves": solves,
+    d = {"median_solve": puzzle.median_solve_duration,
+         "open_count": len(puzzle.open_teams),
+         "submitted_count": len(puzzle.submitted_teams),
+         "solve_count": len(puzzle.solve_durations),
+         "incorrect_answers": puzzle.incorrect_counts,
          "hint_time": puzzle.hints_available_time,
          "log": puzzle.puzzle_log.get_data()}
 

@@ -128,8 +128,16 @@ class TeamPageData {
 
 class PuzzlePageData {
     constructor() {
-        /** @type{Array<SolvedPuzzle>} */
-        this.solves;
+        /** @type{number} */
+        this.median_solve;
+        /** @type{number} */
+        this.open_count;
+        /** @type{number} */
+        this.submitted_count;
+        /** @type{number} */
+        this.solve_count;
+        /** @type{Array<number, string>} */
+        this.incorrect_answers;
         /** @type{Array<LogEntry>} */
         this.log;
         /** @type{number} */
