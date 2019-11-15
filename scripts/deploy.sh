@@ -7,6 +7,18 @@ if [[ -z "$HUNT2020_BASE" ]]; then
     exit 1
 fi
 
+if [[ -z "$1" ]]; then
+    echo "Must specify event dir as argument."
+    exit 1
+fi
+
+EVENT="$1"
+
+if [[ ! -d "$EVENT" ]]; then
+    echo "No dir \"$EVENT\"."
+    exit 1
+fi
+
 cd "$HUNT2020_BASE"
 version="$(date +"%Y%m%d-%H%M%S")-1"
 
@@ -44,31 +56,12 @@ PUZZLE_SERVERS=(badart tugofwar tunnel_of_love hat_venn_dor masked_images)
 )
 
 ##
-## bts
+## event
 ##
 
 (
-    cd bts
-    base="${base}/bts"
-    install -m 0755 -d "${base}"
-
-    for i in map_config.json teams.json admins.json; do
-	install -m 0644 $i "${base}/${i}"
-    done
-
-    install -m 0755 -d "${base}/puzzles"
-    for i in puzzles/*.json; do
-	install -m 0644 $i "${base}/${i}"
-    done
-)
-
-##
-## test_event
-##
-
-(
-    cd test_event
-    base="${base}/test_event"
+    cd $EVENT
+    base="${base}/event"
     install -m 0755 -d "${base}"
 
     for i in map_config.json teams.json admins.json; do

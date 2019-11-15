@@ -6,7 +6,7 @@ Type=simple
 Environment=HUNT2020_BASE=/sites/hunt2020
 WorkingDirectory=/sites/hunt2020/snellen
 ExecStart=/sites/hunt2020/snellen/src/main.py \
-  --event_dir "${HUNT2020_BASE}/bts" \
+  --event_dir "${HUNT2020_BASE}/event" \
   --template_path "${HUNT2020_BASE}/snellen/html" \
   --wait_proxies 5
 

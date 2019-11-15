@@ -7,7 +7,7 @@ Environment=HUNT2020_BASE=/sites/hunt2020
 Environment=PYTHONPATH=/sites/hunt2020/snellen/src
 WorkingDirectory=/sites/hunt2020/masked_images
 ExecStart=/sites/hunt2020/masked_images/masked_images.py \
-  --assets_json="${HUNT2020_BASE}/test_event/puzzles/masked_images.assets.json"
+  --assets_json="${HUNT2020_BASE}/event/puzzles/masked_images.assets.json"
 
 [Install]
 WantedBy=hunt2020.target
