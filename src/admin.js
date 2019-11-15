@@ -563,11 +563,16 @@ class A2020_TeamPage {
         this.tpscore = goog.dom.getElement("tpscore");
 
         var el;
+        el = goog.dom.getElement("enablebestow");
+        goog.events.listen(el, goog.events.EventType.CLICK, function(e) {
+            goog.dom.getElement("bestowfastpass").disabled = false;
+        });
 
         el = goog.dom.getElement("bestowfastpass");
         goog.events.listen(el, goog.events.EventType.CLICK, function(e) {
             goog.net.XhrIo.send("/admin/bestowfastpass/" + team_username, A2020_expect_204);
             e.target.blur();
+            e.target.disabled = true;
         });
 
         el = goog.dom.getElement("tpaddnote");
@@ -650,7 +655,8 @@ class A2020_TeamPage {
 
         el = this.tpfastpass;
         el.innerHTML = "";
-        if (data.fastpasses) {
+        if (data.fastpasses && data.fastpasses.length > 0) {
+            el.style.display = "inline";
             for (i = 0; i < data.fastpasses.length; ++i) {
                 if (i > 0) {
                     el.appendChild(goog.dom.createTextNode(", "));
@@ -659,6 +665,8 @@ class A2020_TeamPage {
                 sp.setAttribute("data-until", data.fastpasses[i]);
                 el.appendChild(sp);
             }
+        } else {
+            el.style.display = "none";
         }
 
         A2020_DisplayLog(this.tplog, data.log);
