@@ -453,6 +453,8 @@ class Team(login.LoginUser):
 
   GLOBAL_FASTPASS_QUEUE = []
 
+  VIDEOS_BY_SCORE = {0: 1, 16: 2, 31: 3, 46: 4, 62: 5}
+
   cached_bb_label_info = None
 
   def __init__(self, username, info):
@@ -922,8 +924,12 @@ class Team(login.LoginUser):
         self.dirty_lands.add("home")
       self.invalidate(puzzle)
 
-      if puzzle.meta and self.videos < 5:
-        self.videos += 1
+      new_videos = 0
+      for s, v in Team.VIDEOS_BY_SCORE.items():
+        if self.score >= s:
+          new_videos = max(new_videos, v)
+      if new_videos > self.videos:
+        self.videos = new_videos
         self.send_messages([
           {"method": "video",
            "video_url": OPTIONS.static_content.get(f"video{self.videos}.mp4"),
