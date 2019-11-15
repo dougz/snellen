@@ -473,11 +473,6 @@ class Team(login.LoginUser):
 
     save_state.add_instance("Team:" + username, self)
 
-    # Create a PuzzleState object for all puzzles that exist.
-    self.puzzle_state = {}
-    for puzzle in Puzzle.all_puzzles():
-      self.puzzle_state[puzzle] = PuzzleState(self, puzzle)
-
     self.map_mode = "inner_only"
     self.open_lands = {}
     self.sorted_open_lands = []
@@ -508,6 +503,13 @@ class Team(login.LoginUser):
 
     self.admin_url = f"/admin/team/{username}"
     self.admin_html = f'<a href="{self.admin_url}">{html.escape(self.name)}</a>'
+
+  def post_init(self):
+    # Create a PuzzleState object for all puzzles that exist.
+    self.puzzle_state = {}
+    for puzzle in Puzzle.all_puzzles():
+      self.puzzle_state[puzzle] = PuzzleState(self, puzzle)
+
 
   def __repr__(self):
     return f"<Team {self.username}>"
@@ -1899,7 +1901,23 @@ class Event:
 
     def on_correct_answer(now, team):
       team.receive_fastpass(now, 300)
+      ps = team.puzzle_state[cls.PUZZLE]
+      completed = [e.answer in ps.answers_found for e in cls.ALL_EVENTS]
+      team.send_messages([{"method": "event_complete", "completed": completed}])
 
     p.on_correct_answer = on_correct_answer
 
     p.post_init(cls.EventLand(), None)
+
+    e = [e for e in cls.ALL_EVENTS if e.time == "__special__"][0]
+    e.team_time = {}
+
+    teams_by_size = [((t.size, id(t)), t) for t in Team.all_teams()]
+    teams_by_size.sort()
+    half = (len(teams_by_size)+1) // 2
+    for i, (_, t) in enumerate(teams_by_size):
+      if i < half:
+        e.team_time[t] = "10:30am Saturday"
+      else:
+        e.team_time[t] = "9am Saturday"
+    e.time = None

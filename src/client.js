@@ -31,12 +31,12 @@ class H2020_Dispatcher {
             "update_map": this.update_map,
             "update_header": this.update_header,
             "video": this.video,
+            "event_complete": this.event_complete,
         }
     }
 
     /** @param{Message} msg */
     dispatch(msg) {
-        console.log(msg);
         this.methods[msg.method](msg);
     }
 
@@ -195,6 +195,21 @@ class H2020_Dispatcher {
     update_map(msg) {
         if (hunt2020.map_draw) {
             hunt2020.map_draw.update_map(msg);
+        }
+    }
+
+    /** @param{Message} msg */
+    event_complete(msg) {
+        var els = document.querySelectorAll(".eventcomplete");
+        if (els && els.length == msg.completed.length) {
+            for (var i = 0; i < els.length; ++i) {
+                var idx = els[i].id.substr(5);
+                if (msg.completed[parseInt(idx, 10)]) {
+                    els[i].innerHTML = "Completed";
+                } else {
+                    els[i].innerHTML = "";
+                }
+            }
         }
     }
 }
@@ -461,7 +476,6 @@ class H2020_SubmitPanel {
 
     /** @param{SubmissionHistory} response */
     render_history(response) {
-        console.log(response);
         if (response.total) {
             var t = response.total;
             var c = response.correct;

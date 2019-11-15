@@ -76,7 +76,6 @@ async def main_server(options):
   game.Achievement.define_achievements(static_content)
   for shortname, d in cfg["events"].items():
     game.Event(shortname, d)
-  game.Event.post_init()
   if options.debug:
     debug.DebugPathHandler.set_static_content(static_content)
   login.Login.set_static_content(static_content)
@@ -91,6 +90,11 @@ async def main_server(options):
     teams = json.load(f)
     for username, d in teams.items():
       game.Team(username, d)
+
+  game.Event.post_init()
+
+  for team in game.Team.all_teams():
+    team.post_init()
 
   save_state.open(os.path.join(options.event_dir, "state.log"))
   save_state.replay(advance_time=game.Submission.process_submit_queue)

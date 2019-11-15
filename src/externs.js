@@ -67,6 +67,8 @@ class Message {
         this.passes;
         /** @type{?string} */
         this.stuff;
+        /** @type{?Array<boolean>} */
+        this.completed;
     }
 }
 

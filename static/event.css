@@ -991,3 +991,23 @@ div.psign b {
 .videothumb {
     margin-top: 12px;
 }
+
+.eventtitle {
+    float: left;
+}
+
+.eventtime {
+    float: right;
+    font-style: italic;
+}
+
+.eventtext {
+    clear: both;
+}
+
+.eventcomplete {
+    margin-left: 20px;
+    text-transform: uppercase;
+    font-weight: bold;
+    color: red;
+}

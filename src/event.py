@@ -150,7 +150,10 @@ class EventsPage(util.TeamPageHandler):
   def get(self):
     self.session.visit_page("events")
     self.puzzle = game.Event.PUZZLE
-    self.render("events.html", events=game.Event.ALL_EVENTS)
+    ps = self.team.puzzle_state[self.puzzle]
+    completed = [e.answer in ps.answers_found for e in game.Event.ALL_EVENTS]
+
+    self.render("events.html", events=game.Event.ALL_EVENTS, completed=completed)
 
 class EventsDataHandler(util.TeamHandler):
   @login.required("team")
