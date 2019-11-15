@@ -584,11 +584,24 @@ class Team(login.LoginUser):
       return self.cached_mapdata[land]
     print(f"mapdata cache miss: {self.username} {land.shortname}")
 
+    if isinstance(land.base_img, str):
+      # most maps: single fixed base image
+      base_img = land.base_img
+      base_size = land.base_size
+    else:
+      # Safari map: base changes as puzzles open
+      need_base = 0
+      for i, p in enumerate(land.base_min_puzzles):
+        if self.puzzle_state[p].state != PuzzleState.CLOSED:
+          need_base = max(i, need_base)
+      base_img = land.base_img[need_base]
+      base_size = land.base_size[need_base]
+
     items = []
-    mapdata = {"base_url": land.base_img,
+    mapdata = {"base_url": base_img,
                "shortname": land.shortname,
-               "width": land.base_size[0],
-               "height": land.base_size[1]}
+               "width": base_size[0],
+               "height": base_size[1]}
     now = time.time()
 
     if land.shortname == "safari":
@@ -1332,6 +1345,7 @@ class Land:
 
     self.puzzles = tuple(self.icons[i].puzzle for i in cfg.get("order", ()))
     self.additional_puzzles = tuple(self.icons[i].puzzle for i in cfg.get("additional_order", ()))
+    self.base_min_puzzles = tuple(self.icons[i].puzzle for i in cfg.get("base_min_puzzles", ()))
     self.all_puzzles = self.additional_puzzles + self.puzzles
 
   def __repr__(self):

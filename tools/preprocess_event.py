@@ -15,7 +15,7 @@ import oauth2
 
 SECRET_KEY_LENGTH = 16
 
-DEFAULT_BASE_IMG = "map_base.png"
+BASE_IMG = "map_base{}.png"
 
 
 def upload_file(path, options, processor=None):
@@ -58,12 +58,27 @@ def convert_map(shortname, d, options):
   copyif("initial_puzzles")
   copyif("order")
   copyif("additional_order")
+  copyif("base_min_puzzles")
   print(f"Parsing {shortname} \"{d['title']}\"...")
 
   base_img = os.path.join(options.input_assets, shortname,
-                          d.get("base_img", DEFAULT_BASE_IMG))
-  out["base_size"] = get_image_size(base_img)
-  out["base_img"] = upload_file(base_img, options)
+                          BASE_IMG.format(""))
+  if os.path.exists(base_img):
+    out["base_size"] = get_image_size(base_img)
+    out["base_img"] = upload_file(base_img, options)
+  else:
+    i = 0
+    out["base_size"] = []
+    out["base_img"] = []
+    while True:
+      base_img = os.path.join(options.input_assets, shortname,
+                              BASE_IMG.format(i))
+      if not os.path.exists(base_img): break
+      out["base_size"].append(get_image_size(base_img))
+      out["base_img"].append(upload_file(base_img, options))
+      i += 1
+
+  assert out["base_img"]
 
   if "logo" in d:
     src_image = os.path.join(options.input_assets, shortname,
