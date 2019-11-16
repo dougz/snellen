@@ -71,6 +71,7 @@ class H2020_Dispatcher {
             hunt2020.toast_manager.add_toast(
                 "You're now eligible to request hints for <b>" + msg.title + "</b>.",
                 6000, null, "salmon", "/guest_services?p=" + msg.puzzle_id);
+            if (hunt2020.activity) hunt2020.activity.update();
         }
     }
 
