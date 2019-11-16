@@ -1094,7 +1094,48 @@ class H2020_GuestServices {
         goog.events.listen(this.use_button, goog.events.EventType.CLICK,
                            goog.bind(this.use, this));
 
-        this.build_fastpass(/** @type{FastPassState} */ (initial_json));
+        this.build_fastpass(/** @type{FastPassState} */ (initial_json.fastpass));
+
+        /** @type{Element} */
+        this.hintnone = goog.dom.getElement("hintnone");
+        /** @type{Element} */
+        this.hintsome = goog.dom.getElement("hintsome");
+        /** @type{Element} */
+        this.hintselect = goog.dom.getElement("hintselect");
+
+        goog.events.listen(this.hintselect, goog.events.EventType.CHANGE,
+                           goog.bind(this.select_puzzle, this));
+
+        this.build_hints(initial_json.hints);
+    }
+
+    select_puzzle(e) {
+        var puzzle = this.hintselect.options[this.hintselect.selectedIndex].value;
+        console.log(puzzle);
+        this.hintselect.style.color = "initial";
+    }
+
+    build_hints(data) {
+        if (data.available.length > 0) {
+            this.hintnone.style.display = "none";
+            this.hintsome.style.display = "block";
+
+            this.hintselect.innerHTML = "";
+            this.hintselect.appendChild(
+                goog.dom.createDom("OPTION", {value: "", selected: true, disabled: true}, "select"));
+            this.hintselect.style.color = "#ccc";
+            for (var i = 0; i < data.available.length; ++i) {
+                var it = data.available[i];
+                this.hintselect.appendChild(
+                    goog.dom.createDom("OPTION", {value: it[0]}, it[1]));
+            }
+        } else {
+            // No hints available.
+            this.hintnone.style.display = "block";
+            this.hintsome.style.display = "none";
+        }
+
+        console.log(data);
     }
 
     /** @param{FastPassState} data */

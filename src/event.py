@@ -164,7 +164,9 @@ class GuestServicesPage(util.TeamPageHandler):
   @login.required("team")
   def get(self):
     self.session.visit_page("guest_services")
-    json_data = "<script>var initial_json = " + json.dumps(self.team.get_fastpass_data()) + ";</script>"
+    d = {"fastpass": self.team.get_fastpass_data(),
+         "hints": self.team.get_open_hints_data()}
+    json_data = "<script>var initial_json = " + json.dumps(d) + ";</script>"
     self.render("guest_services.html", json_data=json_data)
 
 class ApplyFastPassHandler(util.TeamHandler):

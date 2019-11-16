@@ -483,6 +483,7 @@ class Team(login.LoginUser):
     self.last_score_change = 0
     self.score_to_go = None
     self.videos = 1
+    self.hints_open = set()
 
     self.message_mu = asyncio.Lock()
     self.message_serial = 1
@@ -500,6 +501,7 @@ class Team(login.LoginUser):
 
     self.cached_bb_data = None
     self.cached_mapdata = {}
+    self.cached_open_hints_data = None
 
     self.admin_url = f"/admin/team/{username}"
     self.admin_html = f'<a href="{self.admin_url}">{html.escape(self.name)}</a>'
@@ -982,8 +984,7 @@ class Team(login.LoginUser):
     return self.puzzle_state[puzzle]
 
   def invalidate(self, puzzle=None, flush=True):
-    if self.cached_bb_data:
-      self.cached_bb_data = None
+    self.cached_bb_data = None
     login.AdminUser.notify_update(self, puzzle, flush=flush)
 
   BB_PUZZLE_COLOR = {PuzzleState.CLOSED: "#dddddd",
@@ -1064,6 +1065,14 @@ class Team(login.LoginUser):
 
     return self.cached_bb_data
 
+  def get_open_hints_data(self):
+    if self.cached_open_hints_data is not None:
+      return self.cached_open_hints_data
+
+    oh = [[p.shortname, p.title] for p in sorted(self.hints_open, key=lambda p: p.sortkey)]
+    self.cached_open_hints_data = {"available": oh}
+    return self.cached_open_hints_data
+
   @save_state
   def open_hints(self, now, puzzle):
     puzzle = Puzzle.get_by_shortname(puzzle)
@@ -1071,6 +1080,8 @@ class Team(login.LoginUser):
     ps = self.puzzle_state[puzzle]
     if ps.hints_available: return
     ps.hints_available = True
+    self.hints_open.add(puzzle)
+    self.cached_open_hints_data = None
     puzzle.puzzle_log.add(now, f"Hints available to {ps.admin_html_team}.")
     self.activity_log.add(now, f"Hints available for {puzzle.html}.")
     self.admin_log.add(now, f"Hints available for {ps.admin_html_puzzle}.")
@@ -1391,7 +1402,7 @@ class Puzzle:
     self.url = f"/puzzle/{shortname}"
     self.admin_url = f"/admin/puzzle/{shortname}"
     self.points = 1
-    self.hints_available_time = 15 # 12 * 3600   # 12 hours
+    self.hints_available_time = 5 # 12 * 3600   # 12 hours
     self.emojify = False
     self.explanations = {}
     self.puzzle_log = Log()

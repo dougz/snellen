@@ -1015,3 +1015,10 @@ div.psign b {
 #navpass {
     display: none;
 }
+
+select {
+    font-family: 'Merriweather Sans', sans-serif;
+    font-size: 16px;
+}
+
+
