@@ -1011,3 +1011,7 @@ div.psign b {
     font-weight: bold;
     color: red;
 }
+
+#navpass {
+    display: none;
+}

@@ -160,12 +160,12 @@ class EventsDataHandler(util.TeamHandler):
   def get(self):
     self.write(json.dumps({}))
 
-class FastPassPage(util.TeamPageHandler):
+class GuestServicesPage(util.TeamPageHandler):
   @login.required("team")
   def get(self):
-    self.session.visit_page("fastpass")
+    self.session.visit_page("guest_services")
     json_data = "<script>var initial_json = " + json.dumps(self.team.get_fastpass_data()) + ";</script>"
-    self.render("fastpass.html", json_data=json_data)
+    self.render("guest_services.html", json_data=json_data)
 
 class ApplyFastPassHandler(util.TeamHandler):
   @login.required("team")
@@ -272,7 +272,7 @@ def GetHandlers():
     (r"/videos", VideosPage),
     (r"/pins", AchievementPage),
     (r"/events", EventsPage),
-    (r"/pennypass$", FastPassPage),
+    (r"/guest_services$", GuestServicesPage),
     (r"/health_and_safety", HealthAndSafetyPage),
     (r"/land/([a-z0-9_]+)", LandMapPage),
     (r"/puzzle/([a-z0-9_]+)/?", PuzzlePage),

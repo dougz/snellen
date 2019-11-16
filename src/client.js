@@ -78,13 +78,15 @@ class H2020_Dispatcher {
     update_header(msg) {
         goog.dom.getElement("buzz").innerHTML = msg.score;
 
+        var el = goog.dom.getElement("navpass");
         if (msg.passes) {
-            goog.dom.getElement("navpass").innerHTML = "PennyPasses (" + msg.passes + ")";
+            el.style.display = "inline";
+            el.innerHTML = "(" + msg.passes + ")";
         } else {
-            goog.dom.getElement("navpass").innerHTML = "PennyPasses";
+            el.style.display = "none";
         }
 
-        var el = goog.dom.getElement("landtags");
+        el = goog.dom.getElement("landtags");
         el.innerHTML = "";
         for (var i = 0; i < msg.lands.length; ++i) {
             var a = goog.dom.createDom("A", {className: "landtag",
@@ -159,7 +161,7 @@ class H2020_Dispatcher {
     /** @param{Message} msg */
     receive_fastpass(msg) {
         hunt2020.toast_manager.add_toast(
-            "You've received a PennyPass!", 6000, null, "blue", "/pennypass");
+            "You've received a PennyPass!", 6000, null, "blue", "/guest_services");
         if (hunt2020.fastpass) {
             hunt2020.fastpass.build(msg.fastpass);
         }

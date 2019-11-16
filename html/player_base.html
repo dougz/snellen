@@ -24,8 +24,8 @@
       {% block topnav_extraright %}{% end %}
       {% block topnav_startedright %}
       {% if park_open %}
-        <span id="buzz"></span>
-        <a id="navpass" href="/pennypass">PennyPasses</a>
+      <span id="buzz"></span>
+      <span id="navpass"></span>
       {% end %}
       <div id="dropdown">
         <button id="dropbtn">
@@ -37,6 +37,7 @@
           {% if park_open %}
           <a href="/videos">Videos</a>
           <a href="/pins">Pins</a>
+          <a href="/guest_services">Guest Services</a>
           <a href="/log">Activity Log</a>
           {% else %}
           <a href="/">Home</a>
