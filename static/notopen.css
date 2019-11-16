@@ -18,20 +18,32 @@ body {
     animation: scudding linear 150s forwards infinite;
 }
 
+#openwait {
+    z-index: 100;
+}
+
 @keyframes scudding {
     0% { background-position: 0 0; }
     100% { background-position: 1733px 0; }
 }
 
 #nonnav {
-    background: url(@@STATIC:inner_only/land_tree.png@@) bottom repeat-x,
-		#c3dffb;
+    background: #c3dffb;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     height: calc(100vh - 41px);
     font-size: 144%;
+}
+
+#trees {
+    background: url(@@STATIC:inner_only/land_tree.png@@) bottom repeat-x;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 263px;
 }
 
 a { text-decoration: none; }
