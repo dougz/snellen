@@ -145,8 +145,8 @@ class H2020_Dispatcher {
             "<b>" + msg.title + "</b> is now open!", 6000, null, "blue",
             "/land/" + msg.land);
         if (hunt2020.activity) hunt2020.activity.update();
-        if (hunt2020.fastpass) {
-            hunt2020.fastpass.build(msg.fastpass);
+        if (hunt2020.guest_services) {
+            hunt2020.guest_services.build_fastpass(msg.fastpass);
         }
     }
 
@@ -162,8 +162,8 @@ class H2020_Dispatcher {
     receive_fastpass(msg) {
         hunt2020.toast_manager.add_toast(
             "You've received a PennyPass!", 6000, null, "blue", "/guest_services");
-        if (hunt2020.fastpass) {
-            hunt2020.fastpass.build(msg.fastpass);
+        if (hunt2020.guest_services) {
+            hunt2020.guest_services.build_fastpass(msg.fastpass);
         }
         if (hunt2020.activity) hunt2020.activity.update();
     }
@@ -173,8 +173,8 @@ class H2020_Dispatcher {
         var text;
         text = "A PennyPass has been applied to <b>" + msg.title + "</b>!";
         hunt2020.toast_manager.add_toast(text, 6000, null, "blue", "/land/" + msg.land);
-        if (hunt2020.fastpass) {
-            hunt2020.fastpass.build(msg.fastpass);
+        if (hunt2020.guest_services) {
+            hunt2020.guest_services.build_fastpass(msg.fastpass);
         }
         if (hunt2020.activity) hunt2020.activity.update();
     }
@@ -1082,7 +1082,7 @@ class H2020_AudioManager {
     }
 }
 
-class H2020_FastPass {
+class H2020_GuestServices {
     constructor() {
         /** @type{?string} */
         this.sel_shortname = null;
@@ -1094,11 +1094,11 @@ class H2020_FastPass {
         goog.events.listen(this.use_button, goog.events.EventType.CLICK,
                            goog.bind(this.use, this));
 
-        this.build(/** @type{FastPassState} */ (initial_json));
+        this.build_fastpass(/** @type{FastPassState} */ (initial_json));
     }
 
     /** @param{FastPassState} data */
-    build(data) {
+    build_fastpass(data) {
         var e_none = goog.dom.getElement("fphavenone");
         var e_some = goog.dom.getElement("fphavesome");
         if (data.expire_time.length == 0) {
@@ -1192,7 +1192,7 @@ var hunt2020 = {
     audio_manager: null,
     map_draw: null,
     counter: null,
-    fastpass: null,
+    guest_services: null,
     activity: null,
     achievements: null,
     videos: null,
@@ -1295,9 +1295,9 @@ window.onload = function() {
         hunt2020.achievements = new H2020_Achievements();
     }
 
-    // Only present on the fastpass page.
+    // Only present on the guest services page.
     if (goog.dom.getElement("fphavenone")) {
-        hunt2020.fastpass = new H2020_FastPass();
+        hunt2020.guest_services = new H2020_GuestServices();
     }
 
     if (initial_header) {
