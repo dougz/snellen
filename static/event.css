@@ -157,7 +157,7 @@ input, button, .emoji-input {
 
 /* The spacer should take up all the extra space, forcing the items
    before it to the left and those after it to the right. */
-#topnav .spacer {
+#topnav .spacer, #hintheader .spacer {
     flex-grow: 100;
 }
 
@@ -940,6 +940,13 @@ select option {
     color: black;
 }
 
+
+
+#hintheader {
+    display: flex;
+    flex-direction: row;
+}
+
 #hintui {
     display: none;
     background-color: #e7f1fd;
@@ -953,7 +960,7 @@ select option {
     color: #222;
 }
 
-#hinthistory #hintnone {
+#hinthistory #hintnotyet {
     display: block;
     font-weight: bold;
     margin: 20px;
@@ -1009,5 +1016,10 @@ select option {
     color: yellow;
     border: 1px solid #819ac7;
     background: linear-gradient(to bottom, #436299, #4c70af);
+}
+#hintrequest:disabled {
+    color: #666;
+    border: 1px solid #777;
+    background: linear-gradient(to bottom, #ccc, #ddd);
 }
 

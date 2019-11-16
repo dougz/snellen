@@ -231,10 +231,6 @@ class SubmitHistoryHandler(util.TeamHandler):
       d["correct"] = len(state.answers_found)
       d["total"] = len(state.puzzle.answers)
 
-    # if state.recent_solve():
-    #   d["overlay"] = state.puzzle.icon.solved_thumb.url
-    #   d["width"], d["height"] = state.puzzle.icon.solved_thumb.size
-
     self.write(json.dumps(d))
 
 class SubmitCancelHandler(util.TeamHandler):
@@ -256,8 +252,10 @@ class HintRequestHandler(util.TeamHandler):
     puzzle = game.Puzzle.get_by_shortname(shortname)
     if not puzzle:
       raise tornado.web.HTTPError(http.client.NOT_FOUND)
-    state = self.team.puzzle_state[puzzle]
-    if not state.hints_available:
+    ps = self.team.puzzle_state[puzzle]
+    if not ps.hints_available:
+      raise tornado.web.HTTPError(http.client.BAD_REQUEST)
+    if self.team.current_hint_puzzlestate not in (None, ps):
       raise tornado.web.HTTPError(http.client.BAD_REQUEST)
     self.team.add_hint_text(shortname, None, text)
     self.set_status(http.client.NO_CONTENT.value)
@@ -266,11 +264,12 @@ class HintRequestHandler(util.TeamHandler):
 class HintHistoryHandler(util.TeamHandler):
   @login.required("team", on_fail=http.client.UNAUTHORIZED)
   def get(self, shortname):
-    state = self.team.get_puzzle_state(shortname)
-    if not state:
+    ps = self.team.get_puzzle_state(shortname)
+    if not ps:
       raise tornado.web.HTTPError(http.client.NOT_FOUND)
 
-    d = {"history": [msg.json_dict() for msg in state.hints if not msg.admin_only]}
+    d = {"history": [msg.json_dict() for msg in ps.hints if not msg.admin_only],
+         "puzzle_id": ps.puzzle.shortname}
     self.write(json.dumps(d))
 
 def GetHandlers():

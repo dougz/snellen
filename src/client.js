@@ -51,12 +51,13 @@ class H2020_Dispatcher {
     hint_history(msg) {
         if (hunt2020.guest_services) {
             hunt2020.guest_services.update_hint_history();
+            hunt2020.guest_services.update_hints_open();
         }
         if (msg.notify) {
             hunt2020.toast_manager.add_toast(
                 "Hunt HQ has replied to your hint request on <b>" +
                     msg.title + "</b>.", 6000, null, "salmon",
-                "/puzzle/" + msg.puzzle_id);
+                "/guest_services");
         }
         if (hunt2020.activity) hunt2020.activity.update();
     }
@@ -66,9 +67,11 @@ class H2020_Dispatcher {
         if (hunt2020.guest_services) {
             hunt2020.guest_services.update_hints_open();
         }
-        hunt2020.toast_manager.add_toast(
-            "You're now eligible to request hints for <b>" + msg.title + ".",
-            6000, null, "salmon");
+        if (msg.title) {
+            hunt2020.toast_manager.add_toast(
+                "You're now eligible to request hints for <b>" + msg.title + "</b>.",
+                6000, null, "salmon");
+        }
     }
 
     /** @param{Message} msg */
@@ -976,6 +979,8 @@ class H2020_GuestServices {
         this.build_fastpass(/** @type{FastPassState} */ (initial_json.fastpass));
 
         /** @type{Element} */
+        this.hintcurr = goog.dom.getElement("hintcurr");
+        /** @type{Element} */
         this.hintnone = goog.dom.getElement("hintnone");
         /** @type{Element} */
         this.hintsome = goog.dom.getElement("hintsome");
@@ -987,6 +992,10 @@ class H2020_GuestServices {
 
         /** @type{?string} */
         this.hint_selected = null;
+        /** @type{?string} */
+        this.hint_displayed = null;
+        /** @type{?string} */
+        this.restricted_to = null;
 
         this.serializer = new goog.json.Serializer();
         /** @type{Element} */
@@ -994,8 +1003,11 @@ class H2020_GuestServices {
         /** @type{Element} */
         this.history = goog.dom.getElement("hinthistory");
 
-        var b = goog.dom.getElement("hintrequest");
-        goog.events.listen(b, goog.events.EventType.CLICK, goog.bind(this.submit, this));
+        /** @type{Element} */
+        this.hintrequest = goog.dom.getElement("hintrequest");
+
+        goog.events.listen(this.hintrequest, goog.events.EventType.CLICK,
+                           goog.bind(this.submit, this));
 
         this.build_hints(initial_json.hints);
     }
@@ -1012,7 +1024,6 @@ class H2020_GuestServices {
 
     select_puzzle(e) {
         this.hint_selected = this.hintselect.options[this.hintselect.selectedIndex].value;
-        console.log(this.hint_selected);
         this.hintselect.style.color = "black";
         this.update_hint_history();
     }
@@ -1031,32 +1042,36 @@ class H2020_GuestServices {
     render_hint_history(data) {
         goog.dom.getElement("hintui").style.display = "block";
 
+        this.hint_displayed = data.puzzle_id;
+
         var ht = goog.dom.getElement("hinttext");
         if (data.history.length == 0) {
-            this.history.innerHTML = "<span id=hintnone>You have not requested any hints.</span>";
+            this.history.innerHTML = "<span id=hintnotyet>You have not requested any hints on this puzzle.</span>";
             ht.setAttribute(
                 "placeholder",
                 "Describe what you've tried, where you're stuck\u2026");
             ht.setAttribute("rows", "9");
-            return;
+        } else {
+            ht.setAttribute(
+                "placeholder",
+                "Add a followup\u2026");
+            ht.setAttribute("rows", "3");
+            this.history.innerHTML = "";
+            var dl = goog.dom.createDom("DL");
+            for (var i = 0; i < data.history.length; ++i) {
+                var msg = data.history[i];
+                var dt = goog.dom.createDom(
+                    "DT", null,
+                    "At " + hunt2020.time_formatter.format(msg.when) + ", " + msg.sender + " wrote:");
+                var dd = goog.dom.createDom("DD", null);
+                dd.innerHTML = msg.text;
+                dl.appendChild(dt);
+                dl.appendChild(dd);
+            }
+            this.history.appendChild(dl);
         }
-        ht.setAttribute(
-            "placeholder",
-            "Ask a followup question\u2026");
-        ht.setAttribute("rows", "3");
-        this.history.innerHTML = "";
-        var dl = goog.dom.createDom("DL");
-        for (var i = 0; i < data.history.length; ++i) {
-            var msg = data.history[i];
-            var dt = goog.dom.createDom(
-                "DT", null,
-                "At " + hunt2020.time_formatter.format(msg.when) + ", " + msg.sender + " wrote:");
-            var dd = goog.dom.createDom("DD", null);
-            dd.innerHTML = msg.text;
-            dl.appendChild(dt);
-            dl.appendChild(dd);
-        }
-        this.history.appendChild(dl);
+
+        this.update_send_button();
     }
 
     submit() {
@@ -1073,6 +1088,7 @@ class H2020_GuestServices {
 
 
     build_hints(data) {
+        this.restricted_to = data.current;
         if (data.available.length > 0) {
             this.hintnone.style.display = "none";
             this.hintsome.style.display = "block";
@@ -1086,8 +1102,12 @@ class H2020_GuestServices {
                                        "\u2014 select \u2014"));
                 this.hintselect.style.color = "#999";
             }
+            var curr_title = null;
             for (var i = 0; i < data.available.length; ++i) {
                 var it = data.available[i];
+                if (data.current == it[0]) {
+                    curr_title = it[1];
+                }
                 var d = {value: it[0]};
                 if (it[0] == this.hint_selected) {
                     d["selected"] = true;
@@ -1099,10 +1119,27 @@ class H2020_GuestServices {
             if (this.hint_selected) {
                 this.select_puzzle(null);
             }
+
+            if (curr_title) {
+                this.hintcurr.style.display = "block";
+                this.hintcurr.innerHTML = "Waiting for reply on: <b>" + curr_title + "</b>";
+            } else {
+                this.hintcurr.style.display = "none";
+            }
         } else {
             // No hints available.
             this.hintnone.style.display = "block";
             this.hintsome.style.display = "none";
+        }
+
+        this.update_send_button();
+    }
+
+    update_send_button() {
+        if (this.restricted_to && this.restricted_to != this.hint_displayed) {
+            this.hintrequest.disabled = true;
+        } else {
+            this.hintrequest.disabled = false;
         }
     }
 

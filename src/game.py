@@ -484,6 +484,7 @@ class Team(login.LoginUser):
     self.score_to_go = None
     self.videos = 1
     self.hints_open = set()
+    self.current_hint_puzzlestate = None
 
     self.message_mu = asyncio.Lock()
     self.message_serial = 1
@@ -1070,7 +1071,11 @@ class Team(login.LoginUser):
       return self.cached_open_hints_data
 
     oh = [[p.shortname, p.title] for p in sorted(self.hints_open, key=lambda p: p.sortkey)]
-    self.cached_open_hints_data = {"available": oh}
+    d = {"available": oh}
+    if self.current_hint_puzzlestate:
+      d["current"] = self.current_hint_puzzlestate.puzzle.shortname
+    self.cached_open_hints_data = d
+
     return self.cached_open_hints_data
 
   @save_state
@@ -1085,23 +1090,22 @@ class Team(login.LoginUser):
     puzzle.puzzle_log.add(now, f"Hints available to {ps.admin_html_team}.")
     self.activity_log.add(now, f"Hints available for {puzzle.html}.")
     self.admin_log.add(now, f"Hints available for {ps.admin_html_puzzle}.")
-    msg = [{"method": "hints_open", "puzzle_id": puzzle.shortname, "title": puzzle.title}]
-    self.send_messages(msg)
+    self.send_messages([{"method": "hints_open", "title": puzzle.title}])
 
   @save_state
   def hint_no_reply(self, now, puzzle, sender):
     puzzle = Puzzle.get_by_shortname(puzzle)
     if not puzzle: return
-    state = self.puzzle_state[puzzle]
+    ps = self.puzzle_state[puzzle]
 
     sender = login.AdminUser.get_by_username(sender)
-    state.claim = None
-    Global.STATE.task_queue.remove(state)
+    ps.claim = None
+    Global.STATE.task_queue.remove(ps)
 
-    self.admin_log.add(now, f"<b>{sender.fullname}</b> marked hint request on {state.admin_html_puzzle} as not needing reply.")
+    self.admin_log.add(now, f"<b>{sender.fullname}</b> marked hint request on {ps.admin_html_puzzle} as not needing reply.")
 
-    msg = HintMessage(state, now, sender, "(no reply needed)", True)
-    state.hints.append(msg)
+    msg = HintMessage(ps, now, sender, "(no reply needed)", True)
+    ps.hints.append(msg)
 
     login.AdminUser.send_messages([{"method": "update",
                                     "team_username": self.username,
@@ -1111,35 +1115,41 @@ class Team(login.LoginUser):
   def add_hint_text(self, now, puzzle, sender, text):
     puzzle = Puzzle.get_by_shortname(puzzle)
     if not puzzle: return
-    state = self.puzzle_state[puzzle]
+    ps = self.puzzle_state[puzzle]
 
     team_message = {"method": "hint_history",
                     "puzzle_id": puzzle.shortname}
+    prev = self.current_hint_puzzlestate
+
     if sender is None:
+      self.current_hint_puzzlestate = ps
       sender = self
-      state.hints.append(HintMessage(state, now, sender, text, False))
-      Global.STATE.task_queue.add(state)
-      if state.hints:
-        puzzle.puzzle_log.add(now, f"{state.admin_html_team} requested a followup hint.")
+      ps.hints.append(HintMessage(ps, now, sender, text, False))
+      Global.STATE.task_queue.add(ps)
+      if ps.hints:
+        puzzle.puzzle_log.add(now, f"{ps.admin_html_team} requested a followup hint.")
         self.activity_log.add(now, f"Requested a followup hint on {puzzle.html}.")
-        self.admin_log.add(now, f"Requested a followup hint on {state.admin_html_puzzle}.")
+        self.admin_log.add(now, f"Requested a followup hint on {ps.admin_html_puzzle}.")
       else:
-        puzzle.puzzle_log.add(now, f"{state.admin_html_team} requested a hint.")
+        puzzle.puzzle_log.add(now, f"{ps.admin_html_team} requested a hint.")
         self.activity_log.add(now, f"Requested a hint on {puzzle.html}.")
-        self.admin_log.add(now, f"Requested a hint on {state.admin_html_puzzle}.")
+        self.admin_log.add(now, f"Requested a hint on {ps.admin_html_puzzle}.")
     else:
+      self.current_hint_puzzlestate = None
       sender = login.AdminUser.get_by_username(sender)
-      state.last_hq_sender = sender
-      state.claim = None
-      state.hints.append(HintMessage(state, now, sender, text, False))
-      Global.STATE.task_queue.remove(state)
+      ps.last_hq_sender = sender
+      ps.claim = None
+      ps.hints.append(HintMessage(ps, now, sender, text, False))
+      Global.STATE.task_queue.remove(ps)
       team_message["notify"] = True
       team_message["title"] = puzzle.title
 
-      puzzle.puzzle_log.add(now, f"<b>{sender.fullname}</b> replied to hint request from {state.admin_html_team}.")
+      puzzle.puzzle_log.add(now, f"<b>{sender.fullname}</b> replied to hint request from {ps.admin_html_team}.")
       self.activity_log.add(now, f"Hunt HQ replied to hint request on {puzzle.html}.")
-      self.admin_log.add(now, f"<b>{sender.fullname}</b> replied to hint request on {state.admin_html_puzzle}.")
+      self.admin_log.add(now, f"<b>{sender.fullname}</b> replied to hint request on {ps.admin_html_puzzle}.")
 
+    if prev != self.current_hint_puzzlestate:
+      self.cached_open_hints_data = None
     self.invalidate(puzzle)
 
     self.send_messages([team_message])
