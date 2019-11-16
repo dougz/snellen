@@ -1402,7 +1402,8 @@ class Puzzle:
     self.url = f"/puzzle/{shortname}"
     self.admin_url = f"/admin/puzzle/{shortname}"
     self.points = 1
-    self.hints_available_time = 5 # 12 * 3600   # 12 hours
+    import random
+    self.hints_available_time = random.randint(5, 300) # 12 * 3600   # 12 hours
     self.emojify = False
     self.explanations = {}
     self.puzzle_log = Log()

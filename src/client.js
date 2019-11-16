@@ -64,8 +64,7 @@ class H2020_Dispatcher {
     /** @param{Message} msg */
     hints_open(msg) {
         if (hunt2020.guest_services) {
-            // TODO
-            console.log("update hint select here");
+            hunt2020.guest_services.update_hints_open();
         }
         hunt2020.toast_manager.add_toast(
             "You're now eligible to request hints for <b>" + msg.title + ".",
@@ -999,6 +998,16 @@ class H2020_GuestServices {
         goog.events.listen(b, goog.events.EventType.CLICK, goog.bind(this.submit, this));
 
         this.build_hints(initial_json.hints);
+    }
+
+    update_hints_open() {
+        goog.net.XhrIo.send("/js/hintsopen", goog.bind(function(e) {
+            var code = e.target.getStatus();
+            if (code == 200) {
+                var response = e.target.getResponseJson();
+                this.build_hints(response);
+            }
+        }, this));
     }
 
     select_puzzle(e) {

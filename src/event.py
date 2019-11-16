@@ -169,6 +169,12 @@ class GuestServicesPage(util.TeamPageHandler):
     json_data = "<script>var initial_json = " + json.dumps(d) + ";</script>"
     self.render("guest_services.html", json_data=json_data)
 
+class HintsOpenDataHandler(util.TeamHandler):
+  @login.required("team")
+  def get(self):
+    self.set_header("Content-Type", "application/json")
+    self.write(json.dumps(self.team.get_open_hints_data()))
+
 class ApplyFastPassHandler(util.TeamHandler):
   @login.required("team")
   def get(self, land_name):
@@ -287,6 +293,7 @@ def GetHandlers():
     (r"/js/log", ActivityLogDataHandler),
     (r"/js/pins", AchievementDataHandler),
     (r"/js/videos", VideosDataHandler),
+    (r"/js/hintsopen", HintsOpenDataHandler),
     (r"/js/map/([a-z][a-z0-9_]+)$", MapDataHandler),
   ]
 
