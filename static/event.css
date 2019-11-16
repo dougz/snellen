@@ -512,18 +512,10 @@ div#submitentry {
 }
 
 #submitentry #submitsubmit {
-    font-family: 'Merriweather Sans', sans-serif;
-    font-weight: 700;
-    color: white;
-    font-size: 100%;
-    padding: 8px 16px;
     margin: 8px 8px 8px 0;
-    box-sizing: border-box;
-    border: 1px solid #395483;
+    border-radius: 0;
     border-top-right-radius: 15px;
     border-bottom-right-radius: 15px;
-    background: linear-gradient(to bottom, #4c70af, #436299);
-    outline: none;
 }
 
 .submit-cancel {
@@ -998,28 +990,30 @@ select option {
 
 #hintrequest {
     display: block;
-    font-family: 'Merriweather Sans', sans-serif;
-    color: white;
-    font-size: 100%;
-    padding: 8px 16px;
     margin-left: 12px;
-    box-sizing: border-box;
-    border: 1px solid #395483;
-    border-radius: 15px;
-    /*width: 332px;*/
-    background: linear-gradient(to bottom, #4c70af, #436299);
-    outline: none;
     flex-grow: 0;
 }
 
-#hintrequest:focus, #hintrequest:hover {
+.action {
+    font-family: 'Merriweather Sans', sans-serif;
+    font-weight: 700;
+    color: white;
+    font-size: 100%;
+    padding: 8px 16px;
+    margin: 8px 0 8px 0;
+    box-sizing: border-box;
+    border: 1px solid #395483;
+    border-radius: 15px;
+    background: linear-gradient(to bottom, #4c70af, #436299);
+    outline: none;
+}
+.action:focus, .action:hover {
     color: yellow;
     border: 1px solid #819ac7;
     background: linear-gradient(to bottom, #436299, #4c70af);
 }
-#hintrequest:disabled {
-    color: #666;
-    border: 1px solid #777;
+.action:disabled {
+    color: #999;
+    border: 1px solid #bbb;
     background: linear-gradient(to bottom, #ccc, #ddd);
 }
-
