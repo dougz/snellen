@@ -308,91 +308,6 @@ a:hover > .landtip {
 #log td { vertical-align: baseline; padding-bottom: 20px; line-height: 1.4; }
 
 
-#hintpanel {
-    background-color: #888888ee;
-    border-bottom: 0px solid black;
-
-    height: 0;
-    visibility: hidden;
-
-    z-index: 999;
-    position: static;
-
-    overflow-y: hidden;
-    overflow-x: hidden;
-    display: flex;
-    flex-direction: column;
-}
-
-#hinthistory {
-    flex-grow: 1;
-    margin: 12px;
-    color: #eee;
-    overflow-y: auto;
-    border: 1px solid #666;
-    background-color: #777;
-}
-
-#hinthistory #hintnone {
-    display: block;
-    font-weight: bold;
-    margin: 20px;
-    color: #eee;
-}
-
-#hinthistory dl {
-    margin: 0;
-}
-
-#hinthistory dt {
-    margin: 8px 8px 0 8px;
-    color: #fff;
-    font-weight: bold;
-}
-
-#hinthistory dd {
-    margin: 8px 0 16px 32px;
-    font-family: 'Inconsolata', monospace;
-    white-space: pre-wrap;
-}
-
-#hintentry {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    margin: 0 12px 12px 12px;
-}
-
-#hinttext {
-    font-family: 'Inconsolata', monospace;
-    padding: 8px;
-    flex-grow: 1;
-}
-
-#hintrequest {
-    display: block;
-    font-family: 'Merriweather Sans', sans-serif;
-    color: white;
-    font-size: 100%;
-    padding: 8px 16px;
-    margin-left: 12px;
-    box-sizing: border-box;
-    border: 1px solid #395483;
-    border-radius: 15px;
-    /*width: 332px;*/
-    background: linear-gradient(to bottom, #4c70af, #436299);
-    outline: none;
-    flex-grow: 0;
-}
-
-#hintrequest:focus, #hintrequest:hover {
-    color: yellow;
-    border: 1px solid #819ac7;
-    background: linear-gradient(to bottom, #436299, #4c70af);
-}
-
-
-
 @keyframes slide {
     0% { height: 0px; visibility: hidden; border-bottom-width: 0px; }
     1% { visibility: visible; }
@@ -1021,4 +936,78 @@ select {
     font-size: 16px;
 }
 
+select option {
+    color: black;
+}
+
+#hintui {
+    display: none;
+    background-color: #e7f1fd;
+    padding: 8px 0;
+    border-radius: 4px;
+}
+
+#hinthistory {
+    flex-grow: 1;
+    margin: 12px;
+    color: #222;
+}
+
+#hinthistory #hintnone {
+    display: block;
+    font-weight: bold;
+    margin: 20px;
+    color: #666;
+}
+
+#hinthistory dl {
+    margin: 0;
+}
+
+#hinthistory dt {
+    margin: 8px 8px 0 8px;
+    color: black;
+    font-weight: bold;
+}
+
+#hinthistory dd {
+    margin: 8px 0 16px 32px;
+    font-family: 'Inconsolata', monospace;
+    white-space: pre-wrap;
+}
+
+#hintentry {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin: 0 12px 12px 12px;
+}
+
+#hinttext {
+    font-family: 'Inconsolata', monospace;
+    padding: 8px;
+    flex-grow: 1;
+}
+
+#hintrequest {
+    display: block;
+    font-family: 'Merriweather Sans', sans-serif;
+    color: white;
+    font-size: 100%;
+    padding: 8px 16px;
+    margin-left: 12px;
+    box-sizing: border-box;
+    border: 1px solid #395483;
+    border-radius: 15px;
+    /*width: 332px;*/
+    background: linear-gradient(to bottom, #4c70af, #436299);
+    outline: none;
+    flex-grow: 0;
+}
+
+#hintrequest:focus, #hintrequest:hover {
+    color: yellow;
+    border: 1px solid #819ac7;
+    background: linear-gradient(to bottom, #436299, #4c70af);
+}
 

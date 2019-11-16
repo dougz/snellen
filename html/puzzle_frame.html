@@ -8,17 +8,9 @@
 {% else %}
 <a id="submit">Submit</a>
 {% end %}
-<a id="hinttoggle" style="display: {{"inline" if state.hints_available else "none"}}">Hints</a>
 {% end %}
 
 {% block midnav %}
-<div id="hintpanel">
-  <div id="hinthistory"></div>
-  <div id="hintentry">
-    <textarea rows=3 id="hinttext"></textarea>
-    <button id="hintrequest">Send request</button>
-  </div>
-</div>
 <div id="submitpanel">
   {% if thumb %}
   <div id="thumb" style="width: {{thumb.size[0]}}px; height: {{thumb.size[1]}}px;">

@@ -49,8 +49,8 @@ class H2020_Dispatcher {
 
     /** @param{Message} msg */
     hint_history(msg) {
-        if (msg.puzzle_id == puzzle_id) {
-            hunt2020.hint_panel.update_history();
+        if (hunt2020.guest_services) {
+            hunt2020.guest_services.update_hint_history();
         }
         if (msg.notify) {
             hunt2020.toast_manager.add_toast(
@@ -63,15 +63,13 @@ class H2020_Dispatcher {
 
     /** @param{Message} msg */
     hints_open(msg) {
-        if (msg.puzzle_id == puzzle_id) {
-            var el = goog.dom.getElement("hinttoggle");
-            if (el) {
-                el.style.display = "inline";
-                hunt2020.toast_manager.add_toast(
-                    "You're now eligible to request hints for <b>" + msg.title + ".",
-                    6000, null, "salmon");
-            }
+        if (hunt2020.guest_services) {
+            // TODO
+            console.log("update hint select here");
         }
+        hunt2020.toast_manager.add_toast(
+            "You're now eligible to request hints for <b>" + msg.title + ".",
+            6000, null, "salmon");
     }
 
     /** @param{Message} msg */
@@ -653,124 +651,6 @@ class H2020_SubmitPanel {
     }
 }
 
-class H2020_HintPanel {
-    constructor() {
-        /** @type{boolean} */
-        this.built = false;
-        /** @type{Object|null} */
-        this.serializer = null;
-
-        /** @type{Element|null} */
-        this.hintpanel = null;
-
-        /** @type{Element|null} */
-        this.textarea = null;
-
-        /** @type{Element|null} */
-        this.history = null;
-    }
-
-    build() {
-        this.serializer = new goog.json.Serializer();
-        this.hintpanel = goog.dom.getElement("hintpanel");
-        this.textarea = goog.dom.getElement("hinttext");
-        this.history = goog.dom.getElement("hinthistory");
-
-        var b = goog.dom.getElement("hintrequest");
-        goog.events.listen(b, goog.events.EventType.CLICK, goog.bind(this.submit, this));
-
-        this.built = true;
-    }
-
-    submit() {
-        var text = this.textarea.value;
-        if (text == "") return;
-        this.textarea.value = "";
-        goog.net.XhrIo.send("/hintrequest", function(e) {
-            var code = e.target.getStatus();
-            if (code != 204) {
-                alert(e.target.getResponseText());
-            }
-        }, "POST", this.serializer.serialize({"puzzle_id": puzzle_id, "text": text}));
-    }
-
-    update_history() {
-        if (!this.built) return;
-        if (this.hintpanel.style == "none") return;
-        goog.net.XhrIo.send("/hinthistory/" + puzzle_id, goog.bind(function(e) {
-            var code = e.target.getStatus();
-            if (code == 200) {
-                var response = /** @type{HintHistory} */ (e.target.getResponseJson());
-                this.render_history(response);
-            }
-        }, this));
-    }
-
-    /** @param{HintHistory} response */
-    render_history(response) {
-        var ht = goog.dom.getElement("hinttext");
-        if (response.history.length == 0) {
-            this.history.innerHTML = "<span id=hintnone>You have not requested any hints.</span>";
-            ht.setAttribute(
-                "placeholder",
-                "Describe what you've tried, where you're stuck\u2026");
-            ht.setAttribute("rows", "9");
-            return;
-        }
-        ht.setAttribute(
-            "placeholder",
-            "Ask a followup question\u2026");
-        ht.setAttribute("rows", "3");
-        this.history.innerHTML = "";
-        var dl = goog.dom.createDom("DL");
-        for (var i = 0; i < response.history.length; ++i) {
-            var msg = response.history[i];
-            var dt = goog.dom.createDom(
-                "DT", null,
-                "At " + hunt2020.time_formatter.format(msg.when) + ", " + msg.sender + " wrote:");
-            var dd = goog.dom.createDom("DD", null);
-            dd.innerHTML = msg.text;
-            dl.appendChild(dt);
-            dl.appendChild(dd);
-        }
-        this.history.appendChild(dl);
-    }
-
-    // onkeydown(e) {
-    //  if (e.keyCode == goog.events.KeyCodes.ENTER) {
-    //      this.submit();
-    //      e.preventDefault();
-    //  } else if (e.keyCode == goog.events.KeyCodes.ESC) {
-    //      this.close();
-    //      e.preventDefault();
-    //  }
-    // }
-
-    toggle() {
-        if (!this.built) this.build();
-        if (goog.dom.classlist.contains(this.hintpanel, "panel-visible")) {
-            this.close();
-        } else {
-            this.show();
-        }
-    }
-
-    show() {
-        if (!this.built) this.build();
-        goog.dom.classlist.addRemove(this.hintpanel, "panel-invisible",
-                                     "panel-visible");
-        this.update_history();
-        // focus on input field, once slide-out animation is complete.
-        //setTimeout(goog.bind(this.focus_input, this), 200);
-        return false;
-    }
-
-    close() {
-        goog.dom.classlist.addRemove(this.hintpanel, "panel-visible",
-                                     "panel-invisible");
-    }
-}
-
 class H2020_ToastManager {
     constructor() {
         /** @type{Element} */
@@ -1106,14 +986,82 @@ class H2020_GuestServices {
         goog.events.listen(this.hintselect, goog.events.EventType.CHANGE,
                            goog.bind(this.select_puzzle, this));
 
+        /** @type{?string} */
+        this.hint_selected = null;
+
+        this.serializer = new goog.json.Serializer();
+        /** @type{Element} */
+        this.textarea = goog.dom.getElement("hinttext");
+        /** @type{Element} */
+        this.history = goog.dom.getElement("hinthistory");
+
+        var b = goog.dom.getElement("hintrequest");
+        goog.events.listen(b, goog.events.EventType.CLICK, goog.bind(this.submit, this));
+
         this.build_hints(initial_json.hints);
     }
 
     select_puzzle(e) {
-        var puzzle = this.hintselect.options[this.hintselect.selectedIndex].value;
-        console.log(puzzle);
-        this.hintselect.style.color = "initial";
+        this.hint_selected = this.hintselect.options[this.hintselect.selectedIndex].value;
+        console.log(this.hint_selected);
+        this.hintselect.style.color = "black";
+        this.update_hint_history();
     }
+
+    update_hint_history() {
+        goog.net.XhrIo.send("/hinthistory/" + this.hint_selected, goog.bind(function(e) {
+            var code = e.target.getStatus();
+            if (code == 200) {
+                var response = /** @type{HintHistory} */ (e.target.getResponseJson());
+                this.render_hint_history(response);
+            }
+        }, this));
+
+    }
+
+    render_hint_history(data) {
+        goog.dom.getElement("hintui").style.display = "block";
+
+        var ht = goog.dom.getElement("hinttext");
+        if (data.history.length == 0) {
+            this.history.innerHTML = "<span id=hintnone>You have not requested any hints.</span>";
+            ht.setAttribute(
+                "placeholder",
+                "Describe what you've tried, where you're stuck\u2026");
+            ht.setAttribute("rows", "9");
+            return;
+        }
+        ht.setAttribute(
+            "placeholder",
+            "Ask a followup question\u2026");
+        ht.setAttribute("rows", "3");
+        this.history.innerHTML = "";
+        var dl = goog.dom.createDom("DL");
+        for (var i = 0; i < data.history.length; ++i) {
+            var msg = data.history[i];
+            var dt = goog.dom.createDom(
+                "DT", null,
+                "At " + hunt2020.time_formatter.format(msg.when) + ", " + msg.sender + " wrote:");
+            var dd = goog.dom.createDom("DD", null);
+            dd.innerHTML = msg.text;
+            dl.appendChild(dt);
+            dl.appendChild(dd);
+        }
+        this.history.appendChild(dl);
+    }
+
+    submit() {
+        var text = this.textarea.value;
+        if (text == "") return;
+        this.textarea.value = "";
+        goog.net.XhrIo.send("/hintrequest", function(e) {
+            var code = e.target.getStatus();
+            if (code != 204) {
+                alert(e.target.getResponseText());
+            }
+        }, "POST", this.serializer.serialize({"puzzle_id": this.hint_selected, "text": text}));
+    }
+
 
     build_hints(data) {
         if (data.available.length > 0) {
@@ -1121,21 +1069,32 @@ class H2020_GuestServices {
             this.hintsome.style.display = "block";
 
             this.hintselect.innerHTML = "";
-            this.hintselect.appendChild(
-                goog.dom.createDom("OPTION", {value: "", selected: true, disabled: true}, "select"));
-            this.hintselect.style.color = "#ccc";
+            if (!this.hint_selected) {
+                this.hintselect.appendChild(
+                    goog.dom.createDom("OPTION", {selected: true,
+                                                  disabled: true,
+                                                  hidden: true},
+                                       "\u2014 select \u2014"));
+                this.hintselect.style.color = "#999";
+            }
             for (var i = 0; i < data.available.length; ++i) {
                 var it = data.available[i];
+                var d = {value: it[0]};
+                if (it[0] == this.hint_selected) {
+                    d["selected"] = true;
+                }
                 this.hintselect.appendChild(
-                    goog.dom.createDom("OPTION", {value: it[0]}, it[1]));
+                    goog.dom.createDom("OPTION", d, it[1]));
+            }
+
+            if (this.hint_selected) {
+                this.select_puzzle(null);
             }
         } else {
             // No hints available.
             this.hintnone.style.display = "block";
             this.hintsome.style.display = "none";
         }
-
-        console.log(data);
     }
 
     /** @param{FastPassState} data */
@@ -1306,14 +1265,7 @@ window.onload = function() {
         }
     }
 
-    if (puzzle_id && puzzle_id != "events") {
-        a = goog.dom.getElement("hinttoggle");
-        hunt2020.hint_panel = new H2020_HintPanel();
-        goog.events.listen(a, goog.events.EventType.CLICK,
-                           goog.bind(hunt2020.hint_panel.toggle, hunt2020.hint_panel));
-
-        if (puzzle_init) puzzle_init();
-    }
+    if (puzzle_id && puzzle_init) puzzle_init();
 
     // Only present on the map pages.
     var m = goog.dom.getElement("map");
