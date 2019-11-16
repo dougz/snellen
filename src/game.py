@@ -78,6 +78,7 @@ class TaskQueue:
 
     self.cached_json = None
     self.cached_bbdata = None
+    self.cached_favicon = None
 
   def get_by_key(self, task_key):
     return self.tasks.get(task_key)
@@ -124,14 +125,14 @@ class TaskQueue:
     self.cached_json = None
     self.cached_bbdata = None
     self.cached_favicon = None
-    self.to_json()
-
-    login.AdminUser.send_messages([
-      {"method": "task_queue",
-       "favicon": {
-         "s32x32": OPTIONS.static_content[f"admin_fav_{self.cached_favicon}/favicon-32x32.png"],
-         "s16x16": OPTIONS.static_content[f"admin_fav_{self.cached_favicon}/favicon-16x16.png"]
-       }}], flush=True)
+    if not save_state.REPLAYING:
+      self.to_json()
+      login.AdminUser.send_messages([
+        {"method": "task_queue",
+         "favicon": {
+           "s32x32": OPTIONS.static_content[f"admin_fav_{self.cached_favicon}/favicon-32x32.png"],
+           "s16x16": OPTIONS.static_content[f"admin_fav_{self.cached_favicon}/favicon-16x16.png"]
+         }}], flush=True)
 
   def get_bb_data(self):
     if self.cached_bbdata is None:
@@ -159,7 +160,6 @@ class TaskQueue:
                 "last_sender": ps.last_hq_sender.fullname if ps.last_hq_sender else None,
                 "key": "h-" + ps.team.username + "-" + ps.puzzle.shortname,
                 "target": f"/admin/team/{ps.team.username}/puzzle/{ps.puzzle.shortname}"})
-
       total += 1
       if ps.claim: claimed += 1
     for task in self.tasks.values():
@@ -1117,6 +1117,7 @@ class Team(login.LoginUser):
                     "puzzle_id": puzzle.shortname}
     if sender is None:
       sender = self
+      state.hints.append(HintMessage(state, now, sender, text, False))
       Global.STATE.task_queue.add(state)
       if state.hints:
         puzzle.puzzle_log.add(now, f"{state.admin_html_team} requested a followup hint.")
@@ -1130,6 +1131,7 @@ class Team(login.LoginUser):
       sender = login.AdminUser.get_by_username(sender)
       state.last_hq_sender = sender
       state.claim = None
+      state.hints.append(HintMessage(state, now, sender, text, False))
       Global.STATE.task_queue.remove(state)
       team_message["notify"] = True
       team_message["title"] = puzzle.title
@@ -1137,9 +1139,6 @@ class Team(login.LoginUser):
       puzzle.puzzle_log.add(now, f"<b>{sender.fullname}</b> replied to hint request from {state.admin_html_team}.")
       self.activity_log.add(now, f"Hunt HQ replied to hint request on {puzzle.html}.")
       self.admin_log.add(now, f"<b>{sender.fullname}</b> replied to hint request on {state.admin_html_puzzle}.")
-
-    msg = HintMessage(state, now, sender, text, False)
-    state.hints.append(msg)
 
     self.invalidate(puzzle)
 
