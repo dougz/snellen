@@ -99,8 +99,6 @@ async def main_server(options):
   save_state.open(os.path.join(options.event_dir, "state.log"))
   save_state.replay(advance_time=game.Submission.process_submit_queue)
 
-  game.Global.STATE.task_queue.change()
-
   if not login.AdminUser.BY_USERNAME:
     with open(os.path.join(options.event_dir, "admins.json")) as f:
       admins = json.load(f)
@@ -119,6 +117,7 @@ async def main_server(options):
 
   for team in game.Team.BY_USERNAME.values():
     team.discard_messages()
+
   game.Global.STATE.task_queue.build()
 
   app = make_app(options, cfg["static"], autoreload=False)

@@ -418,7 +418,7 @@ body > p, body > h2 {
 
 
 #tpphinthistory {
-    color: #222;
+    color: black;
     margin-bottom: 20px;
 }
 
@@ -430,8 +430,16 @@ body > p, body > h2 {
 
 #tpphinthistory dd {
     margin-top: 4px;
-    font-family: 'Inconsolata', sans-serif;
+    font-family: 'Inconsolata', monospace;
     white-space: pre-wrap;
+}
+
+#tpphinthistory dd.adminonly {
+    font-size: 84%;
+    font-family: 'Merriweather Sans', sans-serif;
+    font-style: italic;
+    color: #666;
+    white-space: normal;
 }
 
 #tppreplycontainer {

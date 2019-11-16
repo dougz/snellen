@@ -43,8 +43,12 @@ class TeamPageHandler(TeamHandler):
         f'var puzzle_id = "{self.puzzle.shortname}";\n'
         "var puzzle_init = null;\n"
       )
-
       style_css = self.puzzle.land.shortname + "/land.css"
+    elif hasattr(self, "puzzle_id"):
+      # Just set puzzle_id; don't pull in land CSS.
+      d["puzzle"] = None
+      script.append(f"var puzzle_id = \"{self.puzzle_id}\";\n"
+                    "var puzzle_init = null;\n")
     else:
       d["puzzle"] = None
       script.append(f"var puzzle_id = null;\n")

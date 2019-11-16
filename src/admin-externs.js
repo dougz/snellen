@@ -153,6 +153,8 @@ class HintMessage {
         this.when;
         /** @type{string} */
         this.text;
+        /** @type{?boolean} */
+        this.admin_only;
     }
 }
 

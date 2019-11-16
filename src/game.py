@@ -56,6 +56,8 @@ class HintMessage:
         d["sender"] = "Hunt HQ"
     else:
       d["sender"] = self.parent.team.name
+    if for_admin and self.admin_only:
+      d["admin_only"] = True
     return d
 
 class Task:
@@ -1090,7 +1092,7 @@ class Team(login.LoginUser):
     puzzle.puzzle_log.add(now, f"Hints available to {ps.admin_html_team}.")
     self.activity_log.add(now, f"Hints available for {puzzle.html}.")
     self.admin_log.add(now, f"Hints available for {ps.admin_html_puzzle}.")
-    self.send_messages([{"method": "hints_open", "title": puzzle.title}])
+    self.send_messages([{"method": "hints_open", "puzzle_id": puzzle.shortname, "title": puzzle.title}])
 
   @save_state
   def hint_no_reply(self, now, puzzle, sender):
@@ -1106,6 +1108,13 @@ class Team(login.LoginUser):
 
     msg = HintMessage(ps, now, sender, "(no reply needed)", True)
     ps.hints.append(msg)
+
+    if self.current_hint_puzzlestate == ps:
+      self.current_hint_puzzlestate = None
+      self.cached_open_hints_data = None
+      team_message = {"method": "hint_history",
+                      "puzzle_id": puzzle.shortname}
+      self.send_messages([team_message])
 
     login.AdminUser.send_messages([{"method": "update",
                                     "team_username": self.username,
@@ -1412,7 +1421,7 @@ class Puzzle:
     self.admin_url = f"/admin/puzzle/{shortname}"
     self.points = 1
     import random
-    self.hints_available_time = random.randint(5, 300) # 12 * 3600   # 12 hours
+    self.hints_available_time = random.randint(5, 3000) # 12 * 3600   # 12 hours
     self.emojify = False
     self.explanations = {}
     self.puzzle_log = Log()

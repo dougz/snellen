@@ -18,20 +18,20 @@ function H2020_expect_204(e) {
 class H2020_Dispatcher {
     constructor() {
         this.methods = {
-            "history_change": this.history_change,
-            "solve": this.solve,
-            "open": this.open,
-            "achieve": this.achieve,
-            "update_start": this.update_start,
-            "to_page": this.to_page,
-            "hint_history": this.hint_history,
-            "receive_fastpass": this.receive_fastpass,
-            "apply_fastpass": this.apply_fastpass,
-            "hints_open": this.hints_open,
-            "update_map": this.update_map,
-            "update_header": this.update_header,
-            "video": this.video,
-            "event_complete": this.event_complete,
+            "history_change": goog.bind(this.history_change, this),
+            "solve": goog.bind(this.solve, this),
+            "open": goog.bind(this.open, this),
+            "achieve": goog.bind(this.achieve, this),
+            "update_start": goog.bind(this.update_start, this),
+            "to_page": goog.bind(this.to_page, this),
+            "hint_history": goog.bind(this.hint_history, this),
+            "receive_fastpass": goog.bind(this.receive_fastpass, this),
+            "apply_fastpass": goog.bind(this.apply_fastpass, this),
+            "hints_open": goog.bind(this.hints_open, this),
+            "update_map": goog.bind(this.update_map, this),
+            "update_header": goog.bind(this.update_header, this),
+            "video": goog.bind(this.video, this),
+            "event_complete": goog.bind(this.event_complete, this),
         }
     }
 
@@ -57,7 +57,7 @@ class H2020_Dispatcher {
             hunt2020.toast_manager.add_toast(
                 "Hunt HQ has replied to your hint request on <b>" +
                     msg.title + "</b>.", 6000, null, "salmon",
-                "/guest_services");
+                "/guest_services?p=" + msg.puzzle_id);
         }
         if (hunt2020.activity) hunt2020.activity.update();
     }
@@ -70,7 +70,7 @@ class H2020_Dispatcher {
         if (msg.title) {
             hunt2020.toast_manager.add_toast(
                 "You're now eligible to request hints for <b>" + msg.title + "</b>.",
-                6000, null, "salmon");
+                6000, null, "salmon", "/guest_services?p=" + msg.puzzle_id);
         }
     }
 
@@ -1093,6 +1093,12 @@ class H2020_GuestServices {
             this.hintnone.style.display = "none";
             this.hintsome.style.display = "block";
 
+            var target = this.hint_selected;
+            if (!target) {
+                target = puzzle_id;
+            }
+            var target_found = false;
+
             this.hintselect.innerHTML = "";
             if (!this.hint_selected) {
                 this.hintselect.appendChild(
@@ -1109,15 +1115,16 @@ class H2020_GuestServices {
                     curr_title = it[1];
                 }
                 var d = {value: it[0]};
-                if (it[0] == this.hint_selected) {
+                if (it[0] == target) {
                     d["selected"] = true;
+                    target_found = true;
                 }
                 this.hintselect.appendChild(
                     goog.dom.createDom("OPTION", d, it[1]));
             }
 
-            if (this.hint_selected) {
-                this.select_puzzle(null);
+            if (target_found) {
+                this.select_puzzle(target);
             }
 
             if (curr_title) {

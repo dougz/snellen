@@ -939,6 +939,14 @@ select option {
     flex-direction: row;
 }
 
+#hintcurr {
+    color: #c00;
+    font-weight: bold;
+}
+#hintcurr b {
+    color: black;
+}
+
 #hintui {
     display: none;
     background-color: #e7f1fd;

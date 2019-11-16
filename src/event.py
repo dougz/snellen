@@ -163,6 +163,11 @@ class EventsDataHandler(util.TeamHandler):
 class GuestServicesPage(util.TeamPageHandler):
   @login.required("team")
   def get(self):
+    shortname = self.get_argument("p", None)
+    if shortname:
+      state = self.team.get_puzzle_state(shortname)
+      if state and state.state != state.CLOSED:
+        self.puzzle_id = state.puzzle.shortname
     self.session.visit_page("guest_services")
     d = {"fastpass": self.team.get_fastpass_data(),
          "hints": self.team.get_open_hints_data()}

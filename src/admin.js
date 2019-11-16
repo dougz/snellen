@@ -8,8 +8,8 @@ goog.require("goog.json.Serializer");
 class A2020_Dispatcher {
     constructor() {
         this.methods = {
-            "task_queue": this.task_queue,
-            "update": this.update,
+            "task_queue": goog.bind(this.task_queue, this),
+            "update": goog.bind(this.update, this),
         }
     }
 
@@ -184,7 +184,7 @@ class A2020_TeamPuzzlePage {
                     var dt = goog.dom.createDom(
                         "DT", null,
                         "At " + admin2020.time_formatter.format(msg.when) + ", " + msg.sender + " wrote:");
-                    var dd = goog.dom.createDom("DD", null);
+                    var dd = goog.dom.createDom("DD", msg.admin_only ? "adminonly" : null);
                     dd.innerHTML = msg.text;
                     dl.appendChild(dt);
                     dl.appendChild(dd);
