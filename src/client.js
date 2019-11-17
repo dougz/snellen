@@ -8,13 +8,6 @@ goog.require("goog.net.XhrIo");
 goog.require("goog.ui.ModalPopup");
 goog.require("goog.json.Serializer");
 
-function H2020_expect_204(e) {
-    var code = e.target.getStatus();
-    if (code != 204) {
-        alert(e.target.getResponseText());
-    }
-}
-
 class H2020_Dispatcher {
     constructor() {
         this.methods = {
@@ -463,18 +456,8 @@ class H2020_SubmitPanel {
     update_history() {
         if (!this.built) return;
         if (this.submitpanel.style == "none") return;
-        goog.net.XhrIo.send("/submit_history/" + puzzle_id, goog.bind(function(e) {
-            var code = e.target.getStatus();
-            if (code == 200) {
-                var response = /** @type{SubmissionHistory} */ (e.target.getResponseJson());
-                this.render_history(response);
-                if (response.allowed) {
-                    this.entry.style.visibility = "visible";
-                } else {
-                    this.entry.style.visibility = "hidden";
-                }
-            }
-        }, this));
+        goog.net.XhrIo.send("/submit_history/" + puzzle_id,
+                            Common_invoke_with_json(this, this.render_history));
     }
 
     /** @param{SubmissionHistory} response */
@@ -506,7 +489,8 @@ class H2020_SubmitPanel {
 
         var cancelsub = function(sub) {
             return function() {
-                goog.net.XhrIo.send("/submit_cancel/" + puzzle_id + "/" + sub.submit_id);
+                goog.net.XhrIo.send("/submit_cancel/" + puzzle_id + "/" + sub.submit_id,
+                                    Common_expect_204);
             };
         };
 
@@ -556,42 +540,15 @@ class H2020_SubmitPanel {
 
         hunt2020.counter.reread();
 
-        // if (response.overlay && !this.has_overlay) {
-        //     // actually the div containing the icon images
-        //     var thumb = goog.dom.getElement("thumb");
-
-        //     var el = goog.dom.createDom("IMG", {
-        //         src: response.overlay,
-        //         className: "icon"});
-        //     thumb.appendChild(el);
-
-        //     this.add_sparkle(thumb, response.width, response.height);
-        // }
-
         var t = goog.dom.getElement("submit_table_scroll");
         t.scrollTop = t.scrollHeight;
+
+        if (response.allowed) {
+            this.entry.style.visibility = "visible";
+        } else {
+            this.entry.style.visibility = "hidden";
+        }
     }
-
-    // add_sparkle(parent, width, height) {
-    //     var div = goog.dom.createDom("DIV", {className: "icon"});
-    //     div.style.width = "" + width + "px";
-    //     div.style.height = "" + height + "px";
-
-    //     var star = '<path class="star" d="M0 -1L.5877 .809 -.9511 -.309 .9511 -.309 -.5877 .809Z" />';
-    //     var fivestar = star;
-    //     for (var i = 1; i < 5; ++i) {
-    //         fivestar += `<g transform="rotate(${i*72})">` + star + "</g>";
-    //     }
-    //     var scale = Math.min(width, height) * 0.4;
-
-    //     var html = `<svg width="${width}" height="${height}">` +
-    //         `<g transform="translate(${width/2},${height/2}) scale(${scale})" fill="yellow">` +
-    //         fivestar + '<g transform="scale(0.5) rotate(36)">' + fivestar +
-    //         "</g></g></svg>";
-    //     div.innerHTML = html;
-
-    //     parent.appendChild(div);
-    // }
 
     submit() {
         var answer = this.input.value;
@@ -742,15 +699,9 @@ class H2020_MapDraw {
         for (var i = 0; i < msg.maps.length; ++i) {
             if (msg.maps[i] == this.shortname) {
                 goog.net.XhrIo.send("/js/map/" + this.shortname,
-                                    goog.bind(this.receive_update, this));
+                                    Common_invoke_with_json(this, this.draw_map));
                 break;
             }
-        }
-    }
-
-    receive_update(e) {
-        if (e.target.getStatus() == 200) {
-            this.draw_map(e.target.getResponseJson());
         }
     }
 
@@ -977,7 +928,7 @@ class H2020_GuestServices {
         goog.events.listen(this.use_button, goog.events.EventType.CLICK,
                            goog.bind(this.use, this));
 
-        this.build_fastpass(/** @type{FastPassState} */ (initial_json.fastpass));
+        this.build_fastpass((/** @type{GuestServicesData} */ (initial_json)).fastpass);
 
         /** @type{Element} */
         this.hintcurr = goog.dom.getElement("hintcurr");
@@ -1010,17 +961,11 @@ class H2020_GuestServices {
         goog.events.listen(this.hintrequest, goog.events.EventType.CLICK,
                            goog.bind(this.submit, this));
 
-        this.build_hints(initial_json.hints);
+        this.build_hints((/** @type{GuestServicesData} */ (initial_json)).hints);
     }
 
     update_hints_open() {
-        goog.net.XhrIo.send("/js/hintsopen", goog.bind(function(e) {
-            var code = e.target.getStatus();
-            if (code == 200) {
-                var response = e.target.getResponseJson();
-                this.build_hints(response);
-            }
-        }, this));
+        goog.net.XhrIo.send("/js/hintsopen", Common_invoke_with_json(this, this.build_hints));
     }
 
     select_puzzle(e) {
@@ -1030,16 +975,11 @@ class H2020_GuestServices {
     }
 
     update_hint_history() {
-        goog.net.XhrIo.send("/hinthistory/" + this.hint_selected, goog.bind(function(e) {
-            var code = e.target.getStatus();
-            if (code == 200) {
-                var response = /** @type{HintHistory} */ (e.target.getResponseJson());
-                this.render_hint_history(response);
-            }
-        }, this));
-
+        goog.net.XhrIo.send("/hinthistory/" + this.hint_selected,
+                            Common_invoke_with_json(this, this.render_hint_history));
     }
 
+    /** @param{HintHistory} data */
     render_hint_history(data) {
         goog.dom.getElement("hintui").style.display = "block";
 
@@ -1079,15 +1019,12 @@ class H2020_GuestServices {
         var text = this.textarea.value;
         if (text == "") return;
         this.textarea.value = "";
-        goog.net.XhrIo.send("/hintrequest", function(e) {
-            var code = e.target.getStatus();
-            if (code != 204) {
-                alert(e.target.getResponseText());
-            }
-        }, "POST", this.serializer.serialize({"puzzle_id": this.hint_selected, "text": text}));
+        goog.net.XhrIo.send("/hintrequest", Common_expect_204,
+                            "POST", this.serializer.serialize({"puzzle_id": this.hint_selected,
+                                                               "text": text}));
     }
 
-
+    /** @param{OpenHints} data */
     build_hints(data) {
         this.restricted_to = data.current;
         if (data.available.length > 0) {
@@ -1229,7 +1166,7 @@ class H2020_GuestServices {
 
     use() {
         if (!this.sel_shortname) return;
-        goog.net.XhrIo.send("/pennypass/" + this.sel_shortname, H2020_expect_204);
+        goog.net.XhrIo.send("/pennypass/" + this.sel_shortname, Common_expect_204);
         goog.dom.classlist.remove(this.sel_div, "fpselected");
         this.sel_div = null;
         this.sel_shortname = null;
@@ -1366,14 +1303,7 @@ class H2020_ActivityLog {
     }
 
     update() {
-        goog.net.XhrIo.send("/js/log", goog.bind(function(e) {
-            var code = e.target.getStatus();
-            if (code == 200) {
-                this.build(e.target.getResponseJson());
-            } else {
-                alert(e.target.getResponseText());
-            }
-        }, this));
+        goog.net.XhrIo.send("/js/log", Common_invoke_with_json(this, this.build));
     }
 
     /** param{ActivityLogData} data */
@@ -1409,14 +1339,7 @@ class H2020_Videos {
     }
 
     update() {
-        goog.net.XhrIo.send("/js/videos", goog.bind(function(e) {
-            var code = e.target.getStatus();
-            if (code == 200) {
-                this.build(e.target.getResponseJson());
-            } else {
-                alert(e.target.getResponseText());
-            }
-        }, this));
+        goog.net.XhrIo.send("/js/videos", Common_invoke_with_json(this, this.build));
     }
 
     /** param{Array<string>} data */
@@ -1441,14 +1364,7 @@ class H2020_Achievements {
     }
 
     update() {
-        goog.net.XhrIo.send("/js/pins", goog.bind(function(e) {
-            var code = e.target.getStatus();
-            if (code == 200) {
-                this.build(e.target.getResponseJson());
-            } else {
-                alert(e.target.getResponseText());
-            }
-        }, this));
+        goog.net.XhrIo.send("/js/pins", Common_invoke_with_json(this, this.build));
     }
 
     /** param{Array<Achievement>} data */
@@ -1463,18 +1379,6 @@ class H2020_Achievements {
     }
 }
 
-function H2020_invoke_with_json(obj, target) {
-    return function(e) {
-        var code = e.target.getStatus();
-        if (code == 200) {
-            goog.bind(target, obj)(e.target.getResponseJson());
-        } else {
-            alert(e.target.getResponseText());
-        }
-    }
-}
-
-
 class H2020_AllPuzzles {
     constructor() {
         this.loplist = goog.dom.getElement("loplist");
@@ -1482,12 +1386,11 @@ class H2020_AllPuzzles {
     }
 
     update() {
-        goog.net.XhrIo.send("/js/puzzles", H2020_invoke_with_json(this, this.build));
+        goog.net.XhrIo.send("/js/puzzles", Common_invoke_with_json(this, this.build));
     }
 
     /** param{AllPuzzles} data */
     build(data) {
-        console.log(data);
         this.loplist.innerHTML = "";
         for (var i = 0; i < data.lands.length; ++i) {
             var land = data.lands[i];

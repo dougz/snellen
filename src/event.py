@@ -258,6 +258,7 @@ class SubmitCancelHandler(util.TeamHandler):
     submit_id = int(submit_id)
     self.team.cancel_submission(submit_id, shortname)
     self.team.send_messages([{"method": "history_change", "puzzle_id": shortname}])
+    self.set_status(http.client.NO_CONTENT.value)
 
 class HintRequestHandler(util.TeamHandler):
   def prepare(self):

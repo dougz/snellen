@@ -1110,6 +1110,8 @@ class Team(login.LoginUser):
     d = {"available": oh}
     if self.current_hint_puzzlestate:
       d["current"] = self.current_hint_puzzlestate.puzzle.shortname
+    else:
+      d["current"] = None
     self.cached_open_hints_data = d
 
     return self.cached_open_hints_data
@@ -1167,8 +1169,6 @@ class Team(login.LoginUser):
     if sender is None:
       self.current_hint_puzzlestate = ps
       sender = self
-      ps.hints.append(HintMessage(ps, now, sender, text, False))
-      Global.STATE.task_queue.add(ps)
       if ps.hints:
         puzzle.puzzle_log.add(now, f"{ps.admin_html_team} requested a followup hint.")
         self.activity_log.add(now, f"Requested a followup hint on {puzzle.html}.")
@@ -1177,6 +1177,8 @@ class Team(login.LoginUser):
         puzzle.puzzle_log.add(now, f"{ps.admin_html_team} requested a hint.")
         self.activity_log.add(now, f"Requested a hint on {puzzle.html}.")
         self.admin_log.add(now, f"Requested a hint on {ps.admin_html_puzzle}.")
+      ps.hints.append(HintMessage(ps, now, sender, text, False))
+      Global.STATE.task_queue.add(ps)
     else:
       self.current_hint_puzzlestate = None
       sender = login.AdminUser.get_by_username(sender)

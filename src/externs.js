@@ -123,6 +123,8 @@ class HintHistory {
     constructor() {
         /** @type{Array<HintMessage>} */
         this.history;
+        /** @ytpe{string} */
+        this.puzzle_id;
     }
 }
 
@@ -246,6 +248,22 @@ class APPuzzle {
     }
 }
 
+class OpenHints {
+    constructor() {
+        /** type{?string} */
+        this.current;
+        /** type{Array<string, string>} */
+        this.available;
+    }
+}
 
+class GuestServicesData {
+    constructor() {
+        /** @type{OpenHints} */
+        this.hints;
+        /** @type{FastPassState} */
+        this.fastpass;
+    }
+}
 
 

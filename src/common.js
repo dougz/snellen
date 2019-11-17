@@ -188,3 +188,20 @@ class Common_Waiter {
     }
 }
 
+function Common_expect_204(e) {
+    var code = e.target.getStatus();
+    if (code != 204) {
+        alert(e.target.getResponseText());
+    }
+}
+
+function Common_invoke_with_json(obj, target) {
+    return function(e) {
+        var code = e.target.getStatus();
+        if (code == 200) {
+            goog.bind(target, obj)(e.target.getResponseJson());
+        } else {
+            alert(e.target.getResponseText());
+        }
+    }
+}
