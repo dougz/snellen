@@ -36,7 +36,6 @@
         </button>
         <div id="dropdown-content">
           {% if park_open %}
-          <a href="/videos">Videos</a>
           <a href="/pins">Pins</a>
           <a href="/guest_services{% if puzzle %}?p={{puzzle.shortname}}{% end %}">Guest Services</a>
           <a href="/log">Activity Log</a>
@@ -44,6 +43,7 @@
           {% else %}
           <a href="/">Home</a>
           {% end %}
+          <a href="/videos">Videos</a>
           <a href="/events">Events</a>
           <a href="/health_and_safety">Health &amp; Safety</a>
           <a href="/logout">Logout</a>

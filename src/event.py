@@ -118,13 +118,13 @@ class ActivityLogDataHandler(util.TeamHandler):
     self.write(json.dumps(d))
 
 class VideosPage(util.TeamPageHandler):
-  @login.required("team")
+  @login.required("team", require_start=False)
   def get(self):
     self.session.visit_page("videos")
     self.render("videos.html")
 
 class VideosDataHandler(util.TeamHandler):
-  @login.required("team")
+  @login.required("team", require_start=False)
   def get(self):
     urls = []
     for i in range(1, self.team.videos+1):
@@ -156,7 +156,7 @@ class EventsPage(util.TeamPageHandler):
     self.render("events.html", events=game.Event.ALL_EVENTS, completed=completed)
 
 class EventsDataHandler(util.TeamHandler):
-  @login.required("team")
+  @login.required("team", require_start=False)
   def get(self):
     self.write(json.dumps({}))
 

@@ -70,7 +70,9 @@ class H2020_Dispatcher {
 
     /** @param{Message} msg */
     update_header(msg) {
-        goog.dom.getElement("buzz").innerHTML = msg.score;
+        var buzz = goog.dom.getElement("buzz");
+        if (!buzz) return;
+        buzz.innerHTML = msg.score;
 
         var el = goog.dom.getElement("navpass");
         if (msg.passes) {
