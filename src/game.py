@@ -902,19 +902,25 @@ class Team(login.LoginUser):
       if not land or not land.puzzles: return
     if not self.fastpasses_available: return
     self.fastpasses_available.pop(0)
-    if not land: return
-    self.fastpasses_used[land] = self.fastpasses_used.get(land, 0) + 1
-    text = f'Used a PennyPass on <b>{html.escape(land.title)}</b>.'
-    self.activity_log.add(now, text)
-    self.admin_log.add(now, text)
-    opened = self.compute_puzzle_beam(now)
-    if not save_state.REPLAYING:
+    if not land:
+      # expires with no land to use it in.
+      text = "A PennyPass expired with nowhere to use it."
+      self.activity_log.add(now, text)
+      self.admin_log.add(now, text)
+      msg = {"method": "apply_fastpass",
+             "fastpass": self.get_fastpass_data()}
+    else:
+      self.fastpasses_used[land] = self.fastpasses_used.get(land, 0) + 1
+      text = f'Used a PennyPass on <b>{html.escape(land.title)}</b>.'
+      self.activity_log.add(now, text)
+      self.admin_log.add(now, text)
+      opened = self.compute_puzzle_beam(now)
       msg = {"method": "apply_fastpass",
              "land": land.shortname,
              "title": land.title,
              "fastpass": self.get_fastpass_data()}
-      # if len(opened) == 1:
-      #   msg["title"] = opened[0].title
+
+    if not save_state.REPLAYING:
       self.send_messages([msg])
       asyncio.create_task(self.flush_messages())
     self.dirty_header = True

@@ -52,6 +52,14 @@ input, button, .emoji-input {
     align-items: stretch;
 }
 
+#fppasses {
+    margin: 12px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+}
 
 #fpicons {
     display: flex;
@@ -1041,4 +1049,26 @@ select option {
 
 #loplist li {
     list-style-type: none;
+}
+
+div.pennypass {
+    display: inline-block;
+    margin: 8px;
+    width: 300px;
+    height: 120px;
+    background: url(@@STATIC:pennypass.png@@);
+    /*padding: 16px 24px 16px 243px;*/
+    box-sizing: border-box;
+    position: relative;
+}
+
+div.pennypass span {
+    font-family: 'Open Sans', 'Merriweather Sans', sans-serif;
+    font-size: 144%;
+    font-weight: bold;
+    left: 259px;
+    top: 60px;
+    position: absolute;
+    transform-origin: center;
+    transform: translateX(-50%) translateY(-50%) rotate(-90deg);
 }

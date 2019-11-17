@@ -166,9 +166,10 @@ class H2020_Dispatcher {
 
     /** @param{Message} msg */
     apply_fastpass(msg) {
-        var text;
-        text = "A PennyPass has been applied to <b>" + msg.title + "</b>!";
-        hunt2020.toast_manager.add_toast(text, 6000, null, "blue", "/land/" + msg.land);
+        if (msg.land) {
+            var text = "A PennyPass has been applied to <b>" + msg.title + "</b>!";
+            hunt2020.toast_manager.add_toast(text, 6000, null, "blue", "/land/" + msg.land);
+        }
         if (hunt2020.guest_services) {
             hunt2020.guest_services.build_fastpass(msg.fastpass);
         }
@@ -1102,12 +1103,24 @@ class H2020_GuestServices {
         e_none.style.display = "none";
         e_some.style.display = "initial";
 
-        var e_xlist = goog.dom.getElement("fpexpirelist");
-        e_xlist.innerHTML = "";
+        var fppasses = goog.dom.getElement("fppasses");
+        fppasses.innerHTML = "";
+
+        var fpone = goog.dom.getElement("fpone");
+        var fpsome = goog.dom.getElement("fpsome");
+        if (data.expire_time.length == 1) {
+            fpone.style.display = "block";
+            fpsome.style.display = "none";
+        } else {
+            fpone.style.display = "none";
+            fpsome.style.display = "block";
+        }
+
         for (var i = 0; i < data.expire_time.length; ++i) {
             var s = goog.dom.createDom("SPAN", {className: "counter"});
             s.setAttribute("data-until", data.expire_time[i].toString());
-            e_xlist.appendChild(goog.dom.createDom("LI", null, s));
+            var d = goog.dom.createDom("DIV", "pennypass", s);
+            fppasses.appendChild(d);
         }
         hunt2020.counter.reread();
 
