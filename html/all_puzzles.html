@@ -1,0 +1,29 @@
+{% extends "player_base.html" %}
+
+{% block headercomment %}{% whitespace all %}
+<!-----------------------------------------------------------------------
+  --                                                                   --
+  --  Greetings, scrapers.  If you're looking for puzzle data to use   --
+  --  with your own puzzle tracking system, try:                       --
+  --                                                                   --
+  --             https://pennypark.fun/js/puzzles                      --
+  --                                                                   --
+  --  to get easily digestible JSON.  Please don't reload that too     --
+  --  often.  Once every couple of minutes or so, maybe?               --
+  --                                                                   --
+  ----------------------------------------------------------------------->
+
+{% end %}
+
+
+{% block title %}List of Puzzles{% end %}
+
+{% block content %}
+<div id="content">
+  <h1 id="pagetitle">List of Puzzles</h1>
+
+  <ul id="loplist"></ul>
+
+</div>
+
+{% end %}

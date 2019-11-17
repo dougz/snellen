@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+{% block headercomment %}{% end %}{% whitespace oneline %}
 <html>
   <head>
     <meta name="viewport" content="width=1200, initial-scale=0">
@@ -39,6 +40,7 @@
           <a href="/pins">Pins</a>
           <a href="/guest_services{% if puzzle %}?p={{puzzle.shortname}}{% end %}">Guest Services</a>
           <a href="/log">Activity Log</a>
+          <a href="/puzzles">List of Puzzles</a>
           {% else %}
           <a href="/">Home</a>
           {% end %}

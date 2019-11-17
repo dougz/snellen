@@ -215,4 +215,37 @@ class Achievement {
     }
 }
 
+class AllPuzzles {
+    constructor() {
+        /** @type{Array<APLand>} */
+        this.lands;
+    }
+}
+
+class APLand {
+    constructor() {
+        /** @type{string} */
+        this.title;
+        /** @type{string} */
+        this.url;
+        /** @type{Array<APPuzzle>} */
+        this.puzzles;
+    }
+}
+
+class APPuzzle {
+    constructor() {
+        /** @type{string} */
+        this.title;
+        /** @type{string} */
+        this.url;
+        /** @type{?string} */
+        this.answer;
+        /** @type{?boolean} */
+        this.spaceafter;
+    }
+}
+
+
+
 

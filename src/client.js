@@ -138,6 +138,7 @@ class H2020_Dispatcher {
             }
         }
         if (hunt2020.activity) hunt2020.activity.update();
+        if (hunt2020.all_puzzles) hunt2020.all_puzzles.update();
     }
 
     /** @param{Message} msg */
@@ -146,9 +147,8 @@ class H2020_Dispatcher {
             "<b>" + msg.title + "</b> is now open!", 6000, null, "blue",
             "/land/" + msg.land);
         if (hunt2020.activity) hunt2020.activity.update();
-        if (hunt2020.guest_services) {
-            hunt2020.guest_services.build_fastpass(msg.fastpass);
-        }
+        if (hunt2020.guest_services) hunt2020.guest_services.build_fastpass(msg.fastpass);
+        if (hunt2020.all_puzzles) hunt2020.all_puzzles.update();
     }
 
     /** @param{Message} msg */
@@ -1250,6 +1250,7 @@ var hunt2020 = {
     activity: null,
     achievements: null,
     videos: null,
+    all_puzzles: null,
 }
 
 /** @param{Node} e */
@@ -1345,6 +1346,10 @@ window.onload = function() {
     // Only present on the guest services page.
     if (goog.dom.getElement("fphavenone")) {
         hunt2020.guest_services = new H2020_GuestServices();
+    }
+
+    if (goog.dom.getElement("loplist")) {
+        hunt2020.all_puzzles = new H2020_AllPuzzles();
     }
 
     if (initial_header) {
@@ -1455,6 +1460,57 @@ class H2020_Achievements {
             goog.dom.classlist.addRemove(el, "no", "yes");
             goog.dom.getElement("achsub_" + e.name).innerHTML = e.subtitle;
         }
+    }
+}
+
+function H2020_invoke_with_json(obj, target) {
+    return function(e) {
+        var code = e.target.getStatus();
+        if (code == 200) {
+            goog.bind(target, obj)(e.target.getResponseJson());
+        } else {
+            alert(e.target.getResponseText());
+        }
+    }
+}
+
+
+class H2020_AllPuzzles {
+    constructor() {
+        this.loplist = goog.dom.getElement("loplist");
+        this.update();
+    }
+
+    update() {
+        goog.net.XhrIo.send("/js/puzzles", H2020_invoke_with_json(this, this.build));
+    }
+
+    /** param{AllPuzzles} data */
+    build(data) {
+        console.log(data);
+        this.loplist.innerHTML = "";
+        for (var i = 0; i < data.lands.length; ++i) {
+            var land = data.lands[i];
+            var ul = goog.dom.createDom("UL");
+            var a = goog.dom.createDom("A", {href: land.url}, land.title);
+            var li = goog.dom.createDom("LI", "lopland", a, ul);
+            for (var j = 0; j < land.puzzles.length; ++j) {
+                var p = land.puzzles[j];
+                a = goog.dom.createDom("A", {href: p.url}, p.title);
+                var lili = goog.dom.createDom("LI", "loppuzzle", a);
+                if (p.spacebefore) {
+                    goog.dom.classlist.add(lili, "spacebefore")
+                }
+                if (p.answer) {
+                    lili.appendChild(goog.dom.createTextNode(" \u2014 "));
+                    lili.appendChild(goog.dom.createDom("SPAN", "solved", p.answer));
+                }
+
+                ul.appendChild(lili);
+            }
+            this.loplist.appendChild(li);
+        }
+        twemoji.parse(this.loplist);
     }
 }
 

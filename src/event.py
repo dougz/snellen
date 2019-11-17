@@ -188,6 +188,20 @@ class ApplyFastPassHandler(util.TeamHandler):
     else:
       raise tornado.web.HTTPError(http.client.NOT_FOUND)
 
+class AllPuzzlesPage(util.TeamPageHandler):
+  @login.required("team")
+  def get(self):
+    self.session.visit_page("all_puzzles")
+    json_data = ""
+    self.render("all_puzzles.html", json_data=json_data)
+
+class AllPuzzlesDataHandler(util.TeamHandler):
+  @login.required("team")
+  def get(self):
+    self.set_header("Content-Type", "application/json")
+    self.write(json.dumps(self.team.get_all_puzzles_data()))
+
+
 class HealthAndSafetyPage(util.TeamPageHandler):
   @login.required("team", require_start=False)
   def get(self):
@@ -284,6 +298,7 @@ def GetHandlers():
     (r"/videos", VideosPage),
     (r"/pins", AchievementPage),
     (r"/events", EventsPage),
+    (r"/puzzles", AllPuzzlesPage),
     (r"/guest_services$", GuestServicesPage),
     (r"/health_and_safety", HealthAndSafetyPage),
     (r"/land/([a-z0-9_]+)", LandMapPage),
@@ -298,6 +313,7 @@ def GetHandlers():
     (r"/js/pins", AchievementDataHandler),
     (r"/js/videos", VideosDataHandler),
     (r"/js/hintsopen", HintsOpenDataHandler),
+    (r"/js/puzzles", AllPuzzlesDataHandler),
     (r"/js/map/([a-z][a-z0-9_]+)$", MapDataHandler),
   ]
 

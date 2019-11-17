@@ -569,6 +569,38 @@ class Team(login.LoginUser):
     self.admin_log.add(now, f"<b>{user_fullname}</b> noted: {text}")
     self.invalidate()
 
+  def get_all_puzzles_data(self):
+    if self.cached_all_puzzles_data: return self.cached_all_puzzles_data
+
+    out = []
+    for land in Land.ordered_lands:
+      if land not in self.open_lands: continue
+      plist = []
+      outland = {"title": land.title,
+                 "url": land.url}
+      out.append(outland)
+      for p in land.all_puzzles:
+        ps = self.puzzle_state[p]
+        if ps.state == PuzzleState.CLOSED: continue
+        d = {"title": p.title, "url": p.url}
+        if ps.answers_found:
+          d["answer"] = ", ".join(sorted(p.display_answers[a] for a in ps.answers_found))
+          if ps.state == PuzzleState.OPEN:
+            d["answer"] += ", \u2026"
+
+        plist.append((p.sortkey, d))
+
+      plist.sort(key=lambda i: i[0])
+      prev_g = None
+      for sk, d in plist:
+        if sk[0] != prev_g:
+          d["spacebefore"] = True
+        prev_g = sk[0]
+      outland["puzzles"] = [i[1] for i in plist]
+
+    self.cached_all_puzzles_data = {"lands": out}
+    return self.cached_all_puzzles_data
+
   def get_header_data(self):
     use_buzz = (self.score < 13)
     d = {"score": f"Buzz: {self.score * 1000:,}" if use_buzz else f"Wonder: {self.score*10000:,}",
@@ -897,6 +929,7 @@ class Team(login.LoginUser):
       state.open_time = now
       self.open_puzzles.add(state)
       puzzle.open_teams.add(self)
+      self.cached_all_puzzles_data = None
       if puzzle.land.land_order < 1000:
         puzzle.puzzle_log.add(now, f"Opened by {state.admin_html_team}.")
         self.activity_log.add(now, f"{puzzle.html} opened.")
@@ -925,6 +958,7 @@ class Team(login.LoginUser):
         }])
       self.dirty_lands.add(puzzle.land.shortname)
       self.cached_mapdata.pop(puzzle.land, None)
+      self.cached_all_puzzles_data = None
       if puzzle.meta:
         current_map = Land.BY_SHORTNAME[self.map_mode]
         self.cached_mapdata.pop(current_map, None)

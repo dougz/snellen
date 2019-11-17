@@ -148,7 +148,8 @@ class Session:
   def visit_page(self, page):
     self.pages_visited.add(page)
     if self.team and self.pages_visited == {
-        "pins", "activity", "health_safety", "guest_services", "videos", "events"}:
+        "pins", "activity", "health_safety", "guest_services",
+        "videos", "events", "all_puzzles"}:
       self.team.achieve_now(game.Achievement.digital_explorer, delay=1.5)
 
   @classmethod

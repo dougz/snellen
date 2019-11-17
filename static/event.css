@@ -655,6 +655,11 @@ img.emoji {
     margin-bottom: -2px;
 }
 
+span.solved img.emoji {
+    width: 2ex;
+    margin-bottom: -2px;
+}
+
 /** puzzle content **/
 
 .flavor { font-style: italic; }
@@ -1024,4 +1029,16 @@ select option {
     color: #999;
     border: 1px solid #bbb;
     background: linear-gradient(to bottom, #ccc, #ddd);
+}
+
+#loplist > li {
+    margin-top: 24px;
+}
+
+#loplist li.spacebefore {
+    margin-top: 16px;
+}
+
+#loplist li {
+    list-style-type: none;
 }
