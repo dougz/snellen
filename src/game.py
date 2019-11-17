@@ -1047,13 +1047,12 @@ class Team(login.LoginUser):
           cx = nx * 15 + 7
           cy = ny * 15 + 7
 
-          if nx == 0:
-            nx = 1
-          else:
+          while True:
             ny += 1
-            if ny == 3:
+            if ny == 4:
               nx += 1
               ny = 0
+            if nx > 1 or ny > 1: break
       lx += cx + 30
     cls.cached_bb_label_info = land_offsets
     return land_offsets
@@ -1086,16 +1085,15 @@ class Team(login.LoginUser):
             else:
               out.append(f'<circle cx="{lx+cx}" cy="{cy}" r="5" class="bb-{ps.state}{used_hints} bbp-{p.bbid}"/>')
 
-            if nx == 0:
-              nx = 1
-            else:
+            while True:
               ny += 1
-              if ny == 3:
+              if ny == 4:
                 nx += 1
                 ny = 0
+              if nx > 1 or ny > 1: break
         lx += cx + 30
 
-      out.insert(0, f'<svg xmlns="http://www.w3.org/2000/svg" width="{lx}" height="44" viewBox="0 0 {lx} 44">')
+      out.insert(0, f'<svg xmlns="http://www.w3.org/2000/svg" width="{lx}" height="59" viewBox="0 0 {lx} 59">')
       out.append("</g></svg>")
       svg = "".join(out)
       self.cached_bb_data["svg"] = svg
