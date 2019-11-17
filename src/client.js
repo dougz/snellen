@@ -77,7 +77,10 @@ class H2020_Dispatcher {
         var el = goog.dom.getElement("navpass");
         if (msg.passes) {
             el.style.display = "inline";
-            el.innerHTML = "(" + msg.passes + ")";
+            el.innerHTML = "";
+            var i = msg.passes;
+            if (i > 3) i = 3;
+            el.appendChild(goog.dom.createDom("A", {id: "ppicon" + i, href: "/guest_services"}));
         } else {
             el.style.display = "none";
         }

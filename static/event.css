@@ -1072,3 +1072,25 @@ div.pennypass span {
     transform-origin: center;
     transform: translateX(-50%) translateY(-50%) rotate(-90deg);
 }
+
+a#ppicon1 {
+    display: block;
+    width: 35px;
+    height: 20px;
+    background: url(@@STATIC:ppicon1.png@@);
+}
+
+a#ppicon2 {
+    display: block;
+    width: 33px;
+    height: 20px;
+    background: url(@@STATIC:ppicon2.png@@);
+}
+
+a#ppicon3 {
+    display: block;
+    width: 32px;
+    height: 20px;
+    background: url(@@STATIC:ppicon3.png@@);
+}
+
