@@ -214,7 +214,7 @@ class H2020_EmojiPicker {
     constructor(parent) {
         /** @type{boolean} */
         this.built = false;
-        /** @type{?Element} */
+        /** @type{?H2020_SubmitPanel} */
         this.parent = parent;
 
         /** @type{?Element} */
