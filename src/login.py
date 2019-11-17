@@ -275,8 +275,7 @@ class LoginSubmit(tornado.web.RequestHandler):
         session.was_admin = False
         team.attach_session(session)
         self.redirect(target or "/")
-      else:
-        self.redirect("/login?" + urllib.parse.urlencode(err_d))
+        return
     else:
       user = AdminUser.get_by_username(username)
       if user:
@@ -289,8 +288,9 @@ class LoginSubmit(tornado.web.RequestHandler):
           session.capabilities = user.roles
           session.was_admin = True
           self.redirect(target or "/admin")
-        else:
-          self.redirect("/login?" + urllib.parse.urlencode(err_d))
+          return
+
+    self.redirect("/login?" + urllib.parse.urlencode(err_d))
 
 
 class Logout(tornado.web.RequestHandler):
