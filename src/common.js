@@ -135,12 +135,13 @@ class Common_Waiter {
         this.send();
     }
 
-    waitcomplete() {
-        if (this.xhr.getStatus() >= 500) {
+    waitcomplete(e) {
+        console.log("wait response is", e.target.getStatus());
+        if (e.target.getStatus() >= 500) {
             this.saw_error = true;
         }
 
-        if (this.xhr.getStatus() == 401) {
+        if (e.target.getStatus() == 401) {
             var text;
             if (this.saw_error) {
                 text = "Server connection lost. Please reload to continue."
@@ -151,7 +152,7 @@ class Common_Waiter {
             return;
         }
 
-        if (this.xhr.getStatus() != 200) {
+        if (e.target.getStatus() != 200) {
             this.retry_backoff = Math.min(10000, Math.floor(
                 this.retry_backoff*(1.4 + Math.random() * 0.2)));
             setTimeout(goog.bind(this.send, this), this.retry_backoff);
@@ -159,10 +160,11 @@ class Common_Waiter {
         }
         this.retry_backoff = 250;
 
-        var msgs = /** @type{Array<Object>} */ (this.xhr.getResponseJson());
+        var msgs = /** @type{Array<Object>} */ (e.target.getResponseJson());
         for (var i = 0; i < msgs.length; ++i) {
             this.serial = /** @type{number} */ (msgs[i][0]);
             var msg = /** @type{Object} */ (msgs[i][1]);
+            console.log("dispatching", msg);
             this.dispatcher.dispatch(msg);
         }
 
