@@ -36,6 +36,8 @@ class Message {
         /** @type{?string} */
         this.puzzle_id;
         /** @type{?string} */
+        this.text;
+        /** @type{?string} */
         this.title;
         /** @type{?string} */
         this.land;

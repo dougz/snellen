@@ -20,6 +20,7 @@ class H2020_Dispatcher {
             "hint_history": goog.bind(this.hint_history, this),
             "receive_fastpass": goog.bind(this.receive_fastpass, this),
             "apply_fastpass": goog.bind(this.apply_fastpass, this),
+            "warn_fastpass": goog.bind(this.warn_fastpass, this),
             "hints_open": goog.bind(this.hints_open, this),
             "update_map": goog.bind(this.update_map, this),
             "update_header": goog.bind(this.update_header, this),
@@ -165,6 +166,13 @@ class H2020_Dispatcher {
             hunt2020.guest_services.build_fastpass(msg.fastpass);
         }
         if (hunt2020.activity) hunt2020.activity.update();
+    }
+
+    /** @param{Message} msg */
+    warn_fastpass(msg) {
+        hunt2020.toast_manager.add_toast(
+            "You have a PennyPass expiring in <b>" + msg.text + "!</b>  Don't miss out!",
+            6000, null, "blue", "/guest_services");
     }
 
     /** @param{Message} msg */

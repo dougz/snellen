@@ -867,9 +867,14 @@ class Team(login.LoginUser):
     while True:
       now = time.time()
       while gfq and now >= gfq[0][0]:
-        team = heapq.heappop(gfq)[1]
-        while team.fastpasses_available and now >= team.fastpasses_available[0]:
-          team.apply_fastpass(None)
+        _, team, action = heapq.heappop(gfq)
+        if action is None:
+          while team.fastpasses_available and now >= team.fastpasses_available[0]:
+            team.apply_fastpass(None)
+        else:
+          if team.get_fastpass_eligible_lands():
+            team.send_messages([{"method": "warn_fastpass", "text": action}])
+            await team.flush_messages()
       await asyncio.sleep(1.0)
 
   @save_state
@@ -879,7 +884,11 @@ class Team(login.LoginUser):
   def receive_fastpass(self, now, expire):
     self.fastpasses_available.append(now + expire)
     self.fastpasses_available.sort()
-    heapq.heappush(self.GLOBAL_FASTPASS_QUEUE, (now+expire, self))
+    heapq.heappush(self.GLOBAL_FASTPASS_QUEUE, (now+expire, self, None))
+    if expire > 60:
+      heapq.heappush(self.GLOBAL_FASTPASS_QUEUE, (now+expire-60, self, "1 minute"))
+    if expire > 300:
+      heapq.heappush(self.GLOBAL_FASTPASS_QUEUE, (now+expire-300, self, "5 minutes"))
     text = "Received a PennyPass."
     self.activity_log.add(now, text)
     self.admin_log.add(now, text)
@@ -892,19 +901,14 @@ class Team(login.LoginUser):
   @save_state
   def apply_fastpass(self, now, land_name):
     if land_name is None:
-      usable = self.get_fastpass_eligible_lands()
-      if usable:
-        land = usable[0]
-      else:
-        land = None
+      land = None
     else:
       land = Land.BY_SHORTNAME.get(land_name)
       if not land or not land.puzzles: return
     if not self.fastpasses_available: return
     self.fastpasses_available.pop(0)
     if not land:
-      # expires with no land to use it in.
-      text = "A PennyPass expired with nowhere to use it."
+      text = "A PennyPass expired."
       self.activity_log.add(now, text)
       self.admin_log.add(now, text)
       msg = {"method": "apply_fastpass",
