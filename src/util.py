@@ -127,6 +127,7 @@ class AdminPageHandler(AdminHandler):
     d["format_duration"] = format_duration
 
     script = ["<script>"]
+    script.append(f"""var page_class = \"{self.__class__.__name__}\";\n""")
     script.append(f"""var wid = {wid};\n""")
     script.append(f"""var received_serial = {serial};""")
     script.append(f"""var eurl = "{self.static_content["emoji"]}";\n""")

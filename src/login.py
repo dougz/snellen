@@ -24,8 +24,9 @@ class AdminRoles:
   ADMIN = "admin"
   CREATE_USERS = "create_users"
   CONTROL_EVENT = "control_event"
+  EDIT_PUZZLES = "edit_puzzles"
 
-  ROLES = [CREATE_USERS, CONTROL_EVENT]
+  ROLES = [CREATE_USERS, CONTROL_EVENT, EDIT_PUZZLES]
 
 
 class LoginUser:

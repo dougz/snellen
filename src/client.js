@@ -1256,6 +1256,11 @@ function emoji_builder(e, ev) {
 
 
 window.onload = function() {
+    console.log("page init");
+
+    goog.events.listen(window, goog.events.EventType.PAGESHOW,
+                       function(e) { console.log("pageshow", e.type, window.performance.navigation.type, e); });
+
     hunt2020.time_formatter = new Common_TimeFormatter();
     hunt2020.counter = new Common_Counter(hunt2020.time_formatter);
 

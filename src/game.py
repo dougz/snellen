@@ -1544,6 +1544,8 @@ class Puzzle:
     shortname = f"{tag.lower()}_placeholder_{number}"
     self = cls(shortname)
 
+    self.path = None
+
     if pstr.startswith("_"):
       if tag[0] in "AEIOU":
         self.title = f"The {tag} Placeholder"
@@ -1608,6 +1610,8 @@ class Puzzle:
     assert shortname == j["shortname"]
     self = cls(shortname)
 
+    self.path = path
+
     self.title = j["title"]
     self.oncall = j["oncall"]
     self.authors = j["authors"]
@@ -1637,6 +1641,54 @@ class Puzzle:
     self.for_ops_url = j.get("for_ops_url", None)
 
     return self
+
+  def reload(self):
+    if not self.path:
+      return "This puzzle doesn't support reloading."
+
+    try:
+      with open(self.path) as f:
+        j = json.load(f)
+    except Exception as e:
+      return f"Error reloading puzzle: {e}"
+
+    if j["shortname"] != self.shortname:
+      return f"New file has shortname '{j['shortname']}'."
+
+    new_answers = set()
+    new_display_answers = {}
+    for a in j["answers"]:
+      disp = a.upper().strip()
+      a = self.canonicalize_answer(a)
+      new_display_answers[a] = disp
+      new_answers.add(a)
+
+    if new_answers != self.answers:
+      return f"New file has different canonical answers."
+
+    self.answers = new_answers
+    self.display_answers = new_display_answers
+
+    self.title = j["title"]
+    self.oncall = j["oncall"]
+    self.authors = j["authors"]
+    self.puzzletron_id = j["puzzletron_id"]
+    self.zip_version = j.get("zip_version")
+    self.max_queued = j.get("max_queued", self.DEFAULT_MAX_QUEUED)
+
+    if "incorrect_responses" in j and "responses" not in j:
+      j["responses"] = j.pop("incorrect_responses")
+
+    self.responses = dict(
+        (self.canonicalize_answer(k), self.respace_text(v))
+        for (k, v) in j["responses"].items())
+
+    self.html_head = j.get("html_head")
+    self.html_body = j["html_body"]
+    self.solution_head = j.get("solution_head")
+    self.solution_body = j.get("solution_body", "(MISSING SOLUTION)")
+    self.for_ops_url = j.get("for_ops_url", None)
+
 
   @classmethod
   def get_by_shortname(cls, shortname):

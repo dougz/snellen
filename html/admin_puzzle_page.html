@@ -15,6 +15,9 @@
       {% else %}
       <span>MISSING hunt ops info!</span>
       {% end %}
+      {% if user.has_role("edit_puzzles") %}
+      <a class="content" href="/admin/fix/{{puzzle.shortname}}">edit puzzle</a>
+      {% end %}
     </td>
   </tr>
   <tr><th>shortname</th><td class=mono>{{puzzle.shortname}}</td></tr>

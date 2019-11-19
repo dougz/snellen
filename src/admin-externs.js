@@ -24,6 +24,9 @@ var edb;
 /** @type{?string} */
 var eurl;
 
+/** @type{string} */
+var page_class;
+
 class Message {
     constructor() {
         /** @type{string} */
@@ -240,4 +243,12 @@ class BBTeamData {
     }
 }
 
+class FixResult {
+    constructor() {
+        /** @type{boolean} */
+        this.success;
+        /** @type{string} */
+        this.message;
+    }
+}
 

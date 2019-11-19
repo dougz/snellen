@@ -174,6 +174,29 @@ class PuzzleDataHandler(util.AdminHandler):
     self.set_header("Content-Type", "application/json")
     self.write(json.dumps(d))
 
+class FixPuzzlePage(util.AdminPageHandler):
+  @login.required("edit_puzzles")
+  def get(self, shortname):
+    self.get_puzzle(shortname)
+    self.render("admin_fix_puzzle_page.html")
+
+class FixPuzzleHandler(util.AdminHandler):
+  def prepare(self):
+    self.args = json.loads(self.request.body)
+
+  @login.required("edit_puzzles")
+  async def post(self):
+    puzzle = self.get_puzzle(self.args.get("puzzle_id"))
+    print(f"fixing puzzle {puzzle}")
+    message = puzzle.reload()
+    if not message:
+      d = {"success": True,
+           "message": "Puzzle has been updated."}
+    else:
+      d = {"success": False,
+           "message": message}
+    self.set_header("Content-Type", "application/json")
+    self.write(json.dumps(d))
 
 class TeamPuzzlePage(util.AdminPageHandler):
   @login.required("admin")
@@ -211,7 +234,7 @@ class BestowFastpassHandler(util.AdminHandler):
     if self.application.settings.get("debug"):
       duration = 310 # 18000 if int(time.time()) % 2 == 0 else 90
     else:
-      duration = 2 * 3600  # 2 hours
+      duration = 310 # 2 * 3600  # 2 hours
     team.bestow_fastpass(duration)
     self.set_status(http.client.NO_CONTENT.value)
 
@@ -537,6 +560,7 @@ def GetHandlers():
     (r"/admin/confirm_change_start$", ConfirmChangeStartPage),
     (r"/admin/taskqueue$", TaskQueuePage),
     (r"/admin/puzzle/([a-z0-9_]+)$", PuzzlePage),
+    (r"/admin/fix/([a-z0-9_]+)$", FixPuzzlePage),
     (r"/admin/show/(puzzle|solution)/([a-z0-9_]+)$", PuzzleContentPage),
     (r"/admin/puzzles$", ListPuzzlesPage),
     (r"/admin/team/([a-z0-9_]+)$", TeamPage),
@@ -558,6 +582,7 @@ def GetHandlers():
     (r"/admin/addnote", AddNoteHandler),
     (r"/admin/(un)?claim/([A-Za-z0-9_-]+)$", TaskClaimHandler),
     (r"/admin/(un)?complete/([A-Za-z0-9_-]+)$", TaskCompleteHandler),
+    (r"/admin/fixpuzzle", FixPuzzleHandler),
 
     (r"/admin/puzzle_json/.*", PuzzleJsonHandler),
     (r"/admin/team_json/.*", TeamJsonHandler),

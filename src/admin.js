@@ -104,7 +104,7 @@ class A2020_TeamPuzzlePage {
 
     do_claim(which) {
         goog.net.XhrIo.send("/admin/" + which + "/h-" + team_username + "-" + puzzle_id,
-                            A2020_expect_204);
+                            Common_expect_204);
     }
 
     submit(has_reply) {
@@ -333,17 +333,17 @@ class A2020_TaskQueue {
 
     claim_task(msg) {
         var url = "/admin/" + (msg.claimant ? "unclaim" : "claim") + "/" + msg.key;
-        goog.net.XhrIo.send(url, A2020_expect_204);
+        goog.net.XhrIo.send(url, Common_expect_204);
     }
 
     complete_task(msg) {
         var url = "/admin/complete/" + msg.key;
-        goog.net.XhrIo.send(url, A2020_expect_204);
+        goog.net.XhrIo.send(url, Common_expect_204);
     }
 
     uncomplete_task(msg) {
         var url = "/admin/uncomplete/" + msg.key;
-        goog.net.XhrIo.send(url, A2020_expect_204);
+        goog.net.XhrIo.send(url, Common_expect_204);
     }
 
 }
@@ -503,13 +503,6 @@ function A2020_DisplayLog(el, log) {
     }
 }
 
-function A2020_expect_204(e) {
-    var code = e.target.getStatus();
-    if (code != 204) {
-        alert(e.target.getResponseText());
-    }
-}
-
 class A2020_ServerPage {
     constructor() {
         /** @type{Element} */
@@ -561,26 +554,24 @@ class A2020_TeamPage {
         this.tpsvg = goog.dom.getElement("tpsvg");
         /** @type{Element} */
         this.tpscore = goog.dom.getElement("tpscore");
+        /** @type{Element} */
+        this.bestow = goog.dom.getElement("bestowfastpass");
 
-        var el;
-        el = goog.dom.getElement("enablebestow");
-        goog.events.listen(el, goog.events.EventType.CLICK, function(e) {
-            goog.dom.getElement("bestowfastpass").disabled = false;
-        });
+        goog.events.listen(goog.dom.getElement("enablebestow"),
+                           goog.events.EventType.CLICK, goog.bind(this.enable, this));
 
-        el = goog.dom.getElement("bestowfastpass");
-        goog.events.listen(el, goog.events.EventType.CLICK, function(e) {
-            goog.net.XhrIo.send("/admin/bestowfastpass/" + team_username, A2020_expect_204);
+        goog.events.listen(this.bestow, goog.events.EventType.CLICK, function(e) {
+            goog.net.XhrIo.send("/admin/bestowfastpass/" + team_username, Common_expect_204);
             e.target.blur();
             e.target.disabled = true;
         });
 
-        el = goog.dom.getElement("tpaddnote");
+        var el = goog.dom.getElement("tpaddnote");
         goog.events.listen(el, goog.events.EventType.CLICK, function() {
             var el = goog.dom.getElement("tpnotetext");
             var text = el.value;
             if (!text) return;
-            goog.net.XhrIo.send("/admin/addnote", A2020_expect_204,
+            goog.net.XhrIo.send("/admin/addnote", Common_expect_204,
                                 "POST", admin2020.serializer.serialize({"team_username": team_username,
                                                                         "note": text}));
             el.value = "";
@@ -601,6 +592,10 @@ class A2020_TeamPage {
         this.dot_labeler = new A2020_DotLabeler(this.tpsvg);
 
         this.update();
+    }
+
+    enable() {
+        this.bestow.disabled = !this.bestow.disabled;
     }
 
     update() {
@@ -707,7 +702,7 @@ class A2020_PuzzlePage {
             goog.events.EventType.CLICK,
             function() {
                 var text = goog.dom.getElement("newhinttime").value;
-                goog.net.XhrIo.send("/admin/hinttimechange", A2020_expect_204, "POST",
+                goog.net.XhrIo.send("/admin/hinttimechange", Common_expect_204, "POST",
                                     admin2020.serializer.serialize({"puzzle_id": puzzle_id,
                                                                     "hint_time": text}));
                 goog.dom.getElement("hinttimechange").style.display = "initial";
@@ -953,6 +948,7 @@ var admin2020 = {
     team_puzzle_page: null,
     server_page: null,
     puzzle_list_page: null,
+    fix_puzzle: null,
 }
 
 window.onload = function() {
@@ -1028,19 +1024,69 @@ window.onload = function() {
     if (goog.dom.getElement("stwaits")) {
         admin2020.server_page = new A2020_ServerPage();
     }
+    if (goog.dom.getElement("fixsubmit")) {
+        admin2020.fix_puzzle = new A2020_FixPuzzlePage();
+    }
 
     if (team_username && !puzzle_id) {
         admin2020.team_page = new A2020_TeamPage();
     }
-    if (puzzle_id && !team_username) {
+    if (page_class == "PuzzlePage") {
         admin2020.puzzle_page = new A2020_PuzzlePage();
     }
     if (puzzle_id && team_username) {
         admin2020.team_puzzle_page = new A2020_TeamPuzzlePage();
     }
 
-    if (goog.dom.getElement("pllist")) {
+
+    if (page_class == "FixPuzzlePage") {
         admin2020.puzzle_list_page = new A2020_PuzzleListPage();
+    }
+}
+
+
+
+
+class A2020_FixPuzzlePage {
+    constructor() {
+        /** @type{Element} */
+        this.fixenable = goog.dom.getElement("fixenable");
+        /** @type{Element} */
+        this.fixsubmit = goog.dom.getElement("fixsubmit");
+        /** @type{Element} */
+        this.fixresult = goog.dom.getElement("fixresult");
+
+        goog.events.listen(this.fixenable, goog.events.EventType.CLICK,
+                           goog.bind(this.enable, this));
+        goog.events.listen(this.fixsubmit, goog.events.EventType.CLICK,
+                           goog.bind(this.submit, this));
+    }
+
+    enable() {
+        this.fixsubmit.disabled = !this.fixsubmit.disabled;
+    }
+
+    submit() {
+        var d = {"puzzle_id": puzzle_id};
+        goog.net.XhrIo.send("/admin/fixpuzzle", goog.bind(this.submit_result, this),
+                            "POST", admin2020.serializer.serialize(d));
+    }
+
+    submit_result(e) {
+        if (e.target.getStatus() != 200) {
+            alert(e.target.getResponseText());
+            return;
+        }
+        var obj = /** @type{FixResult} */ (e.target.getResponseJson());
+        console.log(obj);
+
+        if (obj.success) {
+            goog.dom.classlist.addRemove(this.fixresult, "failure", "success");
+            this.fixresult.innerHTML = obj.message;
+        } else {
+            goog.dom.classlist.addRemove(this.fixresult, "success", "failure");
+            this.fixresult.innerHTML = obj.message;
+        }
     }
 }
 

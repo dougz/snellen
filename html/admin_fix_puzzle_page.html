@@ -1,0 +1,15 @@
+{% extends "admin_base.html" %}
+{% block colorscheme %}color-puzzle{% end %}
+
+{% block title %}Fix a puzzle{% end %}
+
+{% block content %}
+
+<p>
+<button class="action" id="fixenable">Enable &#x25b6;&#xfe0e;&#x25b6;&#xfe0e;</button>
+<button class="action" id="fixsubmit" disabled>Fix</button>
+</p>
+
+<p id="fixresult"></p>
+
+{% end %}
