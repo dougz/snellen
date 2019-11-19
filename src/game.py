@@ -1772,6 +1772,8 @@ class Global:
 
     self.task_queue = TaskQueue()
 
+    self.errata = []
+
   async def stop_server(self):
     async with self.stop_cv:
       self.stopping = True

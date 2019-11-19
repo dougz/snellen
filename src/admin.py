@@ -177,8 +177,8 @@ class PuzzleDataHandler(util.AdminHandler):
 class FixPuzzlePage(util.AdminPageHandler):
   @login.required("edit_puzzles")
   def get(self, shortname):
-    self.get_puzzle(shortname)
-    self.render("admin_fix_puzzle_page.html")
+    puzzle = self.get_puzzle(shortname)
+    self.render("admin_fix_puzzle_page.html", puzzle_path=puzzle.path)
 
 class FixPuzzleHandler(util.AdminHandler):
   def prepare(self):

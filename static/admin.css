@@ -382,8 +382,8 @@ body > p, body > h2 {
     background: linear-gradient(to bottom, #436299, #4c70af);
 }
 .action:disabled {
-    color: #666;
-    border: 1px solid #777;
+    color: #888;
+    border: 1px solid #aaa;
     background: linear-gradient(to bottom, #ccc, #ddd);
 }
 
@@ -906,3 +906,38 @@ tr.submit-pending .submit-state { color: #666 }
 
 #fixresult.success { color: green; }
 #fixresult.failure { color: #c00; }
+
+
+.FixPuzzlePage label {
+    margin-left: 8px;
+}
+
+.fixsection > * {
+    margin: 8px 0 0 28px;
+}
+
+.fixsection .fixselect {
+    margin-left: 0;
+    font-weight: bold;
+}
+
+.fixsection {
+    margin-bottom: 16px;
+}
+
+#fixtext {
+    width: 800px;
+    box-sizing: border-box;
+    padding: 8px;
+}
+
+#fixpreview {
+    width: 800px;
+    border: 1px solid #ccc;
+    padding: 8px;
+    box-sizing: border-box;
+}
+
+#fixexplainreload {
+    color: #222;
+}

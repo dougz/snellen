@@ -160,6 +160,13 @@ class EventsDataHandler(util.TeamHandler):
   def get(self):
     self.write(json.dumps({}))
 
+class ErrataPage(util.TeamPageHandler):
+  @login.required("team")
+  def get(self):
+    if not game.Global.STATE.errata:
+      raise tornado.web.HTTPError(http.client.NOT_FOUND)
+    self.render("errata.html", errata=game.Global.STATE.errata)
+
 class GuestServicesPage(util.TeamPageHandler):
   @login.required("team")
   def get(self):
@@ -300,6 +307,7 @@ def GetHandlers():
     (r"/pins", AchievementPage),
     (r"/events", EventsPage),
     (r"/puzzles", AllPuzzlesPage),
+    (r"/errata", ErrataPage),
     (r"/guest_services$", GuestServicesPage),
     (r"/health_and_safety", HealthAndSafetyPage),
     (r"/land/([a-z0-9_]+)", LandMapPage),

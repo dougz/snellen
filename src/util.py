@@ -75,6 +75,7 @@ class TeamPageHandler(TeamHandler):
     d["script"] = "".join(script)
     d["json_data"] = None
     d["park_open"] = (game.Global.STATE.event_start_time is not None)
+    d["has_errata"] = (not not game.Global.STATE.errata)
     d["logo_nav"] = self.static_content["logo-nav.png"]
 
     return d
@@ -125,6 +126,8 @@ class AdminPageHandler(AdminHandler):
       d["launch"] = None
       d["expected_launch"] = st.expected_start_time
     d["format_duration"] = format_duration
+
+    d["page_class"] = self.__class__.__name__
 
     script = ["<script>"]
     script.append(f"""var page_class = \"{self.__class__.__name__}\";\n""")

@@ -5,11 +5,35 @@
 
 {% block content %}
 
-<p>
-<button class="action" id="fixenable">Enable &#x25b6;&#xfe0e;&#x25b6;&#xfe0e;</button>
-<button class="action" id="fixsubmit" disabled>Fix</button>
-</p>
+<div id="fixerratum" class="fixsection">
+  <div class="fixselect">
+    <input id="fixdopost" type="checkbox"><label for="fixdopost">Post erratum</label>
+  </div>
+  <textarea rows=8 id="fixtext" disabled></textarea>
+  <p>Preview:</p>
+  <div id="fixpreview"></div>
+</div>
 
-<p id="fixresult"></p>
+{% if puzzle_path %}
+<div id="fixreload" class="fixsection">
+  <div class="fixselect">
+    <input id="fixdoreload" type="checkbox"><label for="fixdoreload">Reload puzzle content</label>
+  </div>
+  <div id="fixexplainreload">Reloads the puzzle data from <tt>{{puzzle_path}}</tt> on the server.</div>
+</div>
+{% else %}
+<div id="fixreload" class="fixsection">
+  <div><i>This puzzle can't be reloaded.</i></div>
+</div>
+{% end %}
+
+<div class="fixsection">
+  <div class="fixselect">
+    <button class="action" id="fixenable" disabled>Enable &#x25b6;&#xfe0e;&#x25b6;&#xfe0e;</button>
+    <button class="action" id="fixsubmit" disabled>Fix</button>
+  </div>
+  <p id="fixresult"></p>
+</div>
+
 
 {% end %}

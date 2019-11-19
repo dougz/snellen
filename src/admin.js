@@ -55,7 +55,6 @@ class A2020_Dispatcher {
 class A2020_PuzzleListPage {
     constructor() {
         twemoji.parse(goog.dom.getElement("admincontent"));
-        console.log("hello, world");
     }
 }
 
@@ -1013,33 +1012,28 @@ window.onload = function() {
             });
     }
 
-    if (goog.dom.getElement("user-roles")) {
+    if (page_class == "AdminUsers") {
         admin2020.user_roles = new A2020_UserRoles()
     }
-
-    if (goog.dom.getElement("bbtaskqueue")) {
+    if (page_class == "BigBoardPage") {
         admin2020.bigboard = new A2020_BigBoard();
     }
-
-    if (goog.dom.getElement("stwaits")) {
+    if (page_class == "AdminServerPage") {
         admin2020.server_page = new A2020_ServerPage();
     }
-    if (goog.dom.getElement("fixsubmit")) {
+    if (page_class == "FixPuzzlePage") {
         admin2020.fix_puzzle = new A2020_FixPuzzlePage();
     }
-
-    if (team_username && !puzzle_id) {
+    if (page_class == "TeamPage") {
         admin2020.team_page = new A2020_TeamPage();
     }
     if (page_class == "PuzzlePage") {
         admin2020.puzzle_page = new A2020_PuzzlePage();
     }
-    if (puzzle_id && team_username) {
+    if (page_class == "TeamPuzzlePage") {
         admin2020.team_puzzle_page = new A2020_TeamPuzzlePage();
     }
-
-
-    if (page_class == "FixPuzzlePage") {
+    if (page_class == "ListPuzzles") {
         admin2020.puzzle_list_page = new A2020_PuzzleListPage();
     }
 }
@@ -1055,15 +1049,55 @@ class A2020_FixPuzzlePage {
         this.fixsubmit = goog.dom.getElement("fixsubmit");
         /** @type{Element} */
         this.fixresult = goog.dom.getElement("fixresult");
+        /** @type{Element} */
+        this.fixdopost = goog.dom.getElement("fixdopost");
+        /** @type{Element} */
+        this.fixdoreload = goog.dom.getElement("fixdoreload");
+        /** @type{Element} */
+        this.fixtext = goog.dom.getElement("fixtext");
+        /** @type{Element} */
+        this.fixpreview = goog.dom.getElement("fixpreview");
 
-        goog.events.listen(this.fixenable, goog.events.EventType.CLICK,
-                           goog.bind(this.enable, this));
+        this.dirty = false;
+
+        var b = goog.bind(this.enable, this);
+        goog.events.listen(this.fixdopost, goog.events.EventType.CHANGE, b);
+        goog.events.listen(this.fixdoreload, goog.events.EventType.CHANGE, b);
+        goog.events.listen(this.fixenable, goog.events.EventType.CLICK, b);
+
+        goog.events.listen(this.fixtext, goog.events.EventType.INPUT,
+                           goog.bind(this.mark_dirty, this));
+
         goog.events.listen(this.fixsubmit, goog.events.EventType.CLICK,
                            goog.bind(this.submit, this));
+
+        setInterval(goog.bind(this.show_preview, this), 1000);
     }
 
-    enable() {
-        this.fixsubmit.disabled = !this.fixsubmit.disabled;
+    enable(e) {
+        this.fixtext.disabled = !this.fixdopost.checked;
+
+        if (this.fixdopost.checked || this.fixdoreload.checked) {
+            if (e.target == this.fixenable) {
+                this.fixsubmit.disabled = !this.fixsubmit.disabled;
+            } else {
+                this.fixenable.disabled = false;
+            }
+        } else {
+            this.fixenable.disabled = true;
+            this.fixsubmit.disabled = true;
+        }
+    }
+
+    mark_dirty() {
+        this.dirty = true;
+    }
+
+    show_preview() {
+        if (this.dirty) {
+            this.fixpreview.innerHTML = this.fixtext.value;
+            this.dirty = false;
+        }
     }
 
     submit() {
