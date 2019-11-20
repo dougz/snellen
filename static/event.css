@@ -202,6 +202,11 @@ a#puzzerr {
     color: white;
     padding: 4px;
     font-weight: bold;
+    font-family: 'Merriweather Sans', sans-serif;
+    height: 20px;
+    width: 20px;
+    text-align: center;
+    vertical-align: center;
 }
 
 #nonnav {
