@@ -941,3 +941,10 @@ tr.submit-pending .submit-state { color: #666 }
 #fixexplainreload {
     color: #222;
 }
+
+#pperrata {
+    display: none;
+}
+
+.PuzzlePage dt { font-weight: bold; margin-left: 8px; }
+.PuzzlePage dd { margin-bottom: 8px; }

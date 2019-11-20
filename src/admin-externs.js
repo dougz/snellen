@@ -145,8 +145,21 @@ class PuzzlePageData {
         this.log;
         /** @type{number} */
         this.hint_time;
+        /** @type{Array<Erratum>} */
+        this.errata;
     }
 }
+
+class Erratum {
+    constructor() {
+        /** @type{number} */
+        this.when;
+        /** @type{string} */
+        this.text;
+    }
+}
+
+
 
 class HintMessage {
     constructor() {

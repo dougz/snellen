@@ -169,7 +169,8 @@ class PuzzleDataHandler(util.AdminHandler):
          "solve_count": len(puzzle.solve_durations),
          "incorrect_answers": puzzle.incorrect_counts,
          "hint_time": puzzle.hints_available_time,
-         "log": puzzle.puzzle_log.get_data()}
+         "log": puzzle.puzzle_log.get_data(),
+         "errata": [{"when": e.when, "text": e.text} for e in puzzle.errata]}
 
     self.set_header("Content-Type", "application/json")
     self.write(json.dumps(d))
@@ -214,6 +215,9 @@ class FixPuzzleHandler(util.AdminHandler):
       t.send_messages([{"method": "history_change", "puzzle_id": puzzle.shortname},
                        {"method": "post_erratum", "title": puzzle.title}])
       await t.flush_messages()
+    login.AdminUser.send_messages([{"method": "update", "puzzle_id": puzzle.shortname}])
+    await login.AdminUser.flush_messages()
+
 
 
 

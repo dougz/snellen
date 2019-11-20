@@ -690,6 +690,10 @@ class A2020_PuzzlePage {
         this.pplog = goog.dom.getElement("pplog");
          /** @type{Element} */
         this.pphinttime = goog.dom.getElement("pphinttime");
+         /** @type{Element} */
+        this.pperrata = goog.dom.getElement("pperrata");
+         /** @type{Element} */
+        this.pperratalist = goog.dom.getElement("pperratalist");
 
         var el = goog.dom.getElement("hinttimechange");
         goog.events.listen(el, goog.events.EventType.CLICK, function() {
@@ -746,6 +750,21 @@ class A2020_PuzzlePage {
         this.pphinttime.innerHTML = admin2020.time_formatter.duration(data.hint_time);
 
         A2020_DisplayLog(this.pplog, data.log);
+
+        if (data.errata && data.errata.length > 0) {
+            this.pperrata.style.display = "block";
+            this.pperratalist.innerHTML = ""
+            for (var i = 0; i < data.errata.length; ++i) {
+                var e = data.errata[i];
+
+                var dt = goog.dom.createDom("DT", null, admin2020.time_formatter.format(e.when) + ":")
+                var dd = goog.dom.createDom("DD", null, e.text);
+                this.pperratalist.appendChild(dt);
+                this.pperratalist.appendChild(dd);
+            }
+        } else {
+            this.pperrata.style.display = "none";
+        }
 
         twemoji.parse(goog.dom.getElement("admincontent"));
 

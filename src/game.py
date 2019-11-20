@@ -1494,7 +1494,7 @@ class Puzzle:
     self.incorrect_counts = []    # [count: answer]
     self.open_teams = set()
     self.submitted_teams = set()
-    self.has_errata = False
+    self.errata = []
 
     save_state.add_instance("Puzzle:" + shortname, self)
 
@@ -1781,7 +1781,7 @@ class Erratum:
     self.text = text
     self.sender = sender
 
-    puzzle.has_errata = True
+    puzzle.errata.insert(0, self)
 
 
 class Global:
