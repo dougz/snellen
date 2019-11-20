@@ -967,6 +967,7 @@ var admin2020 = {
     server_page: null,
     puzzle_list_page: null,
     fix_puzzle: null,
+    home_page: null,
 }
 
 window.onload = function() {
@@ -1054,6 +1055,9 @@ window.onload = function() {
     }
     if (page_class == "ListPuzzles") {
         admin2020.puzzle_list_page = new A2020_PuzzleListPage();
+    }
+    if (page_class == "AdminHomePage") {
+        admin2020.home_page = new A2020_HomePage();
     }
 }
 
@@ -1146,6 +1150,27 @@ class A2020_FixPuzzlePage {
             goog.dom.classlist.addRemove(this.fixresult, "success", "failure");
             this.fixresult.innerHTML = obj.message;
         }
+    }
+}
+
+class A2020_HomePage {
+    constructor() {
+        /** @type{Element} */
+        this.homeenable = goog.dom.getElement("homeenable");
+        /** @type{Element} */
+        this.homebestow = goog.dom.getElement("homebestow");
+
+        goog.events.listen(this.homeenable, goog.events.EventType.CLICK, goog.bind(this.enable, this));
+
+        goog.events.listen(this.homebestow, goog.events.EventType.CLICK, function(e) {
+            goog.net.XhrIo.send("/admin/bestowfastpass", Common_expect_204);
+            e.target.blur();
+            e.target.disabled = true;
+        });
+    }
+
+    enable() {
+        this.homebestow.disabled = !this.homebestow.disabled;
     }
 }
 

@@ -256,12 +256,16 @@ class TeamPuzzleDataHandler(util.AdminHandler):
 class BestowFastpassHandler(util.AdminHandler):
   @login.required("admin")
   def get(self, username):
-    team = self.get_team(username)
     if self.application.settings.get("debug"):
       duration = 310 # 18000 if int(time.time()) % 2 == 0 else 90
     else:
       duration = 310 # 2 * 3600  # 2 hours
-    team.bestow_fastpass(duration)
+    if username is None:
+      for team in game.Team.all_teams():
+        team.bestow_fastpass(duration)
+    else:
+      team = self.get_team(username)
+      team.bestow_fastpass(duration)
     self.set_status(http.client.NO_CONTENT.value)
 
 
@@ -597,7 +601,7 @@ def GetHandlers():
 
     (r"/admin/(set|clear)_role/([^/]+)/([^/]+)$", UpdateAdminRoleHandler),
     (r"/admin/become/([a-z0-9_]+)$", BecomeTeamHandler),
-    (r"/admin/bestowfastpass/([a-z0-9_]+)$", BestowFastpassHandler),
+    (r"/admin/bestowfastpass(?:/([a-z0-9_]+))?$", BestowFastpassHandler),
     (r"/admin/bb/taskqueue$", BigBoardTaskQueueDataHandler),
     (r"/admin/bb/team(/[a-z0-9_]+)?$", BigBoardTeamDataHandler),
     (r"/admin/change_password$", ChangePasswordHandler),

@@ -218,7 +218,6 @@ span#home {
 }
 
 li { line-height: 20px; }
-ul#mainmenu li { line-height: 30px; }
 
 table#user-roles tr.h { background-color: #f0f0f8; }
 table#user-roles { margin: 20px; border-collapse: collapse; }
@@ -948,3 +947,5 @@ tr.submit-pending .submit-state { color: #666 }
 
 .PuzzlePage dt { font-weight: bold; margin-left: 8px; }
 .PuzzlePage dd { margin-bottom: 8px; }
+
+.AdminHomePage li { line-height: 40px; }
