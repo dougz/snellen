@@ -26,6 +26,7 @@ class H2020_Dispatcher {
             "update_header": goog.bind(this.update_header, this),
             "video": goog.bind(this.video, this),
             "event_complete": goog.bind(this.event_complete, this),
+            "post_erratum": goog.bind(this.post_erratum, this),
         }
     }
 
@@ -39,6 +40,13 @@ class H2020_Dispatcher {
         if (msg.puzzle_id == puzzle_id) {
             hunt2020.submit_panel.update_history();
         }
+    }
+
+    /** @param{Message} msg */
+    post_erratum(msg) {
+        hunt2020.toast_manager.add_toast(
+            "An erratum has been posted for <b>" + msg.title + "</b>.", 6000, null, "salmon",
+            "/errata");
     }
 
     /** @param{Message} msg */
@@ -444,6 +452,8 @@ class H2020_SubmitPanel {
         this.has_overlay = false;
 
         this.cancel = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/><path d="M0 0h24v24H0z" fill="none"/></svg>';
+
+        this.build();
     }
 
     build() {
@@ -476,6 +486,7 @@ class H2020_SubmitPanel {
 
     /** @param{SubmissionHistory} response */
     render_history(response) {
+        console.log(response);
         if (response.total) {
             var t = response.total;
             var c = response.correct;
@@ -562,6 +573,10 @@ class H2020_SubmitPanel {
         } else {
             this.entry.style.visibility = "hidden";
         }
+
+        if (response.errata) {
+            goog.dom.getElement("puzzerr").style.display = "inline-block";
+        }
     }
 
     submit() {
@@ -606,7 +621,6 @@ class H2020_SubmitPanel {
     }
 
     show() {
-        if (!this.built) this.build();
         goog.dom.classlist.addRemove(this.submitpanel, "panel-invisible",
                                      "panel-visible");
         this.update_history();
@@ -1214,6 +1228,7 @@ var hunt2020 = {
     achievements: null,
     videos: null,
     all_puzzles: null,
+    errata: null,
 }
 
 /** @param{Node} e */
@@ -1320,6 +1335,10 @@ window.onload = function() {
         hunt2020.all_puzzles = new H2020_AllPuzzles();
     }
 
+    if (goog.dom.getElement("errata")) {
+        hunt2020.errata = new H2020_Errata();
+    }
+
     if (initial_header) {
         dispatcher.update_header(initial_header);
     }
@@ -1406,6 +1425,29 @@ class H2020_Achievements {
             if (!el) continue;
             goog.dom.classlist.addRemove(el, "no", "yes");
             goog.dom.getElement("achsub_" + e.name).innerHTML = e.subtitle;
+        }
+    }
+}
+
+class H2020_Errata {
+    constructor() {
+        this.build(initial_json);
+    }
+
+    /** param{Array<Erratum>} data */
+    build(data) {
+        var dl = goog.dom.getElement("errata");
+        dl.innerHTML = "";
+        for (var i = 0; i < data.length; ++i) {
+            var e = data[i];
+
+            var dt = goog.dom.createDom(
+                "DT", null,
+                goog.dom.createDom("A", {href: e.url}, e.title),
+                " (posted " + hunt2020.time_formatter.format(e.when) + ")");
+            var dd = goog.dom.createDom("DD", null, e.text);
+            dl.appendChild(dt);
+            dl.appendChild(dd);
         }
     }
 }

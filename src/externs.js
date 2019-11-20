@@ -107,6 +107,8 @@ class SubmissionHistory {
         this.width;
         /** @type{?number} */
         this.height;
+        /** @type{?boolean} */
+        this.errata;
     }
 }
 
@@ -268,4 +270,16 @@ class GuestServicesData {
     }
 }
 
+class Erratum {
+    constructor() {
+        /** @type{string} */
+        this.url;
+        /** @type{string} */
+        this.title;
+        /** @type{number} */
+        this.when;
+        /** @type{string} */
+        this.text;
+    }
+}
 

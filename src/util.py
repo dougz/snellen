@@ -75,7 +75,7 @@ class TeamPageHandler(TeamHandler):
     d["script"] = "".join(script)
     d["json_data"] = None
     d["park_open"] = (game.Global.STATE.event_start_time is not None)
-    d["has_errata"] = (not not game.Global.STATE.errata)
+    d["has_errata"] = not not self.team.get_errata_data()
     d["logo_nav"] = self.static_content["logo-nav.png"]
 
     return d

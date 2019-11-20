@@ -505,6 +505,7 @@ class Team(login.LoginUser):
     self.cached_bb_data = None
     self.cached_mapdata = {}
     self.cached_open_hints_data = None
+    self.cached_errata_data = None
 
     self.admin_url = f"/admin/team/{username}"
     self.admin_html = f'<a href="{self.admin_url}">{html.escape(self.name)}</a>'
@@ -563,6 +564,20 @@ class Team(login.LoginUser):
     if ach not in self.achievements:
       self.record_achievement(ach.name, delay)
       return True
+
+  def get_errata_data(self):
+    if self.cached_errata_data: return self.cached_errata_data
+
+    ours = []
+    for e in Global.STATE.errata:
+      if self.puzzle_state[e.puzzle].state != PuzzleState.CLOSED:
+        ours.append({"url": e.puzzle.url,
+                     "title": e.puzzle.title,
+                     "when": e.when,
+                     "text": e.text})
+
+    self.cached_errata_data = ours
+    return ours
 
   @save_state
   def add_admin_note(self, now, user_fullname, text):
@@ -940,6 +955,7 @@ class Team(login.LoginUser):
       self.open_puzzles.add(state)
       puzzle.open_teams.add(self)
       self.cached_all_puzzles_data = None
+      self.cached_errata_data = None
       if puzzle.land.land_order < 1000:
         puzzle.puzzle_log.add(now, f"Opened by {state.admin_html_team}.")
         self.activity_log.add(now, f"{puzzle.html} opened.")
@@ -1478,6 +1494,7 @@ class Puzzle:
     self.incorrect_counts = []    # [count: answer]
     self.open_teams = set()
     self.submitted_teams = set()
+    self.has_errata = False
 
     save_state.add_instance("Puzzle:" + shortname, self)
 
@@ -1756,6 +1773,17 @@ class Puzzle:
           asyncio.create_task(t.flush_messages())
       await asyncio.sleep(10.0)
 
+
+class Erratum:
+  def __init__(self, when, puzzle, text, sender):
+    self.when = when
+    self.puzzle = puzzle
+    self.text = text
+    self.sender = sender
+
+    puzzle.has_errata = True
+
+
 class Global:
   STATE = None
 
@@ -1773,6 +1801,16 @@ class Global:
     self.task_queue = TaskQueue()
 
     self.errata = []
+
+  @save_state
+  def post_erratum(self, now, shortname, text, sender):
+    puzzle = Puzzle.get_by_shortname(shortname)
+    if not puzzle: return
+    sender = login.AdminUser.get_by_username(sender)
+    if not sender: return
+    self.errata.insert(0, Erratum(now, puzzle, text, sender))
+
+    puzzle.puzzle_log.add(now, f"An erratum was posted by <b>{sender.fullname}</b>.")
 
   async def stop_server(self):
     async with self.stop_cv:

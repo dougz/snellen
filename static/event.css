@@ -196,6 +196,14 @@ a#submit:hover {
     color: #c00;
 }
 
+a#puzzerr {
+    display: none;
+    background-color: #c00;
+    color: white;
+    padding: 4px;
+    font-weight: bold;
+}
+
 #nonnav {
     display: flex;
     flex-direction: column;
@@ -1094,3 +1102,7 @@ a#ppicon3 {
     background: url(@@STATIC:ppicon3.png@@);
 }
 
+#errata dt {
+    margin-top: 12px;
+    font-weight: bold;
+}

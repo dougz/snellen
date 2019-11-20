@@ -1102,6 +1102,12 @@ class A2020_FixPuzzlePage {
 
     submit() {
         var d = {"puzzle_id": puzzle_id};
+        if (this.fixdopost) {
+            d["text"] = this.fixtext.value;
+        }
+        if (this.fixdoreload) {
+            d["reload"] = true;
+        }
         goog.net.XhrIo.send("/admin/fixpuzzle", goog.bind(this.submit_result, this),
                             "POST", admin2020.serializer.serialize(d));
     }

@@ -187,16 +187,38 @@ class FixPuzzleHandler(util.AdminHandler):
   @login.required("edit_puzzles")
   async def post(self):
     puzzle = self.get_puzzle(self.args.get("puzzle_id"))
-    print(f"fixing puzzle {puzzle}")
-    message = puzzle.reload()
-    if not message:
-      d = {"success": True,
-           "message": "Puzzle has been updated."}
-    else:
-      d = {"success": False,
-           "message": message}
+    text = self.args.get("text", None)
+    do_reload = self.args.get("reload", None)
+
     self.set_header("Content-Type", "application/json")
+
+    print(f"fixing puzzle {puzzle} reload: {not not do_reload} text: {not not text}")
+    message = ""
+    if do_reload:
+      message = puzzle.reload()
+      if message:
+        d = {"success": False,
+             "message": f"Error: {message}<br>(Errata was not posted.)"}
+        self.write(json.dumps(d))
+        return
+      message = "Puzzle updated."
+
+    if text:
+      game.Global.STATE.post_erratum(puzzle.shortname, text, self.user.username)
+      message += " Erratum posted."
+    d = {"success": True, "message": message}
     self.write(json.dumps(d))
+
+    for t in puzzle.open_teams:
+      t.cached_errata_data = None
+      t.send_messages([{"method": "history_change", "puzzle_id": puzzle.shortname},
+                       {"method": "post_erratum", "title": puzzle.title}])
+      await t.flush_messages()
+
+
+
+
+
 
 class TeamPuzzlePage(util.AdminPageHandler):
   @login.required("admin")

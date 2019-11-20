@@ -5,6 +5,12 @@
 
 {% block content %}
 
+<h2>
+  <a href="/admin/puzzle/{{puzzle.shortname}}">{{puzzle.title}}</a>
+  &nbsp;
+  <span class="landtag" style="background-color: {{puzzle.land.color}};">{{puzzle.land.symbol}}</span>
+</h2>
+
 <div id="fixerratum" class="fixsection">
   <div class="fixselect">
     <input id="fixdopost" type="checkbox"><label for="fixdopost">Post erratum</label>
@@ -34,6 +40,5 @@
   </div>
   <p id="fixresult"></p>
 </div>
-
 
 {% end %}

@@ -163,9 +163,11 @@ class EventsDataHandler(util.TeamHandler):
 class ErrataPage(util.TeamPageHandler):
   @login.required("team")
   def get(self):
-    if not game.Global.STATE.errata:
+    errata = self.team.get_errata_data()
+    if not errata:
       raise tornado.web.HTTPError(http.client.NOT_FOUND)
-    self.render("errata.html", errata=game.Global.STATE.errata)
+    json_data = "<script>var initial_json = """ + json.dumps(errata) + ";</script>"
+    self.render("errata.html", json_data=json_data)
 
 class GuestServicesPage(util.TeamPageHandler):
   @login.required("team")
@@ -236,26 +238,28 @@ class SubmitHandler(util.TeamHandler):
 class SubmitHistoryHandler(util.TeamHandler):
   @login.required("team", on_fail=http.client.UNAUTHORIZED)
   def get(self, shortname):
-    state = self.team.get_puzzle_state(shortname)
-    if not state:
+    ps = self.team.get_puzzle_state(shortname)
+    if not ps:
       raise tornado.web.HTTPError(http.client.NOT_FOUND)
 
     # Allow submit if the puzzle is open, and if there are fewer than
     # the max allowed pending submissions.
     submit_allowed = False
-    if state.state == state.OPEN:
-      pending = sum(1 for s in state.submissions if s.state == s.PENDING)
-      if pending < state.puzzle.max_queued:
+    if ps.state == game.PuzzleState.OPEN:
+      pending = sum(1 for s in ps.submissions if s.state == s.PENDING)
+      if pending < ps.puzzle.max_queued:
         submit_allowed = True
 
     self.set_header("Content-Type", "application/json")
     d = {"allowed": submit_allowed,
-         "history": [sub.json_dict() for sub in state.submissions],
+         "history": [sub.json_dict() for sub in ps.submissions],
          }
-    if ((len(state.puzzle.answers) > 1 or state.puzzle.land.shortname == "safari")
-        and state.puzzle.land.land_order < 1000):
-      d["correct"] = len(state.answers_found)
-      d["total"] = len(state.puzzle.answers)
+    if ps.puzzle.has_errata:
+      d["errata"] = True
+    if ((len(ps.puzzle.answers) > 1 or ps.puzzle.land.shortname == "safari")
+        and ps.puzzle.land.land_order < 1000):
+      d["correct"] = len(ps.answers_found)
+      d["total"] = len(ps.puzzle.answers)
 
     self.write(json.dumps(d))
 
