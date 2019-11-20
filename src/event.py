@@ -239,7 +239,7 @@ class SubmitHistoryHandler(util.TeamHandler):
   @login.required("team", on_fail=http.client.UNAUTHORIZED)
   def get(self, shortname):
     ps = self.team.get_puzzle_state(shortname)
-    if not ps:
+    if not ps or ps.state == game.PuzzleState.CLOSED:
       raise tornado.web.HTTPError(http.client.NOT_FOUND)
 
     # Allow submit if the puzzle is open, and if there are fewer than
@@ -254,7 +254,7 @@ class SubmitHistoryHandler(util.TeamHandler):
     d = {"allowed": submit_allowed,
          "history": [sub.json_dict() for sub in ps.submissions],
          }
-    if ps.puzzle.has_errata:
+    if ps.puzzle.errata:
       d["errata"] = True
     if ((len(ps.puzzle.answers) > 1 or ps.puzzle.land.shortname == "safari")
         and ps.puzzle.land.land_order < 1000):

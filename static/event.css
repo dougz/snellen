@@ -540,15 +540,26 @@ div#submitentry {
 }
 
 .submit-cancel {
+    cursor: pointer;
+    font-family: 'Merriweather Sans', sans-serif;
+    color: #ddd;
+    font-weight: bold;
+    font-size: 70%;
+    padding: 0 8px;
     margin-right: 8px;
-    vertical-align: -0.1em;
+    box-sizing: border-box;
+    border: 1px solid black;
+    border-radius: 15px;
+    background: black;
+    outline: none;
+    text-transform: uppercase;
+    vertical-align: 0.1em;
 }
 
 .submit-timer {
     font-family: sans-serif;
     font-weight: normal;
 }
-
 
 /** emoji picker support **/
 
