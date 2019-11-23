@@ -478,13 +478,12 @@ class H2020_SubmitPanel {
     update_history() {
         if (!this.built) return;
         if (this.submitpanel.style == "none") return;
-        goog.net.XhrIo.send("/submit_history/" + puzzle_id,
+        goog.net.XhrIo.send("/js/submit/" + puzzle_id,
                             Common_invoke_with_json(this, this.render_history));
     }
 
     /** @param{SubmissionHistory} response */
     render_history(response) {
-        console.log(response);
         if (response.total) {
             var t = response.total;
             var c = response.correct;
@@ -512,7 +511,7 @@ class H2020_SubmitPanel {
 
         var cancelsub = function(sub) {
             return function() {
-                goog.net.XhrIo.send("/submit_cancel/" + puzzle_id + "/" + sub.submit_id,
+                goog.net.XhrIo.send("/cancel/" + puzzle_id + "/" + sub.submit_id,
                                     Common_expect_204);
             };
         };
@@ -1263,15 +1262,15 @@ function emoji_builder(e, ev) {
         goog.dom.append(/** @type{!Node} */ (e), gr);
     }
     var t1 = performance.now();
-    console.log("building picker took " + (t1-t0) + " ms");
 }
 
+function refresh_header(dispatcher) {
+    goog.net.XhrIo.send("/js/header",
+                        Common_invoke_with_json(dispatcher, dispatcher.update_header));
+}
 
 window.onload = function() {
     console.log("page init");
-
-    goog.events.listen(window, goog.events.EventType.PAGESHOW,
-                       function(e) { console.log("pageshow", e.type, window.performance.navigation.type, e); });
 
     hunt2020.time_formatter = new Common_TimeFormatter();
     hunt2020.counter = new Common_Counter(hunt2020.time_formatter);
@@ -1280,6 +1279,17 @@ window.onload = function() {
     hunt2020.audio_manager = new H2020_AudioManager();
 
     var dispatcher = new H2020_Dispatcher();
+
+    goog.events.listen(
+        window, goog.events.EventType.PAGESHOW,
+        function(e) {
+            if (window.performance.navigation.type == 2) {
+                refresh_header(dispatcher);
+            } else if (initial_header) {
+                dispatcher.update_header(initial_header);
+            }
+        });
+
     hunt2020.waiter = new Common_Waiter(
         dispatcher, "/wait", received_serial, sessionStorage,
         function(text) {
@@ -1334,10 +1344,6 @@ window.onload = function() {
 
     if (goog.dom.getElement("errata")) {
         hunt2020.errata = new H2020_Errata();
-    }
-
-    if (initial_header) {
-        dispatcher.update_header(initial_header);
     }
 }
 

@@ -60,9 +60,7 @@ class MapDataHandler(util.TeamHandler):
         raise tornado.web.HTTPError(http.client.NOT_FOUND)
       if land not in self.team.open_lands:
         raise tornado.web.HTTPError(http.client.NOT_FOUND)
-    mapdata = self.team.get_land_data(land)
-    self.set_header("Content-Type", "application/json")
-    self.write(mapdata)
+    self.return_json(self.team.get_land_data(land))
 
 
 class PlayerHomePage(LandMapPage):
@@ -74,7 +72,6 @@ class PlayerHomePage(LandMapPage):
                   css=(self.static_content["notopen.css"],))
       return
     self.show_map("home")
-
 
 class PuzzlePage(util.TeamPageHandler):
   @login.required("team")
@@ -114,8 +111,12 @@ class ActivityLogDataHandler(util.TeamHandler):
   @login.required("team")
   def get(self):
     d = {"log": self.team.activity_log.get_data()}
-    self.set_header("Content-Type", "application/json")
-    self.write(json.dumps(d))
+    self.return_json(d)
+
+class CurrentHeaderDataHandler(util.TeamHandler):
+  @login.required("team")
+  def get(self):
+    self.return_json(self.team.get_header_data())
 
 class VideosPage(util.TeamPageHandler):
   @login.required("team", require_start=False)
@@ -129,8 +130,7 @@ class VideosDataHandler(util.TeamHandler):
     urls = []
     for i in range(1, self.team.videos+1):
       urls.append(OPTIONS.static_content.get(f"video{i}.mp4"))
-    self.set_header("Content-Type", "application/json")
-    self.write(json.dumps(urls))
+    self.return_json(urls)
 
 class AchievementPage(util.TeamPageHandler):
   @login.required("team")
@@ -142,8 +142,7 @@ class AchievementDataHandler(util.TeamHandler):
   @login.required("team")
   def get(self):
     ach = [{"name": a.name, "subtitle": a.subtitle} for a in self.team.achievements]
-    self.set_header("Content-Type", "application/json")
-    self.write(json.dumps(ach))
+    return self.return_json(ach)
 
 class EventsPage(util.TeamPageHandler):
   @login.required("team", require_start=False)
@@ -186,8 +185,7 @@ class GuestServicesPage(util.TeamPageHandler):
 class HintsOpenDataHandler(util.TeamHandler):
   @login.required("team")
   def get(self):
-    self.set_header("Content-Type", "application/json")
-    self.write(json.dumps(self.team.get_open_hints_data()))
+    self.return_json(self.team.get_open_hints_data())
 
 class ApplyFastPassHandler(util.TeamHandler):
   @login.required("team")
@@ -207,8 +205,7 @@ class AllPuzzlesPage(util.TeamPageHandler):
 class AllPuzzlesDataHandler(util.TeamHandler):
   @login.required("team")
   def get(self):
-    self.set_header("Content-Type", "application/json")
-    self.write(json.dumps(self.team.get_all_puzzles_data()))
+    self.return_json(self.team.get_all_puzzles_data())
 
 
 class HealthAndSafetyPage(util.TeamPageHandler):
@@ -250,7 +247,6 @@ class SubmitHistoryHandler(util.TeamHandler):
       if pending < ps.puzzle.max_queued:
         submit_allowed = True
 
-    self.set_header("Content-Type", "application/json")
     d = {"allowed": submit_allowed,
          "history": [sub.json_dict() for sub in ps.submissions],
          }
@@ -261,7 +257,7 @@ class SubmitHistoryHandler(util.TeamHandler):
       d["correct"] = len(ps.answers_found)
       d["total"] = len(ps.puzzle.answers)
 
-    self.write(json.dumps(d))
+    self.return_json(d)
 
 class SubmitCancelHandler(util.TeamHandler):
   @login.required("team", on_fail=http.client.UNAUTHORIZED)
@@ -317,16 +313,17 @@ def GetHandlers():
     (r"/land/([a-z0-9_]+)", LandMapPage),
     (r"/puzzle/([a-z0-9_]+)/?", PuzzlePage),
     (r"/submit", SubmitHandler),
-    (r"/submit_history/([a-z][a-z0-9_]*)", SubmitHistoryHandler),
-    (r"/submit_cancel/([a-z][a-z0-9_]*)/(\d+)", SubmitCancelHandler),
+    (r"/cancel/([a-z][a-z0-9_]*)/(\d+)", SubmitCancelHandler),
     (r"/hintrequest", HintRequestHandler),
     (r"/hinthistory/([a-z][a-z0-9_]*)", HintHistoryHandler),
     (r"/pennypass/([a-z][a-z0-9_]*)$", ApplyFastPassHandler),
+    (r"/js/submit/([a-z][a-z0-9_]*)$", SubmitHistoryHandler),
     (r"/js/log", ActivityLogDataHandler),
     (r"/js/pins", AchievementDataHandler),
     (r"/js/videos", VideosDataHandler),
     (r"/js/hintsopen", HintsOpenDataHandler),
     (r"/js/puzzles", AllPuzzlesDataHandler),
+    (r"/js/header", CurrentHeaderDataHandler),
     (r"/js/map/([a-z][a-z0-9_]+)$", MapDataHandler),
   ]
 

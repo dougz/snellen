@@ -16,6 +16,14 @@ class TeamHandler(tornado.web.RequestHandler):
     if self.team:
       asyncio.create_task(self.team.flush_messages())
 
+  def return_json(self, obj):
+    self.set_header("Content-Type", "application/json")
+    self.set_header("Cache-Control", "no-store")
+    if isinstance(obj, str):
+      self.write(obj)
+    else:
+      self.write(json.dumps(obj))
+
 
 class TeamPageHandler(TeamHandler):
   def prepare(self):
