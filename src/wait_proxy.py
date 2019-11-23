@@ -181,8 +181,7 @@ class Client:
         print(repr(e), e)
 
   async def check_session(self, key, wid):
-    if not key:
-      raise tornado.web.HTTPError(http.client.UNAUTHORIZED)
+    if not key: return
 
     key = key.decode("ascii")
     v = self.session_cache.get((key, wid))
@@ -209,9 +208,6 @@ class Client:
       pass
     except ValueError:
       pass
-
-    raise tornado.web.HTTPError(http.client.UNAUTHORIZED)
-
 
 class ProxyTeam:
   BY_TEAM = {}
@@ -300,7 +296,14 @@ class WaitHandler(tornado.web.RequestHandler):
   async def get(self, admin, wid, received_serial, suggested_timeout):
     cookie_name = login.Session.ADMIN_COOKIE_NAME if admin else login.Session.PLAYER_COOKIE_NAME
     key = self.get_secure_cookie(cookie_name)
+
+    self.set_header("Cache-Control", "no-store")
+
     team = await self.proxy_client.check_session(key, wid)
+    if not team:
+      self.set_status(http.client.UNAUTHORIZED.value)
+      return
+
     team = ProxyTeam.get_team(team)
 
     wid = int(wid)
@@ -324,7 +327,6 @@ class WaitHandler(tornado.web.RequestHandler):
         print(f"empty response to {team} wid {wid}")
 
     self.set_header("Content-Type", "application/json")
-    self.set_header("Cache-Control", "no-store")
     self.write(b"[")
     for i, (ser, obj) in enumerate(msgs):
       if i > 0: self.write(b",")

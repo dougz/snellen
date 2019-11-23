@@ -143,8 +143,8 @@ class Session:
     self.next_msg_serial = 1
     self.msg_cv = asyncio.Condition()
 
-  def set_cookie(self, req):
-    req.set_secure_cookie(self.cookie_name, self.key)
+  def set_cookie(self, req, domain):
+    req.set_secure_cookie(self.cookie_name, self.key, domain=domain)
 
   def visit_page(self, page):
     self.pages_visited.add(page)
@@ -258,6 +258,11 @@ class LoginSubmit(tornado.web.RequestHandler):
     password = self.get_argument("password", None)
     target = self.get_argument("target", None)
 
+    domain = self.request.headers.get("host", None)
+    if not domain:
+      print(f"Missing host header")
+      domain = "pennypark.fun"
+
     if username: username = username.lower()
 
     err_d = {"bad_login": 1}
@@ -269,7 +274,7 @@ class LoginSubmit(tornado.web.RequestHandler):
       allowed = await team.check_password(password)
       if allowed:
         session = Session(Session.PLAYER_COOKIE_NAME)
-        session.set_cookie(self)
+        session.set_cookie(self, domain)
 
         session.team = team
         session.capabilities = {"team"}
@@ -283,7 +288,7 @@ class LoginSubmit(tornado.web.RequestHandler):
         allowed = await user.check_password(password)
         if allowed:
           session = Session(Session.ADMIN_COOKIE_NAME)
-          session.set_cookie(self)
+          session.set_cookie(self, domain)
 
           session.user = user
           session.capabilities = user.roles

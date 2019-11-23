@@ -101,13 +101,15 @@ class Common_Waiter {
     /** @param{?function(string)} notify_fn */
     constructor(dispatcher, base_url, start_serial, storage, notify_fn) {
         this.dispatcher = dispatcher;
-        this.base_url = base_url;
         this.notify_fn = notify_fn;
         this.storage = storage;
         this.serial = start_serial;
 
+        this.base_url = location.protocol + "//w" + wid + "." + location.hostname + base_url + "/" + wid;
+
         /** @type{goog.net.XhrIo} */
         this.xhr = new goog.net.XhrIo();
+        this.xhr.setWithCredentials(true);
 
         if (storage && window.performance.navigation.type == 2) {
             var e = storage.getItem("serial");
@@ -185,8 +187,8 @@ class Common_Waiter {
     }
 
     send() {
-        this.xhr.send(this.base_url + "/" + wid + "/" + this.serial +
-                      "/" + this.respond_deadline);
+        this.xhr.send(this.base_url + "/" + this.serial +
+                      "/" + this.respond_deadline, "GET", null);
     }
 }
 
