@@ -257,9 +257,9 @@ class BestowFastpassHandler(util.AdminHandler):
   @login.required("admin")
   def get(self, username):
     if self.application.settings.get("debug"):
-      duration = 310 # 18000 if int(time.time()) % 2 == 0 else 90
+      duration = 330 # 18000 if int(time.time()) % 2 == 0 else 90
     else:
-      duration = 310 # 2 * 3600  # 2 hours
+      duration = 330 # 2 * 3600  # 2 hours
     if username is None:
       for team in game.Team.all_teams():
         team.bestow_fastpass(duration)

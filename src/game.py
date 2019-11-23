@@ -887,8 +887,10 @@ class Team(login.LoginUser):
           while team.fastpasses_available and now >= team.fastpasses_available[0]:
             team.apply_fastpass(None)
         else:
-          if team.get_fastpass_eligible_lands():
-            team.send_messages([{"method": "warn_fastpass", "text": action}])
+          text, expire = action
+          if (expire in team.fastpasses_available and
+              team.get_fastpass_eligible_lands()):
+            team.send_messages([{"method": "warn_fastpass", "text": text}])
             await team.flush_messages()
       await asyncio.sleep(1.0)
 
@@ -901,9 +903,11 @@ class Team(login.LoginUser):
     self.fastpasses_available.sort()
     heapq.heappush(self.GLOBAL_FASTPASS_QUEUE, (now+expire, self, None))
     if expire > 60:
-      heapq.heappush(self.GLOBAL_FASTPASS_QUEUE, (now+expire-60, self, "1 minute"))
+      heapq.heappush(self.GLOBAL_FASTPASS_QUEUE,
+                     (now+expire-60, self, ("1 minute", now+expire)))
     if expire > 300:
-      heapq.heappush(self.GLOBAL_FASTPASS_QUEUE, (now+expire-300, self, "5 minutes"))
+      heapq.heappush(self.GLOBAL_FASTPASS_QUEUE,
+                     (now+expire-300, self, ("5 minutes", now+expire)))
     text = "Received a PennyPass."
     self.activity_log.add(now, text)
     self.admin_log.add(now, text)
