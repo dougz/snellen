@@ -389,7 +389,7 @@ class Submission:
       fn = getattr(self.puzzle, "on_correct_answer", None)
       if fn: fn(now, self.team)
       if self.puzzle_state.answers_found == self.puzzle.answers:
-        if self.puzzle in Workshop.PENNY_PUZZLES:
+        if not self.team.remote_only and self.puzzle in Workshop.PENNY_PUZZLES:
           if self.team.puzzle_state[Workshop.PUZZLE].state == PuzzleState.CLOSED:
             self.extra_response = Workshop.pre_response
           else:
@@ -483,6 +483,7 @@ class Team(login.LoginUser):
     self.password_hash = info["pwhash"].encode("ascii")
     self.name = info["name"]
     self.size = info["size"]
+    self.remote_only = info["remote_only"]
     self.attrs = info.get("attrs", {})
 
     save_state.add_instance("Team:" + username, self)
@@ -1023,7 +1024,7 @@ class Team(login.LoginUser):
            "thumb": OPTIONS.static_content.get(f"thumb{self.videos}.png"),
           }])
 
-      if puzzle in Workshop.PENNY_PUZZLES:
+      if not self.remote_only and puzzle in Workshop.PENNY_PUZZLES:
         dirty = False
         for penny in Workshop.ALL_PENNIES.values():
           if penny.puzzle == puzzle:

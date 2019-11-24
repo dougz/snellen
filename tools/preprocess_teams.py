@@ -47,6 +47,8 @@ def main():
     assert d["password"], f"{username} missing password"
     od["pwhash"] = make_hash(d.pop("password"))
 
+    od["remote_only"] = d.pop("remote_only", False)
+
     if d:
       od["attrs"] = d
 

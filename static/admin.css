@@ -949,3 +949,20 @@ tr.submit-pending .submit-state { color: #666 }
 .PuzzlePage dd { margin-bottom: 8px; }
 
 .AdminHomePage li { line-height: 40px; }
+
+.remote {
+    margin-left: 16px;
+    font-family: 'Merriweather Sans', sans-serif;
+    color: #ddd;
+    font-weight: bold;
+    font-size: 70%;
+    padding: 0 8px;
+    margin-right: 8px;
+    box-sizing: border-box;
+    border: 1px solid black;
+    border-radius: 15px;
+    background: black;
+    outline: none;
+    text-transform: uppercase;
+    vertical-align: 0.1em;
+}
