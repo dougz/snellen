@@ -332,12 +332,6 @@ class Submission:
       self.state = self.CORRECT
       self.extra_response = None
 
-      if self.puzzle in Workshop.PENNY_PUZZLES:
-        if self.team.puzzle_state[Workshop.PUZZLE].state == PuzzleState.CLOSED:
-          self.extra_response = Workshop.pre_response
-        else:
-          self.extra_response = Workshop.post_response
-
     elif answer in self.puzzle.responses:
       response = self.puzzle.responses[answer]
       if response is True:
@@ -395,6 +389,11 @@ class Submission:
       fn = getattr(self.puzzle, "on_correct_answer", None)
       if fn: fn(now, self.team)
       if self.puzzle_state.answers_found == self.puzzle.answers:
+        if self.puzzle in Workshop.PENNY_PUZZLES:
+          if self.team.puzzle_state[Workshop.PUZZLE].state == PuzzleState.CLOSED:
+            self.extra_response = Workshop.pre_response
+          else:
+            self.extra_response = Workshop.post_response
         self.team.solve_puzzle(self.puzzle, now)
       else:
         self.team.dirty_lands.add(self.puzzle.land.shortname)
@@ -2085,7 +2084,7 @@ class MiscLand:
   def __init__(self):
     self.shortname = "Misc"
     self.title = "Miscellenous"
-    self.symbol = "Mi"
+    self.symbol = "Misc"
     self.color = "#000000"
     self.land_order = 1000
     self.guess_interval = 30
@@ -2118,7 +2117,7 @@ class Event:
     p.authors = ["Left Out"]
 
     p.title = "Events"
-    p.answers = [e.answer for e in cls.ALL_EVENTS]
+    p.answers = {e.answer for e in cls.ALL_EVENTS}
     p.display_answers = dict((e.answer, e.display_answer) for e in cls.ALL_EVENTS)
     p.responses = {}
     p.html_body = None
@@ -2126,6 +2125,7 @@ class Event:
     p.for_ops_url = ""
     p.max_queued = Puzzle.DEFAULT_MAX_QUEUED
     p.meta = False
+    p.points = 0  # no buzz/wonder for finishing
 
     def on_correct_answer(now, team):
       team.receive_fastpass(now, 300)
@@ -2184,7 +2184,7 @@ class Workshop:
     p.authors = ["Left Out"]
 
     p.title = "Workshop"
-    p.answers = ["MASHNOTE"]
+    p.answers = {"MASHNOTE"}
     p.display_answers = {"MASHNOTE": "MASH NOTE"}
     p.responses = {}
     p.html_body = None
@@ -2192,6 +2192,7 @@ class Workshop:
     p.for_ops_url = ""
     p.max_queued = Puzzle.DEFAULT_MAX_QUEUED
     p.meta = False
+    p.points = 0  # no buzz/wonder for finishing
 
     p.post_init(MiscLand.get(), None)
 

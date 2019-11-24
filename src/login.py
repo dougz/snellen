@@ -188,7 +188,6 @@ class required:
   def bounce(self, req):
     if self.on_fail is not None:
       raise tornado.web.HTTPError(self.on_fail)
-    print(f"bounce to /login")
     if req.request.uri == "/":
       req.redirect("/login")
     else:
