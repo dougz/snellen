@@ -1892,7 +1892,7 @@ class Global:
     for team in Team.BY_USERNAME.values():
       team.compute_puzzle_beam(self.event_start_time)
       team.open_puzzle(Event.PUZZLE, now)
-      team.open_puzzle(Runaround.PUZZLE, now)  # XXX
+      #team.open_puzzle(Runaround.PUZZLE, now)  # XXX
       team.invalidate(flush=False)
     if timed and not save_state.REPLAYING:
       asyncio.create_task(self.notify_event_start())

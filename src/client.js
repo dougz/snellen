@@ -948,18 +948,22 @@ class H2020_AudioManager {
 
     mute_changed() {
         var els = document.querySelectorAll(".mute");
+        var el = goog.dom.getElement("mutebox");
 
         if (localStorage.getItem("mute")) {
             if (this.current) this.current.muted = true;
             for (var i = 0; i < els.length; ++i) {
                 els[i].className = "mute";
             }
+            if (el) el.checked = false;
         } else {
             if (this.current) this.current.muted = false;
             for (var i = 0; i < els.length; ++i) {
                 els[i].className = "mute muteoff";
             }
+            if (el) el.checked = true;
         }
+
     }
 }
 
@@ -1007,6 +1011,18 @@ class H2020_GuestServices {
 
         goog.events.listen(this.hintrequest, goog.events.EventType.CLICK,
                            goog.bind(this.submit, this));
+
+        /** @type{Element} */
+        this.mutebox = goog.dom.getElement("mutebox");
+        if (this.mutebox) {
+            if (localStorage.getItem("mute")) {
+                this.mutebox.checked = false;
+            } else {
+                this.mutebox.checked = true;
+            }
+            goog.events.listen(this.mutebox, goog.events.EventType.CHANGE,
+                               goog.bind(hunt2020.audio_manager.toggle_mute, hunt2020.audio_manager));
+        }
 
         this.build_hints((/** @type{GuestServicesData} */ (initial_json)).hints);
     }

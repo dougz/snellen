@@ -163,7 +163,6 @@ def convert_static_files(out, options, lands):
                      ("logo.png", f"{base}/snellen/static/logo.png"),
                      ("logo-nav.png", f"{base}/snellen/static/logo-nav.png"),
                      ("emoji.json", f"{base}/snellen/static/emoji.json"),
-                     ("home.svg", f"{base}/snellen/static/home.svg"),
                      ("video1.mp4", f"{base}/media/video1.mp4"),
                      ("video2.mp4", f"{base}/media/video2.mp4"),
                      ("video3.mp4", f"{base}/media/video3.mp4"),

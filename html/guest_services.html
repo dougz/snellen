@@ -53,6 +53,10 @@
 
   <h2>Other</h2>
 
+  {% if team.score > 0 %}
+  <p><input type="checkbox" id="mutebox"><label for="mutebox">Play sound on solve</label></p>
+  {% end %}
+
   <p>If you need to contact Hunt HQ for any other non-emergency
   reason,
   email <a href="mailto:guestservices@pennypark.fun">guestservices@pennypark.fun</a>.</p>

@@ -176,7 +176,6 @@ class AdminPageHandler(AdminHandler):
       script.append(f"""<script src="{self.static_content["admin-compiled.js"]}"></script>""")
 
     d["css"] = [self.static_content["admin.css"]]
-    d["home"] = self.static_content["home.svg"]
 
     d["script"] = "".join(script)
 
