@@ -76,8 +76,7 @@ async def main_server(options):
   game.Achievement.define_achievements(static_content)
   for shortname, d in cfg["events"].items():
     game.Event(shortname, d)
-  for shortname, d in cfg["workshop"].items():
-    game.Workshop(shortname, d)
+  game.Workshop.build(cfg["workshop"])
   if options.debug:
     debug.DebugPathHandler.set_static_content(static_content)
   login.Login.set_static_content(static_content)

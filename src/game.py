@@ -331,6 +331,13 @@ class Submission:
     if answer in self.puzzle.answers:
       self.state = self.CORRECT
       self.extra_response = None
+
+      if self.puzzle in Workshop.PENNY_PUZZLES:
+        if self.team.puzzle_state[Workshop.PUZZLE].state == PuzzleState.CLOSED:
+          self.extra_response = Workshop.pre_response
+        else:
+          self.extra_response = Workshop.post_response
+
     elif answer in self.puzzle.responses:
       response = self.puzzle.responses[answer]
       if response is True:
@@ -1021,8 +1028,10 @@ class Team(login.LoginUser):
         dirty = False
         for penny in Workshop.ALL_PENNIES.values():
           if penny.puzzle == puzzle:
-            if not self.pennies_earned:
-              self.open_puzzle(Workshop.PUZZLE, now)
+            if not self.pennies_earned and not self.pennies_collected:
+              Global.STATE.add_task(now, self.username, f"loony-visit",
+                                    "Loony visit", None,
+                                    oncomplete=self.complete_loony_visit)
             self.pennies_earned.append(penny)
             Global.STATE.add_task(now, self.username, f"penny-{penny.shortname}",
                                   f"{penny.name} penny", None,
@@ -1077,6 +1086,11 @@ class Team(login.LoginUser):
     self.admin_log.add(when, f"Collected the <b>{p.name}</b> penny.")
     self.send_messages([{"method": "pennies"}])
     asyncio.create_task(self.flush_messages())
+
+  def complete_loony_visit(self, task, when):
+    #self.activity_log.add(when, f"Collected the <b>{p.name}</b> penny.")
+    self.admin_log.add(when, f"Completed the Loony visit.")
+    self.open_puzzle(Workshop.PUZZLE, when)
 
   def get_puzzle_state(self, puzzle):
     if isinstance(puzzle, str):
@@ -2139,6 +2153,15 @@ class Event:
 class Workshop:
   ALL_PENNIES = {}
   PENNY_PUZZLES = set()
+
+  @classmethod
+  def build(cls, d):
+    for shortname, pd in d["pennies"].items():
+      Workshop(shortname, pd)
+
+    cls.pre_response = d["pre_response"]
+    cls.post_response = d["post_response"]
+
 
   def __init__(self, shortname, d):
     self.shortname = shortname

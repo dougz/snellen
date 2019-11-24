@@ -477,13 +477,9 @@ tr.submit-incorrect {
     border-top: 1px solid #999;
 }
 
-tr.submit-partial, tr.submit-extra, tr.submit-requested {
+tr.submit-partial, tr.submit-requested {
     background-color: #fdfd96;
     border-top: 1px solid #999;
-}
-
-tr.submit-extra {
-    background-color: #fdfd96;
 }
 
 tr.submit-pending {

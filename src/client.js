@@ -561,7 +561,7 @@ class H2020_SubmitPanel {
             if (sub.response) {
                 var td = goog.dom.createDom("TD", {colSpan: 3});
                 td.innerHTML = sub.response;
-                tr = goog.dom.createDom("TR", {className: "submit-extra"}, td);
+                tr = goog.dom.createDom("TR", {className: "submit-extra submit-" + sub.state}, td);
                 this.table.appendChild(tr);
             }
         }
