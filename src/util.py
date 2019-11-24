@@ -26,6 +26,22 @@ class TeamHandler(tornado.web.RequestHandler):
 
 
 class TeamPageHandler(TeamHandler):
+  PAGE_CLASSES = {
+    "PuzzlePage": "a",
+    "EventsPage": "b",
+    "WorkshopPage": "c",
+    "LandMapPage": "d",
+    "PlayerHomePage": "e",
+    "ActivityLogPage": "f",
+    "VideosPage": "g",
+    "AchievementPage": "h",
+    "GuestServicesPage": "i",
+    "AllPuzzlesPage": "j",
+    "ErrataPage": "k",
+    "WorkshopPage": "l",
+    "HealthAndSafetyPage": "m",
+    }
+
   def prepare(self):
     self.set_header("Content-Type", "text/html; charset=utf-8")
 
@@ -39,8 +55,10 @@ class TeamPageHandler(TeamHandler):
     wid = wait_proxy.Server.new_waiter_id()
     serial = self.team.next_serial() - 1
 
+    obfuscated_class = self.PAGE_CLASSES[self.__class__.__name__]
+
     script = ["<script>"]
-    script.append(f"""var page_class = \"{self.__class__.__name__}\";\n""")
+    script.append(f"""var page_class = \"{obfuscated_class}\";\n""")
     d["css"] = [self.static_content["event.css"]]
     style_css = None
 

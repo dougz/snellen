@@ -1305,8 +1305,22 @@ window.onload = function() {
         });
     hunt2020.waiter.start();
 
-    // Present on the puzzle pages and the events page.
-    if (page_class == "PuzzlePage" || page_class == "EventsPage" || page_class == "WorkshopPage") {
+    // PuzzlePage             a
+    // EventsPage             b
+    // WorkshopPage           c
+    // LandMapPage            d
+    // PlayerHomePage         e
+    // ActivityLogPage        f
+    // VideosPage             g
+    // AchievementPage        h
+    // GuestServicesPage      i
+    // AllPuzzlesPage         j
+    // ErrataPage             k
+    // WorkshopPage           l
+    // HealthAndSafetyPage    m
+
+    // Pages with SUBMIT buttons.
+    if (page_class == "a" || page_class == "b" || page_class == "l") {
         var a = goog.dom.getElement("submit");
         hunt2020.submit_panel = new H2020_SubmitPanel();
         goog.events.listen(a, goog.events.EventType.CLICK,
@@ -1320,30 +1334,18 @@ window.onload = function() {
 
     if (puzzle_id && puzzle_init) puzzle_init();
 
-    if (page_class == "LandMapPage" || page_class == "PlayerHomePage") {
+    // Pages that draw maps (lands, home page)
+    if (page_class == "d" || page_class == "e") {
         hunt2020.map_draw = new H2020_MapDraw();
     }
-    if (page_class == "ActivityLogPage") {
-        hunt2020.activity = new H2020_ActivityLog();
-    }
-    if (page_class == "VideosPage") {
-        hunt2020.videos = new H2020_Videos();
-    }
-    if (page_class == "AchievementPage") {
-        hunt2020.achievements = new H2020_Achievements();
-    }
-    if (page_class == "GuestServicesPage") {
-        hunt2020.guest_services = new H2020_GuestServices();
-    }
-    if (page_class == "AllPuzzlesPage") {
-        hunt2020.all_puzzles = new H2020_AllPuzzles();
-    }
-    if (page_class == "ErrataPage") {
-        hunt2020.errata = new H2020_Errata();
-    }
-    if (page_class == "WorkshopPage") {
-        hunt2020.workshop = new H2020_Workshop();
-    }
+
+    if (page_class == "f") hunt2020.activity = new H2020_ActivityLog();
+    if (page_class == "g") hunt2020.videos = new H2020_Videos();
+    if (page_class == "h") hunt2020.achievements = new H2020_Achievements();
+    if (page_class == "i") hunt2020.guest_services = new H2020_GuestServices();
+    if (page_class == "j") hunt2020.all_puzzles = new H2020_AllPuzzles();
+    if (page_class == "k") hunt2020.errata = new H2020_Errata();
+    if (page_class == "l") hunt2020.workshop = new H2020_Workshop();
 }
 
 class H2020_ActivityLog {
