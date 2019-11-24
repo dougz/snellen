@@ -1306,8 +1306,8 @@ window.onload = function() {
     hunt2020.waiter.start();
 
     // Present on the puzzle pages and the events page.
-    var a = goog.dom.getElement("submit");
-    if (a) {
+    if (page_class == "PuzzlePage" || page_class == "EventsPage" || page_class == "WorkshopPage") {
+        var a = goog.dom.getElement("submit");
         hunt2020.submit_panel = new H2020_SubmitPanel();
         goog.events.listen(a, goog.events.EventType.CLICK,
                            goog.bind(hunt2020.submit_panel.toggle, hunt2020.submit_panel));
@@ -1320,40 +1320,27 @@ window.onload = function() {
 
     if (puzzle_id && puzzle_init) puzzle_init();
 
-    // Only present on the map pages.
-    var m = goog.dom.getElement("map");
-    if (m) {
+    if (page_class == "LandMapPage" || page_class == "PlayerHomePage") {
         hunt2020.map_draw = new H2020_MapDraw();
     }
-
-    // Only present on the activity log page.
-    if (goog.dom.getElement("log")) {
+    if (page_class == "ActivityLogPage") {
         hunt2020.activity = new H2020_ActivityLog();
     }
-
-    // Only present on the activity log page.
-    if (goog.dom.getElement("videolist")) {
+    if (page_class == "VideosPage") {
         hunt2020.videos = new H2020_Videos();
     }
-
-    // Only present on the achievements page.
-    if (goog.dom.getElement("pins")) {
+    if (page_class == "AchievementPage") {
         hunt2020.achievements = new H2020_Achievements();
     }
-
-    // Only present on the guest services page.
-    if (goog.dom.getElement("fphavenone")) {
+    if (page_class == "GuestServicesPage") {
         hunt2020.guest_services = new H2020_GuestServices();
     }
-
-    if (goog.dom.getElement("loplist")) {
+    if (page_class == "AllPuzzlesPage") {
         hunt2020.all_puzzles = new H2020_AllPuzzles();
     }
-
-    if (goog.dom.getElement("errata")) {
+    if (page_class == "ErrataPage") {
         hunt2020.errata = new H2020_Errata();
     }
-
     if (page_class == "WorkshopPage") {
         hunt2020.workshop = new H2020_Workshop();
     }
