@@ -1,0 +1,47 @@
+{% extends "player_base.html" %}
+
+{% block title %}Heart of the Park{% end %}
+
+{% block topnav_extraright %}
+<a id="submit">Submit</a>
+{% end %}
+
+{% block midnav %}
+<div id="submitpanel">
+  <div id="submitdata">
+    <div id="submit_table_scroll">
+      <table id="submit_table">
+        <thead>
+          <tr><th id="st_answer">Submission</th><th id="st_time">Submit time</th><th id="st_result">Result</th></tr>
+        </thead>
+        <tbody id="submit_table_body">
+        </tbody>
+      </table>
+    </div>
+    <div id="submitentry">
+      <input type=text maxlength=40 id="answer" name="answer">
+      <button class="action" id="submitsubmit">Submit</button>
+    </div>
+    <span id="top_note"></span>
+    <span id="submitinstr">Enter the answers you receive from each segment of the runaround.</span>
+  </div>
+</div>
+{% end %}
+
+
+{% block content %}
+<div id="content">
+  <h1 id="pagetitle">Heart of the Park</h1>
+
+  {% for s in segments %}
+  <h3 class=segmenttitle>{{s.shortname}}
+    <span class=segmentcomplete id="segment_{{s.shortname}}">
+      {{s.display_answer if s.answer in ps.answers_found else ""}}
+    </span>
+  </h3>
+  <p class=segmenttext>{{s.shortname}}</p>
+  {% end %}
+
+</div>
+
+{% end %}

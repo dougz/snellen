@@ -41,6 +41,7 @@ class TeamPageHandler(TeamHandler):
     "WorkshopPage": "l",
     "HealthAndSafetyPage": "m",
     "SponsorPage": "n",
+    "RunaroundPage": "o",
     }
 
   def prepare(self):

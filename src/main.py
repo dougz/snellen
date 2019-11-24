@@ -77,6 +77,7 @@ async def main_server(options):
   for shortname, d in cfg["events"].items():
     game.Event(shortname, d)
   game.Workshop.build(cfg["workshop"])
+  game.Runaround.build(cfg["runaround"])
   if options.debug:
     debug.DebugPathHandler.set_static_content(static_content)
   login.Login.set_static_content(static_content)

@@ -74,6 +74,17 @@ class Message {
         this.stuff;
         /** @type{?Array<boolean>} */
         this.completed;
+        /** @type{?Object<string,string>} */
+        this.segments;
+    }
+}
+
+class Segment {
+    constructor() {
+        /** @type{string} */
+        this.shortname;
+        /** @type{string} */
+        this.answer;
     }
 }
 

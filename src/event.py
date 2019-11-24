@@ -154,11 +154,6 @@ class EventsPage(util.TeamPageHandler):
 
     self.render("events.html", events=game.Event.ALL_EVENTS, completed=completed)
 
-class EventsDataHandler(util.TeamHandler):
-  @login.required("team", require_start=False)
-  def get(self):
-    self.write(json.dumps({}))
-
 class WorkshopPage(util.TeamPageHandler):
   @login.required("team", require_start=False)
   def get(self):
@@ -174,6 +169,26 @@ class WorkshopDataHandler(util.TeamHandler):
     d = {"earned": [p.name for p in self.team.pennies_earned],
          "collected": [p.name for p in self.team.pennies_collected]}
     self.return_json(d)
+
+class RunaroundPage(util.TeamPageHandler):
+  @login.required("team")
+  def get(self):
+    self.puzzle = game.Runaround.PUZZLE
+    ps = self.team.puzzle_state[self.puzzle]
+
+    # segments = []
+    # for s in game.Runaround.SEGMENTS:
+    #   d = {"title": s.shortname,
+    #        "text": s.shortname}
+    #   if s.answer in ps.answers_found:
+    #     d["answer"] = s.display_answer
+    #   segments.append(d)
+    self.render("runaround.html", segments=game.Runaround.SEGMENTS, ps=ps)
+
+class RunaroundDataHandler(util.TeamHandler):
+  @login.required("team", require_start=False)
+  def get(self):
+    self.write(json.dumps({}))
 
 class ErrataPage(util.TeamPageHandler):
   @login.required("team")
@@ -329,6 +344,7 @@ def GetHandlers():
     (r"/pins", AchievementPage),
     (r"/events", EventsPage),
     (r"/workshop", WorkshopPage),
+    (r"/heart_of_the_park", RunaroundPage),
     (r"/puzzles", AllPuzzlesPage),
     (r"/errata", ErrataPage),
     (r"/guest_services$", GuestServicesPage),

@@ -26,6 +26,7 @@ class H2020_Dispatcher {
             "update_header": goog.bind(this.update_header, this),
             "video": goog.bind(this.video, this),
             "event_complete": goog.bind(this.event_complete, this),
+            "segments_complete": goog.bind(this.segments_complete, this),
             "post_erratum": goog.bind(this.post_erratum, this),
             "pennies": goog.bind(this.pennies, this),
         }
@@ -231,6 +232,21 @@ class H2020_Dispatcher {
                 var idx = els[i].id.substr(5);
                 if (msg.completed[parseInt(idx, 10)]) {
                     els[i].innerHTML = "Completed";
+                } else {
+                    els[i].innerHTML = "";
+                }
+            }
+        }
+    }
+
+    /** @param{Message} msg */
+    segments_complete(msg) {
+        var els = document.querySelectorAll(".segmentcomplete");
+        if (els) {
+            for (var i = 0; i < els.length; ++i) {
+                var id = els[i].id.substr(8);
+                if (msg.segments[id]) {
+                    els[i].innerHTML = msg.segments[id];
                 } else {
                     els[i].innerHTML = "";
                 }
@@ -1318,9 +1334,11 @@ window.onload = function() {
     // ErrataPage             k
     // WorkshopPage           l
     // HealthAndSafetyPage    m
+    // SponsorPage            n
+    // RunaroundPage          o
 
     // Pages with SUBMIT buttons.
-    if (page_class == "a" || page_class == "b" || page_class == "l") {
+    if (page_class == "a" || page_class == "b" || page_class == "l" || page_class == "o") {
         var a = goog.dom.getElement("submit");
         hunt2020.submit_panel = new H2020_SubmitPanel();
         goog.events.listen(a, goog.events.EventType.CLICK,

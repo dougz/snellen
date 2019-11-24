@@ -1892,6 +1892,7 @@ class Global:
     for team in Team.BY_USERNAME.values():
       team.compute_puzzle_beam(self.event_start_time)
       team.open_puzzle(Event.PUZZLE, now)
+      team.open_puzzle(Runaround.PUZZLE, now)  # XXX
       team.invalidate(flush=False)
     if timed and not save_state.REPLAYING:
       asyncio.create_task(self.notify_event_start())
@@ -2083,9 +2084,9 @@ class MiscLand:
     return cls.SINGLETON
 
   def __init__(self):
-    self.shortname = "Misc"
-    self.title = "Miscellenous"
-    self.symbol = "Misc"
+    self.shortname = "pennypark"
+    self.title = "Penny Park"
+    self.symbol = "PP"
     self.color = "#000000"
     self.land_order = 1000
     self.guess_interval = 30
@@ -2197,6 +2198,52 @@ class Workshop:
 
     p.post_init(MiscLand.get(), None)
 
+
+class Runaround:
+  SEGMENTS = []
+
+  def __init__(self, d):
+    self.shortname = d["land"]
+    self.answer = Puzzle.canonicalize_answer(d["answer"])
+    self.display_answer = d["answer"]
+
+  @classmethod
+  def build(cls, d):
+    for dd in d["minis"]:
+      cls.SEGMENTS.append(Runaround(dd))
+
+    p = Puzzle("runaround")
+    cls.PUZZLE = p
+
+    p.oncall = ""
+    p.puzzletron_id = -1
+    p.authors = ["Left Out"]
+
+    p.title = "Heart of the Park"
+    p.answers = set()
+    p.display_answers = {}
+    for s in cls.SEGMENTS:
+      p.answers.add(s.answer)
+      p.display_answers[s.answer] = s.display_answer
+    p.responses = {}
+    p.html_body = None
+    p.html_head = None
+    p.for_ops_url = ""
+    p.max_queued = Puzzle.DEFAULT_MAX_QUEUED
+    p.meta = False
+    p.points = 0  # no buzz/wonder for finishing
+
+    def on_correct_answer(now, team):
+      ps = team.puzzle_state[cls.PUZZLE]
+      segments = {}
+      for s in cls.SEGMENTS:
+        if s.answer in ps.answers_found:
+          segments[s.shortname] = s.display_answer
+      team.send_messages([{"method": "segments_complete", "segments": segments}])
+
+    p.on_correct_answer = on_correct_answer
+
+    p.post_init(MiscLand.get(), None)
 
 
 
