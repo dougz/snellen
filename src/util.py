@@ -40,6 +40,7 @@ class TeamPageHandler(TeamHandler):
     "ErrataPage": "k",
     "WorkshopPage": "l",
     "HealthAndSafetyPage": "m",
+    "SponsorPage": "n",
     }
 
   def prepare(self):

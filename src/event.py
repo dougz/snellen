@@ -230,6 +230,12 @@ class HealthAndSafetyPage(util.TeamPageHandler):
     self.session.visit_page("health_safety")
     self.render("health_safety.html")
 
+class SponsorPage(util.TeamPageHandler):
+  @login.required("team", require_start=False)
+  def get(self):
+    self.session.visit_page("sponsor")
+    self.render("sponsor.html")
+
 class SubmitHandler(util.TeamHandler):
   def prepare(self):
     self.args = json.loads(self.request.body)
@@ -327,6 +333,7 @@ def GetHandlers():
     (r"/errata", ErrataPage),
     (r"/guest_services$", GuestServicesPage),
     (r"/health_and_safety", HealthAndSafetyPage),
+    (r"/sponsors", SponsorPage),
     (r"/land/([a-z0-9_]+)", LandMapPage),
     (r"/puzzle/([a-z0-9_]+)/?", PuzzlePage),
     (r"/submit", SubmitHandler),
