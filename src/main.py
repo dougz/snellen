@@ -76,6 +76,8 @@ async def main_server(options):
   game.Achievement.define_achievements(static_content)
   for shortname, d in cfg["events"].items():
     game.Event(shortname, d)
+  for shortname, d in cfg["workshop"].items():
+    game.Workshop(shortname, d)
   if options.debug:
     debug.DebugPathHandler.set_static_content(static_content)
   login.Login.set_static_content(static_content)
@@ -92,6 +94,7 @@ async def main_server(options):
       game.Team(username, d)
 
   game.Event.post_init()
+  game.Workshop.post_init()
 
   for team in game.Team.all_teams():
     team.post_init()
@@ -112,8 +115,14 @@ async def main_server(options):
 
   if not game.Global.STATE: game.Global()
 
+  await game.Global.STATE.task_queue.purge(None)
+  # arrange to purge any tasks marked complete in the last 20 seconds
+  # of replay time.
+  asyncio.create_task(game.Global.STATE.task_queue.purge(20))
+
   if options.start_event:
     game.Global.STATE.start_event(False)
+
 
   for team in game.Team.BY_USERNAME.values():
     team.discard_messages()

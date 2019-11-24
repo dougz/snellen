@@ -235,7 +235,7 @@ def main():
     y = yaml.safe_load(f)
 
   for land in y.keys():
-    if land == "events": continue
+    if land in ("events", "workshop"): continue
     print(f"Loading assets/{land}/land.yaml...")
     with open(os.path.join(options.input_dir, "assets", land, "land.yaml")) as f:
       y[land].update(yaml.safe_load(f))
@@ -246,7 +246,7 @@ def main():
 
   output["maps"] = {}
   for shortname, d in y.items():
-    if shortname == "events": continue
+    if shortname in ("events", "workshop"): continue
     output["maps"][shortname] = convert_map(shortname, d, options)
 
   output["static"] = {}
@@ -255,6 +255,7 @@ def main():
   output["static"]["emoji"] = f"https://{options.public_host}/emoji/"
 
   output["events"] = y.get("events", {})
+  output["workshop"] = y.get("workshop", {})
 
   with open(output_file, "w") as f:
     json.dump(output, f, sort_keys=True, indent=2)

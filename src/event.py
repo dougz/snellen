@@ -159,6 +159,22 @@ class EventsDataHandler(util.TeamHandler):
   def get(self):
     self.write(json.dumps({}))
 
+class WorkshopPage(util.TeamPageHandler):
+  @login.required("team", require_start=False)
+  def get(self):
+    self.puzzle = game.Workshop.PUZZLE
+    ps = self.team.puzzle_state[self.puzzle]
+    if ps.state == game.PuzzleState.CLOSED:
+      raise tornado.web.HTTPError(http.client.NOT_FOUND)
+    self.render("workshop.html")
+
+class WorkshopDataHandler(util.TeamHandler):
+  @login.required("team", require_start=False)
+  def get(self):
+    d = {"earned": [p.name for p in self.team.pennies_earned],
+         "collected": [p.name for p in self.team.pennies_collected]}
+    self.return_json(d)
+
 class ErrataPage(util.TeamPageHandler):
   @login.required("team")
   def get(self):
@@ -306,6 +322,7 @@ def GetHandlers():
     (r"/videos", VideosPage),
     (r"/pins", AchievementPage),
     (r"/events", EventsPage),
+    (r"/workshop", WorkshopPage),
     (r"/puzzles", AllPuzzlesPage),
     (r"/errata", ErrataPage),
     (r"/guest_services$", GuestServicesPage),
@@ -324,6 +341,7 @@ def GetHandlers():
     (r"/js/hintsopen", HintsOpenDataHandler),
     (r"/js/puzzles", AllPuzzlesDataHandler),
     (r"/js/header", CurrentHeaderDataHandler),
+    (r"/js/workshop", WorkshopDataHandler),
     (r"/js/map/([a-z][a-z0-9_]+)$", MapDataHandler),
   ]
 

@@ -40,7 +40,7 @@ class TeamPageHandler(TeamHandler):
     serial = self.team.next_serial() - 1
 
     script = ["<script>"]
-
+    script.append(f"""var page_class = \"{self.__class__.__name__}\";\n""")
     d["css"] = [self.static_content["event.css"]]
     style_css = None
 
@@ -80,6 +80,7 @@ class TeamPageHandler(TeamHandler):
     else:
       script.append(f"""<script src="{self.static_content["client-compiled.js"]}"></script>""")
 
+    d["page_class"] = self.__class__.__name__
     d["script"] = "".join(script)
     d["json_data"] = None
     d["park_open"] = (game.Global.STATE.event_start_time is not None)

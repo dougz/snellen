@@ -1,0 +1,47 @@
+{% extends "player_base.html" %}
+
+{% block title %}Workshop{% end %}
+
+{% block topnav_extraright %}
+<a id="submit">Submit</a>
+{% end %}
+
+{% block midnav %}
+{% if park_open %}
+<div id="submitpanel">
+  <div id="submitdata">
+    <div id="submit_table_scroll">
+      <table id="submit_table">
+        <thead>
+          <tr><th id="st_answer">Submission</th><th id="st_time">Submit time</th><th id="st_result">Result</th></tr>
+        </thead>
+        <tbody id="submit_table_body">
+        </tbody>
+      </table>
+    </div>
+    <div id="submitentry">
+      <input type=text maxlength=40 id="answer" name="answer">
+      <button class="action" id="submitsubmit">Submit</button>
+    </div>
+    <span id="top_note"></span>
+    <span id="submitinstr">Use this to submit the answer you obtained from the pressed pennies you've received.</span>
+  </div>
+</div>
+{% end %}
+{% end %}
+
+
+{% block content %}
+<div id="content">
+  <h1 id="pagetitle">Workshop</h1>
+
+  <p id="wsearned">Visit the Workshop in room XX-XXX and ask the Tinkerer for the <span id="wsearnednames"></span>.</p>
+
+  <div id="wscoll">
+    <p>You've already collected the following pennies:</p>
+    <ul id="wscollnames">
+    </ul>
+  </div>
+</div>
+
+{% end %}

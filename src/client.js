@@ -27,12 +27,19 @@ class H2020_Dispatcher {
             "video": goog.bind(this.video, this),
             "event_complete": goog.bind(this.event_complete, this),
             "post_erratum": goog.bind(this.post_erratum, this),
+            "pennies": goog.bind(this.pennies, this),
         }
     }
 
     /** @param{Message} msg */
     dispatch(msg) {
         this.methods[msg.method](msg);
+    }
+
+    /** @param{Message} msg */
+    pennies(msg) {
+        if (hunt2020.workshop) hunt2020.workshop.update();
+        if (hunt2020.activity) hunt2020.activity.update();
     }
 
     /** @param{Message} msg */
@@ -1225,6 +1232,7 @@ var hunt2020 = {
     videos: null,
     all_puzzles: null,
     errata: null,
+    workshop: null,
 }
 
 /** @param{Node} e */
@@ -1344,6 +1352,10 @@ window.onload = function() {
 
     if (goog.dom.getElement("errata")) {
         hunt2020.errata = new H2020_Errata();
+    }
+
+    if (page_class == "WorkshopPage") {
+        hunt2020.workshop = new H2020_Workshop();
     }
 }
 
@@ -1490,6 +1502,59 @@ class H2020_AllPuzzles {
             this.loplist.appendChild(li);
         }
         twemoji.parse(this.loplist);
+    }
+}
+
+class H2020_Workshop {
+    constructor() {
+        /** @type{Element} */
+        this.wsearned = goog.dom.getElement("wsearned");
+        /** @type{Element} */
+        this.wsearnednames = goog.dom.getElement("wsearnednames");
+        /** @type{Element} */
+        this.wscoll = goog.dom.getElement("wscoll");
+        /** @type{Element} */
+        this.wscollnames = goog.dom.getElement("wscollnames");
+        this.update();
+    }
+
+    update() {
+        goog.net.XhrIo.send("/js/workshop", Common_invoke_with_json(this, this.build));
+    }
+
+    /** param{WorkshopData} data */
+    build(data) {
+        var e = data.earned;
+        if (e.length == 0) {
+            this.wsearned.style.display = "none";
+        } else {
+            this.wsearned.style.display = "block";
+
+            if (e.length == 1) {
+                this.wsearnednames.innerHTML = "<b>" + e[0] + "</b> penny";
+            } else if (e.length == 2) {
+                this.wsearnednames.innerHTML = "<b>" + e[0] + "</b> and <b>" + e[1] + "</b> pennies";
+            } else {
+                var out = [];
+                for (var i = 0; i < e.length-1; ++i) {
+                    out.push("<b>" + e[i] + "</b>, ");
+                }
+                out.push(" and <b>" + e[e.length-1] + "</b> pennies");
+                this.wsearnednames.innerHTML = out.join("");
+            }
+        }
+
+        var c = data.collected;
+        if (c.length == 0) {
+            this.wscoll.style.display = "none";
+        } else {
+            this.wscoll.style.display = "block";
+
+            this.wscollnames.innerHTML = "";
+            for (var i = 0; i < c.length; ++i) {
+                this.wscollnames.appendChild(goog.dom.createDom("LI", null, c[i]));
+            }
+        }
     }
 }
 

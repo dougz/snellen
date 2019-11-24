@@ -29,6 +29,9 @@ var received_serial;
 /** @type{Storage} */
 var sessionStorage;
 
+/** @type{string} */
+var page_class;
+
 class Message {
     constructor() {
         /** @type{string} */
@@ -283,3 +286,11 @@ class Erratum {
     }
 }
 
+class WorkshopData {
+    constructor() {
+        /** @type{Array<string>} */
+        this.earned;
+        /** @type{Array<string>} */
+        this.collected;
+    }
+}

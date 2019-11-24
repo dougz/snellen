@@ -61,12 +61,13 @@ class HintMessage:
     return d
 
 class Task:
-  def __init__(self, when, team, taskname, text, url):
+  def __init__(self, when, team, taskname, text, url, oncomplete):
     self.when = int(when)
     self.team = team
     self.taskname = taskname
     self.text = text
     self.url = url
+    self.oncomplete = oncomplete
     self.key = "t-" + team.username + "-" + taskname
     self.claim = None
 
@@ -90,16 +91,21 @@ class TaskQueue:
       self.change()
 
   async def purge(self, after):
-    await asyncio.sleep(after+.1)
+    if after is not None:
+      await asyncio.sleep(after+.1)
     now = time.time()
     to_delete = []
     for key, when in self.pending_removal.items():
       if when <= now:
-        to_delete.append(key)
+        to_delete.append((when, key))
     if to_delete:
-      for key in to_delete:
+      to_delete.sort()
+      for when, key in to_delete:
         self.pending_removal.pop(key, None)
-        self.tasks.pop(key, None)
+        task = self.tasks.pop(key, None)
+        if task and task.oncomplete:
+          task.oncomplete(task, when)
+
       self.change()
 
   def build(self):
@@ -117,8 +123,8 @@ class TaskQueue:
     self.states.discard(puzzle_state)
     self.change()
 
-  def add_task(self, when, team, taskname, text, url):
-    task = Task(when, team, taskname, text, url)
+  def add_task(self, when, team, taskname, text, url, oncomplete):
+    task = Task(when, team, taskname, text, url, oncomplete)
     if task.key in self.tasks: return  # dups
     self.tasks[task.key] = task
     self.change()
@@ -501,6 +507,9 @@ class Team(login.LoginUser):
 
     self.fastpasses_available = []
     self.fastpasses_used = {}
+
+    self.pennies_earned = []
+    self.pennies_collected = []
 
     self.cached_bb_data = None
     self.cached_mapdata = {}
@@ -968,24 +977,25 @@ class Team(login.LoginUser):
         self.cached_mapdata.pop(puzzle.land, None)
 
   def solve_puzzle(self, puzzle, now):
-    state = self.puzzle_state[puzzle]
+    ps = self.puzzle_state[puzzle]
     msgs = []
-    if state.state != state.SOLVED:
-      state.state = state.SOLVED
-      state.solve_time = now
-      for sub in state.submissions:
+    if ps.state != PuzzleState.SOLVED:
+      ps.state = PuzzleState.SOLVED
+      ps.solve_time = now
+      for sub in ps.submissions:
         if sub.state == sub.PENDING:
           sub.state = sub.MOOT
       self.score += puzzle.points
       self.dirty_header = True
       self.last_score_change = now
-      self.open_puzzles.remove(state)
+      self.open_puzzles.remove(ps)
       self.send_messages(
         [{"method": "solve",
           "puzzle_id": puzzle.shortname,
           "title": html.escape(puzzle.title),
           "audio": OPTIONS.static_content.get(puzzle.land.shortname + "/solve.mp3"),
         }])
+
       self.dirty_lands.add(puzzle.land.shortname)
       self.cached_mapdata.pop(puzzle.land, None)
       self.cached_all_puzzles_data = None
@@ -1007,9 +1017,23 @@ class Team(login.LoginUser):
            "thumb": OPTIONS.static_content.get(f"thumb{self.videos}.png"),
           }])
 
+      if puzzle in Workshop.PENNY_PUZZLES:
+        dirty = False
+        for penny in Workshop.ALL_PENNIES.values():
+          if penny.puzzle == puzzle:
+            if not self.pennies_earned:
+              self.open_puzzle(Workshop.PUZZLE, now)
+            self.pennies_earned.append(penny)
+            Global.STATE.add_task(now, self.username, f"penny-{penny.shortname}",
+                                  f"{penny.name} penny", None,
+                                  oncomplete=self.collect_penny)
+            dirty = True
+        if dirty:
+          self.send_messages([{"method": "pennies"}])
+
       self.achieve(Achievement.solve_puzzle, now)
 
-      solve_duration = state.solve_time - state.open_time
+      solve_duration = ps.solve_time - ps.open_time
       puzzle.solve_durations[self] = solve_duration
       puzzle.median_solve_duration = statistics.median(puzzle.solve_durations.values())
       if (puzzle.fastest_solver is None or
@@ -1022,9 +1046,9 @@ class Team(login.LoginUser):
         self.achieve(Achievement.champion, now)
 
       durtxt = util.format_duration(solve_duration)
-      puzzle.puzzle_log.add(now, f"Solved by {state.admin_html_team} ({durtxt}).")
+      puzzle.puzzle_log.add(now, f"Solved by {ps.admin_html_team} ({durtxt}).")
       self.activity_log.add(now, f"{puzzle.html} solved.")
-      self.admin_log.add(now, f"{state.admin_html_puzzle} solved ({durtxt}).")
+      self.admin_log.add(now, f"{ps.admin_html_puzzle} solved ({durtxt}).")
 
       if solve_duration < 60:
         self.achieve(Achievement.speed_demon, now)
@@ -1043,6 +1067,16 @@ class Team(login.LoginUser):
         self.achieve(Achievement.hot_streak, now)
 
       self.compute_puzzle_beam(now)
+
+  def collect_penny(self, task, when):
+    p = task.key.split("-")[-1]
+    p = Workshop.ALL_PENNIES[p]
+    self.pennies_earned.remove(p)
+    self.pennies_collected.append(p)
+    self.activity_log.add(when, f"Collected the <b>{p.name}</b> penny.")
+    self.admin_log.add(when, f"Collected the <b>{p.name}</b> penny.")
+    self.send_messages([{"method": "pennies"}])
+    asyncio.create_task(self.flush_messages())
 
   def get_puzzle_state(self, puzzle):
     if isinstance(puzzle, str):
@@ -1860,10 +1894,10 @@ class Global:
       team.compute_puzzle_beam(now)
       await team.flush_messages()
 
-  def add_task(self, now, team, taskname, text, url):
+  def add_task(self, now, team, taskname, text, url, oncomplete=None):
     team = Team.get_by_username(team)
     if not team: return
-    self.task_queue.add_task(now, team, taskname, text, url)
+    self.task_queue.add_task(now, team, taskname, text, url, oncomplete)
 
   @save_state
   def claim_task(self, now, task_key, username):
@@ -1883,7 +1917,8 @@ class Global:
       self.task_queue.pending_removal.pop(task_key, None)
     else:
       self.task_queue.pending_removal[task_key] = now + 20
-      asyncio.create_task(self.task_queue.purge(20))
+      if not save_state.REPLAYING:
+        asyncio.create_task(self.task_queue.purge(20))
     self.task_queue.change()
 
   async def notify_event_start(self):
@@ -2024,6 +2059,24 @@ class Achievement:
                 "Come back!",
                 "Log out of the hunt server before the coin is found.")
 
+class MiscLand:
+  SINGLETON = None
+
+  @classmethod
+  def get(cls):
+    if not cls.SINGLETON:
+      cls.SINGLETON = MiscLand()
+    return cls.SINGLETON
+
+  def __init__(self):
+    self.shortname = "Misc"
+    self.title = "Miscellenous"
+    self.symbol = "Mi"
+    self.color = "#000000"
+    self.land_order = 1000
+    self.guess_interval = 30
+    self.guess_max = 4
+
 class Event:
   ALL_EVENTS = []
 
@@ -2038,15 +2091,6 @@ class Event:
     self.text = d["text"]
 
     self.ALL_EVENTS.append(self)
-
-  class EventLand:
-    shortname = "events"
-    title = "Events"
-    symbol = "Ev"
-    color = "#000000"
-    land_order = 1000
-    guess_interval = 30
-    guess_max = 4
 
   @classmethod
   def post_init(cls):
@@ -2077,7 +2121,7 @@ class Event:
 
     p.on_correct_answer = on_correct_answer
 
-    p.post_init(cls.EventLand(), None)
+    p.post_init(MiscLand.get(), None)
 
     e = [e for e in cls.ALL_EVENTS if e.time == "__special__"][0]
     e.team_time = {}
@@ -2091,3 +2135,44 @@ class Event:
       else:
         e.team_time[t] = "9am Saturday"
     e.time = None
+
+class Workshop:
+  ALL_PENNIES = {}
+  PENNY_PUZZLES = set()
+
+  def __init__(self, shortname, d):
+    self.shortname = shortname
+    self.name = d["name"]
+    self.puzzle = d["puzzle"]
+
+    self.ALL_PENNIES[shortname] = self
+
+  @classmethod
+  def post_init(cls):
+    for p in cls.ALL_PENNIES.values():
+      p.puzzle = Puzzle.get_by_shortname(p.puzzle)
+      cls.PENNY_PUZZLES.add(p.puzzle)
+
+    p = Puzzle("workshop")
+    cls.PUZZLE = p
+
+    p.oncall = ""
+    p.puzzletron_id = -1
+    p.authors = ["Left Out"]
+
+    p.title = "Workshop"
+    p.answers = ["MASHNOTE"]
+    p.display_answers = {"MASHNOTE": "MASH NOTE"}
+    p.responses = {}
+    p.html_body = None
+    p.html_head = None
+    p.for_ops_url = ""
+    p.max_queued = Puzzle.DEFAULT_MAX_QUEUED
+    p.meta = False
+
+    p.post_init(MiscLand.get(), None)
+
+
+
+
+
