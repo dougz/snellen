@@ -467,7 +467,7 @@ class Team(login.LoginUser):
 
   GLOBAL_FASTPASS_QUEUE = []
 
-  VIDEOS_BY_SCORE = {0: 1, 16: 2, 31: 3, 46: 4, 62: 5}
+  VIDEOS_BY_SCORE = {0: 1, 16: 2, 31: 3, 46: 4}
 
   cached_bb_label_info = None
 
@@ -1024,21 +1024,28 @@ class Team(login.LoginUser):
            "thumb": OPTIONS.static_content.get(f"thumb{self.videos}.png"),
           }])
 
-      if not self.remote_only and puzzle in Workshop.PENNY_PUZZLES:
-        dirty = False
-        for penny in Workshop.ALL_PENNIES.values():
-          if penny.puzzle == puzzle:
-            if not self.pennies_earned and not self.pennies_collected:
-              Global.STATE.add_task(now, self.username, f"loony-visit",
-                                    "Loony visit", None,
-                                    oncomplete=self.complete_loony_visit)
-            self.pennies_earned.append(penny)
-            Global.STATE.add_task(now, self.username, f"penny-{penny.shortname}",
-                                  f"{penny.name} penny", None,
-                                  oncomplete=self.collect_penny)
-            dirty = True
-        if dirty:
-          self.send_messages([{"method": "pennies"}])
+      # If this puzzle rewards you with a penny (land meta or events),
+      # request a visit and/or record that you're owed a penny.
+      if puzzle in Workshop.PENNY_PUZZLES:
+        if self.remote_only:
+          if self.puzzle_state[Workshop.PUZZLE].state == PuzzleState.CLOSED:
+            self.admin_log.add(now, f"Skipped Loony visit for remote-only team.")
+            self.open_puzzle(Workshop.PUZZLE, now)
+        else:
+          dirty = False
+          for penny in Workshop.ALL_PENNIES.values():
+            if penny.puzzle == puzzle:
+              if not self.pennies_earned and not self.pennies_collected:
+                Global.STATE.add_task(now, self.username, f"loony-visit",
+                                      "Loony visit", None,
+                                      oncomplete=self.complete_loony_visit)
+              self.pennies_earned.append(penny)
+              Global.STATE.add_task(now, self.username, f"penny-{penny.shortname}",
+                                    f"{penny.name} penny", None,
+                                    oncomplete=self.collect_penny)
+              dirty = True
+          if dirty:
+            self.send_messages([{"method": "pennies"}])
 
       self.achieve(Achievement.solve_puzzle, now)
 

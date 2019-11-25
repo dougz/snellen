@@ -1547,6 +1547,8 @@ class H2020_Workshop {
 
     /** param{WorkshopData} data */
     build(data) {
+        if (!this.wsearned) return;
+
         var e = data.earned;
         if (e.length == 0) {
             this.wsearned.style.display = "none";

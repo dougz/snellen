@@ -35,6 +35,9 @@
 <div id="content">
   <h1 id="pagetitle">Workshop</h1>
 
+  {% if team.remote_only %}
+  <p>Visiting the workshop requires being on the MIT campus.  Sorry.</p>
+  {% else %}
   <p id="wsearned">Visit the Workshop in room XX-XXX and ask the Tinkerer for the <span id="wsearnednames"></span>.</p>
 
   <div id="wscoll">
@@ -42,6 +45,7 @@
     <ul id="wscollnames">
     </ul>
   </div>
+  {% end %}
 </div>
 
 {% end %}
