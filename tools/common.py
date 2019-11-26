@@ -17,6 +17,7 @@ CONTENT_TYPES = {
   ".m4a": "audio/m4a",
 
   ".mp4": "video/mp4",
+  ".mov": "video/quicktime",
 
   ".js": "text/javascript; charset=utf-8",
   ".json": "text/javascript; charset=utf-8",
