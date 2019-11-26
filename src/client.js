@@ -739,17 +739,25 @@ class H2020_MapDraw {
         var mapdata = /** @type{MapData} */ (initial_json);
         this.shortname = mapdata.shortname;
 
-        this.draw_map(mapdata);
+        if (window.performance.navigation.type == 2) {
+            this.update();
+        } else {
+            this.draw_map(mapdata);
+        }
     }
 
     update_map(msg) {
         for (var i = 0; i < msg.maps.length; ++i) {
             if (msg.maps[i] == this.shortname) {
-                goog.net.XhrIo.send("/js/map/" + this.shortname,
-                                    Common_invoke_with_json(this, this.draw_map));
+                this.update();
                 break;
             }
         }
+    }
+
+    update() {
+        goog.net.XhrIo.send("/js/map/" + this.shortname,
+                            Common_invoke_with_json(this, this.draw_map));
     }
 
     draw_map(mapdata) {
@@ -1024,7 +1032,11 @@ class H2020_GuestServices {
                                goog.bind(hunt2020.audio_manager.toggle_mute, hunt2020.audio_manager));
         }
 
-        this.build_hints((/** @type{GuestServicesData} */ (initial_json)).hints);
+        if (window.performance.navigation.type == 2) {
+            this.update_hints_open();
+        } else {
+            this.build_hints((/** @type{GuestServicesData} */ (initial_json)).hints);
+        }
     }
 
     update_hints_open() {
@@ -1320,15 +1332,12 @@ window.onload = function() {
 
     var dispatcher = new H2020_Dispatcher();
 
-    goog.events.listen(
-        window, goog.events.EventType.PAGESHOW,
-        function(e) {
-            if (window.performance.navigation.type == 2) {
-                refresh_header(dispatcher);
-            } else if (initial_header) {
-                dispatcher.update_header(initial_header);
-            }
-        });
+    if (window.performance.navigation.type == 2) {
+        hunt2020.nav_back = true;
+        refresh_header(dispatcher);
+    } else if (initial_header) {
+        dispatcher.update_header(initial_header);
+    }
 
     hunt2020.waiter = new Common_Waiter(
         dispatcher, "/wait", received_serial, sessionStorage,
