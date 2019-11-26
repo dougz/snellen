@@ -29,9 +29,9 @@ class LandMapPage(util.TeamPageHandler):
     else:
       land = game.Land.BY_SHORTNAME.get(shortname, None)
       if not land:
-        raise tornado.web.HTTPError(http.client.NOT_FOUND)
+        return self.not_found()
       if land not in self.team.open_lands:
-        raise tornado.web.HTTPError(http.client.NOT_FOUND)
+        return self.not_found()
     self.land = land
     mapdata = self.team.get_land_data(land)
     json_data = "<script>var initial_json = """ + mapdata + ";</script>"
@@ -57,9 +57,9 @@ class MapDataHandler(util.TeamHandler):
     else:
       land = game.Land.BY_SHORTNAME.get(shortname, None)
       if not land:
-        raise tornado.web.HTTPError(http.client.NOT_FOUND)
+        return self.not_found()
       if land not in self.team.open_lands:
-        raise tornado.web.HTTPError(http.client.NOT_FOUND)
+        return self.not_found()
     self.return_json(self.team.get_land_data(land))
 
 
@@ -78,12 +78,12 @@ class PuzzlePage(util.TeamPageHandler):
   def get(self, shortname):
     state = self.team.get_puzzle_state(shortname)
     if not state or state.state == state.CLOSED:
-      raise tornado.web.HTTPError(http.client.NOT_FOUND)
+      return self.not_found()
 
     puzzle = game.Puzzle.get_by_shortname(shortname)
     if not puzzle:
       print(f"no puzzle called {shortname}")
-      raise tornado.web.HTTPError(http.client.NOT_FOUND)
+      return self.not_found()
 
     # if (state.state == game.PuzzleState.SOLVED and
     #     not state.recent_solve()):
@@ -160,7 +160,7 @@ class WorkshopPage(util.TeamPageHandler):
     self.puzzle = game.Workshop.PUZZLE
     ps = self.team.puzzle_state[self.puzzle]
     if ps.state == game.PuzzleState.CLOSED:
-      raise tornado.web.HTTPError(http.client.NOT_FOUND)
+      return self.not_found()
     self.render("workshop.html")
 
 class WorkshopDataHandler(util.TeamHandler):
@@ -175,14 +175,8 @@ class RunaroundPage(util.TeamPageHandler):
   def get(self):
     self.puzzle = game.Runaround.PUZZLE
     ps = self.team.puzzle_state[self.puzzle]
-
-    # segments = []
-    # for s in game.Runaround.SEGMENTS:
-    #   d = {"title": s.shortname,
-    #        "text": s.shortname}
-    #   if s.answer in ps.answers_found:
-    #     d["answer"] = s.display_answer
-    #   segments.append(d)
+    if ps.state == game.PuzzleState.CLOSED:
+      return self.not_found()
     self.render("runaround.html", segments=game.Runaround.SEGMENTS, ps=ps)
 
 class RunaroundDataHandler(util.TeamHandler):
@@ -195,7 +189,7 @@ class ErrataPage(util.TeamPageHandler):
   def get(self):
     errata = self.team.get_errata_data()
     if not errata:
-      raise tornado.web.HTTPError(http.client.NOT_FOUND)
+      return self.not_found()
     json_data = "<script>var initial_json = """ + json.dumps(errata) + ";</script>"
     self.render("errata.html", json_data=json_data)
 
@@ -224,7 +218,7 @@ class ApplyFastPassHandler(util.TeamHandler):
     if self.team.apply_fastpass(land_name):
       self.set_status(http.client.NO_CONTENT.value)
     else:
-      raise tornado.web.HTTPError(http.client.NOT_FOUND)
+      return self.not_found()
 
 class AllPuzzlesPage(util.TeamPageHandler):
   @login.required("team")
@@ -260,7 +254,7 @@ class SubmitHandler(util.TeamHandler):
     answer = self.args["answer"]
     shortname = self.args["puzzle_id"]
     puzzle = game.Puzzle.get_by_shortname(shortname)
-    if not puzzle: raise tornado.web.HTTPError(http.client.NOT_FOUND)
+    if not puzzle: return self.not_found()
     submit_id = self.team.next_submit_id()
     result = self.team.submit_answer(submit_id, shortname, answer)
     if result:
@@ -274,7 +268,7 @@ class SubmitHistoryHandler(util.TeamHandler):
   def get(self, shortname):
     ps = self.team.get_puzzle_state(shortname)
     if not ps or ps.state == game.PuzzleState.CLOSED:
-      raise tornado.web.HTTPError(http.client.NOT_FOUND)
+      return self.not_found()
 
     # Allow submit if the puzzle is open, and if there are fewer than
     # the max allowed pending submissions.
@@ -315,7 +309,7 @@ class HintRequestHandler(util.TeamHandler):
     shortname = self.args["puzzle_id"]
     puzzle = game.Puzzle.get_by_shortname(shortname)
     if not puzzle:
-      raise tornado.web.HTTPError(http.client.NOT_FOUND)
+      return self.not_found()
     ps = self.team.puzzle_state[puzzle]
     if not ps.hints_available:
       raise tornado.web.HTTPError(http.client.BAD_REQUEST)
@@ -330,7 +324,7 @@ class HintHistoryHandler(util.TeamHandler):
   def get(self, shortname):
     ps = self.team.get_puzzle_state(shortname)
     if not ps:
-      raise tornado.web.HTTPError(http.client.NOT_FOUND)
+      return self.not_found()
 
     d = {"history": [msg.json_dict() for msg in ps.hints if not msg.admin_only],
          "puzzle_id": ps.puzzle.shortname}

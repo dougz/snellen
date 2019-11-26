@@ -212,7 +212,7 @@ class required:
           return
         else:
           # If teams try to access an admin page, return 404.
-          raise tornado.web.HTTPError(http.client.NOT_FOUND)
+          return self.not_found()
 
       if self.cap == "team" and self.require_start and not game.Global.STATE.event_start_time:
         req.redirect("/")

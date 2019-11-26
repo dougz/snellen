@@ -1095,7 +1095,7 @@ class Team(login.LoginUser):
 
       self.compute_puzzle_beam(now)
 
-  def collect_penny(self, task, when):
+  async def collect_penny(self, task, when):
     p = task.key.split("-")[-1]
     p = Workshop.ALL_PENNIES[p]
     self.pennies_earned.remove(p)
@@ -1103,7 +1103,7 @@ class Team(login.LoginUser):
     self.activity_log.add(when, f"Collected the <b>{p.name}</b> penny.")
     self.admin_log.add(when, f"Collected the <b>{p.name}</b> penny.")
     self.send_messages([{"method": "pennies"}])
-    asyncio.create_task(self.flush_messages())
+    await self.flush_messages()
 
   async def complete_loony_visit(self, task, when):
     self.admin_log.add(when, f"Completed the Loony visit.")
@@ -1372,6 +1372,14 @@ class Team(login.LoginUser):
       if (meta and self.puzzle_state[meta].state == PuzzleState.CLOSED and
           (keepers_solved >= 5 or open_all)):
         self.open_puzzle(meta, now)
+
+    if self.puzzle_state[Runaround.PUZZLE].state == PuzzleState.CLOSED:
+      for p in Workshop.RUNAROUND_PUZZLES:
+        if self.puzzle_state[p].state != PuzzleState.SOLVED:
+          break
+      else:
+        # Open the runaround!
+        self.open_puzzle(Runaround.PUZZLE, now)
 
     for st in self.puzzle_state.values():
       if st.state != PuzzleState.CLOSED:
@@ -1922,7 +1930,6 @@ class Global:
     for team in Team.BY_USERNAME.values():
       team.compute_puzzle_beam(self.event_start_time)
       team.open_puzzle(Event.PUZZLE, now)
-      #team.open_puzzle(Runaround.PUZZLE, now)  # XXX
       team.invalidate(flush=False)
     if timed and not save_state.REPLAYING:
       asyncio.create_task(self.notify_event_start())
@@ -2185,6 +2192,8 @@ class Event:
 class Workshop:
   ALL_PENNIES = {}
   PENNY_PUZZLES = set()
+  # All these puzzles must be solved to start the Runaround.
+  RUNAROUND_PUZZLES = set()
 
   @classmethod
   def build(cls, d):
@@ -2207,9 +2216,11 @@ class Workshop:
     for p in cls.ALL_PENNIES.values():
       p.puzzle = Puzzle.get_by_shortname(p.puzzle)
       cls.PENNY_PUZZLES.add(p.puzzle)
+      cls.RUNAROUND_PUZZLES.add(p.puzzle)
 
     p = Puzzle("workshop")
     cls.PUZZLE = p
+    cls.RUNAROUND_PUZZLES.add(p)
 
     p.oncall = ""
     p.puzzletron_id = -1

@@ -24,6 +24,11 @@ class TeamHandler(tornado.web.RequestHandler):
     else:
       self.write(json.dumps(obj))
 
+  def not_found(self):
+    self.set_status(http.client.NOT_FOUND.value)
+    return
+
+
 
 class TeamPageHandler(TeamHandler):
   PAGE_CLASSES = {

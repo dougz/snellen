@@ -123,7 +123,7 @@ class PuzzleContentPage(util.AdminPageHandler):
     puzzle = game.Puzzle.get_by_shortname(shortname)
     if not puzzle:
       print(f"no puzzle called {shortname}")
-      raise tornado.web.HTTPError(http.client.NOT_FOUND)
+      return self.not_found()
 
     if puzzle.icon.headerimage:
       supertitle=f'<img src="{puzzle.icon.headerimage}"><br>'
@@ -238,7 +238,7 @@ class TeamPuzzleDataHandler(util.AdminHandler):
     team = self.get_team(username)
     ps = team.get_puzzle_state(shortname)
     if not ps:
-      raise tornado.web.HTTPError(http.client.NOT_FOUND)
+      return self.not_found()
 
     d = {"history": [msg.json_dict(for_admin=True) for msg in ps.hints],
          "submits": [sub.json_dict() for sub in ps.submissions],
@@ -487,7 +487,7 @@ class HintTimeChangeHandler(util.AdminHandler):
     shortname = self.args.get("puzzle_id")
     puzzle = game.Puzzle.get_by_shortname(shortname)
     if not puzzle:
-      raise tornado.web.HTTPError(http.client.NOT_FOUND)
+      return self.not_found()
 
     try:
       text = self.args.get("hint_time")
@@ -569,7 +569,7 @@ class BigBoardTeamDataHandler(util.AdminHandler):
       username = username.lstrip("/")
       team = game.Team.get_by_username(username)
       if not team:
-        raise tornado.web.HTTPError(http.client.NOT_FOUND)
+        return self.not_found()
       data = team.bb_data()
     else:
       data = {}
