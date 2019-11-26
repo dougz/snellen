@@ -1344,15 +1344,23 @@ class Team(login.LoginUser):
           min_score_to_go = to_go
         continue
 
+      stop_after = 1000
+      if land.shortname == "cascade":
+        if self.puzzle_state[land.first_submeta].state != PuzzleState.SOLVED:
+          stop_after = 7
+        elif self.puzzle_state[land.second_submeta].state != PuzzleState.SOLVED:
+          stop_after = 12
+
       for i, p in enumerate(land.puzzles):
+        if i >= stop_after: break
         if self.puzzle_state[p].state == PuzzleState.CLOSED:
-          if open_count > 0 or p.meta:
+          if open_count > 0 or p.meta or p.submeta:
             self.open_puzzle(p, now)
             opened.append(p)
           else:
             break
         if self.puzzle_state[p].state == PuzzleState.OPEN:
-          if not p.meta:
+          if not p.meta and not p.submeta:
             open_count -= 1
 
     safari = Land.BY_SHORTNAME.get("safari", None)
@@ -1530,6 +1538,7 @@ class Land:
         p.meta = not not pd.get("meta")
         if p.meta:
           self.meta_puzzle = p
+        p.submeta = not not pd.get("submeta")
 
         if "answers" in pd:
           self.keepers.append(p)
@@ -1544,6 +1553,10 @@ class Land:
     self.additional_puzzles = tuple(self.icons[i].puzzle for i in cfg.get("additional_order", ()))
     self.base_min_puzzles = tuple(self.icons[i].puzzle for i in cfg.get("base_min_puzzles", ()))
     self.all_puzzles = self.additional_puzzles + self.puzzles
+
+    if self.shortname == "cascade":
+      self.first_submeta = self.icons["lazyriver"].puzzle
+      self.second_submeta = self.icons["lifeguard"].puzzle
 
   def __repr__(self):
     return f"<Land \"{self.title}\">"
@@ -1602,7 +1615,7 @@ class Puzzle:
     self.icon = icon
     if self.meta:
       group = 0
-    elif hasattr(self, "keeper_answers"):
+    elif hasattr(self, "keeper_answers") or self.submeta:
       group = 1
     else:
       group = 2
@@ -2174,6 +2187,7 @@ class Event:
     p.for_ops_url = ""
     p.max_queued = Puzzle.DEFAULT_MAX_QUEUED
     p.meta = False
+    p.submeta = False
     p.points = 0  # no buzz/wonder for finishing
 
     def on_correct_answer(now, team):
@@ -2241,6 +2255,7 @@ class Workshop:
     p.for_ops_url = ""
     p.max_queued = Puzzle.DEFAULT_MAX_QUEUED
     p.meta = False
+    p.submeta = False
     p.points = 0  # no buzz/wonder for finishing
 
     p.post_init(MiscLand.get(), None)
@@ -2280,6 +2295,7 @@ class Runaround:
     p.for_ops_url = ""
     p.max_queued = Puzzle.DEFAULT_MAX_QUEUED
     p.meta = False
+    p.submeta = False
     p.points = 0  # no buzz/wonder for finishing
 
     def on_correct_answer(now, team):
