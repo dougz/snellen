@@ -16,6 +16,30 @@ input, button, .emoji-input {
     font-family: 'Merriweather Sans', sans-serif;
 }
 
+.action {
+    font-family: 'Merriweather Sans', sans-serif;
+    font-weight: 700;
+    color: white;
+    font-size: 100%;
+    padding: 8px 16px;
+    margin: 8px 0 8px 0;
+    box-sizing: border-box;
+    border: 1px solid #395483;
+    border-radius: 15px;
+    background: linear-gradient(to bottom, #4c70af, #436299);
+    outline: none;
+}
+.action:focus, .action:hover {
+    color: yellow;
+    border: 1px solid #819ac7;
+    background: linear-gradient(to bottom, #436299, #4c70af);
+}
+.action:disabled {
+    color: #999;
+    border: 1px solid #bbb;
+    background: linear-gradient(to bottom, #ccc, #ddd);
+}
+
 .disclaimer {
     text-align: center;
     font-style: italic;
@@ -698,6 +722,58 @@ span.solved img.emoji {
 .answer { font-weight: bold; text-transform: uppercase; }
 .posthunt { border: 1px solid black; margin: 20px; padding: 20px; background-color: #00000011; }
 
+#puzz .entry {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    margin-top: 40px;
+    text-align: center;
+    min-height: 90px;
+}
+
+#puzz .entryentry {
+    font-size: 120%;
+    font-family: 'Inconsolata', monospace;
+    font-weight: bold;
+    margin: 8px 0 8px 8px;
+    border: 1px solid #ccc;
+    border-top-left-radius: 15px;
+    border-bottom-left-radius: 15px;
+    padding: 8px 16px;
+    box-sizing: border-box;
+    outline: none;
+    background-color: #fff;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+#puzz .entrysubmit {
+    margin: 8px 8px 8px 0;
+    border-radius: 0;
+    border-top-right-radius: 15px;
+    border-bottom-right-radius: 15px;
+    font-family: 'Merriweather Sans', sans-serif;
+    font-weight: 700;
+    color: white;
+    font-size: 100%;
+    padding: 8px 16px;
+    box-sizing: border-box;
+    border: 1px solid #395483;
+    background: linear-gradient(to bottom, #4c70af, #436299);
+    outline: none;
+}
+#puzz .entrysubmit:focus, .entrysubmit:hover {
+    color: yellow;
+    border: 1px solid #819ac7;
+    background: linear-gradient(to bottom, #436299, #4c70af);
+}
+#puzz .entrysubmit:disabled {
+    color: #999;
+    border: 1px solid #bbb;
+    background: linear-gradient(to bottom, #ccc, #ddd);
+}
+
 /** notifications **/
 
 div.toasts {
@@ -1033,30 +1109,6 @@ select option {
     display: block;
     margin-left: 12px;
     flex-grow: 0;
-}
-
-.action {
-    font-family: 'Merriweather Sans', sans-serif;
-    font-weight: 700;
-    color: white;
-    font-size: 100%;
-    padding: 8px 16px;
-    margin: 8px 0 8px 0;
-    box-sizing: border-box;
-    border: 1px solid #395483;
-    border-radius: 15px;
-    background: linear-gradient(to bottom, #4c70af, #436299);
-    outline: none;
-}
-.action:focus, .action:hover {
-    color: yellow;
-    border: 1px solid #819ac7;
-    background: linear-gradient(to bottom, #436299, #4c70af);
-}
-.action:disabled {
-    color: #999;
-    border: 1px solid #bbb;
-    background: linear-gradient(to bottom, #ccc, #ddd);
 }
 
 #loplist > li {
