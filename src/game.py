@@ -1345,14 +1345,21 @@ class Team(login.LoginUser):
         continue
 
       stop_after = 1000
+      skip12 = False
       if land.shortname == "cascade":
-        if self.puzzle_state[land.first_submeta].state != PuzzleState.SOLVED:
-          stop_after = 7
-        elif self.puzzle_state[land.second_submeta].state != PuzzleState.SOLVED:
-          stop_after = 12
+        skip12 = True
+        if self.puzzle_state[land.first_submeta].state == PuzzleState.SOLVED:
+          self.open_puzzle(land.second_submeta, now)
+          if self.puzzle_state[land.second_submeta].state == PuzzleState.SOLVED:
+            self.open_puzzle(land.meta_puzzle, now)
+          else:
+            stop_after = 13
+        else:
+          stop_after = 9
 
       for i, p in enumerate(land.puzzles):
         if i >= stop_after: break
+        if skip12 and 1 <= i <= 2: continue
         if self.puzzle_state[p].state == PuzzleState.CLOSED:
           if open_count > 0 or p.meta or p.submeta:
             self.open_puzzle(p, now)
