@@ -104,7 +104,7 @@ class TaskQueue:
         self.pending_removal.pop(key, None)
         task = self.tasks.pop(key, None)
         if task and task.oncomplete:
-          task.oncomplete(task, when)
+          await task.oncomplete(task, when)
 
       self.change()
 
@@ -467,7 +467,8 @@ class Team(login.LoginUser):
 
   GLOBAL_FASTPASS_QUEUE = []
 
-  VIDEOS_BY_SCORE = {0: 1, 16: 2, 31: 3, 46: 4}
+  VIDEOS_BY_SCORE = {0: 1, 16: 2, 31: 3, 46: 4, 62: 5}
+  OUTER_LANDS_SCORE = 2  # 62
 
   cached_bb_label_info = None
 
@@ -500,6 +501,7 @@ class Team(login.LoginUser):
     self.videos = 1
     self.hints_open = set()
     self.current_hint_puzzlestate = None
+    self.outer_lands_state = "closed"
 
     self.message_mu = asyncio.Lock()
     self.message_serial = 1
@@ -1012,6 +1014,15 @@ class Team(login.LoginUser):
         self.dirty_lands.add("home")
       self.invalidate(puzzle)
 
+      if self.score >= self.OUTER_LANDS_SCORE and self.outer_lands_state == "closed":
+        if self.remote_only:
+          self.complete_penny_visit(now)
+        else:
+          Global.STATE.add_task(now, self.username, f"penny-visit",
+                                "Penny visit", None,
+                                oncomplete=self.complete_penny_visit)
+          self.outer_lands_triggered = "triggered"
+
       new_videos = 0
       for s, v in Team.VIDEOS_BY_SCORE.items():
         if self.score >= s:
@@ -1094,10 +1105,19 @@ class Team(login.LoginUser):
     self.send_messages([{"method": "pennies"}])
     asyncio.create_task(self.flush_messages())
 
-  def complete_loony_visit(self, task, when):
-    #self.activity_log.add(when, f"Collected the <b>{p.name}</b> penny.")
+  async def complete_loony_visit(self, task, when):
     self.admin_log.add(when, f"Completed the Loony visit.")
     self.open_puzzle(Workshop.PUZZLE, when)
+
+  async def complete_penny_visit(self, task, when):
+    if self.remote_only:
+      self.admin_log.add(when, f"Skipped Penny visit for remote-only team.")
+    else:
+      self.admin_log.add(when, f"Completed the Penny visit.")
+    self.outer_lands_state = "open"
+    self.compute_puzzle_beam(when)
+    await self.flush_messages()
+    self.invalidate()
 
   def get_puzzle_state(self, puzzle):
     if isinstance(puzzle, str):
@@ -1304,8 +1324,10 @@ class Team(login.LoginUser):
       if open_all:
         open_count = 1000
       else:
-        if (self.score >= land.open_at_score or
-            since_start >= land.open_at_time):
+        if (since_start >= land.open_at_time or
+            (self.score >= land.open_at_score and
+             (land.open_at_score < self.OUTER_LANDS_SCORE or
+              self.outer_lands_state == "open"))):
           open_count += land.initial_puzzles
 
       if open_count == 0:
@@ -1845,6 +1867,7 @@ class Erratum:
 
 class Global:
   STATE = None
+  UNDO_DONE_DELAY = 5
 
   @save_state
   def __init__(self, now):
@@ -1938,9 +1961,9 @@ class Global:
     if undo:
       self.task_queue.pending_removal.pop(task_key, None)
     else:
-      self.task_queue.pending_removal[task_key] = now + 20
+      self.task_queue.pending_removal[task_key] = now + self.UNDO_DONE_DELAY
       if not save_state.REPLAYING:
-        asyncio.create_task(self.task_queue.purge(20))
+        asyncio.create_task(self.task_queue.purge(self.UNDO_DONE_DELAY))
     self.task_queue.change()
 
   async def notify_event_start(self):
