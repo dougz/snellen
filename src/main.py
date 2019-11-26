@@ -97,6 +97,7 @@ async def main_server(options):
 
   game.Event.post_init()
   game.Workshop.post_init()
+  game.Runaround.post_init()
 
   for team in game.Team.all_teams():
     team.post_init()

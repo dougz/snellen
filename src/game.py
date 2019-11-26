@@ -1374,7 +1374,7 @@ class Team(login.LoginUser):
         self.open_puzzle(meta, now)
 
     if self.puzzle_state[Runaround.PUZZLE].state == PuzzleState.CLOSED:
-      for p in Workshop.RUNAROUND_PUZZLES:
+      for p in Runaround.REQUIRED_PUZZLES:
         if self.puzzle_state[p].state != PuzzleState.SOLVED:
           break
       else:
@@ -1563,7 +1563,6 @@ class Puzzle:
     if shortname in self.BY_SHORTNAME:
       raise ValueError(f"duplicate puzzle shortname \"{shortname}\"")
 
-    print(f"    Adding puzzle \"{shortname}\"...")
     self.BY_SHORTNAME[shortname] = self
     self.shortname = shortname
     self.url = f"/puzzle/{shortname}"
@@ -2192,8 +2191,6 @@ class Event:
 class Workshop:
   ALL_PENNIES = {}
   PENNY_PUZZLES = set()
-  # All these puzzles must be solved to start the Runaround.
-  RUNAROUND_PUZZLES = set()
 
   @classmethod
   def build(cls, d):
@@ -2216,11 +2213,9 @@ class Workshop:
     for p in cls.ALL_PENNIES.values():
       p.puzzle = Puzzle.get_by_shortname(p.puzzle)
       cls.PENNY_PUZZLES.add(p.puzzle)
-      cls.RUNAROUND_PUZZLES.add(p.puzzle)
 
     p = Puzzle("workshop")
     cls.PUZZLE = p
-    cls.RUNAROUND_PUZZLES.add(p)
 
     p.oncall = ""
     p.puzzletron_id = -1
@@ -2242,6 +2237,8 @@ class Workshop:
 
 class Runaround:
   SEGMENTS = []
+  # All these puzzles must be solved to start the Runaround.
+  REQUIRED_PUZZLES = set()
 
   def __init__(self, d):
     self.shortname = d["land"]
@@ -2286,6 +2283,19 @@ class Runaround:
 
     p.post_init(MiscLand.get(), None)
 
+  @classmethod
+  def post_init(cls):
+    # All land metas are needed to start the runaround ...
+    for land in Land.BY_SHORTNAME.values():
+      if land.meta_puzzle:
+        cls.REQUIRED_PUZZLES.add(land.meta_puzzle)
 
+    # ... plus the pressed-penny puzzle.
+    cls.REQUIRED_PUZZLES.add(Workshop.PUZZLE)
 
+    print("Required for runaround:")
+    for p in cls.REQUIRED_PUZZLES:
+      print(f"  {p.shortname} {p.title}")
 
+    # Note that the Events puzzle is *not* needed (even though it
+    # produces a penny).
