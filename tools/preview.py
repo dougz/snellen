@@ -154,6 +154,7 @@ class UploadHandler(tornado.web.RequestHandler):
          "css": css,
          "supertitle": "",
          "logo_nav": self.static_content["logo-nav.png"],
+         "has_errata": False,
          }
 
     if land == "space":
