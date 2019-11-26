@@ -663,7 +663,7 @@ class Team(login.LoginUser):
       base_img = land.base_img
       base_size = land.base_size
     else:
-      # Safari map: base changes as puzzles open
+      # Safari & Cascade Bay maps: base changes as puzzles open
       need_base = 0
       for i, p in enumerate(land.base_min_puzzles):
         if self.puzzle_state[p].state != PuzzleState.CLOSED:
@@ -734,6 +734,14 @@ class Team(login.LoginUser):
         if i.under:
           dd = {"icon_url": i.under.url,
                 "xywh": i.under.pos_size}
+          # Sort these before any puzzle title
+          items.append(((-1, "@",), dd))
+        if i.emptypipe2:
+          if ps.state == PuzzleState.SOLVED:
+            pipe = getattr(i, f"fullpipe{need_base}")
+          else:
+            pipe = getattr(i, f"emptypipe{need_base}")
+          dd = {"icon_url": pipe.url, "xywh": pipe.pos_size}
           # Sort these before any puzzle title
           items.append(((-1, "@",), dd))
 
@@ -1452,12 +1460,15 @@ class Icon:
     self.solved_mask = Subicon(d.get("solved_mask"))
     #self.solved_thumb = Subicon(d.get("solved_thumb"))
 
-    s = d.get("under")
-    if s:
-      self.under = Subicon(s)
-    else:
-      self.under = None
-
+    for opt in ("under",
+                "emptypipe1", "fullpipe1",
+                "emptypipe2", "fullpipe2",
+                "emptypipe0", "fullpipe0"):
+      s = d.get(opt)
+      if s:
+        setattr(self, opt, Subicon(s))
+      else:
+        setattr(self, opt, None)
 
 class Land:
   BY_SHORTNAME = {}
