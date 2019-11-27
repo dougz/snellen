@@ -655,19 +655,16 @@ class Team(login.LoginUser):
   def get_header_data(self):
     use_buzz = (self.score < 13)
     d = {"score": f"Buzz: {self.score * 1000:,}" if use_buzz else f"Wonder: {self.score*10000:,}",
-         "stuff": "buzz" if use_buzz else "wonder",
          "lands": [[i.symbol, i.color, i.url, i.title] for i in self.sorted_open_lands],
-         "to_go": None if self.score_to_go is None else (
-           self.score_to_go * (1000 if use_buzz else 1000)),
          "passes": len(self.fastpasses_available),
          }
-    if self.score_to_go:
+    if self.score_to_go and self.score_to_go <= 10:
       if use_buzz:
         num = self.score_to_go * 1000
-        d["to_go"] = f"<b>{num:,}</b> more buzz"
+        d["to_go"] = f"Generate <b>{num:,}</b> more buzz to unlock the next land!"
       else:
         num = self.score_to_go * 10000
-        d["to_go"] = f"<b>{num:,}</b> more wonder"
+        d["to_go"] = f"Generate <b>{num:,}</b> more wonder to unlock the next land!"
     return d
 
   def get_land_data(self, land):
@@ -1449,8 +1446,9 @@ class Team(login.LoginUser):
                                  "fastpass": self.get_fastpass_data()}])
 
     # Check for the first outer land
-    if Land.BY_SHORTNAME.get("studios") in self.open_lands:
-      if self.map_mode != "outer":
+    if self.map_mode != "outer":
+      if (Land.BY_SHORTNAME.get("studios") in self.open_lands or
+          Land.BY_SHORTNAME.get("cascade") in self.open_lands):
         self.map_mode = "outer"
         self.dirty_lands.add("home")
         self.cached_mapdata.pop(Land.BY_SHORTNAME["outer"], None)

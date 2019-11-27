@@ -70,8 +70,6 @@ class Message {
         this.thumb;
         /** @type{?number} */
         this.passes;
-        /** @type{?string} */
-        this.stuff;
         /** @type{?Array<boolean>} */
         this.completed;
         /** @type{?Object<string,string>} */

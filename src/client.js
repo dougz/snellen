@@ -102,6 +102,8 @@ class H2020_Dispatcher {
 
     /** @param{Message} msg */
     update_header(msg) {
+        console.log(msg);
+
         var buzz = goog.dom.getElement("buzz");
         if (!buzz) return;
         buzz.innerHTML = msg.score;
@@ -137,9 +139,11 @@ class H2020_Dispatcher {
             a.style.position = "relative";
             el.appendChild(a);
 
-            var tip = goog.dom.createDom("DIV", "landtip");
-            tip.innerHTML = "Generate " + msg.to_go + " to unlock the next land!";
-            a.appendChild(tip);
+            if (msg.to_go) {
+                var tip = goog.dom.createDom("DIV", "landtip");
+                tip.innerHTML = msg.to_go;
+                a.appendChild(tip);
+            }
         }
 
     }
