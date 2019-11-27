@@ -12,6 +12,7 @@ import statistics
 import string
 import time
 import unicodedata
+import urllib
 
 import login
 from state import save_state
@@ -356,9 +357,13 @@ class Submission:
         self.team.last_incorrect_answer = now
         self.wrong_but_reasonable = True
     else:
-      self.state = self.INCORRECT
-      self.team.streak = []
-      self.team.last_incorrect_answer = now
+      fn = getattr(self.puzzle, "handle_answer", None)
+      if fn:
+        fn(self, now)
+      else:
+        self.state = self.INCORRECT
+        self.team.streak = []
+        self.team.last_incorrect_answer = now
 
     self.puzzle.submitted_teams.add(self.team)
     if self.state == self.INCORRECT:
@@ -1670,6 +1675,18 @@ class Puzzle:
       if ex:
         self.explanations[a] = ex
 
+    if self.shortname == "concierge_services":
+      self.handle_answer = self.do_concierge_callback
+
+  def do_concierge_callback(self, sub, now):
+    sub.state = sub.REQUESTED
+    d = {"phone": "555-555-1234",
+         "team": sub.team.name,
+         "answer": sub.answer}
+    url = ("https://mitmh-2019-leftout-cg.netlify.com/callbacks/callbacks.html?" +
+           urllib.parse.urlencode(d))
+    Global.STATE.add_task(now, sub.team.username, "concierge-callback",
+                          "Concierge callback", url)
 
   def __hash__(self):
     return id(self)
