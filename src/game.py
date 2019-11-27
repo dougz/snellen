@@ -1680,7 +1680,7 @@ class Puzzle:
 
   def do_concierge_callback(self, sub, now):
     sub.state = sub.REQUESTED
-    d = {"phone": "555-555-1234",
+    d = {"phone": sub.team.attrs.get("phone", "(unknown)"),
          "team": sub.team.name,
          "answer": sub.answer}
     url = ("https://mitmh-2019-leftout-cg.netlify.com/callbacks/callbacks.html?" +
