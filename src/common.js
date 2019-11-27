@@ -105,7 +105,23 @@ class Common_Waiter {
         this.storage = storage;
         this.serial = start_serial;
 
-        this.base_url = location.protocol + "//w" + wid + "." + location.hostname + base_url + "/" + wid;
+        var protocol = null;
+        if (window.performance && window.performance.timing.nextHopProtocol) {
+            protocol = window.performance.timing.nextHopProtocol;
+        } else if (window.performance && window.performance.getEntries) {
+            protocol = window.performance.getEntries()[0].nextHopProtocol;
+        }
+
+        // For HTTP/2, we can wait on the same connection we used to
+        // load the page.  For HTTP/1.1, we use a sharded domain to
+        // get around browser per-host connection limit.
+        if (protocol == "h2") {
+            console.log("waiter uses protocol", protocol, ": main domain");
+            this.base_url = base_url + "/" + wid;
+        } else {
+            console.log("waiter uses protocol", protocol, ": sharded domain");
+            this.base_url = location.protocol + "//w" + wid + "." + location.hostname + base_url + "/" + wid;
+        }
 
         /** @type{goog.net.XhrIo} */
         this.xhr = new goog.net.XhrIo();
@@ -128,6 +144,8 @@ class Common_Waiter {
 
         /** @type{number} */
         this.respond_deadline = 10;
+
+
 
         goog.events.listen(this.xhr, goog.net.EventType.COMPLETE,
                            goog.bind(this.waitcomplete, this));
