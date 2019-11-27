@@ -10,6 +10,11 @@ goog.require("goog.json.Serializer");
 
 class H2020_Dispatcher {
     constructor() {
+        /** @type{boolean} */
+        this.dirty_activity = false;
+        /** @type{boolean} */
+        this.dirty_all_puzzles = false;
+
         this.methods = {
             "history_change": goog.bind(this.history_change, this),
             "solve": goog.bind(this.solve, this),
@@ -32,6 +37,16 @@ class H2020_Dispatcher {
         }
     }
 
+    pre_dispatch() {
+        this.dirty_activity = false;
+        this.dirty_all_puzzles = false;
+    }
+    post_dispatch() {
+        console.log("dirty activity", this.dirty_activity, "all_puzzles", this.dirty_all_puzzles);
+        if (this.dirty_activity && hunt2020.activity) hunt2020.activity.update();
+        if (this.dirty_all_puzzles && hunt2020.all_puzzles) hunt2020.all_puzzles.update();
+    }
+
     /** @param{Message} msg */
     dispatch(msg) {
         this.methods[msg.method](msg);
@@ -40,7 +55,7 @@ class H2020_Dispatcher {
     /** @param{Message} msg */
     pennies(msg) {
         if (hunt2020.workshop) hunt2020.workshop.update();
-        if (hunt2020.activity) hunt2020.activity.update();
+        this.dirty_activity = true;
     }
 
     /** @param{Message} msg */
@@ -69,7 +84,7 @@ class H2020_Dispatcher {
                     msg.title + "</b>.", 6000, null, "salmon",
                 "/guest_services?p=" + msg.puzzle_id);
         }
-        if (hunt2020.activity) hunt2020.activity.update();
+        this.dirty_activity = true;
     }
 
     /** @param{Message} msg */
@@ -81,7 +96,7 @@ class H2020_Dispatcher {
             hunt2020.toast_manager.add_toast(
                 "You're now eligible to request hints for <b>" + msg.title + "</b>.",
                 6000, null, "salmon", "/guest_services?p=" + msg.puzzle_id);
-            if (hunt2020.activity) hunt2020.activity.update();
+            this.dirty_activity = true;
         }
     }
 
@@ -152,8 +167,8 @@ class H2020_Dispatcher {
                 el.innerHTML = "Solved";
             }
         }
-        if (hunt2020.activity) hunt2020.activity.update();
-        if (hunt2020.all_puzzles) hunt2020.all_puzzles.update();
+        this.dirty_activity = true;
+        this.dirty_all_puzzles = true;
     }
 
     /** @param{Message} msg */
@@ -161,16 +176,16 @@ class H2020_Dispatcher {
         hunt2020.toast_manager.add_toast(
             "<b>" + msg.title + "</b> is now open!", 6000, null, "blue",
             "/land/" + msg.land);
-        if (hunt2020.activity) hunt2020.activity.update();
         if (hunt2020.guest_services) hunt2020.guest_services.build_fastpass(msg.fastpass);
-        if (hunt2020.all_puzzles) hunt2020.all_puzzles.update();
+        this.dirty_activity = true;
+        this.dirty_all_puzzles = true;
     }
 
     /** @param{Message} msg */
     achieve(msg) {
         hunt2020.toast_manager.add_toast(
             "You received the <b>" + msg.title + "</b> pin!", 6000, null, "gold", "/pins");
-        if (hunt2020.activity) hunt2020.activity.update();
+        this.dirty_activity = true;
         if (hunt2020.achievements) hunt2020.achievements.update();
     }
 
@@ -181,7 +196,7 @@ class H2020_Dispatcher {
         if (hunt2020.guest_services) {
             hunt2020.guest_services.build_fastpass(msg.fastpass);
         }
-        if (hunt2020.activity) hunt2020.activity.update();
+        this.dirty_activity = true;
     }
 
     /** @param{Message} msg */
@@ -200,7 +215,7 @@ class H2020_Dispatcher {
         if (hunt2020.guest_services) {
             hunt2020.guest_services.build_fastpass(msg.fastpass);
         }
-        if (hunt2020.activity) hunt2020.activity.update();
+        this.dirty_activity = true;
     }
 
     /** @param{Message} msg */
@@ -220,7 +235,7 @@ class H2020_Dispatcher {
     /** @param{Message} msg */
     update_map(msg) {
         if (hunt2020.map_draw) hunt2020.map_draw.update_map(msg);
-        if (hunt2020.all_puzzles) hunt2020.all_puzzles.update();
+        this.dirty_all_puzzles = true;
     }
 
     /** @param{Message} msg */

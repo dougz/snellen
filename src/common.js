@@ -163,11 +163,15 @@ class Common_Waiter {
         this.retry_backoff = 250;
 
         var msgs = /** @type{Array<Object>} */ (e.target.getResponseJson());
-        for (var i = 0; i < msgs.length; ++i) {
-            this.serial = /** @type{number} */ (msgs[i][0]);
-            var msg = /** @type{Object} */ (msgs[i][1]);
-            console.log("dispatching", msg);
-            this.dispatcher.dispatch(msg);
+        if (msgs.length > 0) {
+            if (this.dispatcher.pre_dispatch) this.dispatcher.pre_dispatch();
+            for (var i = 0; i < msgs.length; ++i) {
+                this.serial = /** @type{number} */ (msgs[i][0]);
+                var msg = /** @type{Object} */ (msgs[i][1]);
+                console.log("dispatching", msg);
+                this.dispatcher.dispatch(msg);
+            }
+            if (this.dispatcher.post_dispatch) this.dispatcher.post_dispatch();
         }
 
         if (msgs.length == 0) {
