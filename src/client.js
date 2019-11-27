@@ -219,9 +219,8 @@ class H2020_Dispatcher {
 
     /** @param{Message} msg */
     update_map(msg) {
-        if (hunt2020.map_draw) {
-            hunt2020.map_draw.update_map(msg);
-        }
+        if (hunt2020.map_draw) hunt2020.map_draw.update_map(msg);
+        if (hunt2020.all_puzzles) hunt2020.all_puzzles.update();
     }
 
     /** @param{Message} msg */

@@ -387,6 +387,7 @@ class Submission:
         self.team.admin_log.add(now, f"Got answer <b>{html.escape(answer)}</b> for {self.puzzle_state.admin_html_puzzle}.")
       self.puzzle_state.answers_found.add(answer)
       fn = getattr(self.puzzle, "on_correct_answer", None)
+      self.team.cached_all_puzzles_data = None
       if fn: fn(now, self.team)
       if self.puzzle_state.answers_found == self.puzzle.answers:
         if not self.team.remote_only and self.puzzle in Workshop.PENNY_PUZZLES:
@@ -606,6 +607,23 @@ class Team(login.LoginUser):
     if self.cached_all_puzzles_data: return self.cached_all_puzzles_data
 
     out = []
+
+    # "Penny Park": events, workshop, runaround
+    plist = []
+    outland = {"title": "Penny Park",
+               "url": "/",
+               "puzzles": plist}
+    out.append(outland)
+    for p in (Event.PUZZLE, Workshop.PUZZLE, Runaround.PUZZLE):
+      ps = self.puzzle_state[p]
+      if ps.state == PuzzleState.CLOSED: continue
+      d = {"title": p.title, "url": p.url, "spacebefore": True}
+      if ps.answers_found:
+        d["answer"] = ", ".join(sorted(p.display_answers[a] for a in ps.answers_found))
+        if ps.state == PuzzleState.OPEN:
+          d["answer"] += ", \u2026"
+      plist.append(d)
+
     for land in Land.ordered_lands:
       if land not in self.open_lands: continue
       plist = []
@@ -1116,6 +1134,11 @@ class Team(login.LoginUser):
   async def complete_loony_visit(self, task, when):
     self.admin_log.add(when, f"Completed the Loony visit.")
     self.open_puzzle(Workshop.PUZZLE, when)
+    self.cached_all_puzzles_data = None
+    self.dirty_lands.add("home")
+    self.cached_mapdata.pop(Land.BY_SHORTNAME["outer"], None)
+    self.cached_mapdata.pop(Land.BY_SHORTNAME["inner_only"], None)
+    await self.flush_messages()
 
   async def complete_penny_visit(self, task, when):
     if self.remote_only:
@@ -1403,6 +1426,7 @@ class Team(login.LoginUser):
       else:
         # Open the runaround!
         self.open_puzzle(Runaround.PUZZLE, now)
+        self.cached_all_puzzles_data = None
 
     for st in self.puzzle_state.values():
       if st.state != PuzzleState.CLOSED:
@@ -2186,6 +2210,7 @@ class Event:
     p.authors = ["Left Out"]
 
     p.title = "Events"
+    p.url = "/events"
     p.answers = {e.answer for e in cls.ALL_EVENTS}
     p.display_answers = dict((e.answer, e.display_answer) for e in cls.ALL_EVENTS)
     p.responses = {}
@@ -2254,6 +2279,7 @@ class Workshop:
     p.authors = ["Left Out"]
 
     p.title = "Workshop"
+    p.url = "/workshop"
     p.answers = {"MASHNOTE"}
     p.display_answers = {"MASHNOTE": "MASH NOTE"}
     p.responses = {}
@@ -2291,6 +2317,7 @@ class Runaround:
     p.authors = ["Left Out"]
 
     p.title = "Heart of the Park"
+    p.url = "/heart_of_the_park"
     p.answers = set()
     p.display_answers = {}
     for s in cls.SEGMENTS:

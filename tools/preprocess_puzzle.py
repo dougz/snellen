@@ -254,7 +254,7 @@ class Puzzle:
 
       data = z.read(n)
       if obfuscate:
-        path = f"{self.prefix}/{self.shortname}/{common.hash_name(data) + ext}"
+        path = f"{common.hash_name(data) + ext}"
       elif nn.startswith("solution/"):
         path = f"{self.prefix}/{self.shortname}/solution/{common.hash_name(data) + ext}"
       else:
