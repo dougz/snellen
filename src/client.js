@@ -1561,6 +1561,8 @@ class H2020_Workshop {
         this.wscoll = goog.dom.getElement("wscoll");
         /** @type{Element} */
         this.wscollnames = goog.dom.getElement("wscollnames");
+        /** @type{Element} */
+        this.submit = goog.dom.getElement("submit");
         this.update();
     }
 
@@ -1602,6 +1604,12 @@ class H2020_Workshop {
             for (var i = 0; i < c.length; ++i) {
                 this.wscollnames.appendChild(goog.dom.createDom("LI", null, c[i]));
             }
+        }
+
+        if (data.allow_submit) {
+            this.submit.style.display = "block";
+        } else {
+            this.submit.style.display = "none";
         }
     }
 }

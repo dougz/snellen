@@ -853,22 +853,25 @@ class Team(login.LoginUser):
       print(f"no puzzle {shortname}")
       return
 
-    state = self.puzzle_state[puzzle]
-    if state.state != state.OPEN:
-      print(f"submit_answer: puzzle {shortname} {state.state} for {self.username}")
+    ps = self.puzzle_state[puzzle]
+    if ps.state != PuzzleState.OPEN:
+      print(f"submit_answer: puzzle {shortname} {ps.state} for {self.username}")
       return
 
-    pending = sum(1 for s in state.submissions if s.state == s.PENDING)
-    if pending >= state.puzzle.max_queued:
+    submit_filter = getattr(puzzle, "submit_filter", None)
+    if submit_filter and not submit_filter(ps): return
+
+    pending = sum(1 for s in ps.submissions if s.state == s.PENDING)
+    if pending >= ps.puzzle.max_queued:
       print(f"puzzle {shortname} max pending for {self.username}")
       return
 
     sub = Submission(now, submit_id, self, puzzle, answer)
-    for s in state.submissions:
+    for s in ps.submissions:
       if s.answer == sub.answer:
         return sub.answer
 
-    state.submissions.append(sub)
+    ps.submissions.append(sub)
     self.send_messages([{"method": "history_change", "puzzle_id": shortname}])
     sub.check_or_queue(now)
 
@@ -2266,6 +2269,10 @@ class Workshop:
     self.ALL_PENNIES[shortname] = self
 
   @classmethod
+  def submit_filter(cls, ps):
+    return len(ps.team.pennies_collected) == len(cls.ALL_PENNIES)
+
+  @classmethod
   def post_init(cls):
     for p in cls.ALL_PENNIES.values():
       p.puzzle = Puzzle.get_by_shortname(p.puzzle)
@@ -2290,6 +2297,8 @@ class Workshop:
     p.meta = False
     p.submeta = False
     p.points = 0  # no buzz/wonder for finishing
+
+    p.submit_filter = cls.submit_filter
 
     p.post_init(MiscLand.get(), None)
 

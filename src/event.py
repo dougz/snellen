@@ -161,13 +161,17 @@ class WorkshopPage(util.TeamPageHandler):
     ps = self.team.puzzle_state[self.puzzle]
     if ps.state == game.PuzzleState.CLOSED:
       return self.not_found()
-    self.render("workshop.html")
+    self.render("workshop.html", allow_submit=game.Workshop.submit_filter(ps))
 
 class WorkshopDataHandler(util.TeamHandler):
   @login.required("team", require_start=False)
   def get(self):
+    ps = self.team.puzzle_state[game.Workshop.PUZZLE]
+    if ps.state == game.PuzzleState.CLOSED:
+      return self.not_found()
     d = {"earned": [p.name for p in self.team.pennies_earned],
-         "collected": [p.name for p in self.team.pennies_collected]}
+         "collected": [p.name for p in self.team.pennies_collected],
+         "allow_submit": game.Workshop.submit_filter(ps)}
     self.return_json(d)
 
 class RunaroundPage(util.TeamPageHandler):

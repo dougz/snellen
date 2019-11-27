@@ -303,5 +303,7 @@ class WorkshopData {
         this.earned;
         /** @type{Array<string>} */
         this.collected;
+        /** @type{boolean} */
+        this.allow_submit;
     }
 }
