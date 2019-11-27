@@ -3,7 +3,7 @@
 {% block title %}Guest Services{% end %}
 
 {% block content %}
-<div id="content">
+<div id="content" class="{{page_class}}">
   <h1 id="pagetitle">Guest Services</h1>
 
   <h2>PennyPasses</h2>
@@ -56,6 +56,12 @@
   {% if team.score > 0 %}
   <p><input type="checkbox" id="mutebox"><label for="mutebox">Play sound on solve</label></p>
   {% end %}
+
+  <div class="entry">
+    <input type="text" id="newphone" class="entryentry" size=30 value={{team.attrs.get("phone", "")}}>
+    <button id="newphonesubmit" class="entrysubmit">Update contact phone</button>
+    <span id="newphonesaved">Contact phone updated.</span>
+  </div>
 
   <p>If you need to contact Hunt HQ for any other non-emergency
   reason,

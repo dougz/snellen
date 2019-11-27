@@ -334,6 +334,20 @@ class HintHistoryHandler(util.TeamHandler):
          "puzzle_id": ps.puzzle.shortname}
     self.write(json.dumps(d))
 
+class UpdatePhoneHandler(util.TeamHandler):
+  def prepare(self):
+    self.args = json.loads(self.request.body)
+
+  @login.required("team", on_fail=http.client.UNAUTHORIZED)
+  def post(self):
+    new_phone = self.args.get("phone", "").strip()
+    if not new_phone:
+      self.set_status(http.client.BAD_REQUEST.value)
+      return
+    self.team.update_phone(new_phone)
+    self.set_status(http.client.NO_CONTENT.value)
+
+
 def GetHandlers():
   handlers = [
     (r"/", PlayerHomePage),
@@ -355,6 +369,7 @@ def GetHandlers():
     (r"/hintrequest", HintRequestHandler),
     (r"/hinthistory/([a-z][a-z0-9_]*)", HintHistoryHandler),
     (r"/pennypass/([a-z][a-z0-9_]*)$", ApplyFastPassHandler),
+    (r"/updatephone", UpdatePhoneHandler),
     (r"/js/submit/([a-z][a-z0-9_]*)$", SubmitHistoryHandler),
     (r"/js/log", ActivityLogDataHandler),
     (r"/js/pins", AchievementDataHandler),

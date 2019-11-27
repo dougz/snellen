@@ -554,6 +554,8 @@ class A2020_TeamPage {
         /** @type{Element} */
         this.tpscore = goog.dom.getElement("tpscore");
         /** @type{Element} */
+        this.tpphone = goog.dom.getElement("tpphone");
+        /** @type{Element} */
         this.bestow = goog.dom.getElement("bestowfastpass");
 
         goog.events.listen(goog.dom.getElement("enablebestow"),
@@ -610,6 +612,8 @@ class A2020_TeamPage {
 
     /** param{TeamPageData} data */
     build(data) {
+        console.log(data);
+
         this.tpopencount.innerHTML = "" + data.open_puzzles.length;
 
         var i, j;
@@ -667,6 +671,7 @@ class A2020_TeamPage {
 
         this.tpsvg.innerHTML = data.svg;
         this.tpscore.innerHTML = "" + data.score;
+        this.tpphone.innerHTML = data.phone;
 
         twemoji.parse(goog.dom.getElement("admincontent"));
 

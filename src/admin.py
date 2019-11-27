@@ -112,7 +112,8 @@ class TeamDataHandler(util.AdminHandler):
          "fastpasses": team.fastpasses_available,
          "log": team.admin_log.get_data(),
          "svg": team.bb_data()["svg"],
-         "score": team.score}
+         "score": team.score,
+         "phone": team.attrs.get("phone", "(unknown)")}
 
     self.set_header("Content-Type", "application/json")
     self.write(json.dumps(d))

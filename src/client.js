@@ -1050,11 +1050,29 @@ class H2020_GuestServices {
                                goog.bind(hunt2020.audio_manager.toggle_mute, hunt2020.audio_manager));
         }
 
+        /** @type{Element} */
+        this.newphone = goog.dom.getElement("newphone");
+
+        goog.events.listen(goog.dom.getElement("newphonesubmit"), goog.events.EventType.CLICK,
+                           goog.bind(this.update_phone, this));
+
+
         if (window.performance.navigation.type == 2) {
             this.update_hints_open();
         } else {
             this.build_hints((/** @type{GuestServicesData} */ (initial_json)).hints);
         }
+    }
+
+    update_phone() {
+        var value = this.newphone.value;
+        if (value == "") return;
+        goog.net.XhrIo.send("/updatephone", Common_invoke_with_json(this.phone_updated, this),
+                            "POST", this.serializer.serialize({"phone": value}));
+    }
+
+    phone_updated() {
+        goog.dom.getElement("newphonesaved").style.display = "inline";
     }
 
     update_hints_open() {

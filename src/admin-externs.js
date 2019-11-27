@@ -126,6 +126,8 @@ class TeamPageData {
         this.svg;
         /** @type{number} */
         this.score;
+        /** @type{string} */
+        this.phone;
     }
 }
 

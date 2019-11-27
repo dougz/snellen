@@ -722,7 +722,7 @@ span.solved img.emoji {
 .answer { font-weight: bold; text-transform: uppercase; }
 .posthunt { border: 1px solid black; margin: 20px; padding: 20px; background-color: #00000011; }
 
-#puzz .entry {
+.entry {
     display: flex;
     flex-direction: row;
     justify-content: center;
@@ -732,7 +732,7 @@ span.solved img.emoji {
     min-height: 90px;
 }
 
-#puzz .entryentry {
+.entryentry {
     font-size: 120%;
     font-family: 'Inconsolata', monospace;
     font-weight: bold;
@@ -748,7 +748,7 @@ span.solved img.emoji {
     white-space: nowrap;
 }
 
-#puzz .entrysubmit {
+.entrysubmit {
     margin: 8px 8px 8px 0;
     border-radius: 0;
     border-top-right-radius: 15px;
@@ -763,12 +763,12 @@ span.solved img.emoji {
     background: linear-gradient(to bottom, #4c70af, #436299);
     outline: none;
 }
-#puzz .entrysubmit:focus, .entrysubmit:hover {
+.entrysubmit:focus, .entrysubmit:hover {
     color: yellow;
     border: 1px solid #819ac7;
     background: linear-gradient(to bottom, #436299, #4c70af);
 }
-#puzz .entrysubmit:disabled {
+.entrysubmit:disabled {
     color: #999;
     border: 1px solid #bbb;
     background: linear-gradient(to bottom, #ccc, #ddd);
@@ -1173,4 +1173,16 @@ a#ppicon3 {
 
 #mutebox {
     margin-right: 12px;
+}
+
+.GuestServicesPage .entry {
+    justify-content: flex-start;
+    margin-top: 0;
+    min-height: 0;
+}
+
+#newphonesaved {
+    display: none;
+    color: green;
+    font-weight: bold;
 }

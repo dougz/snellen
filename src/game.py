@@ -589,6 +589,15 @@ class Team(login.LoginUser):
       self.record_achievement(ach.name, delay)
       return True
 
+  @save_state
+  def update_phone(self, now, new_phone):
+    self.admin_log.add(
+      now, (f"Changed contact phone from "
+            f"<b>{html.escape(self.attrs.get('phone', '(unknown)'))}</b> to "
+            f"<b>{html.escape(new_phone)}</b>."))
+    self.attrs["phone"] = new_phone
+    self.invalidate()
+
   def get_errata_data(self):
     if self.cached_errata_data: return self.cached_errata_data
 

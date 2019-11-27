@@ -226,6 +226,8 @@ function Common_invoke_with_json(obj, target) {
         var code = e.target.getStatus();
         if (code == 200) {
             goog.bind(target, obj)(e.target.getResponseJson());
+        } else if (code == 204) {
+            goog.bind(target, obj)();
         } else {
             alert(e.target.getResponseText());
         }
