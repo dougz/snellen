@@ -277,13 +277,18 @@ class BecomeTeamHandler(util.AdminPageHandler):
     if self.session.pending_become == team:
       self.session.pending_become = None
 
+      domain = self.request.headers.get("host", None)
+      if not domain:
+        print(f"Missing host header")
+        domain = "pennypark.fun"
+
       # Create a new player session for this team.
       session = login.Session(login.Session.PLAYER_COOKIE_NAME)
       session.team = team
       session.capabilities = {"team"}
       session.was_admin = True
       team.attach_session(session)
-      session.set_cookie(self)
+      session.set_cookie(self, domain)
 
       self.redirect("/")
     else:
