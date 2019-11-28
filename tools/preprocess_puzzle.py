@@ -201,6 +201,9 @@ class Puzzle:
         a = soup.find_all("a")[0]
         self.for_ops_url = a["href"]
 
+    if "extra" in y:
+      self.extra = y["extra"]
+
     if has_static:
       self.static_puzzle_head, self.static_puzzle_body = self.parse_html(
         z, strip_shortname, errors, Puzzle.STATIC_PUZZLE_HTML, self.asset_map)
@@ -307,7 +310,8 @@ class Puzzle:
               "answers responses emojify authors "
               "zip_version "
               "html_head html_body solution_head solution_body "
-              "for_ops_url").split():
+              "for_ops_url "
+              "extra").split():
       v = getattr(self, n)
       if v is not None: d[n] = v
     return d

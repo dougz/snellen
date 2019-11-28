@@ -4,6 +4,9 @@ var puzzle_id;
 /** @type{?function()} */
 var puzzle_init;
 
+/** @type{?function()} */
+var refresh_puzzle;
+
 /** @type{Storage} */
 var localStorage;
 

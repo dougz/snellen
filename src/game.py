@@ -530,6 +530,7 @@ class Team(login.LoginUser):
     self.cached_mapdata = {}
     self.cached_open_hints_data = None
     self.cached_errata_data = None
+    self.cached_jukebox_data = None
 
     self.admin_url = f"/admin/team/{username}"
     self.admin_html = f'<a href="{self.admin_url}">{html.escape(self.name)}</a>'
@@ -539,7 +540,6 @@ class Team(login.LoginUser):
     self.puzzle_state = {}
     for puzzle in Puzzle.all_puzzles():
       self.puzzle_state[puzzle] = PuzzleState(self, puzzle)
-
 
   def __repr__(self):
     return f"<Team {self.username}>"
@@ -1048,6 +1048,7 @@ class Team(login.LoginUser):
       self.dirty_lands.add(puzzle.land.shortname)
       self.cached_mapdata.pop(puzzle.land, None)
       self.cached_all_puzzles_data = None
+      self.cached_jukebox_data = None
       if puzzle.meta:
         current_map = Land.BY_SHORTNAME[self.map_mode]
         self.cached_mapdata.pop(current_map, None)
@@ -1177,6 +1178,23 @@ class Team(login.LoginUser):
   def invalidate(self, puzzle=None, flush=True):
     self.cached_bb_data = None
     login.AdminUser.notify_update(self, puzzle, flush=flush)
+
+  def get_jukebox_data(self):
+    if self.cached_jukebox_data: return self.cached_jukebox_data
+
+    data = []
+    j = Puzzle.get_by_shortname("jukebox")
+
+    for item in j.extra:
+      p = item["puzzle"]
+      if self.puzzle_state[p].state == PuzzleState.SOLVED:
+        d = copy.copy(item)
+        d.pop("puzzle")
+        d.pop("i")
+        data.append(d)
+
+    self.cached_jukebox_data = data
+    return data
 
   BB_PUZZLE_COLOR = {PuzzleState.CLOSED: "#dddddd",
                      PuzzleState.OPEN: "#ffdd66",
@@ -1624,6 +1642,17 @@ class Land:
     by_land_order.sort()
     cls.ordered_lands = [i[1] for i in by_land_order]
 
+    jukebox = Puzzle.get_by_shortname("jukebox")
+    land = cls.BY_SHORTNAME.get("yesterday", None)
+    if jukebox and land:
+      by_icon = {}
+      for item in jukebox.extra:
+        by_icon[item["i"]] = item
+      for p in land.puzzles:
+        item = by_icon.get(p.icon.name)
+        if item:
+          item["puzzle"] = p
+
 
 class Puzzle:
   BY_SHORTNAME = {}
@@ -1809,6 +1838,7 @@ class Puzzle:
     self.puzzletron_id = j["puzzletron_id"]
     self.zip_version = j.get("zip_version")
     self.max_queued = j.get("max_queued", self.DEFAULT_MAX_QUEUED)
+    self.extra = j.get("extra")
 
     if "incorrect_responses" in j and "responses" not in j:
       j["responses"] = j.pop("incorrect_responses")

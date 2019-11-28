@@ -347,6 +347,10 @@ class UpdatePhoneHandler(util.TeamHandler):
     self.team.update_phone(new_phone)
     self.set_status(http.client.NO_CONTENT.value)
 
+class YesterdayMetaDataHandler(util.TeamHandler):
+  @login.required("team")
+  def get(self):
+    self.return_json(self.team.get_jukebox_data())
 
 def GetHandlers():
   handlers = [
@@ -379,6 +383,7 @@ def GetHandlers():
     (r"/js/header", CurrentHeaderDataHandler),
     (r"/js/workshop", WorkshopDataHandler),
     (r"/js/map/([a-z][a-z0-9_]+)$", MapDataHandler),
+    (r"/js/yes", YesterdayMetaDataHandler),
   ]
 
   return handlers

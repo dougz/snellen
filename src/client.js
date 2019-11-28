@@ -173,6 +173,8 @@ class H2020_Dispatcher {
         }
         this.dirty_activity = true;
         this.dirty_all_puzzles = true;
+
+        if (typeof refresh_puzzle !== 'undefined' && refresh_puzzle) refresh_puzzle();
     }
 
     /** @param{Message} msg */
