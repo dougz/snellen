@@ -118,11 +118,11 @@ class CurrentHeaderDataHandler(util.TeamHandler):
   def get(self):
     self.return_json(self.team.get_header_data())
 
-class VideosPage(util.TeamPageHandler):
+class AboutTheParkPage(util.TeamPageHandler):
   @login.required("team", require_start=False)
   def get(self):
-    self.session.visit_page("videos")
-    self.render("videos.html")
+    self.session.visit_page("about_park")
+    self.render("about_the_park.html", static_content=self.static_content)
 
 class VideosDataHandler(util.TeamHandler):
   @login.required("team", require_start=False)
@@ -355,7 +355,7 @@ def GetHandlers():
   handlers = [
     (r"/", PlayerHomePage),
     (r"/log", ActivityLogPage),
-    (r"/videos", VideosPage),
+    (r"/about_the_park", AboutTheParkPage),
     (r"/pins", AchievementPage),
     (r"/events", EventsPage),
     (r"/workshop", WorkshopPage),

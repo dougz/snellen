@@ -38,7 +38,7 @@ class TeamPageHandler(TeamHandler):
     "LandMapPage": "d",
     "PlayerHomePage": "e",
     "ActivityLogPage": "f",
-    "VideosPage": "g",
+    "AboutTheParkPage": "g",
     "AchievementPage": "h",
     "GuestServicesPage": "i",
     "AllPuzzlesPage": "j",

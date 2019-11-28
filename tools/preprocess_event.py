@@ -176,10 +176,6 @@ def convert_static_files(out, options, lands):
                      ("thumb3.png", f"{base}/media/thumb3.png"),
                      ("thumb4.png", f"{base}/media/thumb4.png"),
                      ("thumb5.png", f"{base}/media/thumb5.png"),
-                     ("thinkfun.png", f"{base}/media/thinkfun.png"),
-                     ("gr8ergood.png", f"{base}/media/gr8ergood.png"),
-                     ("cluekeeper.png", f"{base}/media/cluekeeper.png"),
-                     ("janestreet.png", f"{base}/media/janestreet.png"),
                      ("admin_fav_green/favicon-32x32.png",
                       f"{base}/snellen/static/admin_fav_green/favicon-32x32.png"),
                      ("admin_fav_green/favicon-16x16.png",
@@ -193,6 +189,10 @@ def convert_static_files(out, options, lands):
                      ("admin_fav_red/favicon-16x16.png",
                       f"{base}/snellen/static/admin_fav_red/favicon-16x16.png"),
                      ])
+  for mp in ("thinkfun", "gr8ergood", "cluekeeper", "janestreet",
+             "judy", "penny",
+             "jeon_paisa", "kobo", "centime", "luma", "dirham", "kopek"):
+    to_convert.append((f"{mp}.png", f"{base}/media/{mp}.png"))
 
   for fn in os.listdir(os.path.join(options.input_assets, "achievements")):
     if not fn.endswith(".png"): continue

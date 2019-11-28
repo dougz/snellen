@@ -151,8 +151,8 @@ class H2020_Dispatcher {
     /** @param{Message} msg */
     video(msg) {
         hunt2020.toast_manager.add_toast(
-            "A new video is available!<br><img class=videothumb src=\"" + msg.thumb + "\">",
-            6000, false, "blue", "/videos");
+            "A new Park History video is available!<br><img class=videothumb src=\"" + msg.thumb + "\">",
+            6000, false, "blue", "/about_the_park#history");
         if (hunt2020.videos) hunt2020.videos.update();
     }
 
@@ -1390,7 +1390,7 @@ window.onload = function() {
     // LandMapPage            d
     // PlayerHomePage         e
     // ActivityLogPage        f
-    // VideosPage             g
+    // AboutTheParkPage       g
     // AchievementPage        h
     // GuestServicesPage      i
     // AllPuzzlesPage         j

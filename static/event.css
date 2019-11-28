@@ -1186,3 +1186,31 @@ a#ppicon3 {
     color: green;
     font-weight: bold;
 }
+
+.AboutTheParkPage div {
+    clear: both;
+    margin-top: 20px;
+}
+.AboutTheParkPage img {
+    height: 160px;
+    margin-bottom: 20px;
+}
+
+.AboutTheParkPage #loonies {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.loony {
+    text-align: center;
+}
+.loony p {
+    font-weight: bold;
+}
+
+.AboutTheParkPage h2.c {
+    clear: both;
+    text-align: center;
+}
+

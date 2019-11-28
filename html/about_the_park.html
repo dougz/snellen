@@ -1,0 +1,62 @@
+{% extends "player_base.html" %}
+
+{% block title %}About the Park{% end %}
+
+
+{% block content %}
+<div id="content" class="{{page_class}}">
+  <h1 id="pagetitle">About the Park</h1>
+  <p class="disclaimer">This is not a puzzle.</p>
+
+  <p>Founded in 1992, Penny Park has delighted countless visitors for
+  almost three decades.  Whether you're a thrill-seeking kid or simply
+  young at heart, at Penny Park we guarantee you'll have a glorious
+    day!</p>
+
+  <div><img src="{{static_content['judy.png']}}" style="float: right;">
+    <h3>Judy Miller<br>Founder of Penny Park</h3>
+    <p>A long-time lover of theme parks, Judy designed and built this
+      magical place in 1992, naming it after her granddaughter
+      Penny.</p>
+  </div>
+
+  <div><img src="{{static_content['penny.png']}}" style="float: right;">
+    <h3>Penny Miller<br>Owner & Manager of Penny Park</h3>
+    <p>For the last several years, Penny has run the show at the park.
+      She is thrilled to be continuing the family tradition of bringing
+      joy and wonder to people of all ages!</p>
+  </div>
+
+  <h2 class="c">The Loonies</h2>
+  <div id="loonies">
+    <div class="loony" style="width: 197px">
+      <img src="{{static_content['jeon_paisa.png']}}">
+      <p>King Jeon &<br>Queen Paisa</p>
+    </div>
+    <div class="loony" style="width: 160px">
+      <img src="{{static_content['kobo.png']}}">
+      <p>Kobo, the Big Bad Wolf</p>
+    </div>
+    <div class="loony" style="width: 116px">
+      <img src="{{static_content['centime.png']}}">
+      <p>Centime, the Flapper</p>
+    </div>
+    <div class="loony" style="width: 123px">
+      <img src="{{static_content['kopek.png']}}">
+      <p>Kopek the Clown</p>
+    </div>
+    <div class="loony" style="width: 122px">
+      <img src="{{static_content['luma.png']}}">
+      <p>Luma, the Astronaut</p>
+    </div>
+    <div class="loony" style="width: 106px">
+      <img src="{{static_content['dirham.png']}}">
+      <p>Dirham, the Wizard</p>
+    </div>
+
+  </div>
+
+  <h2 class="c" id="history">Park History</h2>
+  <div id="videolist"></div>
+</div>
+{% end %}
