@@ -1090,10 +1090,14 @@ class Team(login.LoginUser):
                 Global.STATE.add_task(now, self.username, f"loony-visit",
                                       "Loony visit", None,
                                       oncomplete=self.complete_loony_visit)
+                Global.STATE.add_task(now, self.username, f"penny-{penny.shortname}",
+                                      f"First penny: {penny.name}", None,
+                                      oncomplete=self.collect_penny)
+              else:
+                Global.STATE.add_task(now, self.username, f"penny-{penny.shortname}",
+                                      f"Return penny: {penny.name}", None,
+                                      oncomplete=self.collect_penny)
               self.pennies_earned.append(penny)
-              Global.STATE.add_task(now, self.username, f"penny-{penny.shortname}",
-                                    f"{penny.name} penny", None,
-                                    oncomplete=self.collect_penny)
               dirty = True
           if dirty:
             self.send_messages([{"method": "pennies"}])
