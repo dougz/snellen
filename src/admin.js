@@ -248,7 +248,7 @@ class A2020_TaskQueue {
     }
 
     update_queue() {
-        goog.net.XhrIo.send("/admin/taskqueuedata",
+        goog.net.XhrIo.send("/admin/js/taskqueue",
                             Common_invoke_with_json(this, this.render_queue));
     }
 
@@ -814,7 +814,7 @@ class A2020_BigBoard {
             div.appendChild(sp);
         }
 
-        goog.net.XhrIo.send("/admin/bb/team",
+        goog.net.XhrIo.send("/admin/js/bbteam",
                             Common_invoke_with_json(this, this.update_all_teams));
 
         this.dot_labeler = new A2020_DotLabeler(this.teamdiv);
@@ -849,7 +849,7 @@ class A2020_BigBoard {
         // Can't refresh until we have the initial data.
         if (this.team_data === null) return;
 
-        goog.net.XhrIo.send("/admin/bb/team/" + username,
+        goog.net.XhrIo.send("/admin/js/bbteam/" + username,
                             Common_invoke_with_json_arg(this, this.update_one_team, username));
     }
 
@@ -898,7 +898,7 @@ class A2020_BigBoard {
     }
 
     refresh_taskqueue() {
-        goog.net.XhrIo.send("/admin/bb/taskqueue",
+        goog.net.XhrIo.send("/admin/js/bbtaskqueue",
                             Common_invoke_with_json(this, this.update_taskqueue));
     }
 

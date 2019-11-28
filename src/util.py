@@ -129,6 +129,17 @@ class AdminHandler(tornado.web.RequestHandler):
     self.pagepuzzle = puzzle
     return puzzle
 
+  def return_json(self, obj):
+    self.set_header("Content-Type", "application/json")
+    self.set_header("Cache-Control", "no-store")
+    if isinstance(obj, str):
+      self.write(obj)
+    else:
+      self.write(json.dumps(obj))
+
+  def not_found(self):
+    self.set_status(http.client.NOT_FOUND.value)
+    return
 
 class AdminPageHandler(AdminHandler):
   @classmethod

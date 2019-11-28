@@ -59,8 +59,7 @@ class ServerDataHandler(util.AdminHandler):
          "sessions": len(keys),
          "proxy_waits": proxy_load}
 
-    self.set_header("Content-Type", "application/json")
-    self.write(json.dumps(d))
+    self.return_json(d)
 
 class UpdateAdminRoleHandler(tornado.web.RequestHandler):
   @login.required(login.AdminRoles.CREATE_USERS)
@@ -114,9 +113,7 @@ class TeamDataHandler(util.AdminHandler):
          "svg": team.bb_data()["svg"],
          "score": team.score,
          "phone": team.attrs.get("phone", "(unknown)")}
-
-    self.set_header("Content-Type", "application/json")
-    self.write(json.dumps(d))
+    self.return_json(d)
 
 class PuzzleContentPage(util.AdminPageHandler):
   @login.required("admin")
@@ -172,9 +169,7 @@ class PuzzleDataHandler(util.AdminHandler):
          "hint_time": puzzle.hints_available_time,
          "log": puzzle.puzzle_log.get_data(),
          "errata": [{"when": e.when, "text": e.text} for e in puzzle.errata]}
-
-    self.set_header("Content-Type", "application/json")
-    self.write(json.dumps(d))
+    self.return_json(d)
 
 class FixPuzzlePage(util.AdminPageHandler):
   @login.required("edit_puzzles")
@@ -208,8 +203,7 @@ class TeamPuzzleDataHandler(util.AdminHandler):
     if ps.claim:
       d["claim"] = ps.claim.fullname
 
-    self.set_header("Content-Type", "application/json")
-    self.write(json.dumps(d))
+    self.return_json(d)
 
 
 class BecomeTeamHandler(util.AdminPageHandler):
@@ -347,8 +341,7 @@ class TaskQueuePage(util.AdminPageHandler):
 class TaskQueueHandler(util.AdminHandler):
   @login.required("admin")
   def get(self):
-    self.set_header("Content-Type", "application/json")
-    self.write(game.Global.STATE.task_queue.to_json())
+    self.return_json(game.Global.STATE.task_queue.to_json())
 
 class TaskClaimHandler(util.AdminHandler):
   @login.required("admin")
@@ -430,9 +423,7 @@ class BigBoardPage(util.AdminPageHandler):
 class BigBoardTaskQueueDataHandler(util.AdminHandler):
   @login.required("admin")
   def get(self):
-    data = game.Global.STATE.bb_task_queue_data()
-    self.set_header("Content-Type", "application/json")
-    self.write(json.dumps(data))
+    self.return_json(game.Global.STATE.bb_task_queue_data())
 
 class BigBoardTeamDataHandler(util.AdminHandler):
   @login.required("admin")
@@ -447,8 +438,7 @@ class BigBoardTeamDataHandler(util.AdminHandler):
       data = {}
       for t in game.Team.all_teams():
         data[t.username] = t.bb_data()
-    self.set_header("Content-Type", "application/json")
-    self.write(json.dumps(data))
+    self.return_json(data)
 
 
 class ActionHandler(util.AdminHandler):
@@ -544,15 +534,13 @@ class ActionHandler(util.AdminHandler):
 
 
   async def ACTION_fix_puzzle(self):
-    if "edit_puzzles" not in self.user.roles:
+    if login.AdminRoles.EDIT_PUZZLES not in self.user.roles:
       self.set_status(http.client.UNAUTHORIZED.value)
       return
 
     puzzle = self.get_puzzle(self.args.get("puzzle_id"))
     text = self.args.get("text", None)
     do_reload = self.args.get("reload", None)
-
-    self.set_header("Content-Type", "application/json")
 
     print(f"fixing puzzle {puzzle} reload: {not not do_reload} text: {not not text}")
     message = ""
@@ -561,16 +549,12 @@ class ActionHandler(util.AdminHandler):
       if message:
         d = {"success": False,
              "message": f"Error: {message}<br>(Errata was not posted.)"}
-        self.write(json.dumps(d))
-        return
+        self.return_json(d)
       message = "Puzzle updated."
 
     if text:
       game.Global.STATE.post_erratum(puzzle.shortname, text, self.user.username)
       message += " Erratum posted."
-    d = {"success": True, "message": message}
-    self.write(json.dumps(d))
-
     for t in puzzle.open_teams:
       t.cached_errata_data = None
       t.send_messages([{"method": "history_change", "puzzle_id": puzzle.shortname},
@@ -578,6 +562,9 @@ class ActionHandler(util.AdminHandler):
       await t.flush_messages()
     login.AdminUser.send_messages([{"method": "update", "puzzle_id": puzzle.shortname}])
     await login.AdminUser.flush_messages()
+
+    d = {"success": True, "message": message}
+    self.return_json(d)
 
 
 def GetHandlers():
@@ -601,11 +588,8 @@ def GetHandlers():
     (r"/admin/action$", ActionHandler),
     (r"/admin/(set|clear)_role/([^/]+)/([^/]+)$", UpdateAdminRoleHandler),
     (r"/admin/become/([a-z0-9_]+)$", BecomeTeamHandler),
-    (r"/admin/bb/taskqueue$", BigBoardTaskQueueDataHandler),
-    (r"/admin/bb/team(/[a-z0-9_]+)?$", BigBoardTeamDataHandler),
     (r"/admin/change_password$", ChangePasswordHandler),
     (r"/admin/create_user$", CreateUserHandler),
-    (r"/admin/taskqueuedata$", TaskQueueHandler),
     (r"/admin/(un)?claim/([A-Za-z0-9_-]+)$", TaskClaimHandler),
     (r"/admin/(un)?complete/([A-Za-z0-9_-]+)$", TaskCompleteHandler),
 
@@ -615,6 +599,9 @@ def GetHandlers():
     (r"/admin/js/puzzle/([a-z0-9_]+)$", PuzzleDataHandler),
     (r"/admin/js/teampuzzle/([a-z0-9_]+)/([a-z0-9_]+)$", TeamPuzzleDataHandler),
     (r"/admin/js/server$", ServerDataHandler),
+    (r"/admin/js/taskqueue$", TaskQueueHandler),
+    (r"/admin/js/bbtaskqueue$", BigBoardTaskQueueDataHandler),
+    (r"/admin/js/bbteam(/[a-z0-9_]+)?$", BigBoardTeamDataHandler),
     ]
   return handlers
 
