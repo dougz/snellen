@@ -107,8 +107,9 @@ class A2020_TeamPuzzlePage {
     }
 
     do_claim(which) {
-        goog.net.XhrIo.send("/admin/" + which + "/h-" + team_username + "-" + puzzle_id,
-                            Common_expect_204);
+        A2020_DoAction({action: "update_claim",
+                        which: which,
+                        key: "h-" + team_username + "-" + puzzle_id}, Common_expect_204);
     }
 
     submit(has_reply) {
@@ -319,18 +320,21 @@ class A2020_TaskQueue {
     }
 
     claim_task(msg) {
-        var url = "/admin/" + (msg.claimant ? "unclaim" : "claim") + "/" + msg.key;
-        goog.net.XhrIo.send(url, Common_expect_204);
+        A2020_DoAction({action: "update_claim",
+                        which: msg.claimant ? "unclaim" : "claim",
+                        key: msg.key}, Common_expect_204);
     }
 
     complete_task(msg) {
-        var url = "/admin/complete/" + msg.key;
-        goog.net.XhrIo.send(url, Common_expect_204);
+        A2020_DoAction({action: "complete_task",
+                        which: "done",
+                        key: msg.key}, Common_expect_204);
     }
 
     uncomplete_task(msg) {
-        var url = "/admin/uncomplete/" + msg.key;
-        goog.net.XhrIo.send(url, Common_expect_204);
+        A2020_DoAction({action: "complete_task",
+                        which: "undone",
+                        key: msg.key}, Common_expect_204);
     }
 
 }
@@ -350,8 +354,10 @@ class A2020_UserRoles {
         var user = e.target.id.substring(0, n);
         var role = e.target.id.substring(n+2);
 
-        goog.net.XhrIo.send("/admin/" + (e.target.checked ? "set" : "clear") + "_role/" + user + "/" + role,
-                            Common_expect_204);
+        A2020_DoAction({action: "update_admin_role",
+                        username: user,
+                        role: role,
+                        which: e.target.checked ? "set" : "clear"}, Common_expect_204);
     }
 }
 
@@ -990,7 +996,7 @@ window.onload = function() {
             });
     }
 
-    if (page_class == "AdminUsers") {
+    if (page_class == "AdminUsersPage") {
         admin2020.user_roles = new A2020_UserRoles()
     }
     if (page_class == "BigBoardPage") {

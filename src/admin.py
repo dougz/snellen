@@ -61,17 +61,6 @@ class ServerDataHandler(util.AdminHandler):
 
     self.return_json(d)
 
-class UpdateAdminRoleHandler(tornado.web.RequestHandler):
-  @login.required(login.AdminRoles.CREATE_USERS)
-  def get(self, action, username, role):
-    if role not in login.AdminRoles.ROLES:
-      raise tornado.web.HTTPError(http.client.BAD_REQUEST)
-    user = login.AdminUser.get_by_username(username)
-    if user is None:
-      raise tornado.web.HTTPError(http.client.BAD_REQUEST)
-    user.update_role(role, action == "set")
-    self.set_status(http.client.NO_CONTENT.value)
-
 class ListTeamsPage(util.AdminPageHandler):
   @login.required("admin")
   def get(self):
@@ -343,38 +332,6 @@ class TaskQueueHandler(util.AdminHandler):
   def get(self):
     self.return_json(game.Global.STATE.task_queue.to_json())
 
-class TaskClaimHandler(util.AdminHandler):
-  @login.required("admin")
-  def get(self, un, task_key):
-    if task_key.startswith("t-"):
-      if un:
-        game.Global.STATE.claim_task(task_key, None)
-      else:
-        game.Global.STATE.claim_task(task_key, self.user.username)
-    elif task_key.startswith("h-"):
-      _, username, shortname = task_key.split("-")
-      print(task_key, username, shortname)
-      team = self.get_team(username)
-      puzzle = self.get_puzzle(shortname)
-      ps = team.puzzle_state[puzzle]
-      if un:
-        if ps.claim:
-          ps.claim = None
-          team.invalidate(puzzle)
-          game.Global.STATE.task_queue.change()
-      else:
-        if ps.claim is None:
-          ps.claim = self.user
-          team.invalidate(puzzle)
-          game.Global.STATE.task_queue.change()
-    self.set_status(http.client.NO_CONTENT.value)
-
-class TaskCompleteHandler(util.AdminHandler):
-  @login.required("admin")
-  def get(self, un, task_key):
-    game.Global.STATE.complete_task(task_key, not not un)
-    self.set_status(http.client.NO_CONTENT.value)
-
 class PuzzleJsonHandler(util.AdminHandler):
   @classmethod
   def build(cls):
@@ -566,6 +523,56 @@ class ActionHandler(util.AdminHandler):
     d = {"success": True, "message": message}
     self.return_json(d)
 
+  async def ACTION_update_claim(self):
+    task_key = self.args.get("key")
+    unclaim = (self.args.get("which") == "unclaim")
+
+    if task_key.startswith("t-"):
+      if unclaim:
+        game.Global.STATE.claim_task(task_key, None)
+      else:
+        game.Global.STATE.claim_task(task_key, self.user.username)
+    elif task_key.startswith("h-"):
+      _, username, shortname = task_key.split("-")
+      team = self.get_team(username)
+      puzzle = self.get_puzzle(shortname)
+      ps = team.puzzle_state[puzzle]
+      if unclaim:
+        if ps.claim:
+          ps.claim = None
+          team.invalidate(puzzle)
+          game.Global.STATE.task_queue.change()
+      else:
+        if ps.claim is None:
+          ps.claim = self.user
+          team.invalidate(puzzle)
+          game.Global.STATE.task_queue.change()
+    self.set_status(http.client.NO_CONTENT.value)
+
+  async def ACTION_complete_task(self):
+    task_key = self.args.get("key")
+    undone = (self.args.get("which") == "undone")
+    game.Global.STATE.complete_task(task_key, not not undone)
+    self.set_status(http.client.NO_CONTENT.value)
+
+  async def ACTION_update_admin_role(self):
+    if login.AdminRoles.CREATE_USERS not in self.user.roles:
+      self.set_status(http.client.UNAUTHORIZED.value)
+      return
+
+    username = self.args.get("username")
+    role = self.args.get("role")
+    which = self.args.get("which")
+
+    if role not in login.AdminRoles.ROLES:
+      raise tornado.web.HTTPError(http.client.BAD_REQUEST)
+    user = login.AdminUser.get_by_username(username)
+    if user is None:
+      raise tornado.web.HTTPError(http.client.BAD_REQUEST)
+    user.update_role(role, which == "set")
+    self.set_status(http.client.NO_CONTENT.value)
+
+
 
 def GetHandlers():
   handlers = [
@@ -586,12 +593,9 @@ def GetHandlers():
     (r"/admin/server$", AdminServerPage),
 
     (r"/admin/action$", ActionHandler),
-    (r"/admin/(set|clear)_role/([^/]+)/([^/]+)$", UpdateAdminRoleHandler),
     (r"/admin/become/([a-z0-9_]+)$", BecomeTeamHandler),
     (r"/admin/change_password$", ChangePasswordHandler),
     (r"/admin/create_user$", CreateUserHandler),
-    (r"/admin/(un)?claim/([A-Za-z0-9_-]+)$", TaskClaimHandler),
-    (r"/admin/(un)?complete/([A-Za-z0-9_-]+)$", TaskCompleteHandler),
 
     (r"/admin/puzzle_json/.*", PuzzleJsonHandler),
     (r"/admin/team_json/.*", TeamJsonHandler),
