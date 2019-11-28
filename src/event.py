@@ -236,7 +236,6 @@ class AllPuzzlesDataHandler(util.TeamHandler):
   def get(self):
     self.return_json(self.team.get_all_puzzles_data())
 
-
 class HealthAndSafetyPage(util.TeamPageHandler):
   @login.required("team", require_start=False)
   def get(self):
