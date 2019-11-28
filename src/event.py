@@ -247,7 +247,7 @@ class SponsorPage(util.TeamPageHandler):
   @login.required("team", require_start=False)
   def get(self):
     self.session.visit_page("sponsor")
-    self.render("sponsor.html")
+    self.render("sponsor.html", static_content=self.static_content)
 
 class SubmitHandler(util.TeamHandler):
   def prepare(self):
