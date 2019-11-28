@@ -182,48 +182,6 @@ class FixPuzzlePage(util.AdminPageHandler):
     puzzle = self.get_puzzle(shortname)
     self.render("admin_fix_puzzle_page.html", puzzle_path=puzzle.path)
 
-class FixPuzzleHandler(util.AdminHandler):
-  def prepare(self):
-    self.args = json.loads(self.request.body)
-
-  @login.required("edit_puzzles")
-  async def post(self):
-    puzzle = self.get_puzzle(self.args.get("puzzle_id"))
-    text = self.args.get("text", None)
-    do_reload = self.args.get("reload", None)
-
-    self.set_header("Content-Type", "application/json")
-
-    print(f"fixing puzzle {puzzle} reload: {not not do_reload} text: {not not text}")
-    message = ""
-    if do_reload:
-      message = puzzle.reload()
-      if message:
-        d = {"success": False,
-             "message": f"Error: {message}<br>(Errata was not posted.)"}
-        self.write(json.dumps(d))
-        return
-      message = "Puzzle updated."
-
-    if text:
-      game.Global.STATE.post_erratum(puzzle.shortname, text, self.user.username)
-      message += " Erratum posted."
-    d = {"success": True, "message": message}
-    self.write(json.dumps(d))
-
-    for t in puzzle.open_teams:
-      t.cached_errata_data = None
-      t.send_messages([{"method": "history_change", "puzzle_id": puzzle.shortname},
-                       {"method": "post_erratum", "title": puzzle.title}])
-      await t.flush_messages()
-    login.AdminUser.send_messages([{"method": "update", "puzzle_id": puzzle.shortname}])
-    await login.AdminUser.flush_messages()
-
-
-
-
-
-
 
 class TeamPuzzlePage(util.AdminPageHandler):
   @login.required("admin")
@@ -254,22 +212,6 @@ class TeamPuzzleDataHandler(util.AdminHandler):
     self.write(json.dumps(d))
 
 
-class BestowFastpassHandler(util.AdminHandler):
-  @login.required("admin")
-  def get(self, username):
-    if self.application.settings.get("debug"):
-      duration = 330 # 18000 if int(time.time()) % 2 == 0 else 90
-    else:
-      duration = 330 # 2 * 3600  # 2 hours
-    if username is None:
-      for team in game.Team.all_teams():
-        team.bestow_fastpass(duration)
-    else:
-      team = self.get_team(username)
-      team.bestow_fastpass(duration)
-    self.set_status(http.client.NO_CONTENT.value)
-
-
 class BecomeTeamHandler(util.AdminPageHandler):
   @login.required("admin", clear_become=False)
   def get(self, username):
@@ -295,50 +237,6 @@ class BecomeTeamHandler(util.AdminPageHandler):
     else:
       self.session.pending_become = team
       self.render("admin_become.html", team=team)
-
-
-class AddNoteHandler(util.AdminHandler):
-  def prepare(self):
-    self.args = json.loads(self.request.body)
-
-  @login.required("admin")
-  async def post(self):
-    username = self.args.get("team_username")
-    team = self.get_team(username)
-
-    text = self.args.get("note")
-    if not text:
-      raise tornado.web.HTTPError(http.client.BAD_REQUEST)
-    text = text.strip()
-    if text:
-      text = html.escape(text).replace("\n", "<br>")
-      team.add_admin_note(self.user.fullname, text)
-
-    self.set_status(http.client.NO_CONTENT.value)
-
-
-class HintReplyHandler(util.AdminHandler):
-  def prepare(self):
-    self.args = json.loads(self.request.body)
-
-  @login.required("admin")
-  async def post(self):
-    username = self.args.get("team_username")
-    team = self.get_team(username)
-
-    shortname = self.args.get("puzzle_id")
-    puzzle = self.get_puzzle(shortname)
-
-    text = self.args.get("text", None)
-    if text:
-      text = text.rstrip()
-      text = html.escape(text).replace("\n", "<br>")
-      team.add_hint_text(shortname, self.session.user.username, text)
-    else:
-      team.hint_no_reply(shortname, self.session.user.username)
-
-    await team.flush_messages()
-    self.set_status(http.client.NO_CONTENT.value)
 
 
 class ListPuzzlesPage(util.AdminPageHandler):
@@ -484,38 +382,6 @@ class TaskCompleteHandler(util.AdminHandler):
     game.Global.STATE.complete_task(task_key, not not un)
     self.set_status(http.client.NO_CONTENT.value)
 
-class HintTimeChangeHandler(util.AdminHandler):
-  def prepare(self):
-    self.args = json.loads(self.request.body)
-
-  @login.required("admin")
-  async def post(self):
-    shortname = self.args.get("puzzle_id")
-    puzzle = game.Puzzle.get_by_shortname(shortname)
-    if not puzzle:
-      return self.not_found()
-
-    try:
-      text = self.args.get("hint_time")
-      text = text.split(":")
-      text = [int(t, 10) for t in text]
-
-      secs = 0
-      if text: secs += text.pop()
-      if text: secs += 60 * text.pop()
-      if text: secs += 3600 * text.pop()
-      if text:
-        raise tornado.web.HTTPError(http.client.BAD_REQUEST)
-
-    except (KeyError, ValueError):
-      raise tornado.web.HTTPError(http.client.BAD_REQUEST)
-
-    if secs < 0:
-      secs = 0
-
-    puzzle.set_hints_available_time(secs, self.user.username)
-    self.set_status(http.client.NO_CONTENT.value)
-
 class PuzzleJsonHandler(util.AdminHandler):
   @classmethod
   def build(cls):
@@ -585,6 +451,133 @@ class BigBoardTeamDataHandler(util.AdminHandler):
     self.write(json.dumps(data))
 
 
+class ActionHandler(util.AdminHandler):
+  def prepare(self):
+    self.args = json.loads(self.request.body)
+
+  @login.required("admin")
+  async def post(self):
+    self.action = self.args.get("action", "")
+
+    fn = getattr(self, "ACTION_" + self.action, None)
+    if fn:
+      await fn()
+
+    else:
+      # Unknown (or no) "action" field.
+      self.set_status(http.client.BAD_REQUEST.value)
+
+  async def ACTION_bestow_fastpass(self):
+    username = self.args.get("team_username", None)
+
+    if self.application.settings.get("debug"):
+      duration = 330 # 18000 if int(time.time()) % 2 == 0 else 90
+    else:
+      duration = 330 # 2 * 3600  # 2 hours
+
+    if username is None:
+      for team in game.Team.all_teams():
+        team.bestow_fastpass(duration)
+    else:
+      team = self.get_team(username)
+      team.bestow_fastpass(duration)
+    self.set_status(http.client.NO_CONTENT.value)
+
+  async def ACTION_update_hint_time(self):
+    shortname = self.args.get("puzzle_id")
+    puzzle = game.Puzzle.get_by_shortname(shortname)
+    if not puzzle:
+      return self.not_found()
+
+    try:
+      text = self.args.get("hint_time")
+      text = text.split(":")
+      text = [int(t, 10) for t in text]
+
+      secs = 0
+      if text: secs += text.pop()
+      if text: secs += 60 * text.pop()
+      if text: secs += 3600 * text.pop()
+      if text:
+        raise tornado.web.HTTPError(http.client.BAD_REQUEST)
+
+    except (KeyError, ValueError):
+      raise tornado.web.HTTPError(http.client.BAD_REQUEST)
+
+    if secs < 0:
+      secs = 0
+
+    puzzle.set_hints_available_time(secs, self.user.username)
+    self.set_status(http.client.NO_CONTENT.value)
+
+  async def ACTION_add_note(self):
+    username = self.args.get("team_username")
+    team = self.get_team(username)
+
+    text = self.args.get("note")
+    if not text:
+      raise tornado.web.HTTPError(http.client.BAD_REQUEST)
+    text = text.strip()
+    if text:
+      text = html.escape(text).replace("\n", "<br>")
+      team.add_admin_note(self.user.fullname, text)
+
+    self.set_status(http.client.NO_CONTENT.value)
+
+  async def ACTION_hint_reply(self):
+    username = self.args.get("team_username")
+    team = self.get_team(username)
+
+    shortname = self.args.get("puzzle_id")
+    puzzle = self.get_puzzle(shortname)
+
+    text = self.args.get("text", None)
+    if text:
+      text = text.rstrip()
+      text = html.escape(text).replace("\n", "<br>")
+      team.add_hint_text(shortname, self.session.user.username, text)
+    else:
+      team.hint_no_reply(shortname, self.session.user.username)
+
+    await team.flush_messages()
+    self.set_status(http.client.NO_CONTENT.value)
+
+
+  async def ACTION_fix_puzzle(self):
+    if "edit_puzzles" not in self.user.roles:
+      self.set_status(http.client.UNAUTHORIZED.value)
+      return
+
+    puzzle = self.get_puzzle(self.args.get("puzzle_id"))
+    text = self.args.get("text", None)
+    do_reload = self.args.get("reload", None)
+
+    self.set_header("Content-Type", "application/json")
+
+    print(f"fixing puzzle {puzzle} reload: {not not do_reload} text: {not not text}")
+    message = ""
+    if do_reload:
+      message = puzzle.reload()
+      if message:
+        d = {"success": False,
+             "message": f"Error: {message}<br>(Errata was not posted.)"}
+        self.write(json.dumps(d))
+        return
+      message = "Puzzle updated."
+
+    if text:
+      game.Global.STATE.post_erratum(puzzle.shortname, text, self.user.username)
+      message += " Erratum posted."
+    d = {"success": True, "message": message}
+    self.write(json.dumps(d))
+
+    for t in puzzle.open_teams:
+      t.cached_errata_data = None
+      t.send_messages([{"method": "history_change", "puzzle_id": puzzle.shortname},
+                       {"method": "post_erratum", "title": puzzle.title}])
+      await t.flush_messages()
+    login.AdminUser.send_messages([{"method": "update", "puzzle_id": puzzle.shortname}])
+    await login.AdminUser.flush_messages()
 
 
 def GetHandlers():
@@ -605,20 +598,16 @@ def GetHandlers():
     (r"/admin/users$", AdminUsersPage),
     (r"/admin/server$", AdminServerPage),
 
+    (r"/admin/action$", ActionHandler),
     (r"/admin/(set|clear)_role/([^/]+)/([^/]+)$", UpdateAdminRoleHandler),
     (r"/admin/become/([a-z0-9_]+)$", BecomeTeamHandler),
-    (r"/admin/bestowfastpass(?:/([a-z0-9_]+))?$", BestowFastpassHandler),
     (r"/admin/bb/taskqueue$", BigBoardTaskQueueDataHandler),
     (r"/admin/bb/team(/[a-z0-9_]+)?$", BigBoardTeamDataHandler),
     (r"/admin/change_password$", ChangePasswordHandler),
     (r"/admin/create_user$", CreateUserHandler),
     (r"/admin/taskqueuedata$", TaskQueueHandler),
-    (r"/admin/hintreply$", HintReplyHandler),
-    (r"/admin/hinttimechange$", HintTimeChangeHandler),
-    (r"/admin/addnote", AddNoteHandler),
     (r"/admin/(un)?claim/([A-Za-z0-9_-]+)$", TaskClaimHandler),
     (r"/admin/(un)?complete/([A-Za-z0-9_-]+)$", TaskCompleteHandler),
-    (r"/admin/fixpuzzle", FixPuzzleHandler),
 
     (r"/admin/puzzle_json/.*", PuzzleJsonHandler),
     (r"/admin/team_json/.*", TeamJsonHandler),

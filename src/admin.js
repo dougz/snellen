@@ -52,6 +52,11 @@ class A2020_Dispatcher {
     }
 }
 
+function A2020_DoAction(data, callback) {
+    goog.net.XhrIo.send("/admin/action", callback, "POST",
+                        admin2020.serializer.serialize(data));
+}
+
 class A2020_PuzzleListPage {
     constructor() {
         twemoji.parse(goog.dom.getElement("admincontent"));
@@ -107,15 +112,14 @@ class A2020_TeamPuzzlePage {
     }
 
     submit(has_reply) {
-        var d = {"team_username": team_username, "puzzle_id": puzzle_id};
+        var d = {"action": "hint_reply", "team_username": team_username, "puzzle_id": puzzle_id};
         if (has_reply) {
             var text = this.textarea.value;
             if (text == "") return;
             this.textarea.value = "";
             d["text"] = text;
         }
-        goog.net.XhrIo.send("/admin/hintreply", Common_expect_204,
-                            "POST", admin2020.serializer.serialize(d));
+        A2020_DoAction(d, Common_expect_204);
     }
 
     update() {
@@ -512,6 +516,8 @@ class A2020_ServerPage {
     }
 }
 
+
+
 class A2020_TeamPage {
     constructor() {
         /** @type{Element} */
@@ -535,7 +541,9 @@ class A2020_TeamPage {
                            goog.events.EventType.CLICK, goog.bind(this.enable, this));
 
         goog.events.listen(this.bestow, goog.events.EventType.CLICK, function(e) {
-            goog.net.XhrIo.send("/admin/bestowfastpass/" + team_username, Common_expect_204);
+            A2020_DoAction({action: "bestow_fastpass",
+                            team_username: team_username},
+                           Common_expect_204);
             e.target.blur();
             e.target.disabled = true;
         });
@@ -545,9 +553,9 @@ class A2020_TeamPage {
             var el = goog.dom.getElement("tpnotetext");
             var text = el.value;
             if (!text) return;
-            goog.net.XhrIo.send("/admin/addnote", Common_expect_204,
-                                "POST", admin2020.serializer.serialize({"team_username": team_username,
-                                                                        "note": text}));
+            A2020_DoAction({action: "add_note",
+                            team_username: team_username,
+                            note: text}, Common_expect_204);
             el.value = "";
         });
 
@@ -675,9 +683,10 @@ class A2020_PuzzlePage {
             goog.events.EventType.CLICK,
             function() {
                 var text = goog.dom.getElement("newhinttime").value;
-                goog.net.XhrIo.send("/admin/hinttimechange", Common_expect_204, "POST",
-                                    admin2020.serializer.serialize({"puzzle_id": puzzle_id,
-                                                                    "hint_time": text}));
+                A2020_DoAction({action: "update_hint_time",
+                                puzzle_id: puzzle_id,
+                                hint_time: text},
+                               Common_expect_204);
                 goog.dom.getElement("hinttimechange").style.display = "initial";
                 goog.dom.getElement("hinttimechangeentry").style.display = "none";
             });
@@ -1073,15 +1082,17 @@ class A2020_FixPuzzlePage {
     }
 
     submit() {
-        var d = {"puzzle_id": puzzle_id};
+        this.fixenable.disabled = true;
+        this.fixsubmit.disabled = true;
+
+        var d = {"action": "fix_puzzle", "puzzle_id": puzzle_id};
         if (this.fixdopost) {
             d["text"] = this.fixtext.value;
         }
         if (this.fixdoreload) {
             d["reload"] = true;
         }
-        goog.net.XhrIo.send("/admin/fixpuzzle", Common_invoke_with_json(this, this.submit_result),
-                            "POST", admin2020.serializer.serialize(d));
+        A2020_DoAction(d, Common_invoke_with_json(this, this.submit_result));
     }
 
     submit_result(data) {
@@ -1105,7 +1116,8 @@ class A2020_HomePage {
         goog.events.listen(this.homeenable, goog.events.EventType.CLICK, goog.bind(this.enable, this));
 
         goog.events.listen(this.homebestow, goog.events.EventType.CLICK, function(e) {
-            goog.net.XhrIo.send("/admin/bestowfastpass", Common_expect_204);
+            A2020_DoAction({action: "bestow_fastpass"},
+                           Common_expect_204);
             e.target.blur();
             e.target.disabled = true;
         });
