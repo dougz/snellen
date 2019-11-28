@@ -1086,10 +1086,10 @@ class A2020_FixPuzzlePage {
         this.fixsubmit.disabled = true;
 
         var d = {"action": "fix_puzzle", "puzzle_id": puzzle_id};
-        if (this.fixdopost) {
+        if (this.fixdopost.checked) {
             d["text"] = this.fixtext.value;
         }
-        if (this.fixdoreload) {
+        if (this.fixdoreload.checked) {
             d["reload"] = true;
         }
         A2020_DoAction(d, Common_invoke_with_json(this, this.submit_result));
