@@ -1067,7 +1067,7 @@ class H2020_GuestServices {
     update_phone() {
         var value = this.newphone.value;
         if (value == "") return;
-        goog.net.XhrIo.send("/updatephone", Common_invoke_with_json(this.phone_updated, this),
+        goog.net.XhrIo.send("/updatephone", Common_invoke_with_json(this, this.phone_updated),
                             "POST", this.serializer.serialize({"phone": value}));
     }
 

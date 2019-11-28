@@ -114,25 +114,14 @@ class A2020_TeamPuzzlePage {
             this.textarea.value = "";
             d["text"] = text;
         }
-        goog.net.XhrIo.send("/admin/hintreply", function(e) {
-            var code = e.target.getStatus();
-            if (code != 204) {
-                alert(e.target.getResponseText());
-            }
-        }, "POST", admin2020.serializer.serialize(d));
+        goog.net.XhrIo.send("/admin/hintreply", Common_expect_204,
+                            "POST", admin2020.serializer.serialize(d));
     }
 
     update() {
         goog.net.XhrIo.send(
             "/admin/js/teampuzzle/" + team_username + "/" + puzzle_id,
-            goog.bind(function(e) {
-                var code = e.target.getStatus();
-                if (code == 200) {
-                    this.build(e.target.getResponseJson());
-                } else {
-                    alert(e.target.getResponseText());
-                }
-            }, this));
+            Common_invoke_with_json(this, this.build));
     }
 
     /** @param{TeamPuzzlePageData} data */
@@ -255,13 +244,8 @@ class A2020_TaskQueue {
     }
 
     update_queue() {
-        goog.net.XhrIo.send("/admin/taskqueuedata", goog.bind(function(e) {
-            var code = e.target.getStatus();
-            if (code == 200) {
-                var response = /** @type{TaskQueue} */ (e.target.getResponseJson());
-                this.render_queue(response);
-            }
-        }, this));
+        goog.net.XhrIo.send("/admin/taskqueuedata",
+                            Common_invoke_with_json(this, this.render_queue));
     }
 
     /** @param{TaskQueue} response */
@@ -363,12 +347,7 @@ class A2020_UserRoles {
         var role = e.target.id.substring(n+2);
 
         goog.net.XhrIo.send("/admin/" + (e.target.checked ? "set" : "clear") + "_role/" + user + "/" + role,
-                            function(e) {
-                                var xhr = e.target;
-                                if (xhr.getStatus() != 204) {
-                                    alert("Updating " + user + " " + role + " failed: " + xhr.getResponseText());
-                                }
-                            });
+                            Common_expect_204);
     }
 }
 
@@ -517,14 +496,8 @@ class A2020_ServerPage {
     }
 
     update() {
-        goog.net.XhrIo.send("/admin/js/server", goog.bind(function(e) {
-            var code = e.target.getStatus();
-            if (code == 200) {
-                this.build(e.target.getResponseJson());
-            } else if (code != 502) {
-                alert(e.target.getResponseText());
-            }
-        }, this));
+        goog.net.XhrIo.send("/admin/js/server",
+                            Common_invoke_with_json(this, this.build));
     }
 
     /** param{ServerPageData} data */
@@ -600,20 +573,12 @@ class A2020_TeamPage {
     }
 
     update() {
-        goog.net.XhrIo.send("/admin/js/team/" + team_username, goog.bind(function(e) {
-            var code = e.target.getStatus();
-            if (code == 200) {
-                this.build(e.target.getResponseJson());
-            } else {
-                alert(e.target.getResponseText());
-            }
-        }, this));
+        goog.net.XhrIo.send("/admin/js/team/" + team_username,
+                            Common_invoke_with_json(this, this.build));
     }
 
     /** param{TeamPageData} data */
     build(data) {
-        console.log(data);
-
         this.tpopencount.innerHTML = "" + data.open_puzzles.length;
 
         var i, j;
@@ -721,14 +686,8 @@ class A2020_PuzzlePage {
     }
 
     update() {
-        goog.net.XhrIo.send("/admin/js/puzzle/" + puzzle_id, goog.bind(function(e) {
-            var code = e.target.getStatus();
-            if (code == 200) {
-                this.build(e.target.getResponseJson());
-            } else {
-                alert(e.target.getResponseText());
-            }
-        }, this));
+        goog.net.XhrIo.send("/admin/js/puzzle/" + puzzle_id,
+                            Common_invoke_with_json(this, this.build));
     }
 
     /** param{PuzzlePageData} data */
@@ -846,13 +805,8 @@ class A2020_BigBoard {
             div.appendChild(sp);
         }
 
-        goog.net.XhrIo.send("/admin/bb/team", goog.bind(function(e) {
-            var code = e.target.getStatus();
-            if (code != 200) {
-                alert(e.target.getResponseText());
-            }
-            this.update_all_teams(e.target.getResponseJson());
-        }, this), "GET");
+        goog.net.XhrIo.send("/admin/bb/team",
+                            Common_invoke_with_json(this, this.update_all_teams));
 
         this.dot_labeler = new A2020_DotLabeler(this.teamdiv);
     }
@@ -886,13 +840,8 @@ class A2020_BigBoard {
         // Can't refresh until we have the initial data.
         if (this.team_data === null) return;
 
-        goog.net.XhrIo.send("/admin/bb/team/" + username, goog.bind(function(e) {
-            var code = e.target.getStatus();
-            if (code != 200) {
-                alert(e.target.getResponseText());
-            }
-            this.update_one_team(username, e.target.getResponseJson());
-        }, this), "GET");
+        goog.net.XhrIo.send("/admin/bb/team/" + username,
+                            Common_invoke_with_json_arg(this, this.update_one_team, username));
     }
 
     /** @param{string} username */
@@ -940,13 +889,8 @@ class A2020_BigBoard {
     }
 
     refresh_taskqueue() {
-        goog.net.XhrIo.send("/admin/bb/taskqueue", goog.bind(function(e) {
-            var code = e.target.getStatus();
-            if (code != 200) {
-                alert(e.target.getResponseText());
-            }
-            this.update_taskqueue(/** @type{BBTaskQueue} */ (e.target.getResponseJson()));
-        }, this), "GET");
+        goog.net.XhrIo.send("/admin/bb/taskqueue",
+                            Common_invoke_with_json(this, this.update_taskqueue));
     }
 
     /** @param{BBTaskQueue} data */
@@ -1136,24 +1080,17 @@ class A2020_FixPuzzlePage {
         if (this.fixdoreload) {
             d["reload"] = true;
         }
-        goog.net.XhrIo.send("/admin/fixpuzzle", goog.bind(this.submit_result, this),
+        goog.net.XhrIo.send("/admin/fixpuzzle", Common_invoke_with_json(this, this.submit_result),
                             "POST", admin2020.serializer.serialize(d));
     }
 
-    submit_result(e) {
-        if (e.target.getStatus() != 200) {
-            alert(e.target.getResponseText());
-            return;
-        }
-        var obj = /** @type{FixResult} */ (e.target.getResponseJson());
-        console.log(obj);
-
-        if (obj.success) {
+    submit_result(data) {
+        if (data.success) {
             goog.dom.classlist.addRemove(this.fixresult, "failure", "success");
-            this.fixresult.innerHTML = obj.message;
+            this.fixresult.innerHTML = data.message;
         } else {
             goog.dom.classlist.addRemove(this.fixresult, "success", "failure");
-            this.fixresult.innerHTML = obj.message;
+            this.fixresult.innerHTML = data.message;
         }
     }
 }

@@ -222,12 +222,27 @@ function Common_expect_204(e) {
 }
 
 function Common_invoke_with_json(obj, target) {
+    var cb = goog.bind(target, obj);
     return function(e) {
         var code = e.target.getStatus();
         if (code == 200) {
-            goog.bind(target, obj)(e.target.getResponseJson());
+            cb(e.target.getResponseJson());
         } else if (code == 204) {
-            goog.bind(target, obj)();
+            cb();
+        } else {
+            alert(e.target.getResponseText());
+        }
+    }
+}
+
+function Common_invoke_with_json_arg(obj, target, arg) {
+    var cb = goog.bind(target, obj, arg);
+    return function(e) {
+        var code = e.target.getStatus();
+        if (code == 200) {
+            cb(e.target.getResponseJson());
+        } else if (code == 204) {
+            cb();
         } else {
             alert(e.target.getResponseText());
         }
