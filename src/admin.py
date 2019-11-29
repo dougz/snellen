@@ -552,7 +552,7 @@ class ActionHandler(util.AdminHandler):
   async def ACTION_complete_task(self):
     task_key = self.args.get("key")
     undone = (self.args.get("which") == "undone")
-    game.Global.STATE.complete_task(task_key, not not undone)
+    game.Global.STATE.mark_task_complete(task_key, not not undone)
     self.set_status(http.client.NO_CONTENT.value)
 
   async def ACTION_update_admin_role(self):

@@ -105,9 +105,9 @@ class TaskQueue:
       to_delete.sort()
       for when, key in to_delete:
         self.pending_removal.pop(key, None)
-        task = self.tasks.pop(key, None)
-        if task and task.oncomplete:
-          await task.oncomplete(task, when)
+        task = self.tasks[key]
+        print(f"purging {key} {task}")
+        Global.STATE.complete_task(key)
 
       self.change()
 
@@ -131,6 +131,11 @@ class TaskQueue:
     if task.key in self.tasks: return  # dups
     self.tasks[task.key] = task
     self.change()
+
+  def remove_task(self, key):
+    task = self.tasks.pop(key, None)
+    self.change()
+    return task
 
   def change(self):
     self.cached_json = None
@@ -510,7 +515,7 @@ class Team(login.LoginUser):
   GLOBAL_FASTPASS_QUEUE = []
 
   VIDEOS_BY_SCORE = {0: 1, 16: 2, 31: 3, 46: 4, 62: 5}
-  OUTER_LANDS_SCORE = 2  # 62
+  OUTER_LANDS_SCORE = 62
 
   cached_bb_label_info = None
 
@@ -703,12 +708,12 @@ class Team(login.LoginUser):
     return self.cached_all_puzzles_data
 
   def get_header_data(self):
-    use_buzz = (self.score < 13)
+    use_buzz = (self.outer_lands_state != "open")
     d = {"score": f"Buzz: {self.score * 1000:,}" if use_buzz else f"Wonder: {self.score*10000:,}",
          "lands": [[i.symbol, i.color, i.url, i.title] for i in self.sorted_open_lands],
          "passes": len(self.fastpasses_available),
          }
-    if self.score_to_go and self.score_to_go <= 10:
+    if self.score_to_go and 0 < self.score_to_go <= 10:
       if use_buzz:
         num = self.score_to_go * 1000
         d["to_go"] = f"Generate <b>{num:,}</b> more buzz to unlock the next land!"
@@ -1187,7 +1192,7 @@ class Team(login.LoginUser):
 
       self.compute_puzzle_beam(now)
 
-  async def collect_penny(self, task, when):
+  def collect_penny(self, task, when):
     p = task.key.split("-")[-1]
     p = Workshop.ALL_PENNIES[p]
     self.pennies_earned.remove(p)
@@ -1195,26 +1200,29 @@ class Team(login.LoginUser):
     self.activity_log.add(when, f"Collected the <b>{p.name}</b> penny.")
     self.admin_log.add(when, f"Collected the <b>{p.name}</b> penny.")
     self.send_messages([{"method": "pennies"}])
-    await self.flush_messages()
+    if not save_state.REPLAYING:
+      asyncio.create_task(self.flush_messages())
 
-  async def complete_loony_visit(self, task, when):
+  def complete_loony_visit(self, task, when):
     self.admin_log.add(when, f"Completed the Loony visit.")
     self.open_puzzle(Workshop.PUZZLE, when)
     self.cached_all_puzzles_data = None
     self.dirty_lands.add("home")
     self.cached_mapdata.pop(Land.BY_SHORTNAME["outer"], None)
     self.cached_mapdata.pop(Land.BY_SHORTNAME["inner_only"], None)
-    await self.flush_messages()
+    if not save_state.REPLAYING:
+      asyncio.create_task(self.flush_messages())
 
-  async def complete_penny_visit(self, task, when):
+  def complete_penny_visit(self, task, when):
     if self.remote_only:
       self.admin_log.add(when, f"Skipped Penny visit for remote-only team.")
     else:
       self.admin_log.add(when, f"Completed the Penny visit.")
     self.outer_lands_state = "open"
     self.compute_puzzle_beam(when)
-    await self.flush_messages()
     self.invalidate()
+    if not save_state.REPLAYING:
+      asyncio.create_task(self.flush_messages())
 
   def get_puzzle_state(self, puzzle):
     if isinstance(puzzle, str):
@@ -1493,9 +1501,7 @@ class Team(login.LoginUser):
             count = sum(1 for a in kp.keeper_answers if a in answers)
             if kps.keeper_answers == 0 and count >= kp.keeper_needed:
               kps.keeper_answers = min(len(answers)+2, safari.total_keeper_answers)
-              print(f"{self.username} will open {kp.icon.name} at {kps.keeper_answers} answers")
             if 0 < kps.keeper_answers <= len(answers):
-              print(f"{self.username} opening {kp.icon.name}")
               self.open_puzzle(kp, now)
       meta = Puzzle.get_by_shortname("safari_adventure")
       if (meta and self.puzzle_state[meta].state == PuzzleState.CLOSED and
@@ -2126,15 +2132,19 @@ class Global:
       task.claim = user
     self.task_queue.change()
 
-  @save_state
-  def complete_task(self, now, task_key, undo):
+  def mark_task_complete(self, task_key, undo):
     if undo:
       self.task_queue.pending_removal.pop(task_key, None)
     else:
-      self.task_queue.pending_removal[task_key] = now + self.UNDO_DONE_DELAY
-      if not save_state.REPLAYING:
-        asyncio.create_task(self.task_queue.purge(self.UNDO_DONE_DELAY))
+      self.task_queue.pending_removal[task_key] = time.time() + self.UNDO_DONE_DELAY
+      asyncio.create_task(self.task_queue.purge(self.UNDO_DONE_DELAY))
     self.task_queue.change()
+
+  @save_state
+  def complete_task(self, now, task_key):
+    task = Global.STATE.task_queue.remove_task(task_key)
+    if task and task.oncomplete:
+      task.oncomplete(task, now)
 
   async def notify_event_start(self):
     for team in Team.BY_USERNAME.values():

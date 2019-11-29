@@ -121,6 +121,7 @@ class Client:
   def __init__(self, wpid, options):
     self.wpid = wpid
     self.options = options
+    self.ever_connected = False
 
     self.session_cache = {}
 
@@ -142,7 +143,7 @@ class Client:
 
   async def fetch(self):
     # Give main server time to start up.
-    await asyncio.sleep(2.0)
+    await asyncio.sleep(5.0)
 
     snapshot = {}
     while True:
@@ -156,6 +157,7 @@ class Client:
         await team.send_messages(items)
 
   async def get_messages(self, stats):
+    retries = 5
     while True:
       req = tornado.httpclient.HTTPRequest(
         f"http://localhost:{self.options.base_port}/proxywait/{self.wpid}",
@@ -165,6 +167,7 @@ class Client:
         request_timeout=PROXY_WAIT_TIMEOUT+10)
       try:
         response = await self.client.fetch(req)
+        self.ever_connected = True
         return json.loads(response.body)
       except tornado.httpclient.HTTPClientError as e:
         print(f"proxy {self.wpid} got {e.code}; retrying")
@@ -173,8 +176,12 @@ class Client:
         pass
       except ConnectionRefusedError:
         if self.options.debug:
-          print(f"proxy {self.wpid} got connection refused; exiting")
-          sys.exit(1)
+          if retries:
+            print(f"proxy {self.wpid} got connection refused; retrying {retries} more time(s)")
+            retries -= 1
+          else:
+            print(f"proxy {self.wpid} got connection refused; exiting")
+            sys.exit(1)
         print(f"proxy {self.wpid} got connection refused; retrying")
         await asyncio.sleep(1.0)
       except Exception as e:
@@ -182,6 +189,7 @@ class Client:
 
   async def check_session(self, key, wid):
     if not key: return
+    if not self.ever_connected: return
 
     key = key.decode("ascii")
     v = self.session_cache.get((key, wid))

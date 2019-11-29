@@ -49,6 +49,15 @@ def make_app(options, static_dir, **kwargs):
     **kwargs)
 
 
+def dump_info(fn):
+  plist = {}
+  for p in game.Puzzle.BY_SHORTNAME.values():
+    plist[p.shortname] = list(p.answers)
+
+  d = {"puzzles": plist}
+  with open(fn, "w") as f:
+    json.dump(d, f, indent=True)
+
 async def main_server(options):
   if options.debug:
     game.Submission.PER_ANSWER_DELAY = 20
@@ -102,6 +111,9 @@ async def main_server(options):
   for team in game.Team.all_teams():
     team.post_init()
 
+  if options.dump_info:
+    dump_info(options.dump_info);
+
   save_state.open(os.path.join(options.event_dir, "state.log"))
   save_state.replay(advance_time=game.Submission.process_submit_queue)
 
@@ -125,7 +137,6 @@ async def main_server(options):
 
   if options.start_event:
     game.Global.STATE.start_event(False)
-
 
   for team in game.Team.BY_USERNAME.values():
     team.discard_messages()
@@ -183,6 +194,8 @@ def main():
   parser.add_argument("--start_delay",
                       type=int, default=None,
                       help=("Seconds to count down before starting event."))
+  parser.add_argument("--dump_info", default=None,
+                      help=("Dump all puzzle info to this file"))
 
   # wait proxy configuration
   parser.add_argument("-w", "--wait_proxies",
