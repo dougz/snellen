@@ -1171,6 +1171,10 @@ a#ppicon3 {
     font-weight: bold;
 }
 
+#errata dd {
+    margin-top: 8px;
+}
+
 #mutebox {
     margin-right: 12px;
 }

@@ -1530,7 +1530,8 @@ class H2020_Errata {
                 "DT", null,
                 goog.dom.createDom("A", {href: e.url}, e.title),
                 " (posted " + hunt2020.time_formatter.format(e.when) + ")");
-            var dd = goog.dom.createDom("DD", null, e.text);
+            var dd = goog.dom.createDom("DD", null);
+            dd.innerHTML = e.text;
             dl.appendChild(dt);
             dl.appendChild(dd);
         }
