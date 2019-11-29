@@ -61,6 +61,7 @@ class HintMessage:
       d["admin_only"] = True
     return d
 
+
 class Task:
   def __init__(self, when, team, taskname, text, url, oncomplete):
     self.when = int(when)
@@ -71,6 +72,7 @@ class Task:
     self.oncomplete = oncomplete
     self.key = "t-" + team.username + "-" + taskname
     self.claim = None
+
 
 class TaskQueue:
   def __init__(self):
@@ -237,18 +239,36 @@ class PuzzleState:
     return (self.state == PuzzleState.SOLVED and
             0 <= now - self.solve_time <= PuzzleState.RECENT_TIME)
 
-  def requeue_pending(self, now):
+  def remove_pending(self):
     for count, sub in enumerate(reversed(self.submissions)):
       if sub.state != sub.PENDING:
         break
-    if not count: return
+    if not count: return[]
 
     after = self.submissions[-count:]
     del self.submissions[-count:]
+    return after
+
+  def requeue(self, after, now):
     for sub in after:
       sub.check_time = None
       self.submissions.append(sub)
       sub.check_or_queue(now)
+
+
+  def requeue_pending(self, now):
+    self.requeue(self.remove_pending(), now)
+
+  def reset_and_requeue(self, now, user):
+    sub = Submission(now, -1, self.team, self.puzzle, None)
+    sub.state = Submission.RESET
+    sub.user = user
+
+    after = self.remove_pending()
+    self.submissions.append(sub)
+    self.requeue(after, now)
+
+
 
 
 class Submission:
@@ -259,6 +279,7 @@ class Submission:
   MOOT = "moot"
   CANCELLED = "cancelled"
   REQUESTED = "requested"
+  RESET = "reset"
 
   GLOBAL_SUBMIT_QUEUE = []
 
@@ -271,7 +292,10 @@ class Submission:
     self.team = team
     self.puzzle = puzzle
     self.puzzle_state = team.get_puzzle_state(puzzle)
-    self.answer = Puzzle.canonicalize_answer(answer)
+    if answer is None:
+      self.answer = None
+    else:
+      self.answer = Puzzle.canonicalize_answer(answer)
     self.raw_answer = answer
     self.sent_time = now
     self.submit_time = None
@@ -300,7 +324,14 @@ class Submission:
 
     guesses = 0
     last_ding = self.puzzle_state.open_time - guess_interval
+    last_reset = 0
     for sub in self.puzzle_state.submissions[:-1]:
+      if sub.state == self.RESET:
+        guesses = 0
+        last_ding = sub.sent_time - guess_interval
+        last_reset = sub.sent_time
+        continue
+
       if not (sub.state in (self.PENDING, self.INCORRECT) and not sub.wrong_but_reasonable):
         continue
 
@@ -314,17 +345,17 @@ class Submission:
 
     sub = self.puzzle_state.submissions[-1]
     assert sub.check_time is None
-    interval = max(sub.sent_time - last_ding, 0)
+    virtual_sent_time = max(sub.sent_time, last_reset)
+    interval = max(virtual_sent_time - last_ding, 0)
     gotten = int(interval / guess_interval)
     guesses += gotten
     if guesses > guess_max: guesses = guess_max
     #print(f"** {sub.answer} {sub.sent_time - sub.puzzle_state.open_time:.3f}   {interval:.3f}: +{gotten} = {guesses}")
 
     if guesses > 0:
-      return self.sent_time
+      return virtual_sent_time
 
     return last_ding + (gotten+1) * guess_interval
-
 
   def check_answer(self, now):
     self.submit_time = now
@@ -409,12 +440,17 @@ class Submission:
     self.team.invalidate(self.puzzle)
 
   def json_dict(self):
-    return {"submit_time": self.submit_time,
-            "answer": self.answer,
-            "check_time": self.check_time,
-            "state": self.state,
-            "response": self.extra_response,
-            "submit_id": self.submit_id}
+    if self.state == self.RESET:
+      return {"sent_time": self.sent_time,
+              "state": self.state,
+              "user": self.user.fullname}
+    else:
+      return {"submit_time": self.submit_time,
+              "answer": self.answer,
+              "check_time": self.check_time,
+              "state": self.state,
+              "response": self.extra_response,
+              "submit_id": self.submit_id}
 
   @classmethod
   async def realtime_process_submit_queue(cls):
@@ -910,6 +946,15 @@ class Team(login.LoginUser):
     else:
       print(f"failed to cancel submit {submit_id} puzzle {shortname} for {self.username}")
       return
+
+  @save_state
+  def reset_spam(self, now, shortname, username):
+    puzzle = Puzzle.get_by_shortname(shortname)
+    if not puzzle: return
+    user = login.AdminUser.get_by_username(username)
+    ps = self.puzzle_state[puzzle]
+    ps.reset_and_requeue(now, user)
+
 
   def get_fastpass_eligible_lands(self):
     usable = []
@@ -1552,8 +1597,8 @@ class Icon:
 class Land:
   BY_SHORTNAME = {}
 
-  DEFAULT_GUESS_INTERVAL = 30  # 6 minutes
-  DEFAULT_GUESS_MAX = 10
+  DEFAULT_GUESS_INTERVAL = 360 # 6 minutes
+  DEFAULT_GUESS_MAX = 3
 
   DEFAULT_INITIAL_PUZZLES = 2
 

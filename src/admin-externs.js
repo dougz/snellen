@@ -180,15 +180,19 @@ class Submission {
     constructor() {
         /** @type{?number} */
         this.submit_time;
+        /** @type{?number} */
+        this.sent_time;
+        /** @type{?string} */
+        this.user;
         /** @type{number} */
         this.check_time;
-        /** @type{string} */
+        /** @type{?string} */
         this.answer;
         /** @type{string} */
         this.state;
-        /** @type{string} */
+        /** @type{?string} */
         this.response;
-        /** @type{number} */
+        /** @type{?number} */
         this.submit_id;
     }
 }

@@ -572,6 +572,20 @@ class ActionHandler(util.AdminHandler):
     user.update_role(role, which == "set")
     self.set_status(http.client.NO_CONTENT.value)
 
+  async def ACTION_reset_spam(self):
+    username = self.args.get("team_username")
+    team = self.get_team(username)
+    shortname = self.args.get("puzzle_id")
+    puzzle = game.Puzzle.get_by_shortname(shortname)
+    team.reset_spam(shortname, self.user.username)
+
+    team.send_messages([{"method": "history_change", "puzzle_id": shortname}])
+    await team.flush_messages()
+    team.invalidate(puzzle)
+
+    self.set_status(http.client.NO_CONTENT.value)
+
+
 
 
 def GetHandlers():

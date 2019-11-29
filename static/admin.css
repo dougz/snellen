@@ -876,6 +876,11 @@ tr.submit-pending {
     border-top: 1px solid #999;
 }
 
+tr.submit-reset {
+    background-color: #ddf4ff;
+    border-top: 1px solid #999;
+}
+
 td.submit-state {
     text-transform: uppercase;
     width: 160px;

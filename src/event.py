@@ -282,7 +282,7 @@ class SubmitHistoryHandler(util.TeamHandler):
         submit_allowed = True
 
     d = {"allowed": submit_allowed,
-         "history": [sub.json_dict() for sub in ps.submissions],
+         "history": [sub.json_dict() for sub in ps.submissions if sub.state != sub.RESET],
          }
     if ps.puzzle.errata:
       d["errata"] = True

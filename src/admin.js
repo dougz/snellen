@@ -103,7 +103,16 @@ class A2020_TeamPuzzlePage {
         goog.events.listen(this.unclaimlink, goog.events.EventType.CLICK,
                            goog.bind(this.do_claim, this, "unclaim"));
 
+        goog.events.listen(goog.dom.getElement("tppreset"),
+                           goog.events.EventType.CLICK, goog.bind(this.reset_spam, this));
+
         this.update();
+    }
+
+    reset_spam() {
+        A2020_DoAction({action: "reset_spam",
+                        team_username: team_username,
+                        puzzle_id: puzzle_id}, Common_expect_204);
     }
 
     do_claim(which) {
@@ -209,14 +218,23 @@ class A2020_TeamPuzzlePage {
             var time_el = null;
             if (sub.state == "pending") {
                 time_el = el;
+            } else if (sub.state == "reset") {
+                time_el = admin2020.time_formatter.format(sub.sent_time);
             } else {
                 time_el = admin2020.time_formatter.format(sub.submit_time);
             }
 
+            var td = null;
+            if (sub.state == "reset") {
+                td = goog.dom.createDom("TD", "submit-reset");
+                td.innerHTML = "Spam counter reset by <b>" + sub.user + "</b>.";
+            } else {
+                td = goog.dom.createDom("TD", {className: "submit-answer"}, sub.answer);
+            }
+
             tr = goog.dom.createDom(
                 "TR", {className: "submit-" + sub.state},
-                goog.dom.createDom("TD", {className: "submit-answer"},
-                                   sub.answer),
+                td,
                 goog.dom.createDom("TD", {className: "submit-time"}, time_el),
                 goog.dom.createDom("TD", {className: "submit-state"},
                                    goog.dom.createDom("SPAN", null,
@@ -227,7 +245,7 @@ class A2020_TeamPuzzlePage {
             this.tppsubmitbody.appendChild(tr);
 
             if (sub.response) {
-                var td = goog.dom.createDom("TD", {colSpan: 3});
+                td = goog.dom.createDom("TD", {colSpan: 3});
                 td.innerHTML = sub.response;
                 tr = goog.dom.createDom("TR", {className: "submit-extra"}, td);
                 this.tppsubmitbody.appendChild(tr);
