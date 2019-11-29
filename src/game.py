@@ -1307,7 +1307,7 @@ class Team(login.LoginUser):
           else:
             cx = nx * 15 + 7
             cy = ny * 15 + 7
-            if p in land.additional_puzzles:
+            if p in land.additional_puzzles or p.submeta:
               out.append(f'<rect x="{lx+cx-4}" y="{cy-4}" width="8" height="8" class="bb-{ps.state}{used_hints} bbp-{p.bbid}"/>')
             else:
               out.append(f'<circle cx="{lx+cx}" cy="{cy}" r="5" class="bb-{ps.state}{used_hints} bbp-{p.bbid}"/>')
