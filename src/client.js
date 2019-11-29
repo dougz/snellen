@@ -914,8 +914,8 @@ class H2020_MapDraw {
         }
 
         var h = goog.dom.createDom("DIV", {className: "p"}, ch);
-        h.style.left = "" + it.xywh[0] + "px";
-        h.style.top = "" + it.xywh[1] + "px";
+        h.style.left = "" + (it.xywh[0] + it.offset[0]) + "px";
+        h.style.top = "" + (it.xywh[1] + it.offset[1]) + "px";
         h.style.width = "" + it.xywh[2] + "px";
         h.style.height = "" + it.xywh[3] + "px";
 

@@ -163,6 +163,8 @@ class MapItem {
         this.mask_url;
         /** @type{Array<number>} */
         this.xywh;
+        /** @type{?Array<number>} */
+        this.offset;
         /** @type{?string} */
         this.poly;
         /** @type{?string} */

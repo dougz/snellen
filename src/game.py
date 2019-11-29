@@ -735,7 +735,8 @@ class Team(login.LoginUser):
         d = {"name": p.title,
              "url": p.url,
              "icon_url": i.solved.url,
-             "mask_url": i.solved_mask.url}
+             "mask_url": i.solved_mask.url,
+             "offset": i.offset}
 
         if hasattr(p, "keeper_answers"):
           # compute the position later
@@ -797,7 +798,8 @@ class Team(login.LoginUser):
               "poly": i.solved.poly,
               "url": i.to_land.url,
               "icon_url": i.solved.url,
-              "mask_url": i.solved_mask.url}
+              "mask_url": i.solved_mask.url,
+              "offset": [0,0] }
         if i.to_land.meta_puzzle:
           p = i.to_land.meta_puzzle
           ps = self.puzzle_state[p]
@@ -1527,6 +1529,7 @@ class Icon:
     self.puzzle = None
     self.to_land = None
     self.headerimage = d.get("headerimage")
+    self.offset = d.get("offset", [0,0])
 
     #self.locked = Subicon(d.get("locked"))
     # self.unlocked = Subicon(d.get("unlocked"))

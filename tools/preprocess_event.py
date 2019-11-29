@@ -90,6 +90,8 @@ def convert_map(shortname, d, options):
   if assignments:
     out["assignments"] = assignments
 
+  offsets = d.get("offsets", {})
+
   icons = d.get("icons", None)
   if icons:
     out_icons = {}
@@ -97,6 +99,9 @@ def convert_map(shortname, d, options):
     for name, ic in icons.items():
       oic = {}
       out_icons[name] = oic
+
+      if name in offsets:
+        oic["offset"] = offsets[name]
 
       if name in assignments and "headerimage" in assignments[name]:
         src = os.path.join(options.input_assets, shortname,
