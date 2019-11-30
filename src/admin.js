@@ -264,6 +264,46 @@ class A2020_TaskQueue {
         this.queue = goog.dom.getElement("taskqueue");
         this.tbody = goog.dom.getElement("taskqueuedata");
         this.update_queue();
+        this.last_response = null;
+
+        var el = goog.dom.getElement("tqfilters");
+        el.innerHTML = "";
+
+        var kinds = ["hint", "visit", "penny", "puzzle"];
+        this.filter = {};
+
+        var saved = [];
+        var x = localStorage.getItem("tqfilter");
+        if (x) {
+            saved = x.split(",");
+        }
+
+        for (var i = 0; i < kinds.length; ++i) {
+            var k = kinds[i];
+            this.filter[k] = saved.includes(k);
+            var cb = goog.dom.createDom("BUTTON", this.filter[k] ? "filterbox" : "filterbox off", k);
+            goog.events.listen(cb, goog.events.EventType.CLICK,
+                               goog.bind(this.toggle_filter, this, k));
+            el.appendChild(cb);
+        }
+    }
+
+    toggle_filter(kind, e) {
+        this.filter[kind] = !this.filter[kind];
+        if (this.filter[kind]) {
+            goog.dom.classlist.remove(e.target, "off");
+        } else {
+            goog.dom.classlist.add(e.target, "off");
+        }
+        var save = ""
+        for (var k in this.filter) {
+            if (this.filter[k]) {
+                save += k + ","
+            }
+        }
+        localStorage.setItem("tqfilter", save);
+        e.target.blur();
+        this.render_queue(this.last_response);
     }
 
     update_queue() {
@@ -273,14 +313,19 @@ class A2020_TaskQueue {
 
     /** @param{TaskQueue} response */
     render_queue(response) {
-        if (response.queue.length == 0) {
+        this.last_response = response;
+        if (!response || response.queue.length == 0) {
             this.tbody.innerHTML = "<tr><td colspan=6 style=\"padding: 20px;\">No tasks are waiting.</td></tr>"
             return;
         }
         this.tbody.innerHTML = "";
         var now = (new Date()).getTime() / 1000.0;
+        var count = 0;
         for (var i = 0; i < response.queue.length; ++i) {
             var msg = response.queue[i];
+            if (!this.filter[msg.kind]) continue;
+            ++count;
+
             var tqtime = goog.dom.createDom("TD", "tqtime counter", admin2020.time_formatter.duration(now-msg.when));
             tqtime.setAttribute("data-since", msg.when);
             var tqteam = goog.dom.createDom("TD", {className: "tqteam"}, msg.team);
@@ -335,6 +380,10 @@ class A2020_TaskQueue {
             this.tbody.appendChild(tr);
         }
         admin2020.counter.reread();
+
+        if (count == 0) {
+            this.tbody.innerHTML = "<tr><td colspan=6 style=\"padding: 20px;\">All tasks have been filtered out.</td></tr>";
+        }
     }
 
     claim_task(msg) {

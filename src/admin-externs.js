@@ -27,6 +27,9 @@ var eurl;
 /** @type{string} */
 var page_class;
 
+/** @type{Storage} */
+var localStorage;
+
 class Message {
     constructor() {
         /** @type{string} */
@@ -51,6 +54,8 @@ class TaskQueueItem {
     constructor() {
         /** @type{string} */
         this.team;
+        /** @type{string} */
+        this.kind;
         /** @type{string} */
         this.key;
         /** @type{string} */

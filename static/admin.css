@@ -374,6 +374,7 @@ body > p, body > h2 {
     border-radius: 15px;
     background: linear-gradient(to bottom, #4c70af, #436299);
     outline: none;
+    user-select: none;
 }
 .action:focus, .action:hover {
     color: yellow;
@@ -397,6 +398,7 @@ body > p, body > h2 {
     border-radius: 15px;
     background: linear-gradient(to bottom, #4c70af, #436299);
     outline: none;
+    user-select: none;
 }
 .miniaction:focus, .miniaction:hover {
     color: yellow;
@@ -408,6 +410,26 @@ body > p, body > h2 {
     border: 1px solid #aaa;
     background: linear-gradient(to bottom, #ccc, #ddd);
 }
+
+.filterbox {
+    font-family: 'Merriweather Sans', sans-serif;
+    font-weight: bold;
+    color: white;
+    font-size: 84%;
+    padding: 4px 8px;
+    margin: 4px 0 4px 8px;
+    box-sizing: border-box;
+    border: 1px solid #395483;
+    border-radius: 15px;
+    background: linear-gradient(to bottom, #4c70af, #436299);
+    outline: none;
+    user-select: none;
+}
+.filterbox.off {
+    border: 1px solid #9caac1;
+    background: linear-gradient(to bottom, #ced4e0, #e6eaf0);
+}
+
 
 .inlineminiaction {
     font-family: 'Open Sans', 'Merriweather Sans', sans-serif;
@@ -516,12 +538,23 @@ p.note {
 
 #taskqueue {
     border-collapse: collapse;
+    border-spacing: 2px;
 }
 
+#taskqueue td {
+    padding: 4px;
+    border: 4px solid transparent;
+}
 #taskqueue th {
     background-color: #f8f8f8;
     text-align: left;
     padding: 4px;
+    border: 4px solid transparent;
+}
+
+
+#taskqueue #filters {
+    text-align: right;
 }
 
 #taskqueue .tqtime {
@@ -530,22 +563,22 @@ p.note {
 }
 
 #taskqueue .tqteam {
-    width: 300px;
+    min-width: 300px;
     text-overflow: ellipsis;
 }
 
 #taskqueue .tqwhat {
-    width: 300px;
+    min-width: 300px;
     text-overflow: ellipsis;
 }
 
 #taskqueue .tqclaim {
-    width: 120px;
+    min-width: 132px;
     text-align: center;
 }
 
 #taskqueue .tqclaimant {
-    width: 300px;
+    min-width: 300px;
     text-overflow: ellipsis;
 }
 

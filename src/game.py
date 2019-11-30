@@ -63,7 +63,7 @@ class HintMessage:
 
 
 class Task:
-  def __init__(self, when, team, taskname, text, url, oncomplete):
+  def __init__(self, when, team, taskname, text, url, oncomplete, kind):
     self.when = int(when)
     self.team = team
     self.taskname = taskname
@@ -72,6 +72,7 @@ class Task:
     self.oncomplete = oncomplete
     self.key = "t-" + team.username + "-" + taskname
     self.claim = None
+    self.kind = kind
 
 
 class TaskQueue:
@@ -125,8 +126,8 @@ class TaskQueue:
     self.states.discard(puzzle_state)
     self.change()
 
-  def add_task(self, when, team, taskname, text, url, oncomplete):
-    task = Task(when, team, taskname, text, url, oncomplete)
+  def add_task(self, when, team, taskname, text, url, oncomplete, kind):
+    task = Task(when, team, taskname, text, url, oncomplete, kind)
     if task.key in self.tasks: return  # dups
     self.tasks[task.key] = task
     self.change()
@@ -169,6 +170,7 @@ class TaskQueue:
         else:
           break
       q.append({"team": ps.team.name,
+                "kind": "hint",
                 "what": "Hint: " + ps.puzzle.title,
                 "when": ts,
                 "claimant": ps.claim.fullname if ps.claim else None,
@@ -179,6 +181,7 @@ class TaskQueue:
       if ps.claim: claimed += 1
     for task in self.tasks.values():
       d = {"team": task.team.name,
+           "kind": task.kind,
            "what": task.text,
            "target": task.url,
            "when": task.when,
@@ -384,7 +387,7 @@ class Submission:
         self.state = self.REQUESTED
         self.extra_response = response[0]
         Global.STATE.add_task(now, self.team.username, answer.lower(),
-                              response[1], response[2])
+                              response[1], response[2], "puzzle")
       elif response is None:
         # incorrect but "honest guess"
         self.state = self.INCORRECT
@@ -1112,7 +1115,7 @@ class Team(login.LoginUser):
         else:
           Global.STATE.add_task(now, self.username, f"penny-visit",
                                 "Penny visit", None,
-                                oncomplete=self.complete_penny_visit)
+                                self.complete_penny_visit, "visit")
           self.outer_lands_triggered = "triggered"
 
       new_videos = 0
@@ -1141,14 +1144,14 @@ class Team(login.LoginUser):
               if not self.pennies_earned and not self.pennies_collected:
                 Global.STATE.add_task(now, self.username, f"loony-visit",
                                       "Loony visit", None,
-                                      oncomplete=self.complete_loony_visit)
+                                      self.complete_loony_visit, "visit")
                 Global.STATE.add_task(now, self.username, f"penny-{penny.shortname}",
                                       f"First penny: {penny.name}", None,
-                                      oncomplete=self.collect_penny)
+                                      self.collect_penny, "penny")
               else:
                 Global.STATE.add_task(now, self.username, f"penny-{penny.shortname}",
                                       f"Return penny: {penny.name}", None,
-                                      oncomplete=self.collect_penny)
+                                      self.collect_penny, "penny")
               self.pennies_earned.append(penny)
               dirty = True
           if dirty:
@@ -1781,7 +1784,7 @@ class Puzzle:
     url = ("https://mitmh-2019-leftout-cg.netlify.com/callbacks/callbacks.html?" +
            urllib.parse.urlencode(d))
     Global.STATE.add_task(now, sub.team.username, "concierge-callback",
-                          "Concierge callback", url)
+                          "Concierge callback", url, None, "puzzle")
 
   def __hash__(self):
     return id(self)
@@ -2114,10 +2117,10 @@ class Global:
       team.compute_puzzle_beam(now)
       await team.flush_messages()
 
-  def add_task(self, now, team, taskname, text, url, oncomplete=None):
+  def add_task(self, now, team, taskname, text, url, oncomplete, kind):
     team = Team.get_by_username(team)
     if not team: return
-    self.task_queue.add_task(now, team, taskname, text, url, oncomplete)
+    self.task_queue.add_task(now, team, taskname, text, url, oncomplete, kind)
 
   @save_state
   def claim_task(self, now, task_key, username):
