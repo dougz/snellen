@@ -291,7 +291,7 @@ class ChangeStartPage(util.AdminPageHandler):
     new_time = dateutil.parser.parse(new_time_text)
     new_timestamp = int(new_time.timestamp())
     from_now = new_timestamp - time.time()
-    if from_now < 60:
+    if from_now < 5:
       self.render("admin_change_start.html",
                   error="Time is in the past (or not far enough in the future).")
       return

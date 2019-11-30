@@ -106,8 +106,9 @@ class TaskQueue:
       to_delete.sort()
       for when, key in to_delete:
         self.pending_removal.pop(key, None)
-        task = self.tasks[key]
-        Global.STATE.complete_task(key)
+        task = self.tasks.get(key)
+        if task:
+          Global.STATE.complete_task(key)
 
       self.change()
 

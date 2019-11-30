@@ -29,8 +29,6 @@ squad stooth team teammate teapots tng tried turquoise twtw unclear
 unclear unseen uplate vaguely wafflehaus waslater whitelotus wizards
 wpi wranglers wwe leftout""".split()
 
-BASE_URL = "http://snellen.fun"
-
 ADMIN = """dougz""".split()
 
 stats = {}
@@ -83,7 +81,7 @@ async def simulate_admin(client, username, password, options):
   # Submit the login page.
 
   req = tornado.httpclient.HTTPRequest(
-    f"{BASE_URL}/login_submit",
+    f"{options.base_url}/login_submit",
     method="POST",
     body=f"username={username}&password={password}",
     follow_redirects=False)
@@ -97,12 +95,12 @@ async def simulate_admin(client, username, password, options):
 
     print(f"--- ADMIN {username} logged in ---")
 
-  await tasker(username, cookie, client)
+  await tasker(username, cookie, client, options)
 
-async def tasker(username, cookie, client):
+async def tasker(username, cookie, client, options):
   while True:
     req = tornado.httpclient.HTTPRequest(
-      f"{BASE_URL}/admin/js/taskqueue",
+      f"{options.base_url}/admin/js/taskqueue",
       connect_timeout=5.0,
       request_timeout=10.0,
       follow_redirects=False,
@@ -116,14 +114,16 @@ async def tasker(username, cookie, client):
 
     j = json.loads(response.body)
     count = 0
+    threshold = time.time() - 60
     for t in j.get("queue", ()):
       key = t.get("key", "")
       if not key.startswith("t-"): continue
+      if t["when"] > threshold: continue
       d = {"action": "complete_task", "key": key, "which": "done"}
       print(f"ADMIN {username} completing {key}")
 
       req = tornado.httpclient.HTTPRequest(
-        f"{BASE_URL}/admin/action",
+        f"{options.base_url}/admin/action",
         method="POST",
         body=json.dumps(d),
         follow_redirects=False,
@@ -141,7 +141,7 @@ async def tasker(username, cookie, client):
       count += 1
       if count >= 20: break
 
-    await asyncio.sleep(15)
+    await asyncio.sleep(5)
 
 
 
@@ -153,7 +153,7 @@ async def simulate_browser(my_id, client, username, password, delay, options):
   # Submit the login page.
 
   req = tornado.httpclient.HTTPRequest(
-    f"{BASE_URL}/login_submit",
+    f"{options.base_url}/login_submit",
     method="POST",
     body=f"username={username}&password={password}",
     follow_redirects=False)
@@ -167,18 +167,20 @@ async def simulate_browser(my_id, client, username, password, delay, options):
 
     print(f"--- {my_id} logged in ---")
 
-  await asyncio.gather(solver(my_id, cookie, client),
-                       *[simulate_tab(my_id, i, cookie, client) for i in range(options.tabs)])
+  await asyncio.gather(solver(my_id, cookie, client, options),
+                       *[simulate_tab(my_id, i, cookie, client, options) for i in range(options.tabs)])
 
-async def solver(my_id, cookie, client):
+async def solver(my_id, cookie, client, options):
   goodness = random.random() * 18 + 2
   while True:
     await asyncio.sleep(goodness)
-    if not await solve_one(my_id, cookie, client): break
+    if not await solve_one(my_id, cookie, client, options): break
 
-async def solve_one(my_id, cookie, client):
+async def solve_one(my_id, cookie, client, options):
+  print(f"solve_one {my_id}")
+
   req = tornado.httpclient.HTTPRequest(
-    f"{BASE_URL}/js/puzzles",
+    f"{options.base_url}/js/puzzles",
     connect_timeout=5.0,
     request_timeout=10.0,
     follow_redirects=False,
@@ -207,7 +209,7 @@ async def solve_one(my_id, cookie, client):
 
   if not open_puzzles:
     print("all puzzles solved")
-    return
+    return True
 
   to_solve = random.choice(list(open_puzzles.keys()))
 
@@ -221,7 +223,7 @@ async def solve_one(my_id, cookie, client):
   d = {"answer": a, "puzzle_id": to_solve}
 
   req = tornado.httpclient.HTTPRequest(
-    f"{BASE_URL}/submit",
+    f"{options.base_url}/submit",
     method="POST",
     body=json.dumps(d),
     follow_redirects=False,
@@ -238,7 +240,7 @@ async def solve_one(my_id, cookie, client):
 
 
 
-async def simulate_tab(my_id, tab_num, cookie, client):
+async def simulate_tab(my_id, tab_num, cookie, client, options):
   #print(f"--- {my_id}.{tab_num} starting {cookie} ---")
 
   stats["LOGIN"] = stats.get("LOGIN", 0) + 1
@@ -249,7 +251,7 @@ async def simulate_tab(my_id, tab_num, cookie, client):
   # Now we can fetch the home page to get assigned a waiter_id.
 
   req = tornado.httpclient.HTTPRequest(
-    f"{BASE_URL}/",
+    f"{options.base_url}/",
     connect_timeout=5.0,
     request_timeout=10.0,
     follow_redirects=False,
@@ -274,7 +276,7 @@ async def simulate_tab(my_id, tab_num, cookie, client):
   while True:
     #print(f"--- {my_id}.{tab_num} waiting (wid {wid}) ---")
     req = tornado.httpclient.HTTPRequest(
-      f"{BASE_URL}/wait/{wid}/{serial}/10",
+      f"{options.base_url}/wait/{wid}/{serial}/10",
       follow_redirects=False,
       headers={"Cookie": cookie},
       request_timeout=600.0)
@@ -307,6 +309,7 @@ if __name__ == "__main__":
   parser.add_argument("-b", "--browsers", type=int, default=1)
   parser.add_argument("-i", "--tabs", type=int, default=1)
   parser.add_argument("-a", "--info_dump", default=None)
+  parser.add_argument("-u", "--base_url", default="http://snellen.fun")
   options = parser.parse_args()
 
   if options.info_dump:
