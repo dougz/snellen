@@ -34,6 +34,7 @@ class Server:
     self.cv = asyncio.Condition()
     self.q = []
     self.last_stats = {}
+    self.ever_connected = False
 
   @classmethod
   def init_proxies(cls, count):
@@ -69,18 +70,20 @@ class ProxyWaitHandler(tornado.web.RequestHandler):
   async def post(self, wpid):
     wpid = int(wpid)
     proxy = Server.PROXIES[wpid]
+    timeout = PROXY_WAIT_TIMEOUT if proxy.ever_connected else 0.0
 
     proxy.last_stats = json.loads(self.request.body)
 
     async with proxy.cv:
       if not proxy.q:
         try:
-          await asyncio.wait_for(proxy.cv.wait(), PROXY_WAIT_TIMEOUT)
+          await asyncio.wait_for(proxy.cv.wait(), timeout)
         except asyncio.TimeoutError:
           pass
 
       content, proxy.q = proxy.q, []
 
+    proxy.ever_connected = True
     content = json.dumps(content)
     self.set_header("Content-Type", "application/json")
     self.set_header("Cache-Control", "no-store")
@@ -143,7 +146,7 @@ class Client:
 
   async def fetch(self):
     # Give main server time to start up.
-    await asyncio.sleep(5.0)
+    await asyncio.sleep(1.0)
 
     snapshot = {}
     while True:
@@ -167,7 +170,9 @@ class Client:
         request_timeout=PROXY_WAIT_TIMEOUT+10)
       try:
         response = await self.client.fetch(req)
-        self.ever_connected = True
+        if not self.ever_connected:
+          print(f"proxy {self.wpid} connected")
+          self.ever_connected = True
         return json.loads(response.body)
       except tornado.httpclient.HTTPClientError as e:
         print(f"proxy {self.wpid} got {e.code}; retrying")
@@ -189,7 +194,9 @@ class Client:
 
   async def check_session(self, key, wid):
     if not key: return
-    if not self.ever_connected: return
+    if not self.ever_connected:
+      print(f"proxy {self.wpid} never connected")
+      return
 
     key = key.decode("ascii")
     v = self.session_cache.get((key, wid))

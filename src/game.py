@@ -106,7 +106,6 @@ class TaskQueue:
       for when, key in to_delete:
         self.pending_removal.pop(key, None)
         task = self.tasks[key]
-        print(f"purging {key} {task}")
         Global.STATE.complete_task(key)
 
       self.change()

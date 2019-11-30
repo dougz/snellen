@@ -20,16 +20,18 @@ bruins central codex conduction constructs control corvus dalton death
 donner dootdoot dragoncakehat ducksoup dynamite etphone exercise exit
 fellowship fevers fighters fish flower frumious galactic gnus
 hedgehogs hunches hunters immoral janedoe knock ladder lastplace
-leftout lexhunt lexingtons love malls manateem mathcampers mathletes
+lexhunt lexingtons love malls manateem mathcampers mathletes
 metaphysical mindthegap mystere n3xt nair neuromology neverever nope
 offinthelab omnom palindrome palmford plain planetix pluto praxis
 providenc puzzkill puzzledom quiz reptilian resistance rhinos rofls
 secrets sg shortz shrug singles slack slalom sloan snowman sorrymom
 squad stooth team teammate teapots tng tried turquoise twtw unclear
 unclear unseen uplate vaguely wafflehaus waslater whitelotus wizards
-wpi wranglers wwe""".split()
+wpi wranglers wwe leftout""".split()
 
 BASE_URL = "http://snellen.fun"
+
+ADMIN = """dougz""".split()
 
 stats = {}
 LAUNCH = asyncio.Event()
@@ -67,12 +69,81 @@ async def main(options):
   client = tornado.httpclient.AsyncHTTPClient()
 
   await asyncio.gather(*[simulate_team(client, username, "snth", options) for username in TEAMS[:options.teams]],
-                         show_stats(options))
+                       simulate_admin(client, ADMIN[0], "snth", options),
+                       show_stats(options))
 
 
 async def simulate_team(client, username, password, options):
   print(f"starting {username}")
   await asyncio.gather(*[simulate_browser(f"{username}_{i}", client, username, password, i * .025, options) for i in range(options.browsers)])
+
+async def simulate_admin(client, username, password, options):
+  print(f"--- ADMIN {username} logging in ---")
+
+  # Submit the login page.
+
+  req = tornado.httpclient.HTTPRequest(
+    f"{BASE_URL}/login_submit",
+    method="POST",
+    body=f"username={username}&password={password}",
+    follow_redirects=False)
+
+  try:
+    response = await client.fetch(req)
+    assert False
+  except tornado.httpclient.HTTPClientError as e:
+    assert e.code == 302
+    cookie = e.response.headers["Set-Cookie"].split(";")[0]
+
+    print(f"--- ADMIN {username} logged in ---")
+
+  await tasker(username, cookie, client)
+
+async def tasker(username, cookie, client):
+  while True:
+    req = tornado.httpclient.HTTPRequest(
+      f"{BASE_URL}/admin/js/taskqueue",
+      connect_timeout=5.0,
+      request_timeout=10.0,
+      follow_redirects=False,
+      headers={"Cookie": cookie})
+
+    try:
+      response = await client.fetch(req)
+    except tornado.httpclient.HTTPClientError as e:
+      print(f"--- ADMIN {username} solver puzzle fetch failed: {e} ---")
+      return
+
+    j = json.loads(response.body)
+    count = 0
+    for t in j.get("queue", ()):
+      key = t.get("key", "")
+      if not key.startswith("t-"): continue
+      d = {"action": "complete_task", "key": key, "which": "done"}
+      print(f"ADMIN {username} completing {key}")
+
+      req = tornado.httpclient.HTTPRequest(
+        f"{BASE_URL}/admin/action",
+        method="POST",
+        body=json.dumps(d),
+        follow_redirects=False,
+        headers={"Cookie": cookie})
+
+      try:
+        response = await client.fetch(req)
+      except tornado.httpclient.HTTPClientError as e:
+        print(f"--- ADMIN {username} failed to submit: {e} ---")
+        return
+
+      if response.code != 204:
+        print(f"--- ADMIN {username} got back: {response.code} ---")
+
+      count += 1
+      if count >= 20: break
+
+    await asyncio.sleep(15)
+
+
 
 async def simulate_browser(my_id, client, username, password, delay, options):
   await asyncio.sleep(delay)

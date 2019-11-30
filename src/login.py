@@ -45,13 +45,16 @@ class LoginUser:
 class AdminUser(LoginUser):
   BY_USERNAME = {}
 
-  message_mu = asyncio.Lock()
+  message_mu = None
   message_serial = 1
   pending_messages = []
   pending_updates = {}
 
   @save_state
   def __init__(self, now, username, password_hash, fullname, roles):
+    if AdminUser.message_mu is None:
+      AdminUser.message_mu = asyncio.Lock()
+
     self.username = username.lower()
     self.password_hash = password_hash.encode("ascii")
     self.fullname = fullname
