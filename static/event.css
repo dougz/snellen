@@ -1219,21 +1219,21 @@ a#ppicon3 {
     text-align: center;
 }
 
-.RulesPage .b {
+.GuidePage .b {
     font-weight: bold;
 }
-.RulesPage .i {
+.GuidePage .i {
     font-style: italic;
     float: right;
 }
-.RulesPage h3 {
+.GuidePage h3 {
     margin-top: 32px;
     margin-bottom: 12px;
 }
-.RulesPage p {
+.GuidePage p {
     margin-top: 12px;
     margin-bottom: 12px;
 }
-.RulesPage p.disclaimer {
+.GuidePage p.disclaimer {
     margin-bottom: 32px;
 }

@@ -153,7 +153,7 @@ class Session:
     self.pages_visited.add(page)
     if self.team and self.pages_visited == {
         "pins", "activity", "health_safety", "guest_services",
-        "about_park", "events", "all_puzzles", "sponsor", "rules"}:
+        "about_park", "events", "all_puzzles", "sponsor", "guide"}:
       self.team.achieve_now(game.Achievement.digital_explorer, delay=1.5)
 
   @classmethod
