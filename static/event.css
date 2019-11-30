@@ -43,6 +43,7 @@ input, button, .emoji-input {
 .disclaimer {
     text-align: center;
     font-style: italic;
+    margin-bottom: 32px;
 }
 
 #pins li {
@@ -1218,3 +1219,21 @@ a#ppicon3 {
     text-align: center;
 }
 
+.RulesPage .b {
+    font-weight: bold;
+}
+.RulesPage .i {
+    font-style: italic;
+    float: right;
+}
+.RulesPage h3 {
+    margin-top: 32px;
+    margin-bottom: 12px;
+}
+.RulesPage p {
+    margin-top: 12px;
+    margin-bottom: 12px;
+}
+.RulesPage p.disclaimer {
+    margin-bottom: 32px;
+}

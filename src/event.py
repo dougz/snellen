@@ -124,6 +124,12 @@ class AboutTheParkPage(util.TeamPageHandler):
     self.session.visit_page("about_park")
     self.render("about_the_park.html", static_content=self.static_content)
 
+class RulesPage(util.TeamPageHandler):
+  @login.required("team", require_start=False)
+  def get(self):
+    self.session.visit_page("rules")
+    self.render("rules.html", static_content=self.static_content)
+
 class VideosDataHandler(util.TeamHandler):
   @login.required("team", require_start=False)
   def get(self):
@@ -356,6 +362,7 @@ def GetHandlers():
     (r"/", PlayerHomePage),
     (r"/log", ActivityLogPage),
     (r"/about_the_park", AboutTheParkPage),
+    (r"/rules", RulesPage),
     (r"/pins", AchievementPage),
     (r"/events", EventsPage),
     (r"/workshop", WorkshopPage),
