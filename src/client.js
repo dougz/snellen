@@ -5,7 +5,6 @@ goog.require("goog.events");
 goog.require("goog.events.KeyCodes");
 goog.require("goog.style");
 goog.require("goog.net.XhrIo");
-goog.require("goog.ui.ModalPopup");
 goog.require("goog.json.Serializer");
 
 class H2020_Dispatcher {

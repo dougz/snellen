@@ -552,7 +552,12 @@ class ActionHandler(util.AdminHandler):
   async def ACTION_complete_task(self):
     task_key = self.args.get("key")
     undone = (self.args.get("which") == "undone")
-    game.Global.STATE.mark_task_complete(task_key, not not undone)
+    if self.args.get("immediate"):
+      # do it now.
+      game.Global.STATE.complete_task(task_key)
+    else:
+      # 5-second undo period
+      game.Global.STATE.mark_task_complete(task_key, not not undone)
     self.set_status(http.client.NO_CONTENT.value)
 
   async def ACTION_update_admin_role(self):
@@ -586,6 +591,30 @@ class ActionHandler(util.AdminHandler):
     self.set_status(http.client.NO_CONTENT.value)
 
 
+class VisitPage(util.AdminPageHandler):
+  @login.required("admin")
+  def get(self, mode):
+    if not mode:
+      self.render("admin_visit.html", mode="select", js="", team_data="null")
+    else:
+      looking_for = f"-{mode}-visit"
+      teams = {}
+      for t in game.Global.STATE.task_queue.tasks.values():
+        print(t.key)
+        if t.key.endswith(looking_for):
+          teams[t.team.username] = {"name": t.team.name,
+                                    "location": t.team.attrs.get("location", "(unknown)"),
+                                    "phone": t.team.attrs.get("phone", "(unknown)"),
+                                    "key": t.key}
+      if self.application.settings.get("debug"):
+        script = ("""<script src="/closure/goog/base.js"></script>\n"""
+                  """<script src="/debug/snellen/src/visit.js"></script>""")
+      else:
+        script = f"""<script src="{self.static_content["visit-compiled.js"]}"></script>"""
+
+      self.render("admin_visit.html", mode=mode, teams=teams, team_data=json.dumps(teams), js=script)
+
+
 
 
 def GetHandlers():
@@ -605,6 +634,7 @@ def GetHandlers():
     (r"/admin/teams$", ListTeamsPage),
     (r"/admin/users$", AdminUsersPage),
     (r"/admin/server$", AdminServerPage),
+    (r"/admin/visit(?:/(penny|loony))?$", VisitPage),
 
     (r"/admin/action$", ActionHandler),
     (r"/admin/become/([a-z0-9_]+)$", BecomeTeamHandler),

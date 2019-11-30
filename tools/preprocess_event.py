@@ -162,6 +162,7 @@ def convert_static_files(out, options, lands):
                      ("ppicon2.png", f"{base}/snellen/static/ppicon2.png"),
                      ("ppicon3.png", f"{base}/snellen/static/ppicon3.png"),
                      ("admin-compiled.js", f"{base}/snellen/bin/admin-compiled.js"),
+                     ("visit-compiled.js", f"{base}/snellen/bin/visit-compiled.js"),
                      ("client-compiled.js", f"{base}/snellen/bin/client-compiled.js"),
                      ("admin.css", f"{base}/snellen/static/admin.css"),
                      ("event.css", f"{base}/snellen/static/event.css"),

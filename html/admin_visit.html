@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+      body {
+          font-family: sans-serif;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+      }
+      a, button {
+          width: 90vw;
+          height: 30vh;
+          text-align: center;
+          vertical-align: middle;
+          font-size: 144%;
+          font-weight: bold;
+          text-decoration: none;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          color: white;
+          background-color: #a32f80;
+          border-radius: 0.25in;
+          margin: 20px;
+
+        }
+      .explain { font-style: italic; }
+      .info { font-weight: bold; }
+      button:disabled {
+          background-color: #ccc;
+          color: #999;
+      }
+      div#result {
+          height: 10vh;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+      }
+      .success {
+          color: green;
+          font-weight: bold;
+          font-size: 144%;
+      }
+    </style>
+    <script>var team_data = {% raw team_data %};</script>
+    {% raw js %}
+  </head>
+  <body>
+    {% if mode == "select" %}
+    <div>
+      <a href="/admin/visit/loony">Loony visit</a>
+      <p class=explain>(First meta solve)</p>
+    </div>
+    <div>
+      <a href="/admin/visit/penny">Penny visit</a>
+      <p class=explain>(Completed inner lands)</p>
+    </div>
+    {% else %}
+    <div>
+      <select id=teamselect>
+        <option value="" selected>&ndash; select &ndash;</option>
+        {% for u, t in teams.items() %}
+        <option value="{{u}}">{{t["name"]}}</option>
+        {% end %}
+      </select>
+      <p>location: <span class="info" id="location"></span></p>
+      <p>phone: <span class="info" id="phone"></span></p>
+      <button id="enable" disabled>enable</button>
+      <button id="complete" disabled>complete</button>
+      <div id="result">
+      </div>
+    </div>
+    {% end %}
+  </body>
+</html>
