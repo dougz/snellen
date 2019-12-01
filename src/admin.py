@@ -461,7 +461,7 @@ class ActionHandler(util.AdminHandler):
     username = self.args.get("team_username")
     team = self.get_team(username)
 
-    text = self.args.get("note")
+    text = self.args.get("text")
     if not text:
       raise tornado.web.HTTPError(http.client.BAD_REQUEST)
     text = text.strip()

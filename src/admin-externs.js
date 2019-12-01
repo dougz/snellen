@@ -276,3 +276,28 @@ class FixResult {
     }
 }
 
+class Action {
+    constructor() {
+        /** @type{string} */
+        this.action;
+
+        /** @type{?string} */
+        this.team_username;
+        /** @type{?string} */
+        this.puzzle_id;
+        /** @type{?string} */
+        this.which;
+        /** @type{?string} */
+        this.key;
+        /** @type{?string} */
+        this.text;
+        /** @type{?string} */
+        this.username;
+        /** @type{?string} */
+        this.role;
+        /** @type{?string} */
+        this.hint_time;
+        /** @type{?boolean} */
+        this.reload;
+    }
+}

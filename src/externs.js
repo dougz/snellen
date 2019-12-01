@@ -310,3 +310,23 @@ class WorkshopData {
         this.allow_submit;
     }
 }
+
+class Action {
+    constructor() {
+        /** @type{string} */
+        this.action;
+
+        /** @type{?string} */
+        this.puzzle_id;
+        /** @type{?number} */
+        this.submit_id;
+        /** @type{?string} */
+        this.answer;
+        /** @type{?string} */
+        this.phone;
+        /** @type{?string} */
+        this.text;
+        /** @type{?string} */
+        this.land;
+    }
+}

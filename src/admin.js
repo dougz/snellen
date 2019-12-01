@@ -52,6 +52,8 @@ class A2020_Dispatcher {
     }
 }
 
+/** @param{Action} data */
+/** @param{function(Object)} callback */
 function A2020_DoAction(data, callback) {
     goog.net.XhrIo.send("/admin/action", callback, "POST",
                         admin2020.serializer.serialize(data));
@@ -630,7 +632,7 @@ class A2020_TeamPage {
             if (!text) return;
             A2020_DoAction({action: "add_note",
                             team_username: team_username,
-                            note: text}, Common_expect_204);
+                            text: text}, Common_expect_204);
             el.value = "";
         });
 

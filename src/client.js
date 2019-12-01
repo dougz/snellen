@@ -274,6 +274,8 @@ class H2020_Dispatcher {
     }
 }
 
+/** @param{Action} data */
+/** @param{function(Object)} callback */
 function H2020_DoAction(data, callback) {
     goog.net.XhrIo.send("/action", callback, "POST",
                         hunt2020.serializer.serialize(data));
@@ -1071,8 +1073,8 @@ class H2020_GuestServices {
     update_phone() {
         var value = this.newphone.value;
         if (value == "") return;
-        H2020_DoAction({action: "update_phone",
-                        phone: value}, Common_invoke_with_json(this, this.phone_updated));
+        H2020_DoAction({action: "update_phone", phone: value},
+                       Common_invoke_with_json(this, this.phone_updated));
     }
 
     phone_updated() {
