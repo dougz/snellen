@@ -222,14 +222,6 @@ class HintsOpenDataHandler(util.TeamHandler):
   def get(self):
     self.return_json(self.team.get_open_hints_data())
 
-class ApplyFastPassHandler(util.TeamHandler):
-  @login.required("team")
-  def get(self, land_name):
-    if self.team.apply_fastpass(land_name):
-      self.set_status(http.client.NO_CONTENT.value)
-    else:
-      return self.not_found()
-
 class AllPuzzlesPage(util.TeamPageHandler):
   @login.required("team")
   def get(self):
@@ -253,24 +245,6 @@ class SponsorPage(util.TeamPageHandler):
   def get(self):
     self.session.visit_page("sponsor")
     self.render("sponsor.html", static_content=self.static_content)
-
-class SubmitHandler(util.TeamHandler):
-  def prepare(self):
-    self.args = json.loads(self.request.body)
-
-  @login.required("team", on_fail=http.client.UNAUTHORIZED)
-  def post(self):
-    answer = self.args["answer"]
-    shortname = self.args["puzzle_id"]
-    puzzle = game.Puzzle.get_by_shortname(shortname)
-    if not puzzle: return self.not_found()
-    submit_id = self.team.next_submit_id()
-    result = self.team.submit_answer(submit_id, shortname, answer)
-    if result:
-      self.write(result)
-      self.set_status(http.client.CONFLICT.value)
-    else:
-      self.set_status(http.client.NO_CONTENT.value)
 
 class SubmitHistoryHandler(util.TeamHandler):
   @login.required("team", on_fail=http.client.UNAUTHORIZED)
@@ -299,35 +273,6 @@ class SubmitHistoryHandler(util.TeamHandler):
 
     self.return_json(d)
 
-class SubmitCancelHandler(util.TeamHandler):
-  @login.required("team", on_fail=http.client.UNAUTHORIZED)
-  def get(self, shortname, submit_id):
-    submit_id = int(submit_id)
-    self.team.cancel_submission(submit_id, shortname)
-    self.team.send_messages([{"method": "history_change", "puzzle_id": shortname}])
-    self.set_status(http.client.NO_CONTENT.value)
-
-class HintRequestHandler(util.TeamHandler):
-  def prepare(self):
-    self.args = json.loads(self.request.body)
-
-  @login.required("team", on_fail=http.client.UNAUTHORIZED)
-  def post(self):
-    text = self.args["text"].rstrip()
-    text = html.escape(text).replace("\n", "<br>")
-    shortname = self.args["puzzle_id"]
-    puzzle = game.Puzzle.get_by_shortname(shortname)
-    if not puzzle:
-      return self.not_found()
-    ps = self.team.puzzle_state[puzzle]
-    if not ps.hints_available:
-      raise tornado.web.HTTPError(http.client.BAD_REQUEST)
-    if self.team.current_hint_puzzlestate not in (None, ps):
-      raise tornado.web.HTTPError(http.client.BAD_REQUEST)
-    self.team.add_hint_text(shortname, None, text)
-    self.set_status(http.client.NO_CONTENT.value)
-    asyncio.create_task(login.AdminUser.flush_messages())
-
 class HintHistoryHandler(util.TeamHandler):
   @login.required("team", on_fail=http.client.UNAUTHORIZED)
   def get(self, shortname):
@@ -338,12 +283,29 @@ class HintHistoryHandler(util.TeamHandler):
          "puzzle_id": ps.puzzle.shortname}
     self.return_json(d)
 
-class UpdatePhoneHandler(util.TeamHandler):
+
+class YesterdayMetaDataHandler(util.TeamHandler):
+  @login.required("team")
+  def get(self):
+    self.return_json(self.team.get_jukebox_data())
+
+
+class ActionHandler(util.AdminHandler):
   def prepare(self):
     self.args = json.loads(self.request.body)
 
   @login.required("team", on_fail=http.client.UNAUTHORIZED)
-  def post(self):
+  async def post(self):
+    self.action = self.args.get("action", "")
+    fn = getattr(self, "ACTION_" + self.action, None)
+    if fn:
+      await fn()
+      await self.team.flush_messages()
+    else:
+      # Unknown (or no) "action" field.
+      self.set_status(http.client.BAD_REQUEST.value)
+
+  async def ACTION_update_phone(self):
     new_phone = self.args.get("phone", "").strip()
     if not new_phone:
       self.set_status(http.client.BAD_REQUEST.value)
@@ -351,10 +313,52 @@ class UpdatePhoneHandler(util.TeamHandler):
     self.team.update_phone(new_phone)
     self.set_status(http.client.NO_CONTENT.value)
 
-class YesterdayMetaDataHandler(util.TeamHandler):
-  @login.required("team")
-  def get(self):
-    self.return_json(self.team.get_jukebox_data())
+  async def ACTION_apply_pennypass(self):
+    land_name = self.args.get("land", "")
+    if self.team.apply_fastpass(land_name):
+      self.set_status(http.client.NO_CONTENT.value)
+    else:
+      return self.not_found()
+
+  async def ACTION_hint_request(self):
+    text = self.args["text"].rstrip()
+    text = html.escape(text).replace("\n", "<br>")
+    shortname = self.args["puzzle_id"]
+    puzzle = game.Puzzle.get_by_shortname(shortname)
+    if not puzzle:
+      return self.not_found()
+    ps = self.team.puzzle_state[puzzle]
+    if not ps.hints_available:
+      self.set_status(http.client.BAD_REQUEST.value)
+      return
+    if self.team.current_hint_puzzlestate not in (None, ps):
+      self.set_status(http.client.BAD_REQUEST.value)
+      return
+    self.team.add_hint_text(shortname, None, text)
+    self.set_status(http.client.NO_CONTENT.value)
+    await login.AdminUser.flush_messages()
+
+  async def ACTION_cancel_submit(self):
+    shortname = self.args.get("puzzle_id", "")
+    submit_id = self.args.get("submit_id", -1)
+    submit_id = int(submit_id)
+    self.team.cancel_submission(submit_id, shortname)
+    self.team.send_messages([{"method": "history_change", "puzzle_id": shortname}])
+    self.set_status(http.client.NO_CONTENT.value)
+
+  async def ACTION_submit(self):
+    answer = self.args["answer"]
+    shortname = self.args["puzzle_id"]
+    puzzle = game.Puzzle.get_by_shortname(shortname)
+    if not puzzle: return self.not_found()
+    submit_id = self.team.next_submit_id()
+    result = self.team.submit_answer(submit_id, shortname, answer)
+    if result:
+      self.write(result)
+      self.set_status(http.client.CONFLICT.value)
+    else:
+      self.set_status(http.client.NO_CONTENT.value)
+
 
 def GetHandlers():
   handlers = [
@@ -375,11 +379,7 @@ def GetHandlers():
     (r"/land/([a-z0-9_]+)", LandMapPage),
     (r"/puzzle/([a-z0-9_]+)/?", PuzzlePage),
 
-    (r"/submit", SubmitHandler),
-    (r"/cancel/([a-z][a-z0-9_]*)/(\d+)", SubmitCancelHandler),
-    (r"/hintrequest", HintRequestHandler),
-    (r"/pennypass/([a-z][a-z0-9_]*)$", ApplyFastPassHandler),
-    (r"/updatephone", UpdatePhoneHandler),
+    (r"/action$", ActionHandler),
 
     (r"/js/submit/([a-z][a-z0-9_]*)$", SubmitHistoryHandler),
     (r"/js/log", ActivityLogDataHandler),

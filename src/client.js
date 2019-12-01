@@ -274,6 +274,11 @@ class H2020_Dispatcher {
     }
 }
 
+function H2020_DoAction(data, callback) {
+    goog.net.XhrIo.send("/action", callback, "POST",
+                        hunt2020.serializer.serialize(data));
+}
+
 class H2020_EmojiPicker {
     constructor(parent) {
         /** @type{boolean} */
@@ -474,8 +479,6 @@ class H2020_SubmitPanel {
     constructor() {
         /** @type{boolean} */
         this.built = false;
-        /** @type{Object|null} */
-        this.serializer = null;
 
         /** @type{?Element} */
         this.submitpanel = null;
@@ -497,8 +500,6 @@ class H2020_SubmitPanel {
     }
 
     build() {
-        this.serializer = new goog.json.Serializer();
-
         this.submitpanel = goog.dom.getElement("submitpanel");
         this.input = goog.dom.getElement("answer");
         this.table = goog.dom.getElement("submit_table_body");
@@ -553,8 +554,9 @@ class H2020_SubmitPanel {
 
         var cancelsub = function(sub) {
             return function() {
-                goog.net.XhrIo.send("/cancel/" + puzzle_id + "/" + sub.submit_id,
-                                    Common_expect_204);
+                H2020_DoAction({action: "cancel_submit",
+                                puzzle_id: puzzle_id,
+                                submit_id: sub.submit_id}, Common_expect_204);
             };
         };
 
@@ -624,19 +626,21 @@ class H2020_SubmitPanel {
         if (this.emoji_picker) {
           this.emoji_picker.clear_input();
         }
-        goog.net.XhrIo.send("/submit", function(e) {
-            var code = e.target.getStatus();
-            if (code == 409) {
-                var text = e.target.getResponseText();
-                if (typeof twemoji !== 'undefined') {
-                  text = twemoji.parse(text);
+        H2020_DoAction(
+            {action: "submit", puzzle_id: puzzle_id, answer: answer},
+            function(e) {
+                var code = e.target.getStatus();
+                if (code == 409) {
+                    var text = e.target.getResponseText();
+                    if (typeof twemoji !== 'undefined') {
+                        text = twemoji.parse(text);
+                    }
+                    hunt2020.toast_manager.add_toast("You've already submitted <b>" + text + "</b>.",
+                                                     5000, null, "salmon");
+                } else if (code != 204) {
+                    alert(e.target.getResponseText());
                 }
-                hunt2020.toast_manager.add_toast("You've already submitted <b>" + text + "</b>.",
-                                                 5000, null, "salmon");
-            } else if (code != 204) {
-                alert(e.target.getResponseText());
-            }
-        }, "POST", this.serializer.serialize({"puzzle_id": puzzle_id, "answer": answer}));
+            });
     }
 
     onkeydown(e) {
@@ -1027,7 +1031,6 @@ class H2020_GuestServices {
         /** @type{?string} */
         this.restricted_to = null;
 
-        this.serializer = new goog.json.Serializer();
         /** @type{Element} */
         this.textarea = goog.dom.getElement("hinttext");
         /** @type{Element} */
@@ -1068,8 +1071,8 @@ class H2020_GuestServices {
     update_phone() {
         var value = this.newphone.value;
         if (value == "") return;
-        goog.net.XhrIo.send("/updatephone", Common_invoke_with_json(this, this.phone_updated),
-                            "POST", this.serializer.serialize({"phone": value}));
+        H2020_DoAction({action: "update_phone",
+                        phone: value}, Common_invoke_with_json(this, this.phone_updated));
     }
 
     phone_updated() {
@@ -1131,9 +1134,9 @@ class H2020_GuestServices {
         var text = this.textarea.value;
         if (text == "") return;
         this.textarea.value = "";
-        goog.net.XhrIo.send("/hintrequest", Common_expect_204,
-                            "POST", this.serializer.serialize({"puzzle_id": this.hint_selected,
-                                                               "text": text}));
+        H2020_DoAction({action: "hint_request",
+                        puzzle_id: this.hint_selected,
+                        text: text}, Common_expect_204);
     }
 
     /** @param{OpenHints} data */
@@ -1290,7 +1293,8 @@ class H2020_GuestServices {
 
     use() {
         if (!this.sel_shortname) return;
-        goog.net.XhrIo.send("/pennypass/" + this.sel_shortname, Common_expect_204);
+        H2020_DoAction({action: "apply_pennypass",
+                        land: this.sel_shortname}, Common_expect_204);
         goog.dom.classlist.remove(this.sel_div, "fpselected");
         this.sel_div = null;
         this.sel_shortname = null;
@@ -1299,6 +1303,7 @@ class H2020_GuestServices {
 
 
 var hunt2020 = {
+    serializer: null,
     waiter: null,
     submit_panel: null,
     hint_panel: null,
@@ -1361,6 +1366,7 @@ function refresh_header(dispatcher) {
 window.onload = function() {
     console.log("page init");
 
+    hunt2020.serializer = new goog.json.Serializer();
     hunt2020.time_formatter = new Common_TimeFormatter();
     hunt2020.counter = new Common_Counter(hunt2020.time_formatter);
 
