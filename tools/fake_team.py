@@ -66,6 +66,9 @@ async def main(options):
     "tornado.curl_httpclient.CurlAsyncHTTPClient", max_clients=10000)
   client = tornado.httpclient.AsyncHTTPClient()
 
+  logins = asyncio.Semaphore(value=2)
+  options.logins = logins
+
   await asyncio.gather(*[simulate_team(client, username, "snth", options) for username in TEAMS[:options.teams]],
                        simulate_admin(client, ADMIN[0], "snth", options),
                        show_stats(options))
@@ -73,27 +76,28 @@ async def main(options):
 
 async def simulate_team(client, username, password, options):
   print(f"starting {username}")
-  await asyncio.gather(*[simulate_browser(f"{username}_{i}", client, username, password, i * .025, options) for i in range(options.browsers)])
+  await asyncio.gather(*[simulate_browser(f"{username}_{i}", client, username, password, i * .1, options) for i in range(options.browsers)])
 
 async def simulate_admin(client, username, password, options):
-  print(f"--- ADMIN {username} logging in ---")
 
   # Submit the login page.
 
-  req = tornado.httpclient.HTTPRequest(
-    f"{options.base_url}/login_submit",
-    method="POST",
-    body=f"username={username}&password={password}",
-    follow_redirects=False)
+  async with options.logins:
+    print(f"--- ADMIN {username} logging in ---")
+    req = tornado.httpclient.HTTPRequest(
+      f"{options.base_url}/login_submit",
+      method="POST",
+      body=f"username={username}&password={password}",
+      follow_redirects=False)
 
-  try:
-    response = await client.fetch(req)
-    assert False
-  except tornado.httpclient.HTTPClientError as e:
-    assert e.code == 302
-    cookie = e.response.headers["Set-Cookie"].split(";")[0]
+    try:
+      response = await client.fetch(req)
+      assert False
+    except tornado.httpclient.HTTPClientError as e:
+      assert e.code == 302
+      cookie = e.response.headers["Set-Cookie"].split(";")[0]
 
-    print(f"--- ADMIN {username} logged in ---")
+      print(f"--- ADMIN {username} logged in ---")
 
   await tasker(username, cookie, client, options)
 
@@ -148,22 +152,22 @@ async def tasker(username, cookie, client, options):
 async def simulate_browser(my_id, client, username, password, delay, options):
   await asyncio.sleep(delay)
 
-  print(f"--- {my_id} logging in ---")
-
   # Submit the login page.
 
-  req = tornado.httpclient.HTTPRequest(
-    f"{options.base_url}/login_submit",
-    method="POST",
-    body=f"username={username}&password={password}",
-    follow_redirects=False)
+  async with options.logins:
+    print(f"--- {my_id} logging in ---")
+    req = tornado.httpclient.HTTPRequest(
+      f"{options.base_url}/login_submit",
+      method="POST",
+      body=f"username={username}&password={password}",
+      follow_redirects=False)
 
-  try:
-    response = await client.fetch(req)
-    assert False
-  except tornado.httpclient.HTTPClientError as e:
-    assert e.code == 302
-    cookie = e.response.headers["Set-Cookie"].split(";")[0]
+    try:
+      response = await client.fetch(req)
+      assert False
+    except tornado.httpclient.HTTPClientError as e:
+      assert e.code == 302
+      cookie = e.response.headers["Set-Cookie"].split(";")[0]
 
     print(f"--- {my_id} logged in ---")
 
@@ -177,8 +181,6 @@ async def solver(my_id, cookie, client, options):
     if not await solve_one(my_id, cookie, client, options): break
 
 async def solve_one(my_id, cookie, client, options):
-  print(f"solve_one {my_id}")
-
   req = tornado.httpclient.HTTPRequest(
     f"{options.base_url}/js/puzzles",
     connect_timeout=5.0,

@@ -276,6 +276,8 @@ class A2020_TaskQueue {
         var x = localStorage.getItem("tqfilter");
         if (x) {
             saved = x.split(",");
+        } else {
+            saved = kinds;
         }
 
         for (var i = 0; i < kinds.length; ++i) {
