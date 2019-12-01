@@ -57,9 +57,14 @@ function reload() {
 }
 
 window.onload = function() {
-    goog.events.listen(goog.dom.getElement("teamselect"), goog.events.EventType.CHANGE, show_team);
+    var el;
 
-    goog.events.listen(goog.dom.getElement("enable"), goog.events.EventType.CLICK, enable);
-    goog.events.listen(goog.dom.getElement("complete"), goog.events.EventType.CLICK, complete);
-    goog.events.listen(goog.dom.getElement("reload"), goog.events.EventType.CLICK, reload);
+    el = goog.dom.getElement("teamselect");
+    if (el) goog.events.listen(el, goog.events.EventType.CHANGE, show_team);
+    el = goog.dom.getElement("enable");
+    if (el) goog.events.listen(el, goog.events.EventType.CLICK, enable);
+    el = goog.dom.getElement("complete");
+    if (el) goog.events.listen(el, goog.events.EventType.CLICK, complete);
+    el = goog.dom.getElement("reload");
+    if (el) goog.events.listen(el, goog.events.EventType.CLICK, reload);
 }

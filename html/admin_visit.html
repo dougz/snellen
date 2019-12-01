@@ -86,8 +86,8 @@
     {% else %}
     <select id=teamselect>
       <option value="" selected>&ndash; select &ndash;</option>
-      {% for u, t in teams.items() %}
-      <option value="{{u}}">{{t["name"]}}</option>
+      {% for u in ordered %}
+      <option value="{{u}}">{{teams[u]["name"]}}</option>
       {% end %}
     </select>
     <p>location: <span class="info" id="location">&nbsp;</span></p>

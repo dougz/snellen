@@ -599,19 +599,24 @@ class VisitPage(util.AdminPageHandler):
     else:
       looking_for = f"-{mode}-visit"
       teams = {}
+      ordered = []
       for t in game.Global.STATE.task_queue.tasks.values():
         if t.key.endswith(looking_for):
+          ordered.append((t.team.name, t.team.username))
           teams[t.team.username] = {"name": t.team.name,
                                     "location": t.team.attrs.get("location", "(unknown)"),
                                     "phone": t.team.attrs.get("phone", "(unknown)"),
                                     "key": t.key}
+      ordered.sort()
       if self.application.settings.get("debug"):
         script = ("""<script src="/closure/goog/base.js"></script>\n"""
                   """<script src="/debug/snellen/src/visit.js"></script>""")
       else:
         script = f"""<script src="{self.static_content["visit-compiled.js"]}"></script>"""
 
-      self.render("admin_visit.html", mode=mode, teams=teams, team_data=json.dumps(teams), js=script)
+      self.render("admin_visit.html", mode=mode, teams=teams,
+                  ordered=[x[1] for x in ordered],
+                  team_data=json.dumps(teams), js=script)
 
 
 
