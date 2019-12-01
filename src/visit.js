@@ -52,9 +52,14 @@ function result(e) {
     goog.dom.getElement("complete").disabled = true;
 }
 
+function reload() {
+    location.reload(true);
+}
+
 window.onload = function() {
     goog.events.listen(goog.dom.getElement("teamselect"), goog.events.EventType.CHANGE, show_team);
 
     goog.events.listen(goog.dom.getElement("enable"), goog.events.EventType.CLICK, enable);
     goog.events.listen(goog.dom.getElement("complete"), goog.events.EventType.CLICK, complete);
+    goog.events.listen(goog.dom.getElement("reload"), goog.events.EventType.CLICK, reload);
 }

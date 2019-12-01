@@ -4,15 +4,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
       body {
+          margin: 0;
+          min-height: 100vh;
           font-family: sans-serif;
           display: flex;
           flex-direction: column;
-          justify-content: center;
+          justify-content: space-evenly;
           align-items: center;
+          font-size: x-large;
       }
       a, button {
           width: 90vw;
-          height: 30vh;
+          flex-grow: 2;
           text-align: center;
           vertical-align: middle;
           font-size: 144%;
@@ -25,10 +28,26 @@
           background-color: #a32f80;
           border-radius: 0.25in;
           margin: 20px;
-
-        }
-      .explain { font-style: italic; }
-      .info { font-weight: bold; }
+          border: none;
+      }
+      div#nav {
+          flex-grow: 1;
+          display: flex;
+          justify-content: space-evenly;
+          align-items: stretch;
+      }
+      div#nav button, div#nav a {
+          width: 40vw;
+          background-color: #ff6363;
+      }
+      .explain {
+          font-style: italic;
+          margin: 0 0 20px 0;
+      }
+      .info {
+          font-weight: bold;
+          width: 80vw;
+      }
       button:disabled {
           background-color: #ccc;
           color: #999;
@@ -44,35 +63,39 @@
           font-weight: bold;
           font-size: 144%;
       }
+      p { width: 90vw; }
+      select { font-size: 40px; width: 90vw; }
+
     </style>
     <script>var team_data = {% raw team_data %};</script>
     {% raw js %}
   </head>
   <body>
     {% if mode == "select" %}
-    <div>
-      <a href="/admin/visit/loony">Loony visit</a>
-      <p class=explain>(First meta solve)</p>
-    </div>
-    <div>
-      <a href="/admin/visit/penny">Penny visit</a>
-      <p class=explain>(Completed inner lands)</p>
-    </div>
+    <a href="/admin/visit/loony">Loony visit</a>
+    <span class=explain>(First meta solve)</span>
+    <a href="/admin/visit/penny">Penny visit</a>
+    <span class=explain>(Completed inner lands)</span>
     {% else %}
-    <div>
-      <select id=teamselect>
-        <option value="" selected>&ndash; select &ndash;</option>
-        {% for u, t in teams.items() %}
-        <option value="{{u}}">{{t["name"]}}</option>
-        {% end %}
-      </select>
-      <p>location: <span class="info" id="location"></span></p>
-      <p>phone: <span class="info" id="phone"></span></p>
-      <button id="enable" disabled>enable</button>
-      <button id="complete" disabled>complete</button>
-      <div id="result">
-      </div>
+    <div id="nav">
+      <button id="reload">reload</button>
+      <a href="/admin/visit">back</a>
     </div>
+    {% if not teams %}
+    <p class=explain style="flex-grow: 3;">no {{mode}} visits waiting</p>
+    {% else %}
+    <select id=teamselect>
+      <option value="" selected>&ndash; select &ndash;</option>
+      {% for u, t in teams.items() %}
+      <option value="{{u}}">{{t["name"]}}</option>
+      {% end %}
+    </select>
+    <p>location: <span class="info" id="location">&nbsp;</span></p>
+    <p>phone: <span class="info" id="phone">&nbsp;</span></p>
+    <button id="enable" disabled>enable &#x25bc;</button>
+    <button id="complete" disabled>complete</button>
+    <div id="result"></div>
+    {% end %}
     {% end %}
   </body>
 </html>
