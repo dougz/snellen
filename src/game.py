@@ -2393,9 +2393,16 @@ class Workshop:
 
   @classmethod
   def post_init(cls):
+    missing = []
     for p in cls.ALL_PENNIES.values():
-      p.puzzle = Puzzle.get_by_shortname(p.puzzle)
+      shortname = p.puzzle
+      p.puzzle = Puzzle.get_by_shortname(shortname)
+      if not p.puzzle:
+        missing.append(shortname)
       cls.PENNY_PUZZLES.add(p.puzzle)
+
+    if missing:
+      raise ValueError(f"missing pennies: {', '.join(missing)}")
 
     p = Puzzle("workshop")
     cls.PUZZLE = p
