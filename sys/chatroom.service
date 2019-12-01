@@ -1,0 +1,13 @@
+[Unit]
+Description=Hunt 2020 Chatroom (chatroom)
+
+[Service]
+Type=simple
+Environment=HUNT2020_BASE=/sites/hunt2020
+Environment=PYTHONPATH=/sites/hunt2020/snellen/src
+WorkingDirectory=/sites/hunt2020/chatroom
+ExecStart=/sites/hunt2020/chatroom/chatroom.py
+
+[Install]
+WantedBy=hunt2020.target
+

@@ -32,7 +32,7 @@ root="${t}/${version}"
 base="${t}/${version}${INSTALL_DIR}"
 debdir="${t}/${version}/DEBIAN"
 
-PUZZLE_SERVERS=(badart tugofwar tunnel_of_love hat_venn_dor masked_images coven)
+PUZZLE_SERVERS=(badart tugofwar tunnel_of_love hat_venn_dor masked_images coven chatroom)
 
 ##
 ## base server
