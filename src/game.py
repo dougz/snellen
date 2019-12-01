@@ -195,8 +195,6 @@ class TaskQueue:
       total += 1
       if task.claim: claimed += 1
 
-    q.sort(key=lambda d: (d["when"], d["team"]))
-
     self.cached_json = json.dumps({"queue": q})
     self.cached_bbdata = {"size": total, "claimed": claimed}
 

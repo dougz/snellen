@@ -290,6 +290,48 @@ class A2020_TaskQueue {
                                goog.bind(this.toggle_filter, this, k));
             el.appendChild(cb);
         }
+
+        this.sort_age = goog.dom.getElement("tqsort_age");
+        this.sort_team = goog.dom.getElement("tqsort_team");
+        goog.events.listen(this.sort_age, goog.events.EventType.CLICK,
+                           goog.bind(this.change_sort, this, "age"));
+        goog.events.listen(this.sort_team, goog.events.EventType.CLICK,
+                           goog.bind(this.change_sort, this, "team"));
+        this.sort_key = null;
+
+        var sort = localStorage.getItem("tqsort");
+        if (!sort) sort = "age";
+        this.change_sort(sort, null);
+
+        this.comparators = {age: function(a, b) { return a.when - b.when; },
+                            team: function(a, b) {
+                                if (a.team < b.team) {
+                                    return -1;
+                                } else if (a.team > b.team) {
+                                    return 1;
+                                } else {
+                                    return 0;
+                                }
+                            }}
+    }
+
+    change_sort(newsort, e) {
+        if (this.sort_key == newsort) return;
+        this.sort_key = newsort;
+        if (newsort == "age") {
+            goog.dom.classlist.remove(this.sort_age, "off");
+            goog.dom.classlist.add(this.sort_team, "off");
+        } else {
+            goog.dom.classlist.add(this.sort_age, "off");
+            goog.dom.classlist.remove(this.sort_team, "off");
+        }
+        if (e) {
+            localStorage.setItem("tqsort", newsort);
+            e.target.blur();
+        }
+        if (this.last_response) {
+            this.render_queue(this.last_response);
+        }
     }
 
     toggle_filter(kind, e) {
@@ -325,6 +367,9 @@ class A2020_TaskQueue {
         this.tbody.innerHTML = "";
         var now = (new Date()).getTime() / 1000.0;
         var count = 0;
+
+        response.queue.sort(this.comparators[this.sort_key]);
+
         for (var i = 0; i < response.queue.length; ++i) {
             var msg = response.queue[i];
             if (!this.filter[msg.kind]) continue;
