@@ -1087,7 +1087,7 @@ class H2020_GuestServices {
     }
 
     update_hint_history() {
-        goog.net.XhrIo.send("/hinthistory/" + this.hint_selected,
+        goog.net.XhrIo.send("/js/hints/" + this.hint_selected,
                             Common_invoke_with_json(this, this.render_hint_history));
     }
 

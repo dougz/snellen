@@ -192,7 +192,7 @@ class RunaroundPage(util.TeamPageHandler):
 class RunaroundDataHandler(util.TeamHandler):
   @login.required("team", require_start=False)
   def get(self):
-    self.write(json.dumps({}))
+    self.return_json(None)
 
 class ErrataPage(util.TeamPageHandler):
   @login.required("team")
@@ -334,10 +334,9 @@ class HintHistoryHandler(util.TeamHandler):
     ps = self.team.get_puzzle_state(shortname)
     if not ps:
       return self.not_found()
-
     d = {"history": [msg.json_dict() for msg in ps.hints if not msg.admin_only],
          "puzzle_id": ps.puzzle.shortname}
-    self.write(json.dumps(d))
+    self.return_json(d)
 
 class UpdatePhoneHandler(util.TeamHandler):
   def prepare(self):
@@ -360,6 +359,7 @@ class YesterdayMetaDataHandler(util.TeamHandler):
 def GetHandlers():
   handlers = [
     (r"/", PlayerHomePage),
+
     (r"/log", ActivityLogPage),
     (r"/about_the_park", AboutTheParkPage),
     (r"/guide", GuidePage),
@@ -374,12 +374,13 @@ def GetHandlers():
     (r"/sponsors", SponsorPage),
     (r"/land/([a-z0-9_]+)", LandMapPage),
     (r"/puzzle/([a-z0-9_]+)/?", PuzzlePage),
+
     (r"/submit", SubmitHandler),
     (r"/cancel/([a-z][a-z0-9_]*)/(\d+)", SubmitCancelHandler),
     (r"/hintrequest", HintRequestHandler),
-    (r"/hinthistory/([a-z][a-z0-9_]*)", HintHistoryHandler),
     (r"/pennypass/([a-z][a-z0-9_]*)$", ApplyFastPassHandler),
     (r"/updatephone", UpdatePhoneHandler),
+
     (r"/js/submit/([a-z][a-z0-9_]*)$", SubmitHistoryHandler),
     (r"/js/log", ActivityLogDataHandler),
     (r"/js/pins", AchievementDataHandler),
@@ -390,6 +391,7 @@ def GetHandlers():
     (r"/js/workshop", WorkshopDataHandler),
     (r"/js/map/([a-z][a-z0-9_]+)$", MapDataHandler),
     (r"/js/yes", YesterdayMetaDataHandler),
+    (r"/js/hints/([a-z][a-z0-9_]*)$", HintHistoryHandler),
   ]
 
   return handlers
