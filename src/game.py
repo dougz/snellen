@@ -1433,7 +1433,7 @@ class Team(login.LoginUser):
   # BEAM!
   def compute_puzzle_beam(self, now):
     #print("-----------------------------")
-    open_all = (OPTIONS.open_all or self.username == "leftout")
+    open_all = (OPTIONS.open_all or self.attrs.get("all_open", False))
 
     opened = []
     locked = []
