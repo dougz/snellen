@@ -4,6 +4,7 @@ import argparse
 import asyncio
 import copy
 import json
+import math
 import pprint
 import random
 import re
@@ -145,7 +146,7 @@ async def tasker(username, cookie, client, options):
       count += 1
       if count >= 20: break
 
-    await asyncio.sleep(5)
+    await asyncio.sleep(10)
 
 
 
@@ -175,9 +176,10 @@ async def simulate_browser(my_id, client, username, password, delay, options):
                        *[simulate_tab(my_id, i, cookie, client, options) for i in range(options.tabs)])
 
 async def solver(my_id, cookie, client, options):
-  goodness = random.random() * 18 + 2
+  solves_per_minute = random.random() * 8 + 1
   while True:
-    await asyncio.sleep(goodness)
+    delay = -math.log(1.0 - random.random()) / solves_per_minute * 60
+    await asyncio.sleep(delay)
     if not await solve_one(my_id, cookie, client, options): break
 
 async def solve_one(my_id, cookie, client, options):
@@ -222,10 +224,10 @@ async def solve_one(my_id, cookie, client, options):
       break
   print(f"{my_id} submitting {a} for {to_solve}")
 
-  d = {"answer": a, "puzzle_id": to_solve}
+  d = {"action": "submit", "answer": a, "puzzle_id": to_solve}
 
   req = tornado.httpclient.HTTPRequest(
-    f"{options.base_url}/submit",
+    f"{options.base_url}/action",
     method="POST",
     body=json.dumps(d),
     follow_redirects=False,
