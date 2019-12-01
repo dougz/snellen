@@ -600,7 +600,6 @@ class VisitPage(util.AdminPageHandler):
       looking_for = f"-{mode}-visit"
       teams = {}
       for t in game.Global.STATE.task_queue.tasks.values():
-        print(t.key)
         if t.key.endswith(looking_for):
           teams[t.team.username] = {"name": t.team.name,
                                     "location": t.team.attrs.get("location", "(unknown)"),
