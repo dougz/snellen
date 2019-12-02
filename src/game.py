@@ -425,8 +425,9 @@ class Submission:
 
     if self.state == self.CORRECT:
       if len(self.puzzle.answers) > 1:
-        self.team.activity_log.add(now, f"Got answer <b>{html.escape(answer)}</b> for {self.puzzle.html}.")
-        self.team.admin_log.add(now, f"Got answer <b>{html.escape(answer)}</b> for {self.puzzle_state.admin_html_puzzle}.")
+        a = self.puzzle.display_answers[answer]
+        self.team.activity_log.add(now, f"Got answer <b>{html.escape(a)}</b> for {self.puzzle.html}.")
+        self.team.admin_log.add(now, f"Got answer <b>{html.escape(a)}</b> for {self.puzzle_state.admin_html_puzzle}.")
       self.puzzle_state.answers_found.add(answer)
       fn = getattr(self.puzzle, "on_correct_answer", None)
       self.team.cached_all_puzzles_data = None
@@ -1211,6 +1212,7 @@ class Team(login.LoginUser):
     self.dirty_lands.add("home")
     self.cached_mapdata.pop(Land.BY_SHORTNAME["outer"], None)
     self.cached_mapdata.pop(Land.BY_SHORTNAME["inner_only"], None)
+    self.invalidate(Workshop.PUZZLE)
     if not save_state.REPLAYING:
       asyncio.create_task(self.flush_messages())
 
@@ -1263,7 +1265,7 @@ class Team(login.LoginUser):
 
     land_offsets = []
     lx = 0
-    for land in Land.ordered_lands:
+    for land in Land.ordered_lands + [MiscLand.get()]:
       d = {"symbol": land.symbol,
            "color": land.color,
            "left": lx}
@@ -1320,6 +1322,17 @@ class Team(login.LoginUser):
                 ny = 0
               if nx > 1 or ny > 1: break
         lx += cx + 30
+
+      land = MiscLand.get()
+      lx = [x["left"] for x in self.bb_label_info() if x["symbol"] == land.symbol][0]
+      for (p, big, ny, r) in zip(land.all_puzzles, (False, True, True), (0, 1, 3), (5, 9, 12)):
+        ps = self.puzzle_state[p]
+        cy = ny*15 + 7
+        if big:
+          out.append(f'<circle cx="{lx+14.5}" cy="{cy+7.5}" r="{r}" class="bb-{ps.state}{used_hints} bbp-{p.bbid}"/>')
+        else:
+          out.append(f'<circle cx="{lx+14.5}" cy="{cy}" r="{r}" class="bb-{ps.state}{used_hints} bbp-{p.bbid}"/>')
+      lx += 30
 
       out.insert(0, f'<svg xmlns="http://www.w3.org/2000/svg" width="{lx}" height="74" viewBox="0 0 {lx} 74">')
       out.append("</g></svg>")
@@ -1516,6 +1529,7 @@ class Team(login.LoginUser):
       else:
         # Open the runaround!
         self.open_puzzle(Runaround.PUZZLE, now)
+        self.invalidate(Runaround.PUZZLE)
         self.cached_all_puzzles_data = None
 
     for st in self.puzzle_state.values():
@@ -2302,6 +2316,7 @@ class MiscLand:
     self.land_order = 1000
     self.guess_interval = 30
     self.guess_max = 4
+    self.all_puzzles = []
 
 class Event:
   ALL_EVENTS = []
@@ -2350,7 +2365,9 @@ class Event:
 
     p.on_correct_answer = on_correct_answer
 
-    p.post_init(MiscLand.get(), None)
+    land = MiscLand.get()
+    land.all_puzzles.append(p)
+    p.post_init(land, None)
 
     e = [e for e in cls.ALL_EVENTS if e.time == "__special__"][0]
     e.team_time = {}
@@ -2424,7 +2441,9 @@ class Workshop:
 
     p.submit_filter = cls.submit_filter
 
-    p.post_init(MiscLand.get(), None)
+    land = MiscLand.get()
+    land.all_puzzles.append(p)
+    p.post_init(land, None)
 
 
 class Runaround:
@@ -2442,6 +2461,8 @@ class Runaround:
     for dd in d["minis"]:
       cls.SEGMENTS.append(Runaround(dd))
 
+  @classmethod
+  def post_init(cls):
     p = Puzzle("runaround")
     cls.PUZZLE = p
 
@@ -2475,10 +2496,10 @@ class Runaround:
 
     p.on_correct_answer = on_correct_answer
 
-    p.post_init(MiscLand.get(), None)
+    land = MiscLand.get()
+    land.all_puzzles.append(p)
+    p.post_init(land, None)
 
-  @classmethod
-  def post_init(cls):
     # All land metas are needed to start the runaround ...
     for land in Land.BY_SHORTNAME.values():
       if land.meta_puzzle:
