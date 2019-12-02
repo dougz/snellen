@@ -137,7 +137,6 @@ class Session:
     self.key = base64.urlsafe_b64encode(os.urandom(18))
     self.BY_KEY[self.key] = self
     self.user = None
-    self.pending_become = None
     self.team = None
     self.capabilities = set(caps)
     self.expires = int(time.time()) + self.SESSION_TIMEOUT
@@ -182,11 +181,10 @@ class Session:
 # account with a given capability.  The browser is redirected to the
 # login or access-denied page as appropriate.
 class required:
-  def __init__(self, cap=None, on_fail=None, require_start=True, clear_become=True):
+  def __init__(self, cap=None, on_fail=None, require_start=True):
     self.cap = cap
     self.on_fail = on_fail
     self.require_start = require_start
-    self.clear_become = clear_become
 
   def bounce(self, req):
     if self.on_fail is not None:
@@ -208,7 +206,6 @@ class required:
         print(f"session {session.key} has expired")
         Session.delete_from_request(req, cookie_name)
         return self.bounce(req)
-      if self.clear_become: session.pending_become = None
       if self.cap and self.cap not in session.capabilities:
         if AdminRoles.ADMIN in session.capabilities:
           req.redirect("/no_access")

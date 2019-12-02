@@ -196,13 +196,11 @@ class TeamPuzzleDataHandler(util.AdminHandler):
 
 
 class BecomeTeamHandler(util.AdminPageHandler):
-  @login.required("admin", clear_become=False)
-  def get(self, username):
+  @login.required("admin")
+  def get(self, username, confirmed):
     team = self.get_team(username)
 
-    if self.session.pending_become == team:
-      self.session.pending_become = None
-
+    if confirmed:
       domain = self.request.headers.get("host", None)
       if not domain:
         print(f"Missing host header")
@@ -218,7 +216,6 @@ class BecomeTeamHandler(util.AdminPageHandler):
 
       self.redirect("/")
     else:
-      self.session.pending_become = team
       self.render("admin_become.html", team=team)
 
 
@@ -641,7 +638,7 @@ def GetHandlers():
     (r"/admin/visit(?:/(penny|loony))?$", VisitPage),
 
     (r"/admin/action$", ActionHandler),
-    (r"/admin/become/([a-z0-9_]+)$", BecomeTeamHandler),
+    (r"/admin/become/([a-z0-9_]+)(/confirmed)?$", BecomeTeamHandler),
     (r"/admin/change_password$", ChangePasswordHandler),
     (r"/admin/create_user$", CreateUserHandler),
 
