@@ -103,7 +103,7 @@ def main():
 
   out.save(options.output_png)
   with open(options.output_json, "w") as f:
-    json.dump(out_json, f)
+    json.dump(out_json, f, separators=",:")
 
 
 

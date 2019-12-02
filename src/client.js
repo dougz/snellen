@@ -399,7 +399,7 @@ class H2020_EmojiPicker {
         }
         var emojis = goog.dom.getElementsByClass("emoji-picker-emoji");
         for (var i = 0; i < emojis.length; ++i) {
-            var show = emojis[i].title.includes(searchQuery);
+            var show = emojis[i].getAttribute("data-search").includes(searchQuery);
             goog.style.setElementShown(emojis[i], show);
             // Show any group containing a matching emoji.
             if (show) {
@@ -1340,7 +1340,7 @@ function emoji_builder(e, ev) {
 
         for (var j = 0; j < emojis.length; ++j) {
             var em = emojis[j];
-            var title = em[0];
+            var title = em[0].split("|", 1)[0];
             var text = em[1];
             var x = em[2];
             var y = em[3];
@@ -1351,8 +1351,10 @@ function emoji_builder(e, ev) {
             d.setAttribute("data-text", text);
             d.setAttribute("data-x", x);
             d.setAttribute("data-y", y);
-            ch.push(goog.dom.createDom(
-                "SPAN", {className: "emoji-picker-emoji", title: title}, d));
+            var s = goog.dom.createDom(
+                "SPAN", {className: "emoji-picker-emoji", title: title}, d);
+            s.setAttribute("data-search", em[0]);
+            ch.push(s);
         }
         goog.dom.append(gr, ch);
         goog.dom.append(/** @type{!Node} */ (e), gr);
