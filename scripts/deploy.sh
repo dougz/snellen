@@ -107,6 +107,31 @@ for i in snellen "${PUZZLE_SERVERS[@]}"; do
 done
 install -m 0644 "snellen/sys/hunt2020.target" "${root}/lib/systemd/system/hunt2020.target"
 
+install -m 0755 -d "${root}/usr/local/sbin"
+cat >"${root}/usr/local/sbin/STOP_hunt" <<EOF
+#!/bin/bash
+systemctl stop snellen.service\\
+EOF
+for i in "${PUZZLE_SERVERS[@]}"; do
+    echo -n " ${i}.service" >>"${root}/usr/local/sbin/STOP_hunt"
+done
+cat >>"${root}/usr/local/sbin/STOP_hunt" <<EOF
+
+echo "All hunt services stopped."
+EOF
+
+cat >"${root}/usr/local/sbin/start_hunt" <<EOF
+#!/bin/bash
+systemctl start hunt2020.target
+EOF
+
+cat >"${root}/usr/local/sbin/show_hunt" <<EOF
+#!/bin/bash
+systemctl list-dependencies hunt2020.target
+EOF
+
+chmod 0755 "${root}/usr/local/sbin/start_hunt" "${root}/usr/local/sbin/STOP_hunt" "${root}/usr/local/sbin/show_hunt"
+
 ##
 ## haproxy config
 ##
