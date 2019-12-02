@@ -1461,7 +1461,7 @@ class Team(login.LoginUser):
 
       stop_after = 1000
       skip12 = False
-      if land.shortname == "cascade":
+      if not open_all and land.shortname == "cascade":
         skip12 = True
         if self.puzzle_state[land.first_submeta].state == PuzzleState.SOLVED:
           self.open_puzzle(land.second_submeta, now)
