@@ -174,7 +174,6 @@ input, button, .emoji-input {
     user-select: none;
 }
 
-@media print { #topnav { display: none; } }
 
 #topnav > span {
     display: inline-block;
@@ -959,8 +958,6 @@ div.psign b {
     font-weight: 400;
 }
 
-@media print { #landtitle { display: none; } }
-
 #puzzletitle {
     font-size: 40px;
     text-align: center;
@@ -1236,4 +1233,13 @@ a#ppicon3 {
 }
 .GuidePage p.disclaimer {
     margin-bottom: 32px;
+}
+
+@media print {
+    html { background: none; }
+    #topnav { display: none; }
+    #nonnav { display: block; background: none; }
+    #nonnav > a { display: none; }
+    #content { width: auto; }
+    #landtitle { display: none; }
 }
