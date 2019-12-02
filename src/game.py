@@ -1277,7 +1277,7 @@ class Team(login.LoginUser):
 
           while True:
             ny += 1
-            if ny == 4:
+            if ny == 5:
               nx += 1
               ny = 0
             if nx > 1 or ny > 1: break
@@ -1315,13 +1315,13 @@ class Team(login.LoginUser):
 
             while True:
               ny += 1
-              if ny == 4:
+              if ny == 5:
                 nx += 1
                 ny = 0
               if nx > 1 or ny > 1: break
         lx += cx + 30
 
-      out.insert(0, f'<svg xmlns="http://www.w3.org/2000/svg" width="{lx}" height="59" viewBox="0 0 {lx} 59">')
+      out.insert(0, f'<svg xmlns="http://www.w3.org/2000/svg" width="{lx}" height="74" viewBox="0 0 {lx} 74">')
       out.append("</g></svg>")
       svg = "".join(out)
       self.cached_bb_data["svg"] = svg
