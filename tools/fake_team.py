@@ -176,7 +176,7 @@ async def simulate_browser(my_id, client, username, password, delay, options):
                        *[simulate_tab(my_id, i, cookie, client, options) for i in range(options.tabs)])
 
 async def solver(my_id, cookie, client, options):
-  solves_per_minute = random.random() * 8 + 1
+  solves_per_minute = random.random() * 7 + 3
   while True:
     delay = -math.log(1.0 - random.random()) / solves_per_minute * 60
     await asyncio.sleep(delay)
@@ -213,7 +213,7 @@ async def solve_one(my_id, cookie, client, options):
 
   if not open_puzzles:
     print("all puzzles solved")
-    return True
+    return len(j["lands"]) < 10
 
   to_solve = random.choice(list(open_puzzles.keys()))
 

@@ -66,6 +66,8 @@ class SaverClass:
 
   @classmethod
   def replay(cls, advance_time=None):
+    start = time.time()
+    count = 1
     skipped = set()
     cls.REPLAYING = True
     try:
@@ -75,6 +77,7 @@ class SaverClass:
         saver_id, name, now, args, kwargs = record
         if advance_time:
           advance_time(now)
+        count += 1
 
         classname, num = saver_id.split(":")
         try:
@@ -104,6 +107,8 @@ class SaverClass:
 
     if skipped:
       print("Replay skipped references to: " + ", ".join(skipped))
+    dur = int((time.time() - start) * 1000)
+    print(f"Replayed {count} log items in {dur} ms.")
 
 
 save_state = SaverClass()
