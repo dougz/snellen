@@ -94,7 +94,13 @@ PUZZLE_SERVERS=(badart tugofwar tunnel_of_love hat_venn_dor masked_images sand_w
 
 for i in "${PUZZLE_SERVERS[@]}"; do
     install -m 0755 -d "${base}/${i}"
-    install -m 0755 "${i}/${i}.py" "${base}/${i}/${i}.py"
+    if [[ "$i" == "chatroom" ]]; then
+        sed -e '/# CREDENTIALS HERE/ {s/.*/BUILTIN_CREDENTIALS=\\/; r chatroom/chatroom-puzzle-credentials.json
+                }' "${i}/${i}.py" > "${base}/${i}/${i}.py"
+        chmod 0755 "${base}/${i}/${i}.py"
+    else
+        install -m 0755 "${i}/${i}.py" "${base}/${i}/${i}.py"
+    fi
 done
 
 ##
