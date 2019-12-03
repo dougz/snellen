@@ -386,7 +386,7 @@ class Submission:
         self.state = self.REQUESTED
         self.extra_response = response[0]
         Global.STATE.add_task(now, self.team.username, answer.lower(),
-                              response[1], response[2], "puzzle")
+                              response[1], response[2], None, "puzzle")
       elif response is None:
         # incorrect but "honest guess"
         self.state = self.INCORRECT
@@ -1327,6 +1327,7 @@ class Team(login.LoginUser):
       lx = [x["left"] for x in self.bb_label_info() if x["symbol"] == land.symbol][0]
       for (p, big, ny, r) in zip(land.all_puzzles, (False, True, True), (0, 1, 3), (5, 9, 12)):
         ps = self.puzzle_state[p]
+        used_hints = "-hint" if ps.hints else ""
         cy = ny*15 + 7
         if big:
           out.append(f'<circle cx="{lx+14.5}" cy="{cy+7.5}" r="{r}" class="bb-{ps.state}{used_hints} bbp-{p.bbid}"/>')
