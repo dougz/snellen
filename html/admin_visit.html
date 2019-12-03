@@ -13,7 +13,7 @@
           align-items: center;
           font-size: x-large;
       }
-      a, button {
+      a.big, button {
           width: 90vw;
           flex-grow: 2;
           text-align: center;
@@ -72,14 +72,14 @@
   </head>
   <body>
     {% if mode == "select" %}
-    <a href="/admin/visit/loony">Loony visit</a>
+    <a class=big href="/admin/visit/loony">Loony visit</a>
     <span class=explain>(First meta solve)</span>
-    <a href="/admin/visit/penny">Penny visit</a>
+    <a class=big href="/admin/visit/penny">Penny visit</a>
     <span class=explain>(Completed inner lands)</span>
     {% else %}
     <div id="nav">
       <button id="reload">reload</button>
-      <a href="/admin/visit">back</a>
+      <a class=big href="/admin/visit">back</a>
     </div>
     {% if not teams %}
     <p class=explain style="flex-grow: 3;">no {{mode}} visits waiting</p>
@@ -91,7 +91,7 @@
       {% end %}
     </select>
     <p>location: <span class="info" id="location">&nbsp;</span></p>
-    <p>phone: <span class="info" id="phone">&nbsp;</span></p>
+    <p>phone: <a class="info" id="phone">&nbsp;</a></p>
     <button id="enable" disabled>enable &#x25bc;</button>
     <button id="complete" disabled>complete</button>
     <div id="result"></div>

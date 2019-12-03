@@ -12,10 +12,12 @@ function show_team(e) {
         goog.dom.getElement("enable").disabled = false;
         goog.dom.getElement("location").innerHTML = t.location;
         goog.dom.getElement("phone").innerHTML = t.phone;
+        goog.dom.getElement("phone").href = "tel:" + t.phone;
     } else {
         goog.dom.getElement("enable").disabled = true;
         goog.dom.getElement("location").innerHTML = "";
         goog.dom.getElement("phone").innerHTML = "";
+        goog.dom.getElement("phone").href = "";
     }
     goog.dom.getElement("complete").disabled = true;
 }
