@@ -61,10 +61,32 @@ class Patch:
     self.coords_str = ",".join(t)
 
     self.highlight = Image.new("RGBA", self.image.size, (255,255,255,0))
-    for origin in ((0,0), (2,0), (-2,0), (0,2), (0,-2),
-                   (-1,-1), (-1,1), (1,1), (1,-1)):
-      self.highlight.paste((255,255,255,255), origin, self.image)
+    for ox in range(-2, 3):
+      for oy in range(-2, 3):
+        if ox in (-2,2) and oy in (-2,2): continue
+        self.highlight.paste((255,255,255,255), (ox,oy), self.image)
 
+    pixels = set()
+    for j in range(self.size[1]):
+      for i in range(self.size[0]):
+        if self.image.getpixel((i,j))[3]:
+          pixels.add((i,j))
+        elif self.highlight.getpixel((i,j))[3]:
+          pixels.add((i,j))
+
+    min_x = min(p[0] for p in pixels)
+    max_x = max(p[0] for p in pixels)
+    min_y = min(p[1] for p in pixels)
+    max_y = max(p[1] for p in pixels)
+
+    w = max_x + 1 - min_x
+    h = max_y + 1 - min_y
+
+    self.image = self.image.crop((min_x, min_y, max_x, max_y))
+    self.highlight = self.highlight.crop((min_x, min_y, max_x, max_y))
+
+    self.origin = [self.origin[0] + min_x, self.origin[1] + min_y]
+    self.size = [w, h]
 
 
 def main():
@@ -83,7 +105,7 @@ def main():
 
   parser.add_argument("html",
                       help="Image map HTML")
-  parser.add_argument("solved_image")
+  parser.add_argument("source_image")
   parser.add_argument("--under_image", default=None)
 
   options = parser.parse_args()
@@ -92,14 +114,14 @@ def main():
   options.background_color = tuple(int(options.background_color[i*2+1:i*2+3], 16) for i in range(3))
 
   html_map = get_polys(options.html)
-  solved_image = Image.open(options.solved_image).convert("RGBA")
+  source_image = Image.open(options.source_image).convert("RGBA")
   if options.under_image:
     under_image = Image.open(options.under_image).convert("RGBA")
-    assert under_image.size == solved_image.size
+    assert under_image.size == source_image.size
   else:
     under_image = None
 
-  size = solved_image.size
+  size = source_image.size
 
   icons = {}
 
@@ -107,20 +129,20 @@ def main():
     out = {}
     icons[name] = out
 
-    solved_patch = Patch(solved_image, coords)
+    patch = Patch(source_image, coords)
 
     od = {}
-    out["solved"] = od
-    od["pos"] = solved_patch.origin
-    od["poly"] = solved_patch.coords_str
-    od["size"] = solved_patch.size
-    solved_patch.image.save(os.path.join(options.output_dir, f"{name}_solved.png"))
+    out["image"] = od
+    od["pos"] = patch.origin
+    od["poly"] = patch.coords_str
+    od["size"] = patch.size
+    patch.image.save(os.path.join(options.output_dir, f"image_{name}.png"))
 
     od = {}
-    out["solved_mask"] = od
-    od["pos"] = solved_patch.origin[:]
-    od["size"] = solved_patch.size[:]
-    solved_patch.highlight.save(os.path.join(options.output_dir, f"{name}_solved_mask.png"))
+    out["mask"] = od
+    od["pos"] = patch.origin[:]
+    od["size"] = patch.size[:]
+    patch.highlight.save(os.path.join(options.output_dir, f"mask_{name}.png"))
 
     if under_image:
       under_patch = Patch(under_image, coords)
@@ -130,7 +152,7 @@ def main():
       od["pos"] = under_patch.origin
       od["poly"] = under_patch.coords_str
       od["size"] = under_patch.size
-      under_patch.image.save(os.path.join(options.output_dir, f"{name}_under.png"))
+      under_patch.image.save(os.path.join(options.output_dir, f"under_{name}.png"))
 
 
   y = { "icons": icons }

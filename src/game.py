@@ -777,18 +777,18 @@ class Team(login.LoginUser):
 
         d = {"name": p.title,
              "url": p.url,
-             "icon_url": i.solved.url,
-             "mask_url": i.solved_mask.url,
+             "icon_url": i.image.url,
+             "mask_url": i.mask.url,
              "offset": i.offset}
 
         if hasattr(p, "keeper_answers"):
           # compute the position later
           d["xywh"] = None
-          keepers.append((p.keeper_order, d, i.solved.size))
+          keepers.append((p.keeper_order, d, i.image.size))
         else:
-          d["xywh"] = i.solved.pos_size
+          d["xywh"] = i.image.pos_size
 
-        if i.solved.poly: d["poly"] = i.solved.poly
+        if i.image.poly: d["poly"] = i.image.poly
 
         if ps.answers_found:
           d["answer"] = ", ".join(sorted(p.display_answers[a] for a in ps.answers_found))
@@ -837,11 +837,11 @@ class Team(login.LoginUser):
 
         if i.to_land not in self.open_lands: continue
         d = { "name": i.to_land.title,
-              "xywh": i.solved.pos_size,
-              "poly": i.solved.poly,
+              "xywh": i.image.pos_size,
+              "poly": i.image.poly,
               "url": i.to_land.url,
-              "icon_url": i.solved.url,
-              "mask_url": i.solved_mask.url,
+              "icon_url": i.image.url,
+              "mask_url": i.mask.url,
               "offset": [0,0] }
         if i.to_land.meta_puzzle:
           p = i.to_land.meta_puzzle
@@ -1598,15 +1598,7 @@ class Icon:
     self.headerimage = d.get("headerimage")
     self.offset = d.get("offset", [0,0])
 
-    #self.locked = Subicon(d.get("locked"))
-    # self.unlocked = Subicon(d.get("unlocked"))
-    # self.unlocked_mask = Subicon(d.get("unlocked_mask"))
-    # self.unlocked_thumb = Subicon(d.get("unlocked_thumb"))
-    self.solved = Subicon(d.get("solved"))
-    self.solved_mask = Subicon(d.get("solved_mask"))
-    #self.solved_thumb = Subicon(d.get("solved_thumb"))
-
-    for opt in ("under",
+    for opt in ("image", "mask", "under",
                 "emptypipe1", "fullpipe1",
                 "emptypipe2", "fullpipe2",
                 "emptypipe0", "fullpipe0"):
@@ -1615,6 +1607,9 @@ class Icon:
         setattr(self, opt, Subicon(s))
       else:
         setattr(self, opt, None)
+
+    assert getattr(self, "image")
+    assert getattr(self, "mask")
 
 class Land:
   BY_SHORTNAME = {}
