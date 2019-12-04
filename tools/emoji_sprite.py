@@ -17,8 +17,9 @@ def main():
 
   parser = argparse.ArgumentParser(
     description="Join emoji image into sprite.")
-  parser.add_argument("--base_dir", help="Directory with inputs to process.")
-  parser.add_argument("--overlay_dir", help="Directory to receive output.")
+  parser.add_argument("--base_dir", help="Directory of all input images.")
+  parser.add_argument("--overlay_dir", help="Directory of input image overrides.")
+  parser.add_argument("--aliases", help="JSON file of alias data.")
   parser.add_argument("input_json")
   parser.add_argument("output_json")
   parser.add_argument("output_png")
@@ -31,6 +32,17 @@ def main():
     options.base_dir = os.path.join(hunt2020_base, "twemoji/assets/72x72")
   if not options.overlay_dir:
     options.overlay_dir = os.path.join(hunt2020_base, "snellen/static/overlay")
+
+  if options.aliases:
+    with open(options.aliases) as f:
+      a = json.load(f)
+    options.aliases = {}
+    for d in a.values():
+      aa = d["aliases"]
+      if aa:
+        options.aliases[d["title"]] = aa
+  else:
+    options.aliases = {}
 
   all_files = set(os.listdir(options.base_dir))
   overlay_files = set(os.listdir(options.overlay_dir))
@@ -66,14 +78,14 @@ def main():
       if title.endswith(" suit"): continue
 
       fn = "-".join(f"{ord(k):x}" for k in text) + ".png"
-      print(text, fn)
+      #print(text, fn)
 
       if fn in overlay_files:
         src_fn = os.path.join(options.overlay_dir, fn)
       elif fn in all_files:
         src_fn = os.path.join(options.base_dir, fn)
       else:
-        print(f"No input {fn}.")
+        #print(f"No input {fn}.")
         continue
 
       if os.stat(src_fn).st_size == 0: continue
@@ -88,6 +100,12 @@ def main():
       if title in names:
         print(f"duplicate: {title}")
       names.add(title)
+
+      aliases = options.aliases.get(title, ())
+      for y in aliases:
+        if y in title: continue
+        title = title + "|" + y
+
       outemojis.append((title, text, x_pos, y_pos))
       actual_count += 1
 
