@@ -854,9 +854,11 @@ div#map .icon {
     pointer-events: none;
 }
 
+/*
 div#map img.blurred {
   filter: grayscale(50%) contrast(50%) blur(2px);
 }
+*/
 
 div#map .mask {
     position: absolute;

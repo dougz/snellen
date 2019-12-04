@@ -12,7 +12,7 @@ important to not use "Storage Object Viewer"!
 
 configure CORS (gsutil cors set)
 [{"maxAgeSeconds": 3600, "method": ["GET", "HEAD"], "origin": ["https://pennypark.fun"], "responseHeader": ["Content-Type"]},
- {"maxAgeSeconds": 3600, "method": ["GET", "HEAD"], "origin": ["http://snellen"], "responseHeader": ["Content-Type"]}]
+ {"maxAgeSeconds": 3600, "method": ["GET", "HEAD"], "origin": ["http://snellen.fun"], "responseHeader": ["Content-Type"]}]
 
 
 ## Set up CDN

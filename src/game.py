@@ -1791,7 +1791,7 @@ class Puzzle:
          "answer": sub.answer}
     url = ("https://mitmh-2019-leftout-cg.netlify.com/callbacks/callbacks.html?" +
            urllib.parse.urlencode(d))
-    Global.STATE.add_task(now, sub.team.username, "concierge-callback",
+    Global.STATE.add_task(now, sub.team.username, f"concierge-callback-{sub.submit_id}",
                           "Concierge callback", url, None, "puzzle")
 
   def __hash__(self):
