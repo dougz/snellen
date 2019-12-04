@@ -818,8 +818,14 @@ class H2020_MapDraw {
                 this.map_el.appendChild(mask_el);
             }
 
+            var k;
+            if (it.solved || typeof it.solved === 'undefined') {
+                k = "icon";
+            } else {
+                k = "icon blurred";
+            }
             var el = goog.dom.createDom("IMG", {
-                src: it.icon_url, className: "icon"});
+                src: it.icon_url, className: k});
             el.style.left = "" + it.xywh[0] + "px";
             el.style.top = "" + it.xywh[1] + "px";
             this.map_el.appendChild(el);

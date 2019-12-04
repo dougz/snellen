@@ -372,26 +372,6 @@ a:hover > .landtip {
     animation: slide2 150ms ease-in reverse;
 }
 
-/** submit panel thumbnail attraction image */
-
-div#thumb {
-    position: relative;
-    margin: 20px;
-}
-
-div#thumb img.base {
-    position: absolute;
-}
-
-div#thumb .icon {
-    position: absolute;
-    pointer-events: none;
-    opacity: 0;
-    animation: fadeIn 2s ease-out forwards;
-    animation-delay: 1s;
-}
-
-
 /** submit panel **/
 
 #submitpanel {
@@ -872,6 +852,10 @@ div#map img.base {
 div#map .icon {
     position: absolute;
     pointer-events: none;
+}
+
+div#map img.blurred {
+  filter: grayscale(50%) contrast(50%) blur(2px);
 }
 
 div#map .mask {

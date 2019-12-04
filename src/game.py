@@ -752,14 +752,14 @@ class Team(login.LoginUser):
 
     if land.shortname == "safari":
       io = land.icons["sign_overlay"]
-      iod = {"icon_url": io.solved.url,
-             "xywh": io.solved.pos_size,
+      iod = {"icon_url": io.image.url,
+             "xywh": io.image.pos_size,
              "name": "Each animal has up to <b>five</b> answers!  To see how many an animal has, click the SUBMIT button."}
 
       i = land.icons["sign"]
-      d = {"icon_url": i.solved.url,
-           "xywh": i.solved.pos_size,
-           "poly": i.solved.poly,
+      d = {"icon_url": i.image.url,
+           "xywh": i.image.pos_size,
+           "poly": i.image.poly,
            "special": iod}
       items.append(((-1, "@",), d))
 
@@ -1609,7 +1609,6 @@ class Icon:
         setattr(self, opt, None)
 
     assert getattr(self, "image")
-    assert getattr(self, "mask")
 
 class Land:
   BY_SHORTNAME = {}
