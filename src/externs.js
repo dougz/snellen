@@ -100,6 +100,8 @@ class Submission {
         /** @type{string} */
         this.state;
         /** @type{string} */
+        this.color;
+        /** @type{string} */
         this.response;
         /** @type{number} */
         this.submit_id;

@@ -910,33 +910,33 @@ td.submit-time {
     width: 200px;
 }
 
-tr.submit-correct {
+tr.submit-green {
     background-color: #ddffdd;
     border-top: 1px solid #999;
 }
 
-tr.submit-incorrect {
+tr.submit-red {
     background-color: #fee;
     border-top: 1px solid #999;
 }
 
-tr.submit-partial, tr.submit-extra, tr.submit-requested {
+tr.submit-yellow {
     background-color: #fdfd96;
     border-top: 1px solid #999;
 }
 
-tr.submit-extra {
-    background-color: #fdfd96;
-}
-
-tr.submit-pending {
+tr.submit-gray {
     background-color: #dddddd;
     border-top: 1px solid #999;
 }
 
-tr.submit-reset {
+tr.submit-blue {
     background-color: #ddf4ff;
     border-top: 1px solid #999;
+}
+
+tr.submit-extra {
+    border-top: none;
 }
 
 td.submit-state {
@@ -945,11 +945,11 @@ td.submit-state {
 }
 
 
-tr.submit-correct .submit-state { color: #090 }
-tr.submit-incorrect .submit-state { color: #c00 }
-tr.submit-partial .submit-state { color: #990 }
-tr.submit-requested .submit-state { color: #990 }
-tr.submit-pending .submit-state { color: #666 }
+tr.submit-green .submit-state { color: #090 }
+tr.submit-red .submit-state { color: #c00 }
+tr.submit-yellow .submit-state { color: #990 }
+tr.submit-blue .submit-state { color: #009 }
+tr.submit-gray .submit-state { color: #666 }
 
 #tppsubmit tr.submit-extra td {
     padding-left: 32px;

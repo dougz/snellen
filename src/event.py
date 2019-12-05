@@ -255,11 +255,16 @@ class SubmitHistoryHandler(util.TeamHandler):
 
     # Allow submit if the puzzle is open, and if there are fewer than
     # the max allowed pending submissions.
-    submit_allowed = False
     if ps.state == game.PuzzleState.OPEN:
-      pending = sum(1 for s in ps.submissions if s.state == s.PENDING)
-      if pending < ps.puzzle.max_queued:
+      if ps.puzzle.wait_for_requested:
         submit_allowed = True
+        if ps.submissions and ps.submissions[-1].state == game.Submission.REQUESTED:
+          submit_allowed = False
+      else:
+        submit_allowed = False
+        pending = sum(1 for s in ps.submissions if s.state == s.PENDING)
+        if pending < ps.puzzle.max_queued:
+          submit_allowed = True
 
     d = {"allowed": submit_allowed,
          "history": [sub.json_dict() for sub in ps.submissions if sub.state != sub.RESET],
@@ -351,7 +356,7 @@ class ActionHandler(util.AdminHandler):
     shortname = self.args["puzzle_id"]
     puzzle = game.Puzzle.get_by_shortname(shortname)
     if not puzzle: return self.not_found()
-    submit_id = self.team.next_submit_id()
+    submit_id = self.team.get_submit_id()
     result = self.team.submit_answer(submit_id, shortname, answer)
     if result:
       self.write(result)

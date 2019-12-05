@@ -1,3 +1,4 @@
+import asyncio
 import datetime
 import dateutil.parser
 import hashlib
@@ -615,7 +616,36 @@ class VisitPage(util.AdminPageHandler):
                   ordered=[x[1] for x in ordered],
                   team_data=json.dumps(teams), js=script)
 
+class ConciergeHandler(util.AdminHandler):
+  @login.required("admin")
+  async def get(self):
+    print("starting handler")
+    username = self.get_argument('u', None)
+    submit_id = self.get_argument('s', None)
+    result = self.get_argument('result', None)
+    team = game.Team.get_by_username(username)
+    if not team: return self.not_found()
 
+    print(f"team is {team}")
+    if result not in ("no_answer", "wrong_number", "complete"):
+      return self.not_found()
+
+    print(f"result is {result}")
+
+    try:
+      submit_id = int(submit_id)
+    except ValueError:
+      return self.not_found()
+
+    team.concierge_update(submit_id, result)
+
+    team.send_messages([{"method": "history_change", "puzzle_id": "concierge_services"}])
+    await team.flush_messages()
+
+    task_key = f"t-{team.username}-concierge-callback-{submit_id}"
+    game.Global.STATE.complete_task(task_key)
+
+    self.redirect("/admin/taskqueue")
 
 
 def GetHandlers():
@@ -641,6 +671,7 @@ def GetHandlers():
     (r"/admin/become/([a-z0-9_]+)(/confirmed)?$", BecomeTeamHandler),
     (r"/admin/change_password$", ChangePasswordHandler),
     (r"/admin/create_user$", CreateUserHandler),
+    (r"/admin/concierge$", ConciergeHandler),
 
     (r"/admin/puzzle_json/.*", PuzzleJsonHandler),
     (r"/admin/team_json/.*", TeamJsonHandler),

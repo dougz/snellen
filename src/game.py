@@ -287,6 +287,20 @@ class Submission:
   REQUESTED = "requested"
   RESET = "reset"
 
+  COLOR = {
+    PENDING: "gray",
+    PARTIAL: "yellow",
+    INCORRECT: "red",
+    CORRECT: "green",
+    MOOT: "gray",
+    CANCELLED: "gray",
+    REQUESTED: "yellow",
+    RESET: "blue",
+    "no answer": "red",
+    "wrong number": "red",
+    "complete": "yellow",
+    }
+
   GLOBAL_SUBMIT_QUEUE = []
 
   PER_ANSWER_DELAY = 20
@@ -450,12 +464,14 @@ class Submission:
     if self.state == self.RESET:
       return {"sent_time": self.sent_time,
               "state": self.state,
+              "color": Submission.COLOR[self.state],
               "user": self.user.fullname}
     else:
       return {"submit_time": self.submit_time,
               "answer": self.answer,
               "check_time": self.check_time,
               "state": self.state,
+              "color": Submission.COLOR[self.state],
               "response": self.extra_response,
               "submit_id": self.submit_id}
 
@@ -509,8 +525,6 @@ class Submission:
 class Team(login.LoginUser):
   BY_USERNAME = {}
 
-  NEXT_SUBMIT_ID = 1
-
   # If a puzzle was opened less than this long ago, it gets a "new!" tag.
   NEW_PUZZLE_SECONDS = 120  # 2 minutes
 
@@ -538,6 +552,7 @@ class Team(login.LoginUser):
 
     save_state.add_instance("Team:" + username, self)
 
+    self.next_submit_id = 1
     self.map_mode = "inner_only"
     self.open_lands = {}
     self.sorted_open_lands = []
@@ -895,14 +910,13 @@ class Team(login.LoginUser):
   def get_by_username(cls, username):
     return cls.BY_USERNAME.get(username)
 
-  @classmethod
-  def next_submit_id(cls):
-    cls.NEXT_SUBMIT_ID += 1
-    return cls.NEXT_SUBMIT_ID - 1
+  def get_submit_id(self):
+    self.next_submit_id += 1
+    return self.next_submit_id - 1
 
   @save_state
   def submit_answer(self, now, submit_id, shortname, answer):
-    self.NEXT_SUBMIT_ID = max(self.NEXT_SUBMIT_ID, submit_id+1)
+    self.next_submit_id = max(self.next_submit_id, submit_id+1)
 
     puzzle = Puzzle.get_by_shortname(shortname)
     if not puzzle:
@@ -923,9 +937,10 @@ class Team(login.LoginUser):
       return
 
     sub = Submission(now, submit_id, self, puzzle, answer)
-    for s in ps.submissions:
-      if s.answer == sub.answer:
-        return sub.answer
+    if not ps.puzzle.allow_duplicates:
+      for s in ps.submissions:
+        if s.answer == sub.answer:
+          return sub.answer
 
     ps.submissions.append(sub)
     self.send_messages([{"method": "history_change", "puzzle_id": shortname}])
@@ -1226,6 +1241,34 @@ class Team(login.LoginUser):
     self.invalidate()
     if not save_state.REPLAYING:
       asyncio.create_task(self.flush_messages())
+
+  @save_state
+  def concierge_update(self, now, submit_id, result):
+    puzzle = Puzzle.get_by_shortname("concierge_services")
+    ps = self.puzzle_state[puzzle]
+
+    sub = None
+    if ps.submissions and ps.submissions[-1].submit_id == submit_id:
+      sub = ps.submissions[-1]
+    else:
+      for s in ps.submissions:
+        if s.submit_id == submit_id:
+          sub = s
+          break
+    if not sub: return None
+    print(f"sub is {sub}")
+
+    if result == "complete":
+      sub.state = result
+    elif result == "no_answer":
+      sub.state = "no answer"
+      sub.extra_response = ("We did not reach you when we called.  Please check your "
+                            "team contact number on the Guest Services page and submit again.")
+    else:
+      sub.state = "wrong number"
+      sub.extra_response = ("We did not reach you when we called.  Please check your "
+                            "team contact number on the Guest Services page and submit again.")
+    sub.color = Submission.COLOR[sub.state]
 
   def get_puzzle_state(self, puzzle):
     if isinstance(puzzle, str):
@@ -1741,6 +1784,8 @@ class Puzzle:
     self.explanations = {}
     self.puzzle_log = Log()
     self.zip_version = None
+    self.allow_duplicates = False
+    self.wait_for_requested = False
 
     self.median_solve_duration = None
     self.solve_durations = {}     # {team: duration}
@@ -1783,12 +1828,16 @@ class Puzzle:
 
     if self.shortname == "concierge_services":
       self.handle_answer = self.do_concierge_callback
+      self.allow_duplicates = True
+      self.wait_for_requested = True
 
   def do_concierge_callback(self, sub, now):
     sub.state = sub.REQUESTED
     d = {"phone": sub.team.attrs.get("phone", "(unknown)"),
          "team": sub.team.name,
-         "answer": sub.answer}
+         "answer": sub.answer,
+         "u": sub.team.username,
+         "s": sub.submit_id}
     url = ("https://mitmh-2019-leftout-cg.netlify.com/callbacks/callbacks.html?" +
            urllib.parse.urlencode(d))
     Global.STATE.add_task(now, sub.team.username, f"concierge-callback-{sub.submit_id}",

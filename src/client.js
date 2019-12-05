@@ -529,6 +529,7 @@ class H2020_SubmitPanel {
 
     /** @param{SubmissionHistory} response */
     render_history(response) {
+        console.log(response);
         if (response.total) {
             var t = response.total;
             var c = response.correct;
@@ -585,7 +586,7 @@ class H2020_SubmitPanel {
 
 
             tr = goog.dom.createDom(
-                "TR", {className: "submit-" + sub.state},
+                "TR", {className: "submit-" + sub.color},
                 goog.dom.createDom("TD", {className: "submit-answer"},
                                    answer),
                 goog.dom.createDom("TD", {className: "submit-time"}, time_el),
@@ -600,7 +601,7 @@ class H2020_SubmitPanel {
             if (sub.response) {
                 var td = goog.dom.createDom("TD", {colSpan: 3});
                 td.innerHTML = sub.response;
-                tr = goog.dom.createDom("TR", {className: "submit-extra submit-" + sub.state}, td);
+                tr = goog.dom.createDom("TR", {className: "submit-extra submit-" + sub.color}, td);
                 this.table.appendChild(tr);
             }
         }

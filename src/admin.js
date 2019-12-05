@@ -228,14 +228,14 @@ class A2020_TeamPuzzlePage {
 
             var td = null;
             if (sub.state == "reset") {
-                td = goog.dom.createDom("TD", "submit-reset");
+                td = goog.dom.createDom("TD", "submit-blue");
                 td.innerHTML = "Spam counter reset by <b>" + sub.user + "</b>.";
             } else {
                 td = goog.dom.createDom("TD", {className: "submit-answer"}, sub.answer);
             }
 
             tr = goog.dom.createDom(
-                "TR", {className: "submit-" + sub.state},
+                "TR", {className: "submit-" + sub.color},
                 td,
                 goog.dom.createDom("TD", {className: "submit-time"}, time_el),
                 goog.dom.createDom("TD", {className: "submit-state"},
@@ -249,7 +249,7 @@ class A2020_TeamPuzzlePage {
             if (sub.response) {
                 td = goog.dom.createDom("TD", {colSpan: 3});
                 td.innerHTML = sub.response;
-                tr = goog.dom.createDom("TR", {className: "submit-extra"}, td);
+                tr = goog.dom.createDom("TR", {className: "submit-extra submit-" + sub.color}, td);
                 this.tppsubmitbody.appendChild(tr);
             }
         }
@@ -395,7 +395,7 @@ class A2020_TaskQueue {
             }
             var what_el = null;
             if (msg.target) {
-                what_el = goog.dom.createDom("A", {href: msg.target, target: "_blank"}, msg.what);
+                what_el = goog.dom.createDom("A", {href: msg.target}, msg.what);
             } else {
                 what_el = goog.dom.createDom("SPAN", null, msg.what);
             }

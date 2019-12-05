@@ -195,6 +195,8 @@ class Submission {
         this.answer;
         /** @type{string} */
         this.state;
+        /** @type{string} */
+        this.color;
         /** @type{?string} */
         this.response;
         /** @type{?number} */
