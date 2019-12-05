@@ -1177,6 +1177,8 @@ class Team(login.LoginUser):
       solve_duration = ps.solve_time - ps.open_time
       puzzle.solve_durations[self] = solve_duration
       puzzle.median_solve_duration = statistics.median(puzzle.solve_durations.values())
+      puzzle.adjust_hints_available_time();
+
       if (puzzle.fastest_solver is None or
           puzzle.solve_durations[puzzle.fastest_solver] > solve_duration):
         # a new record
@@ -1767,6 +1769,9 @@ class Puzzle:
   PLACEHOLDER_COUNT = 0
   NEXT_BBID = 1
 
+  START_HINT_AVAILABLE_TIME = 24 * 3600
+  START_HINT_AVAILABLE_SOLVES = 20
+
   def __init__(self, shortname):
     if not re.match(r"^[a-z][a-z0-9_]*$", shortname):
       raise ValueError(f"\"{shortname}\" is not a legal puzzle shortname")
@@ -1778,8 +1783,8 @@ class Puzzle:
     self.url = f"/puzzle/{shortname}"
     self.admin_url = f"/admin/puzzle/{shortname}"
     self.points = 1
-    #import random
-    self.hints_available_time = 24 * 3600   # 24 hours
+    self.hints_available_time_auto = True
+    self.hints_available_time = Puzzle.START_HINT_AVAILABLE_TIME
     self.emojify = False
     self.explanations = {}
     self.puzzle_log = Log()
@@ -2034,11 +2039,22 @@ class Puzzle:
 
   @save_state
   def set_hints_available_time(self, now, new_time, admin_user):
+    self.hints_available_time_auto = False
     self.hints_available_time = new_time
     admin_user = login.AdminUser.get_by_username(admin_user)
     self.puzzle_log.add(now, f"Hint time set to {util.format_duration(new_time)} by {admin_user.fullname}.")
     if not save_state.REPLAYING:
       self.maybe_open_hints(now)
+      self.invalidate()
+
+  def adjust_hints_available_time(self):
+    if not self.hints_available_time_auto: return
+    if len(self.solve_durations) < Puzzle.START_HINT_AVAILABLE_SOLVES: return
+    dur = list(self.solve_durations.values())
+    heapq.heapify(dur)
+    m = statistics.median(heapq.nsmallest(Puzzle.START_HINT_AVAILABLE_SOLVES, dur))
+    self.hints_available_time = m
+    if not save_state.REPLAYING:
       self.invalidate()
 
   def invalidate(self, flush=True):
