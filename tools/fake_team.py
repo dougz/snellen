@@ -119,13 +119,19 @@ async def tasker(username, cookie, client, options):
 
     j = json.loads(response.body)
     count = 0
-    threshold = time.time() - 60
+    claim_threshold = time.time() - 30
+    complete_threshold = time.time() - 60
     for t in j.get("queue", ()):
       key = t.get("key", "")
       if not key.startswith("t-"): continue
-      if t["when"] > threshold: continue
-      d = {"action": "complete_task", "key": key, "which": "done"}
-      print(f"ADMIN {username} completing {key}")
+      if t["when"] < complete_threshold:
+        d = {"action": "complete_task", "key": key, "which": "done"}
+        print(f"ADMIN {username} completing {key}")
+      elif t["when"] < claim_threshold:
+        d = {"action": "update_claim", "key": key, "which": "claim"}
+        print(f"ADMIN {username} claiming {key}")
+      else:
+        continue
 
       req = tornado.httpclient.HTTPRequest(
         f"{options.base_url}/admin/action",
@@ -144,7 +150,7 @@ async def tasker(username, cookie, client, options):
         print(f"--- ADMIN {username} got back: {response.code} ---")
 
       count += 1
-      if count >= 20: break
+      #if count >= 20: break
 
     await asyncio.sleep(10)
 
