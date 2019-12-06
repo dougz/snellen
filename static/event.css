@@ -1225,6 +1225,5 @@ a#ppicon3 {
     #topnav { display: none; }
     #nonnav { display: block; background: none; }
     #nonnav > a { display: none; }
-    #content { width: auto; }
     #landtitle { display: none; }
 }
