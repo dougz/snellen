@@ -73,6 +73,10 @@ class Patch:
           pixels.add((i,j))
         elif self.highlight.getpixel((i,j))[3]:
           pixels.add((i,j))
+    if not pixels:
+      self.image = None
+      self.highlight = None
+      return
 
     min_x = min(p[0] for p in pixels)
     max_x = max(p[0] for p in pixels)
@@ -131,29 +135,31 @@ def main():
 
     patch = Patch(source_image, coords)
 
-    od = {}
-    out["image"] = od
-    od["pos"] = patch.origin
-    od["poly"] = patch.coords_str
-    od["size"] = patch.size
-    patch.image.save(os.path.join(options.output_dir, f"image_{name}.png"))
+    if patch.image:
+      od = {}
+      out["image"] = od
+      od["pos"] = patch.origin
+      od["poly"] = patch.coords_str
+      od["size"] = patch.size
+      patch.image.save(os.path.join(options.output_dir, f"image_{name}.png"))
 
-    od = {}
-    out["mask"] = od
-    od["pos"] = patch.origin[:]
-    od["size"] = patch.size[:]
-    patch.highlight.save(os.path.join(options.output_dir, f"mask_{name}.png"))
+    if patch.highlight:
+      od = {}
+      out["mask"] = od
+      od["pos"] = patch.origin[:]
+      od["size"] = patch.size[:]
+      patch.highlight.save(os.path.join(options.output_dir, f"mask_{name}.png"))
 
     if under_image:
       under_patch = Patch(under_image, coords)
 
-      od = {}
-      out["under"] = od
-      od["pos"] = under_patch.origin
-      od["poly"] = under_patch.coords_str
-      od["size"] = under_patch.size
-      under_patch.image.save(os.path.join(options.output_dir, f"under_{name}.png"))
-
+      if under_patch.image:
+        od = {}
+        out["under"] = od
+        od["pos"] = under_patch.origin
+        od["poly"] = under_patch.coords_str
+        od["size"] = under_patch.size
+        under_patch.image.save(os.path.join(options.output_dir, f"under_{name}.png"))
 
   y = { "icons": icons }
   with open(os.path.join(options.output_dir, "land.yaml"), "w") as f:
