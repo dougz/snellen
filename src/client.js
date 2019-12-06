@@ -858,7 +858,7 @@ class H2020_MapDraw {
             }
         }
 
-        if (it.name) {
+        if (it.name && !it.nolist) {
             var a = [];
             if (it.new_open) {
                 var sp = goog.dom.createDom("SPAN", {className: "newopen counter"}, "NEW");

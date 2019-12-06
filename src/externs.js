@@ -177,6 +177,8 @@ class MapItem {
         this.special;
         /** @type{?boolean} */
         this.spaceafter;
+        /** @ytpe{?boolean} */
+        this.nolist;
     }
 }
 

@@ -553,7 +553,7 @@ class Team(login.LoginUser):
     save_state.add_instance("Team:" + username, self)
 
     self.next_submit_id = 1
-    self.map_mode = "inner_only"
+    self.map_mode = "outer"   # BTS3 hack
     self.open_lands = {}
     self.sorted_open_lands = []
     self.open_puzzles = set()    # PuzzleState objects
@@ -864,7 +864,7 @@ class Team(login.LoginUser):
           if ps.state == PuzzleState.SOLVED:
             d["solved"] = True
             d["answer"] = ", ".join(sorted(p.display_answers[a] for a in ps.answers_found))
-        items.append((i.to_land.sortkey, d))
+        items.append((("A", i.to_land.sortkey), d))
 
         if i.under:
           dd = {"icon_url": i.under.url,
@@ -881,6 +881,7 @@ class Team(login.LoginUser):
              "url": "/events",
              "icon_url": e.image.url,
              "mask_url": e.mask.url,
+             "nolist": True,
              "offset": [-5,0]}
         items.append((("@",), d))
 
@@ -899,21 +900,33 @@ class Team(login.LoginUser):
           dd = {"icon_url": warning.image.url,
                 "xywh": warning.image.pos_size}
           d["special"] = dd
+          d["nolist"] = True
         else:
           d["url"] = "/workshop"
+          d["spaceafter"] = True
 
         items.append((("@",), d))
 
       # Add statue
-      e = land.icons.get("statue")
+      work = False
+      if self.puzzle_state[Runaround.PUZZLE].state == PuzzleState.CLOSED:
+        e = land.icons.get("statue")
+      else:
+        e = land.icons.get("statue2")
+        work = True
       if e:
         d = {"xywh": e.image.pos_size,
              "poly": e.image.poly,
              "icon_url": e.image.url,
-             "mask_url": e.mask.url,
              "offset": [0,0]}
+        if work:
+          d["name"] = "Heart of the Park"
+          d["url"] = "/heart_of_the_park"
+          d["mask_url"] = e.mask.url
+          d["spaceafter"] = True
+        else:
+          d["nolist"] = True
         items.append((("@",), d))
-
 
     items.sort(key=lambda i: i[0])
     for i, (sk, d) in enumerate(items):
@@ -1620,6 +1633,9 @@ class Team(login.LoginUser):
         self.open_puzzle(Runaround.PUZZLE, now)
         self.invalidate(Runaround.PUZZLE)
         self.cached_all_puzzles_data = None
+        self.dirty_lands.add("home")
+        self.cached_mapdata.pop(Land.BY_SHORTNAME["outer"], None)
+        self.cached_mapdata.pop(Land.BY_SHORTNAME["inner_only"], None)
 
     for st in self.puzzle_state.values():
       if st.state != PuzzleState.CLOSED:
