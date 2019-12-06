@@ -2477,7 +2477,7 @@ class Event:
     p.points = 0  # no buzz/wonder for finishing
 
     def on_correct_answer(now, team):
-      team.receive_fastpass(now, 300)
+      team.receive_fastpass(now, 2 * 3600)
       ps = team.puzzle_state[cls.PUZZLE]
       completed = [e.answer in ps.answers_found for e in cls.ALL_EVENTS]
       team.send_messages([{"method": "event_complete", "completed": completed}])

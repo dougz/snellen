@@ -418,7 +418,7 @@ class ActionHandler(util.AdminHandler):
     if self.application.settings.get("debug"):
       duration = 330 # 18000 if int(time.time()) % 2 == 0 else 90
     else:
-      duration = 330 # 2 * 3600  # 2 hours
+      duration = 2 * 3600  # 2 hours
 
     if username is None:
       for team in game.Team.all_teams():
