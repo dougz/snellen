@@ -831,17 +831,7 @@ class H2020_MapDraw {
             el.style.top = "" + it.xywh[1] + "px";
             this.map_el.appendChild(el);
 
-            if (it.poly && it.name) {
-                var area = goog.dom.createDom("AREA", {shape: "poly",
-                                                       coords: it.poly});
-                if (it.url) area.href = it.url;
-                this.mapmap_el.appendChild(area);
-
-                goog.events.listen(area, goog.events.EventType.MOUSEENTER,
-                                   goog.bind(this.item_enter, this, it, mask_el));
-                goog.events.listen(area, goog.events.EventType.MOUSELEAVE,
-                                   goog.bind(this.item_leave, this, it));
-            } else if (it.poly && it.special) {
+            if (it.poly && it.special) {
                 var area = goog.dom.createDom("AREA", {shape: "poly",
                                                        coords: it.poly});
                 if (it.url) area.href = it.url;
@@ -849,6 +839,16 @@ class H2020_MapDraw {
 
                 goog.events.listen(area, goog.events.EventType.MOUSEENTER,
                                    goog.bind(this.special_item_enter, this, it));
+                goog.events.listen(area, goog.events.EventType.MOUSELEAVE,
+                                   goog.bind(this.item_leave, this, it));
+            } else if (it.poly) {
+                var area = goog.dom.createDom("AREA", {shape: "poly",
+                                                       coords: it.poly});
+                if (it.url) area.href = it.url;
+                this.mapmap_el.appendChild(area);
+
+                goog.events.listen(area, goog.events.EventType.MOUSEENTER,
+                                   goog.bind(this.item_enter, this, it, mask_el));
                 goog.events.listen(area, goog.events.EventType.MOUSELEAVE,
                                    goog.bind(this.item_leave, this, it));
             }
@@ -893,13 +893,15 @@ class H2020_MapDraw {
         el.style.top = "" + it.special.xywh[1] + "px";
         hel.appendChild(el);
 
-        var h = goog.dom.createDom("DIV", {className: "psign"});
-        h.innerHTML = it.special.name;
-        h.style.left = "" + it.special.xywh[0] + "px";
-        h.style.top = "" + it.special.xywh[1] + "px";
-        h.style.width = "" + it.special.xywh[2] + "px";
-        h.style.height = "" + it.special.xywh[3] + "px";
-        hel.appendChild(h);
+        if (it.special.name) {
+            var h = goog.dom.createDom("DIV", {className: "psign"});
+            h.innerHTML = it.special.name;
+            h.style.left = "" + it.special.xywh[0] + "px";
+            h.style.top = "" + it.special.xywh[1] + "px";
+            h.style.width = "" + it.special.xywh[2] + "px";
+            h.style.height = "" + it.special.xywh[3] + "px";
+            hel.appendChild(h);
+        }
     }
 
     item_enter(it, mask_el) {

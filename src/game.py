@@ -872,6 +872,49 @@ class Team(login.LoginUser):
           # Sort these before any puzzle title
           items.append((("@",), dd))
 
+      # Add events
+      e = land.icons.get("events")
+      if e:
+        d = {"name": "Events",
+             "xywh": e.image.pos_size,
+             "poly": e.image.poly,
+             "url": "/events",
+             "icon_url": e.image.url,
+             "mask_url": e.mask.url,
+             "offset": [-5,0]}
+        items.append((("@",), d))
+
+      # Add workshop
+      e = land.icons.get("workshop")
+      if e:
+        d = {"name": "Workshop",
+             "xywh": e.image.pos_size,
+             "poly": e.image.poly,
+             "icon_url": e.image.url,
+             "mask_url": e.mask.url,
+             "offset": [-5,0]}
+
+        if self.puzzle_state[Workshop.PUZZLE].state == PuzzleState.CLOSED:
+          warning = land.icons.get("warning")
+          dd = {"icon_url": warning.image.url,
+                "xywh": warning.image.pos_size}
+          d["special"] = dd
+        else:
+          d["url"] = "/workshop"
+
+        items.append((("@",), d))
+
+      # Add statue
+      e = land.icons.get("statue")
+      if e:
+        d = {"xywh": e.image.pos_size,
+             "poly": e.image.poly,
+             "icon_url": e.image.url,
+             "mask_url": e.mask.url,
+             "offset": [0,0]}
+        items.append((("@",), d))
+
+
     items.sort(key=lambda i: i[0])
     for i, (sk, d) in enumerate(items):
       if i < len(items)-1 and sk[0] != items[i+1][0][0]:
