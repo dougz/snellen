@@ -886,15 +886,16 @@ div#map div.p {
     align-items: center;
 
     font-size: 120%;
-    color: #eeeeee;
+    font-weight: 700;
+    color: #f8f8f8;
     pointer-events: none;
     text-align: center;
-    text-shadow: 2px 2px 5px black;
+    text-shadow: 2px 0 3px #00000066, -2px 0 3px #00000066, 0 2px 3px #00000066, 0 -2px 3px #00000066;
 }
 
 div#map div.p b {
     font-family: 'Merriweather Sans', sans-serif;
-    font-weight: bold;
+    font-weight: 800;
     color: white;
 }
 
