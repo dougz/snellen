@@ -530,8 +530,11 @@ class Team(login.LoginUser):
 
   GLOBAL_FASTPASS_QUEUE = []
 
-  VIDEOS_BY_SCORE = {0: 1, 16: 2, 31: 3, 46: 4, 62: 5}
-  OUTER_LANDS_SCORE = 62
+  #VIDEOS_BY_SCORE = {0: 1, 16: 2, 31: 3, 46: 4, 62: 5}
+  #OUTER_LANDS_SCORE = 62
+
+  VIDEOS_BY_SCORE = {0: 1, 5: 2, 10: 3, 15: 4, 19: 5}
+  OUTER_LANDS_SCORE = 19
 
   cached_bb_label_info = None
 
