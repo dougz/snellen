@@ -98,6 +98,7 @@ for i in "${PUZZLE_SERVERS[@]}"; do
         sed -e '/# CREDENTIALS HERE/ {s/.*/BUILTIN_CREDENTIALS=\\/; r chatroom/chatroom-puzzle-credentials.json
                 }' "${i}/${i}.py" > "${base}/${i}/${i}.py"
         chmod 0755 "${base}/${i}/${i}.py"
+        install -m 0655 "${i}/declaration.txt" "${base}/${i}/declaration.txt"
     else
         install -m 0755 "${i}/${i}.py" "${base}/${i}/${i}.py"
     fi
