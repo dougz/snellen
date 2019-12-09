@@ -748,6 +748,8 @@ class Team(login.LoginUser):
       return self.cached_mapdata[land]
     print(f"mapdata cache miss: {self.username} {land.shortname}")
 
+    show_solved = self.attrs.get("show_solved", False)
+
     if isinstance(land.base_img, str):
       # most maps: single fixed base image
       base_img = land.base_img
@@ -794,6 +796,7 @@ class Team(login.LoginUser):
         if ps.state == PuzzleState.CLOSED: continue
 
         d = {"name": p.title,
+             "icon": i.name,
              "url": p.url,
              "icon_url": i.image.url,
              "mask_url": i.mask.url,
@@ -818,6 +821,10 @@ class Team(login.LoginUser):
               ps.open_time != Global.STATE.event_start_time):
             d["new_open"] = ps.open_time + self.NEW_PUZZLE_SECONDS
         elif ps.state == PuzzleState.SOLVED:
+          d["solved"] = True
+
+        if show_solved:
+          d["answer"] = ", ".join(sorted(p.display_answers.values()))
           d["solved"] = True
 
         items.append((p.sortkey, d))
@@ -860,7 +867,7 @@ class Team(login.LoginUser):
               "url": i.to_land.url,
               "icon_url": i.image.url,
               "mask_url": i.mask.url,
-              "offset": [0,0] }
+              "offset": [0,0,0] }
         if i.to_land.meta_puzzle:
           p = i.to_land.meta_puzzle
           ps = self.puzzle_state[p]
@@ -885,7 +892,7 @@ class Team(login.LoginUser):
              "icon_url": e.image.url,
              "mask_url": e.mask.url,
              "nolist": True,
-             "offset": [-5,0]}
+             "offset": [-5,0,0]}
         items.append((("@",), d))
 
       # Add workshop
@@ -896,7 +903,7 @@ class Team(login.LoginUser):
              "poly": e.image.poly,
              "icon_url": e.image.url,
              "mask_url": e.mask.url,
-             "offset": [-5,0]}
+             "offset": [-5,0,0]}
 
         if self.puzzle_state[Workshop.PUZZLE].state == PuzzleState.CLOSED:
           warning = land.icons.get("warning")
@@ -921,7 +928,7 @@ class Team(login.LoginUser):
         d = {"xywh": e.image.pos_size,
              "poly": e.image.poly,
              "icon_url": e.image.url,
-             "offset": [0,0]}
+             "offset": [0,0,0]}
         if work:
           d["name"] = "Heart of the Park"
           d["url"] = "/heart_of_the_park"
@@ -1703,7 +1710,9 @@ class Icon:
     self.puzzle = None
     self.to_land = None
     self.headerimage = d.get("headerimage")
-    self.offset = d.get("offset", [0,0])
+    self.offset = d.get("offset", [0,0,0])
+    if len(self.offset) == 2:
+      self.offset.append(0)
 
     for opt in ("image", "mask", "under",
                 "emptypipe1", "fullpipe1",

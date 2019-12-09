@@ -762,6 +762,15 @@ class H2020_MapDraw {
         /** @type{?Element} */
         this.mask_el = null;
 
+        /** @type{?string} */
+        this.land_name = null;
+        /** @type{?string} */
+        this.icon_name = null;
+
+        console.log("adding event to", this.map_el);
+        goog.events.listen(this.map_el, goog.events.EventType.KEYDOWN,
+                           goog.bind(this.onkeydown, this));
+
         var mapdata = /** @type{MapData} */ (initial_json);
         this.shortname = mapdata.shortname;
 
@@ -769,6 +778,38 @@ class H2020_MapDraw {
             this.update();
         } else {
             this.draw_map(mapdata);
+        }
+    }
+
+    onkeydown(e) {
+        var d = 1;
+        if (e.shiftKey) d = 10;
+        if (e.keyCode == goog.events.KeyCodes.UP) {
+            H2020_DoAction({action: "adjust_offset", land: this.land_name, icon: this.icon_name,
+                            dy: -d}, Common_expect_204);
+            e.preventDefault();
+        } else if (e.keyCode == goog.events.KeyCodes.DOWN) {
+            H2020_DoAction({action: "adjust_offset", land: this.land_name, icon: this.icon_name,
+                            dy: d}, Common_expect_204);
+            e.preventDefault();
+        } else if (e.keyCode == goog.events.KeyCodes.RIGHT) {
+            if (e.ctrlKey) {
+                H2020_DoAction({action: "adjust_offset", land: this.land_name, icon: this.icon_name,
+                                dw: d}, Common_expect_204);
+            } else {
+                H2020_DoAction({action: "adjust_offset", land: this.land_name, icon: this.icon_name,
+                                dx: d}, Common_expect_204);
+            }
+            e.preventDefault();
+        } else if (e.keyCode == goog.events.KeyCodes.LEFT) {
+            if (e.ctrlKey) {
+                H2020_DoAction({action: "adjust_offset", land: this.land_name, icon: this.icon_name,
+                                dw: -d}, Common_expect_204);
+            } else {
+                H2020_DoAction({action: "adjust_offset", land: this.land_name, icon: this.icon_name,
+                                dx: -d}, Common_expect_204);
+            }
+            e.preventDefault();
         }
     }
 
@@ -789,6 +830,8 @@ class H2020_MapDraw {
     draw_map(mapdata) {
         if (this.shortname != mapdata.shortname) return;
 
+        this.land_name = mapdata.shortname;
+
         this.map_el.innerHTML = "";
         this.mapmap_el.innerHTML = "";
         this.list_el.innerHTML = "";
@@ -800,6 +843,7 @@ class H2020_MapDraw {
             this.map_el.style.width = "" + mapdata.width + "px";
             this.map_el.style.height = "" + mapdata.height + "px";
             this.map_el.appendChild(el);
+
         }
 
         for (var i = 0; i < mapdata.items.length; ++i) {
@@ -853,7 +897,7 @@ class H2020_MapDraw {
                                    goog.bind(this.item_leave, this, it));
             }
 
-            if (!it.solved && it.name) {
+            if (/*!it.solved &&*/ it.name) {
                 this.add_title(it);
             }
         }
@@ -915,6 +959,9 @@ class H2020_MapDraw {
         if (it.answer) {
             this.highlight_el  = this.add_title(it);
         }
+
+        this.map_el.focus();
+        this.icon_name = it.icon;
     }
 
     add_title(it) {
@@ -930,7 +977,7 @@ class H2020_MapDraw {
         var h = goog.dom.createDom("DIV", {className: "p"}, ch);
         h.style.left = "" + (it.xywh[0] + it.offset[0]) + "px";
         h.style.top = "" + (it.xywh[1] + it.offset[1]) + "px";
-        h.style.width = "" + it.xywh[2] + "px";
+        h.style.width = "" + (it.xywh[2] + it.offset[2]) + "px";
         h.style.height = "" + it.xywh[3] + "px";
 
         this.map_el.appendChild(h);
@@ -946,6 +993,7 @@ class H2020_MapDraw {
             goog.dom.removeNode(this.highlight_el);
             this.highlight_el = null;
         }
+        this.icon = null;
     }
 }
 

@@ -7,6 +7,7 @@ import random
 import re
 import time
 import tornado.web
+import yaml
 
 import game
 import login
@@ -364,6 +365,37 @@ class ActionHandler(util.AdminHandler):
     else:
       self.set_status(http.client.NO_CONTENT.value)
 
+  async def ACTION_adjust_offset(self):
+    land = self.args["land"]
+    icon = self.args["icon"]
+    dx = int(self.args.get("dx", 0))
+    dy = int(self.args.get("dy", 0))
+    dw = int(self.args.get("dw", 0))
+
+    land = game.Land.BY_SHORTNAME[land]
+    icon = land.icons[icon]
+    icon.offset = [icon.offset[0] + dx, icon.offset[1] + dy, icon.offset[2] + dw]
+    self.team.dirty_lands.add(land.shortname)
+    self.team.cached_mapdata.pop(land, None)
+    self.set_status(http.client.NO_CONTENT.value)
+
+class OffsetsPage(util.TeamPageHandler):
+  def get(self):
+    out = {}
+    for land in game.Land.BY_SHORTNAME.values():
+      d = {}
+      for n, i in land.icons.items():
+        if i.offset != [0,0]:
+          d[n] = i.offset
+      if d:
+        out[land.shortname] = d
+    text = yaml.dump(out)
+
+    self.set_header("Content-Type", "text/plain")
+    self.set_header("Cache-Control", "no-store")
+    self.write(text)
+
+
 
 def GetHandlers():
   handlers = [
@@ -383,6 +415,8 @@ def GetHandlers():
     (r"/sponsors", SponsorPage),
     (r"/land/([a-z0-9_]+)", LandMapPage),
     (r"/puzzle/([a-z0-9_]+)/?", PuzzlePage),
+
+    (r"/offsets", OffsetsPage),
 
     (r"/action$", ActionHandler),
 
