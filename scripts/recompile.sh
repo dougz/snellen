@@ -13,6 +13,7 @@ mkdir -p "$HUNT2020_BASE/snellen/bin"
     -f '--compilation_level' -f 'ADVANCED_OPTIMIZATIONS' \
     -f '--externs' -f "$HUNT2020_BASE/snellen/src/common-externs.js" \
     -f '--externs' -f "$HUNT2020_BASE/snellen/src/externs.js" \
+    -f '--define' -f 'goog.DEBUG=false' \
     -f '--rename_variable_prefix' -f 'H'
 
 

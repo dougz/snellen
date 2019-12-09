@@ -767,9 +767,11 @@ class H2020_MapDraw {
         /** @type{?string} */
         this.icon_name = null;
 
-        console.log("adding event to", this.map_el);
-        goog.events.listen(this.map_el, goog.events.EventType.KEYDOWN,
-                           goog.bind(this.onkeydown, this));
+        if (goog.DEBUG) {
+            this.map_el.tabIndex = 0;
+            goog.events.listen(this.map_el, goog.events.EventType.KEYDOWN,
+                               goog.bind(this.onkeydown, this));
+        }
 
         var mapdata = /** @type{MapData} */ (initial_json);
         this.shortname = mapdata.shortname;
@@ -782,6 +784,7 @@ class H2020_MapDraw {
     }
 
     onkeydown(e) {
+        if (!goog.DEBUG) return;
         var d = 1;
         if (e.shiftKey) d = 10;
         if (e.keyCode == goog.events.KeyCodes.UP) {
@@ -897,7 +900,7 @@ class H2020_MapDraw {
                                    goog.bind(this.item_leave, this, it));
             }
 
-            if (/*!it.solved &&*/ it.name) {
+            if (!it.solved && it.name) {
                 this.add_title(it);
             }
         }
@@ -960,7 +963,6 @@ class H2020_MapDraw {
             this.highlight_el  = this.add_title(it);
         }
 
-        this.map_el.focus();
         this.icon_name = it.icon;
     }
 
@@ -993,7 +995,7 @@ class H2020_MapDraw {
             goog.dom.removeNode(this.highlight_el);
             this.highlight_el = null;
         }
-        this.icon = null;
+        this.icon_name = null;
     }
 }
 
@@ -1001,6 +1003,8 @@ class H2020_AudioManager {
     constructor() {
         this.current = null;
         this.current_url = null;
+        /** @type{?number} */
+        this.current_request_time = null;
         window.addEventListener("storage", goog.bind(this.mute_changed, this));
     }
 

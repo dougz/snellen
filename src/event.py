@@ -366,6 +366,10 @@ class ActionHandler(util.AdminHandler):
       self.set_status(http.client.NO_CONTENT.value)
 
   async def ACTION_adjust_offset(self):
+    if not self.application.settings.get("debug"):
+      self.set_status(http.client.BAD_REQUEST.value)
+      return
+
     land = self.args["land"]
     icon = self.args["icon"]
     dx = int(self.args.get("dx", 0))
@@ -381,6 +385,10 @@ class ActionHandler(util.AdminHandler):
 
 class OffsetsPage(util.TeamPageHandler):
   def get(self):
+    if not self.application.settings.get("debug"):
+      self.set_status(http.client.BAD_REQUEST.value)
+      return
+
     out = {}
     for land in game.Land.BY_SHORTNAME.values():
       d = {}
