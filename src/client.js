@@ -957,6 +957,7 @@ class H2020_AudioManager {
     }
 
     start(url) {
+        console.log("audio", url, "requested");
         if (this.current && !this.current.ended) {
             // previous audio still playing, skip this one
             return;
@@ -968,10 +969,23 @@ class H2020_AudioManager {
         if (localStorage.getItem("mute")) {
             this.current.muted = true;
         }
+        this.current_request_time = (new Date()).getTime();
         var promise = this.current.play();
         if (promise !== undefined) {
-            promise.catch(error => {});
+            promise.then(goog.bind(this.start_playback, this))
+                .catch(error => {
+                    console.log("playback error", error);
+                });
         }
+    }
+
+    start_playback() {
+        var delay = (new Date()).getTime() - this.current_request_time;
+        if (delay > 1000) {
+            console.log("cancelling sound; too late");
+            this.current.pause();
+        }
+        console.log("playback has started after", delay, "ms");
     }
 
     toggle_mute() {
