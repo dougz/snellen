@@ -608,8 +608,7 @@ class H2020_SubmitPanel {
 
         hunt2020.counter.reread();
 
-        var t = goog.dom.getElement("submit_table_scroll");
-        t.scrollTop = t.scrollHeight;
+        this.table.scrollTop = this.table.scrollHeight + 100;
 
         if (response.allowed) {
             this.entry.style.visibility = "visible";
