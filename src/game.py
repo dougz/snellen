@@ -1827,6 +1827,7 @@ class Puzzle:
     self.points = 1
     self.hints_available_time_auto = True
     self.hints_available_time = CONSTANTS["start_hint_available_sec"]
+    self.hints_available_solves = CONSTANTS["start_hint_available_solves"]
     self.emojify = False
     self.explanations = {}
     self.puzzle_log = Log()
@@ -2091,10 +2092,10 @@ class Puzzle:
 
   def adjust_hints_available_time(self):
     if not self.hints_available_time_auto: return
-    if len(self.solve_durations) < CONSTANTS["start_hint_available_solves"]: return
+    if len(self.solve_durations) < self.start_hint_available_solves: return
     dur = list(self.solve_durations.values())
     heapq.heapify(dur)
-    m = statistics.median(heapq.nsmallest(CONSTANTS["start_hint_available_solves"], dur))
+    m = statistics.median(heapq.nsmallest(self.start_hint_available_solves, dur))
     self.hints_available_time = m
     if not save_state.REPLAYING:
       self.invalidate()
@@ -2458,6 +2459,8 @@ class Event:
     p.meta = False
     p.submeta = False
     p.points = 0  # no buzz/wonder for finishing
+    p.hints_available_time = 96 * 3600
+    p.hints_available_solves = 1000
 
     def on_correct_answer(now, team):
       team.receive_fastpass(now, CONSTANTS["pennypass_expiration_sec"])
@@ -2540,6 +2543,8 @@ class Workshop:
     p.meta = False
     p.submeta = False
     p.points = 0  # no buzz/wonder for finishing
+    p.hints_available_time = 96 * 3600
+    p.hints_available_solves = 1000
 
     p.submit_filter = cls.submit_filter
 
@@ -2587,6 +2592,8 @@ class Runaround:
     p.meta = False
     p.submeta = False
     p.points = 0  # no buzz/wonder for finishing
+    p.hints_available_time = 96 * 3600
+    p.hints_available_solves = 1000
 
     def on_correct_answer(now, team):
       ps = team.puzzle_state[cls.PUZZLE]
