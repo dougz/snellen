@@ -415,10 +415,7 @@ class ActionHandler(util.AdminHandler):
   async def ACTION_bestow_fastpass(self):
     username = self.args.get("team_username", None)
 
-    if self.application.settings.get("debug"):
-      duration = 330 # 18000 if int(time.time()) % 2 == 0 else 90
-    else:
-      duration = 2 * 3600  # 2 hours
+    duration = CONSTANTS["pennypass_expiration_sec"]
 
     if username is None:
       for team in game.Team.all_teams():

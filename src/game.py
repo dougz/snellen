@@ -214,8 +214,6 @@ class PuzzleState:
   OPEN = "open"
   SOLVED = "solved"
 
-  RECENT_TIME = 10.0  # seconds
-
   def __init__(self, team, puzzle):
     self.team = team
     self.puzzle = puzzle
@@ -237,13 +235,6 @@ class PuzzleState:
 
 
     self.admin_html_team = f'<a href="{self.admin_url}">{html.escape(team.name)}</a>'
-
-
-  def recent_solve(self, now=None):
-    if now is None:
-      now = time.time()
-    return (self.state == PuzzleState.SOLVED and
-            0 <= now - self.solve_time <= PuzzleState.RECENT_TIME)
 
   def remove_pending(self):
     for count, sub in enumerate(reversed(self.submissions)):
@@ -302,9 +293,6 @@ class Submission:
     }
 
   GLOBAL_SUBMIT_QUEUE = []
-
-  PER_ANSWER_DELAY = 20
-  MAX_ACCUM = 4
 
   def __init__(self, now, submit_id, team, puzzle, answer):
     self.state = self.PENDING
@@ -525,16 +513,7 @@ class Submission:
 class Team(login.LoginUser):
   BY_USERNAME = {}
 
-  # If a puzzle was opened less than this long ago, it gets a "new!" tag.
-  NEW_PUZZLE_SECONDS = 120  # 2 minutes
-
   GLOBAL_FASTPASS_QUEUE = []
-
-  #VIDEOS_BY_SCORE = {0: 1, 16: 2, 31: 3, 46: 4, 62: 5}
-  #OUTER_LANDS_SCORE = 62
-
-  VIDEOS_BY_SCORE = {0: 1, 5: 2, 10: 3, 15: 4, 19: 5}
-  OUTER_LANDS_SCORE = 19
 
   cached_bb_label_info = None
 
@@ -817,9 +796,9 @@ class Team(login.LoginUser):
         if ps.state == PuzzleState.OPEN:
           if "answer" in d: d["answer"] += ", \u2026"
           d["solved"] = False
-          if (now - ps.open_time < self.NEW_PUZZLE_SECONDS and
+          if (now - ps.open_time < CONSTANTS["new_puzzle_seconds"] and
               ps.open_time != Global.STATE.event_start_time):
-            d["new_open"] = ps.open_time + self.NEW_PUZZLE_SECONDS
+            d["new_open"] = ps.open_time + CONSTANTS["new_puzzle_seconds"]
         elif ps.state == PuzzleState.SOLVED:
           d["solved"] = True
 
@@ -1190,7 +1169,7 @@ class Team(login.LoginUser):
         self.dirty_lands.add("home")
       self.invalidate(puzzle)
 
-      if self.score >= self.OUTER_LANDS_SCORE and self.outer_lands_state == "closed":
+      if self.score >= CONSTANTS["outer_lands_score"] and self.outer_lands_state == "closed":
         if self.remote_only:
           self.complete_penny_visit(now)
         else:
@@ -1200,7 +1179,7 @@ class Team(login.LoginUser):
           self.outer_lands_triggered = "triggered"
 
       new_videos = 0
-      for s, v in Team.VIDEOS_BY_SCORE.items():
+      for s, v in CONSTANTS["videos_by_score"].items():
         if self.score >= s:
           new_videos = max(new_videos, v)
       if new_videos > self.videos:
@@ -1574,7 +1553,7 @@ class Team(login.LoginUser):
       else:
         if (since_start >= land.open_at_time or
             (self.score >= land.open_at_score and
-             (land.open_at_score < self.OUTER_LANDS_SCORE or
+             (land.open_at_score < CONSTANTS["outer_lands_score"] or
               self.outer_lands_state == "open"))):
           open_count += land.initial_puzzles
 
@@ -1729,11 +1708,6 @@ class Icon:
 class Land:
   BY_SHORTNAME = {}
 
-  DEFAULT_GUESS_INTERVAL = 360 # 6 minutes
-  DEFAULT_GUESS_MAX = 3
-
-  DEFAULT_INITIAL_PUZZLES = 2
-
   def __init__(self, shortname, cfg, event_dir):
     print(f"  Adding land \"{shortname}\"...")
 
@@ -1748,11 +1722,12 @@ class Land:
     self.symbol = cfg.get("symbol", None)
     self.land_order = cfg.get("land_order")
     self.color = cfg.get("color")
-    self.guess_interval = cfg.get("guess_interval", self.DEFAULT_GUESS_INTERVAL)
-    self.guess_max = cfg.get("guess_max", self.DEFAULT_GUESS_MAX)
+    self.guess_interval = cfg.get("guess_interval", CONSTANTS["default_guess_interval_sec"])
+    self.guess_max = cfg.get("guess_max", CONSTANTS["default_guess_max"])
     self.open_at_score, self.open_at_time = cfg.get("open_at", (None, None))
     if self.open_at_time: self.open_at_time *= 60
-    self.initial_puzzles = cfg.get("initial_puzzles", self.DEFAULT_INITIAL_PUZZLES)
+    if "assignments" in cfg:
+      self.initial_puzzles = cfg["initial_puzzles"]
 
     self.base_img = cfg["base_img"]
     self.base_size = cfg["base_size"]
@@ -1836,12 +1811,8 @@ class Land:
 
 class Puzzle:
   BY_SHORTNAME = {}
-  DEFAULT_MAX_QUEUED = 3
   PLACEHOLDER_COUNT = 0
   NEXT_BBID = 1
-
-  START_HINT_AVAILABLE_TIME = 24 * 3600
-  START_HINT_AVAILABLE_SOLVES = 20
 
   def __init__(self, shortname):
     if not re.match(r"^[a-z][a-z0-9_]*$", shortname):
@@ -1855,7 +1826,7 @@ class Puzzle:
     self.admin_url = f"/admin/puzzle/{shortname}"
     self.points = 1
     self.hints_available_time_auto = True
-    self.hints_available_time = Puzzle.START_HINT_AVAILABLE_TIME
+    self.hints_available_time = CONSTANTS["start_hint_available_sec"]
     self.emojify = False
     self.explanations = {}
     self.puzzle_log = Log()
@@ -2026,7 +1997,7 @@ class Puzzle:
     self.authors = j["authors"]
     self.puzzletron_id = j["puzzletron_id"]
     self.zip_version = j.get("zip_version")
-    self.max_queued = j.get("max_queued", self.DEFAULT_MAX_QUEUED)
+    self.max_queued = j.get("max_queued", CONSTANTS["default_max_queued"])
     self.extra = j.get("extra")
 
     if "incorrect_responses" in j and "responses" not in j:
@@ -2084,7 +2055,7 @@ class Puzzle:
     self.authors = j["authors"]
     self.puzzletron_id = j["puzzletron_id"]
     self.zip_version = j.get("zip_version")
-    self.max_queued = j.get("max_queued", self.DEFAULT_MAX_QUEUED)
+    self.max_queued = j.get("max_queued", CONSTANTS["default_max_queued"])
 
     if "incorrect_responses" in j and "responses" not in j:
       j["responses"] = j.pop("incorrect_responses")
@@ -2120,10 +2091,10 @@ class Puzzle:
 
   def adjust_hints_available_time(self):
     if not self.hints_available_time_auto: return
-    if len(self.solve_durations) < Puzzle.START_HINT_AVAILABLE_SOLVES: return
+    if len(self.solve_durations) < CONSTANTS["start_hint_available_solves"]: return
     dur = list(self.solve_durations.values())
     heapq.heapify(dur)
-    m = statistics.median(heapq.nsmallest(Puzzle.START_HINT_AVAILABLE_SOLVES, dur))
+    m = statistics.median(heapq.nsmallest(CONSTANTS["start_hint_available_solves"], dur))
     self.hints_available_time = m
     if not save_state.REPLAYING:
       self.invalidate()
@@ -2190,7 +2161,6 @@ class Erratum:
 
 class Global:
   STATE = None
-  UNDO_DONE_DELAY = 5
 
   @save_state
   def __init__(self, now):
@@ -2282,8 +2252,9 @@ class Global:
     if undo:
       self.task_queue.pending_removal.pop(task_key, None)
     else:
-      self.task_queue.pending_removal[task_key] = time.time() + self.UNDO_DONE_DELAY
-      asyncio.create_task(self.task_queue.purge(self.UNDO_DONE_DELAY))
+      delay = CONSTANTS["undo_done_sec"]
+      self.task_queue.pending_removal[task_key] = time.time() + delay
+      asyncio.create_task(self.task_queue.purge(delay))
     self.task_queue.change()
 
   @save_state
@@ -2483,13 +2454,13 @@ class Event:
     p.html_body = None
     p.html_head = None
     p.for_ops_url = ""
-    p.max_queued = Puzzle.DEFAULT_MAX_QUEUED
+    p.max_queued = CONSTANTS["default_max_queued"]
     p.meta = False
     p.submeta = False
     p.points = 0  # no buzz/wonder for finishing
 
     def on_correct_answer(now, team):
-      team.receive_fastpass(now, 2 * 3600)
+      team.receive_fastpass(now, CONSTANTS["pennypass_expiration_sec"])
       ps = team.puzzle_state[cls.PUZZLE]
       completed = [e.answer in ps.answers_found for e in cls.ALL_EVENTS]
       team.send_messages([{"method": "event_complete", "completed": completed}])
@@ -2565,7 +2536,7 @@ class Workshop:
     p.html_body = None
     p.html_head = None
     p.for_ops_url = ""
-    p.max_queued = Puzzle.DEFAULT_MAX_QUEUED
+    p.max_queued = CONSTANTS["default_max_queued"]
     p.meta = False
     p.submeta = False
     p.points = 0  # no buzz/wonder for finishing
@@ -2612,7 +2583,7 @@ class Runaround:
     p.html_body = None
     p.html_head = None
     p.for_ops_url = ""
-    p.max_queued = Puzzle.DEFAULT_MAX_QUEUED
+    p.max_queued = CONSTANTS["default_max_queued"]
     p.meta = False
     p.submeta = False
     p.points = 0  # no buzz/wonder for finishing

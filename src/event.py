@@ -86,12 +86,6 @@ class PuzzlePage(util.TeamPageHandler):
       print(f"no puzzle called {shortname}")
       return self.not_found()
 
-    # if (state.state == game.PuzzleState.SOLVED and
-    #     not state.recent_solve()):
-    #   thumb = puzzle.icon.solved_thumb
-    # else:
-    #   thumb = puzzle.icon.unlocked_thumb
-
     if puzzle.icon.headerimage:
       supertitle=f'<img src="{puzzle.icon.headerimage}"><br>'
     else:

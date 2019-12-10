@@ -247,7 +247,7 @@ def main():
     y = yaml.safe_load(f)
 
   for land in y.keys():
-    if land in ("events", "workshop", "runaround"): continue
+    if land in ("events", "workshop", "runaround", "constants"): continue
     print(f"Loading assets/{land}/land.yaml...")
     with open(os.path.join(options.input_dir, "assets", land, "land.yaml")) as f:
       y[land].update(yaml.safe_load(f))
@@ -258,7 +258,7 @@ def main():
 
   output["maps"] = {}
   for shortname, d in y.items():
-    if shortname in ("events", "workshop", "runaround"): continue
+    if shortname in ("events", "workshop", "runaround", "constants"): continue
     output["maps"][shortname] = convert_map(shortname, d, options)
 
   output["static"] = {}
@@ -269,6 +269,7 @@ def main():
   output["events"] = y.get("events", {})
   output["workshop"] = y.get("workshop", {})
   output["runaround"] = y.get("runaround", {})
+  output["constants"] = y.get("constants", {})
 
   with open(output_file, "w") as f:
     json.dump(output, f, sort_keys=True, indent=2)
