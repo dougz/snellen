@@ -186,7 +186,7 @@ span#home {
     align-items: center;
 
     margin-top: 44px;
-    min-height: calc(100vh - 41px - 360px);
+    min-height: calc(100vh - 44px);
     background: #c3dffb;
     padding: 100px 0 260px 0;
 }

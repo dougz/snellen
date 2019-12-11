@@ -38,18 +38,6 @@ class LandMapPage(util.TeamPageHandler):
     json_data = "<script>var initial_json = """ + mapdata + ";</script>"
     self.render("land.html", land=land, json_data=json_data)
 
-  def get_template_namespace(self):
-    d = super().get_template_namespace()
-    if hasattr(self, "land"):
-      if False and self.application.settings.get("debug"):
-        d["css"].append(f"/assets/{self.land.shortname}/land.css")
-      else:
-        css = f"{self.land.shortname}/land.css"
-        if css in self.static_content:
-          d["css"].append(self.static_content[css])
-    return d
-
-
 class MapDataHandler(util.TeamHandler):
   @login.required("team")
   def get(self, shortname):

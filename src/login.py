@@ -181,6 +181,7 @@ class required:
   def bounce(self, req):
     if self.on_fail is not None:
       raise tornado.web.HTTPError(self.on_fail)
+    req.set_header("Cache-Control", "no-store")
     if req.request.uri == "/":
       req.redirect("/login")
     else:
@@ -200,6 +201,7 @@ class required:
         return self.bounce(req)
       if self.cap and self.cap not in session.capabilities:
         if AdminRoles.ADMIN in session.capabilities:
+          req.set_header("Cache-Control", "no-store")
           req.redirect("/no_access")
           return
         else:
@@ -207,6 +209,7 @@ class required:
           return self.not_found()
 
       if self.cap == "team" and self.require_start and not game.Global.STATE.event_start_time:
+        req.set_header("Cache-Control", "no-store")
         req.redirect("/")
         return
 
@@ -271,6 +274,7 @@ class LoginSubmit(tornado.web.RequestHandler):
         session.capabilities = {"team"}
         session.was_admin = False
         team.attach_session(session)
+        self.set_header("Cache-Control", "no-store")
         self.redirect(target or "/")
         return
     else:
@@ -284,9 +288,11 @@ class LoginSubmit(tornado.web.RequestHandler):
           session.user = user
           session.capabilities = user.roles
           session.was_admin = True
+          self.set_header("Cache-Control", "no-store")
           self.redirect(target or "/admin")
           return
 
+    self.set_header("Cache-Control", "no-store")
     self.redirect("/login?" + urllib.parse.urlencode(err_d))
 
 
@@ -302,6 +308,7 @@ class Logout(tornado.web.RequestHandler):
     # Uncookie the browser, delete the session, send them back to the
     # login page.
     Session.delete_from_request(self, cookie_name)
+    self.set_header("Cache-Control", "no-store")
     self.redirect("/login")
 
 

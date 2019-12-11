@@ -1,7 +1,16 @@
 #nonnav {
     min-height: calc(100vh - 44px - 360px);
-   background: url(@@STATIC:inner_only/land_clouds.png@@) top repeat-x,
+    background: url(@@STATIC:inner_only/land_clouds.png@@) top repeat-x,
                 url(@@STATIC:inner_only/land_tree.png@@) bottom repeat-x,
                 #c3dffb;
     padding: 100px 0 260px 0;
 }
+
+#content {
+    margin: 30px auto;
+    padding: 40px;
+    background-color: #f8f8f8;
+    border: 2px solid #999;
+    border-radius: 10px;
+}
+

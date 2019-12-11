@@ -237,6 +237,7 @@ a#puzzerr {
     display: flex;
     flex-direction: column;
     align-items: center;
+    min-height: calc(100vh - 44px);
 }
 
 #pagetitle {
@@ -246,12 +247,8 @@ a#puzzerr {
 #content {
     font-size: 16px;
     width: 1020px;
-    margin-top: 30px;
-    margin-bottom: 30px;
-    padding: 30px 60px 40px 60px;
-    background-color: #f8f8f8;
-    border: 2px solid #999;
-    border-radius: 10px;
+    padding: 20px;
+    box-sizing: border-box;
 }
 
 #dropdown {
