@@ -18,7 +18,6 @@ class H2020_Dispatcher {
             "history_change": goog.bind(this.history_change, this),
             "solve": goog.bind(this.solve, this),
             "open": goog.bind(this.open, this),
-            "achieve": goog.bind(this.achieve, this),
             "update_start": goog.bind(this.update_start, this),
             "to_page": goog.bind(this.to_page, this),
             "hint_history": goog.bind(this.hint_history, this),
@@ -184,14 +183,6 @@ class H2020_Dispatcher {
         if (hunt2020.guest_services) hunt2020.guest_services.build_fastpass(msg.fastpass);
         this.dirty_activity = true;
         this.dirty_all_puzzles = true;
-    }
-
-    /** @param{Message} msg */
-    achieve(msg) {
-        hunt2020.toast_manager.add_toast(
-            "You received the <b>" + msg.title + "</b> pin!", 6000, null, "gold", "/pins");
-        this.dirty_activity = true;
-        if (hunt2020.achievements) hunt2020.achievements.update();
     }
 
     /** @param{Message} msg */
@@ -1390,7 +1381,6 @@ var hunt2020 = {
     counter: null,
     guest_services: null,
     activity: null,
-    achievements: null,
     videos: null,
     all_puzzles: null,
     errata: null,
@@ -1474,7 +1464,6 @@ window.onload = function() {
     // PlayerHomePage         e
     // ActivityLogPage        f
     // AboutTheParkPage       g
-    // AchievementPage        h
     // GuestServicesPage      i
     // AllPuzzlesPage         j
     // ErrataPage             k
@@ -1505,7 +1494,6 @@ window.onload = function() {
 
     if (page_class == "f") hunt2020.activity = new H2020_ActivityLog();
     if (page_class == "g") hunt2020.videos = new H2020_Videos();
-    if (page_class == "h") hunt2020.achievements = new H2020_Achievements();
     if (page_class == "i") hunt2020.guest_services = new H2020_GuestServices();
     if (page_class == "j") hunt2020.all_puzzles = new H2020_AllPuzzles();
     if (page_class == "k") hunt2020.errata = new H2020_Errata();
@@ -1572,27 +1560,6 @@ class H2020_Videos {
                                                   controls: true},
                                         goog.dom.createDom("SOURCE", {src: data[i]}));
             this.video_div.appendChild(el);
-        }
-    }
-}
-
-class H2020_Achievements {
-    constructor() {
-        this.update();
-    }
-
-    update() {
-        goog.net.XhrIo.send("/js/pins", Common_invoke_with_json(this, this.build));
-    }
-
-    /** param{Array<Achievement>} data */
-    build(data) {
-        for (var i = 0; i < data.length; ++i) {
-            var e = data[i];
-            var el = goog.dom.getElement("ach_" + e.name);
-            if (!el) continue;
-            goog.dom.classlist.addRemove(el, "no", "yes");
-            goog.dom.getElement("achsub_" + e.name).innerHTML = e.subtitle;
         }
     }
 }

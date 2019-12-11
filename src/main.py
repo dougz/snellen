@@ -90,7 +90,6 @@ async def main_server(options):
   util.TeamPageHandler.set_static_content(static_content)
   util.AdminPageHandler.set_static_content(static_content)
   game.Land.resolve_lands()
-  game.Achievement.define_achievements(static_content)
   for shortname, d in cfg["events"].items():
     game.Event(shortname, d)
   if "workshop" in cfg:
@@ -162,7 +161,6 @@ async def main_server(options):
   loop.create_task(game.Submission.realtime_process_submit_queue())
   loop.create_task(game.Puzzle.realtime_open_hints())
   loop.create_task(game.Team.realtime_expire_fastpasses())
-  loop.create_task(game.Global.STATE.flawless_check())
 
   print("Serving...")
   async with game.Global.STATE.stop_cv:

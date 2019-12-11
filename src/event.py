@@ -99,7 +99,6 @@ class PuzzlePage(util.TeamPageHandler):
 class ActivityLogPage(util.TeamPageHandler):
   @login.required("team")
   def get(self):
-    self.session.visit_page("activity")
     self.render("activity_log.html")
 
 class ActivityLogDataHandler(util.TeamHandler):
@@ -116,13 +115,11 @@ class CurrentHeaderDataHandler(util.TeamHandler):
 class AboutTheParkPage(util.TeamPageHandler):
   @login.required("team", require_start=False)
   def get(self):
-    self.session.visit_page("about_park")
     self.render("about_the_park.html", static_content=self.static_content)
 
 class GuidePage(util.TeamPageHandler):
   @login.required("team", require_start=False)
   def get(self):
-    self.session.visit_page("guide")
     self.render("guide.html", static_content=self.static_content)
 
 class VideosDataHandler(util.TeamHandler):
@@ -133,22 +130,9 @@ class VideosDataHandler(util.TeamHandler):
       urls.append(OPTIONS.static_content.get(f"video{i}.mp4"))
     self.return_json(urls)
 
-class AchievementPage(util.TeamPageHandler):
-  @login.required("team")
-  def get(self):
-    self.session.visit_page("pins")
-    self.render("achievements.html", achievements=game.Achievement.ALL)
-
-class AchievementDataHandler(util.TeamHandler):
-  @login.required("team")
-  def get(self):
-    ach = [{"name": a.name, "subtitle": a.subtitle} for a in self.team.achievements]
-    return self.return_json(ach)
-
 class EventsPage(util.TeamPageHandler):
   @login.required("team", require_start=False)
   def get(self):
-    self.session.visit_page("events")
     self.puzzle = game.Event.PUZZLE
     ps = self.team.puzzle_state[self.puzzle]
     completed = [e.answer in ps.answers_found for e in game.Event.ALL_EVENTS]
@@ -206,7 +190,6 @@ class GuestServicesPage(util.TeamPageHandler):
       state = self.team.get_puzzle_state(shortname)
       if state and state.state != state.CLOSED:
         self.puzzle_id = state.puzzle.shortname
-    self.session.visit_page("guest_services")
     d = {"fastpass": self.team.get_fastpass_data(),
          "hints": self.team.get_open_hints_data()}
     json_data = "<script>var initial_json = " + json.dumps(d) + ";</script>"
@@ -220,7 +203,6 @@ class HintsOpenDataHandler(util.TeamHandler):
 class AllPuzzlesPage(util.TeamPageHandler):
   @login.required("team")
   def get(self):
-    self.session.visit_page("all_puzzles")
     json_data = ""
     self.render("all_puzzles.html", json_data=json_data)
 
@@ -232,13 +214,11 @@ class AllPuzzlesDataHandler(util.TeamHandler):
 class HealthAndSafetyPage(util.TeamPageHandler):
   @login.required("team", require_start=False)
   def get(self):
-    self.session.visit_page("health_safety")
     self.render("health_safety.html")
 
 class SponsorPage(util.TeamPageHandler):
   @login.required("team", require_start=False)
   def get(self):
-    self.session.visit_page("sponsor")
     self.render("sponsor.html", static_content=self.static_content)
 
 class SubmitHistoryHandler(util.TeamHandler):
@@ -406,7 +386,6 @@ def GetHandlers():
     (r"/log", ActivityLogPage),
     (r"/about_the_park", AboutTheParkPage),
     (r"/guide", GuidePage),
-    (r"/pins", AchievementPage),
     (r"/events", EventsPage),
     (r"/workshop", WorkshopPage),
     (r"/heart_of_the_park", RunaroundPage),
@@ -424,7 +403,6 @@ def GetHandlers():
 
     (r"/js/submit/([a-z][a-z0-9_]*)$", SubmitHistoryHandler),
     (r"/js/log", ActivityLogDataHandler),
-    (r"/js/pins", AchievementDataHandler),
     (r"/js/videos", VideosDataHandler),
     (r"/js/hintsopen", HintsOpenDataHandler),
     (r"/js/puzzles", AllPuzzlesDataHandler),

@@ -140,20 +140,12 @@ class Session:
     self.team = None
     self.capabilities = set(caps)
     self.expires = int(time.time()) + self.SESSION_TIMEOUT
-    self.pages_visited = set()
 
     self.next_msg_serial = 1
     self.msg_cv = asyncio.Condition()
 
   def set_cookie(self, req, domain):
     req.set_secure_cookie(self.cookie_name, self.key, domain=domain)
-
-  def visit_page(self, page):
-    self.pages_visited.add(page)
-    if self.team and self.pages_visited == {
-        "pins", "activity", "health_safety", "guest_services",
-        "about_park", "events", "all_puzzles", "sponsor", "guide"}:
-      self.team.achieve_now(game.Achievement.digital_explorer, delay=1.5)
 
   @classmethod
   def from_request(cls, req, cookie_name):

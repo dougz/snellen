@@ -320,7 +320,6 @@ class Submission:
       self.check_answer(self.sent_time)
     else:
       heapq.heappush(self.GLOBAL_SUBMIT_QUEUE, (self.check_time, self))
-      self.team.achieve(Achievement.scattershot, now)
       self.team.invalidate(self.puzzle)
 
   def compute_check_time(self):
@@ -392,7 +391,6 @@ class Submission:
       elif response is None:
         # incorrect but "honest guess"
         self.state = self.INCORRECT
-        self.team.streak = []
         self.team.last_incorrect_answer = now
         self.wrong_but_reasonable = True
     else:
@@ -401,18 +399,12 @@ class Submission:
         fn(self, now)
       else:
         self.state = self.INCORRECT
-        self.team.streak = []
         self.team.last_incorrect_answer = now
 
     self.puzzle.submitted_teams.add(self.team)
     if self.state == self.INCORRECT:
       same_answer = self.puzzle.incorrect_answers.setdefault(answer, set())
       same_answer.add(self.team)
-      if len(same_answer) > 10:
-        for t in same_answer:
-          if t.achieve(Achievement.youre_all_wrong, now):
-            if t is not self.team:
-              asyncio.create_task(t.flush_messages())
       self.puzzle.incorrect_counts = [(len(v), k) for (k, v) in self.puzzle.incorrect_answers.items()]
       self.puzzle.incorrect_counts.sort(key=lambda x: (-x[0], x[1]))
 
@@ -555,8 +547,6 @@ class Team(login.LoginUser):
     self.dirty_lands = set()
     self.dirty_header = False
 
-    self.achievements = {}
-    self.streak = []
     self.solve_days = set()
     self.last_incorrect_answer = None
 
@@ -623,11 +613,6 @@ class Team(login.LoginUser):
 
   def next_serial(self):
     return self.message_serial
-
-  def achieve_now(self, ach, delay=None):
-    if ach not in self.achievements:
-      self.record_achievement(ach.name, delay)
-      return True
 
   @save_state
   def update_phone(self, now, new_phone):
@@ -927,30 +912,6 @@ class Team(login.LoginUser):
     self.cached_mapdata[land] = mapdata
     return mapdata
 
-  @save_state
-  def record_achievement(self, now, aname, delay):
-    ach = Achievement.by_name(aname)
-    self.achieve(ach, now, delay=None if save_state.REPLAYING else delay)
-
-  def achieve(self, ach, now, delay=None):
-    if ach not in self.achievements:
-      self.achievements[ach] = now
-      text = f'Received the <b>{html.escape(ach.title)}</b> pin.'
-      self.activity_log.add(now, text)
-      self.admin_log.add(now, text)
-      msg = [{"method": "achieve", "title": ach.title}]
-      if delay:
-        async def future():
-          await asyncio.sleep(delay)
-          self.send_messages(msg)
-          await self.flush_messages()
-          self.invalidate()
-        asyncio.create_task(future())
-      else:
-        self.send_messages(msg)
-        self.invalidate()
-      return True
-
   @classmethod
   def get_by_username(cls, username):
     return cls.BY_USERNAME.get(username)
@@ -1217,42 +1178,15 @@ class Team(login.LoginUser):
           if dirty:
             self.send_messages([{"method": "pennies"}])
 
-      self.achieve(Achievement.solve_puzzle, now)
-
       solve_duration = ps.solve_time - ps.open_time
       puzzle.solve_durations[self] = solve_duration
       puzzle.median_solve_duration = statistics.median(puzzle.solve_durations.values())
       puzzle.adjust_hints_available_time();
 
-      if (puzzle.fastest_solver is None or
-          puzzle.solve_durations[puzzle.fastest_solver] > solve_duration):
-        # a new record
-        if puzzle.fastest_solver:
-          puzzle.fastest_solver.achieve(Achievement.ex_champion, now)
-          asyncio.create_task(puzzle.fastest_solver.flush_messages())
-        puzzle.fastest_solver = self
-        self.achieve(Achievement.champion, now)
-
       durtxt = util.format_duration(solve_duration)
       puzzle.puzzle_log.add(now, f"Solved by {ps.admin_html_team} ({durtxt}).")
       self.activity_log.add(now, f"{puzzle.html} solved.")
       self.admin_log.add(now, f"{ps.admin_html_puzzle} solved ({durtxt}).")
-
-      if solve_duration < 60:
-        self.achieve(Achievement.speed_demon, now)
-      if solve_duration >= 24*60*60:
-        self.achieve(Achievement.better_late_than_never, now)
-      st = datetime.datetime.fromtimestamp(now)
-      if 0 <= st.hour < 3:
-        self.achieve(Achievement.night_owl, now)
-      elif 3 <= st.hour < 6:
-        self.achieve(Achievement.early_bird, now)
-      self.solve_days.add(st.weekday())
-      if self.solve_days.issuperset({4,5,6}):
-        self.achieve(Achievement.weekend_pass, now)
-      self.streak.append(now)
-      if len(self.streak) >= 3 and now - self.streak[-3] <= 600:
-        self.achieve(Achievement.hot_streak, now)
 
       self.compute_puzzle_beam(now)
 
@@ -1837,7 +1771,6 @@ class Puzzle:
 
     self.median_solve_duration = None
     self.solve_durations = {}     # {team: duration}
-    self.fastest_solver = None
     self.incorrect_answers = {}   # {answer: {teams}}
     self.incorrect_counts = []    # [count: answer]
     self.open_teams = set()
@@ -2092,10 +2025,10 @@ class Puzzle:
 
   def adjust_hints_available_time(self):
     if not self.hints_available_time_auto: return
-    if len(self.solve_durations) < self.start_hint_available_solves: return
+    if len(self.solve_durations) < self.hints_available_solves: return
     dur = list(self.solve_durations.values())
     heapq.heapify(dur)
-    m = statistics.median(heapq.nsmallest(self.start_hint_available_solves, dur))
+    m = statistics.median(heapq.nsmallest(self.hints_available_solves, dur))
     self.hints_available_time = m
     if not save_state.REPLAYING:
       self.invalidate()
@@ -2274,133 +2207,9 @@ class Global:
       team.send_messages([{"method": "update_start", "new_start": self.expected_start_time}])
       await team.flush_messages()
 
-  async def flawless_check(self):
-    while True:
-      now = time.time()
-      for team in Team.all_teams():
-        if team.last_incorrect_answer:
-          start = team.last_incorrect_answer
-        elif self.event_start_time:
-          start = self.event_start_time
-        else:
-          continue
-        if now - start >= 6 * 60 * 60:
-          if team.achieve_now(Achievement.flawless):
-            asyncio.create_task(team.flush_messages())
-      await asyncio.sleep(15)
-
   def bb_task_queue_data(self):
     return self.task_queue.get_bb_data()
 
-
-class Achievement:
-  ALL = []
-  BY_NAME = {}
-
-  def __init__(self, name, title, subtitle):
-    self.name = name
-    self.title = title
-    self.subtitle = subtitle
-    self.url = Achievement.static_dir["achievements/" + name + ".png"]
-    setattr(Achievement, name, self)
-    Achievement.BY_NAME[name] = self
-    Achievement.ALL.append(self)
-
-  def __repr__(self):
-    return f"<Achievement {self.name}>"
-
-  @classmethod
-  def by_name(cls, aname):
-    return cls.BY_NAME[aname]
-
-  @classmethod
-  def define_achievements(cls, static_dir):
-    cls.static_dir = static_dir
-
-    Achievement("solve_puzzle",
-                "That's how this works",
-                "Solve a puzzle.")
-
-    Achievement("speed_demon",
-                "Speed Demon",
-                "Solve a puzzle in under a minute.")
-
-    Achievement("flawless",
-                "Flawless",
-                "Submit no incorrect answers for six hours.")
-
-    # TODO(dougz): this currently requires no incorrect intervening answers
-    Achievement("hot_streak",
-                "Hot streak",
-                "Solve three puzzles within ten minutes.")
-
-    Achievement("better_late_than_never",
-                "Better late than never",
-                "Solve a puzzle 24 hours after opening it.")
-
-    Achievement("night_owl",
-                "Night owl",
-                "Solve a puzzle between midnight and 3am.")
-
-    Achievement("early_bird",
-                "Early bird",
-                "Solve a puzzle between 3am and 6am.")
-
-    Achievement("champion",
-                "Champion!",
-                "Set a new record time in solving a puzzle.")
-
-    Achievement("ex_champion",
-                "Ex-champion!",
-                "Lose the record time for solving a puzzle.")
-
-    Achievement("influencer",
-                "Influencer",
-                "Create enough buzz to save the park.")
-
-    Achievement("take_a_shortcut",
-                "Take a shortcut",
-                "Solve a meta before solving all feeders.")
-
-    Achievement("completionist",
-                "Completionist",
-                "Solve every single puzzle.")
-
-    Achievement("weekend_pass",
-                "Weekend pass",
-                "Solve a puzzle on each of Friday, Saturday, and Sunday.")
-
-    Achievement("digital_explorer",
-                "Digital explorer",
-                "Navigate to every page on the website.")
-
-    Achievement("scattershot",
-                "Scattershot",
-                "Trigger answer throttling with incorrect guesses.")
-
-    Achievement("youre_all_wrong",
-                "You're all wrong!",
-                "Submit the same wrong answer as ten other teams.")
-
-    Achievement("mea_culpa",
-                "Mea culpa",
-                "View the errata page.")
-
-    Achievement("bug_catcher",
-                "Bug catcher",
-                "Submit a valid errata entry to HQ.  Thanks!")
-
-    Achievement("penny_pincher",
-                "Penny pincher",
-                "Collect your first pressed penny.")
-
-    Achievement("parade_goer",
-                "Parade-goer",
-                "Attend a parade")
-
-    Achievement("come_back",
-                "Come back!",
-                "Log out of the hunt server before the coin is found.")
 
 class MiscLand:
   SINGLETON = None
