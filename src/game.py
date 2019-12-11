@@ -1725,7 +1725,7 @@ class Land:
     self.guess_interval = cfg.get("guess_interval", CONSTANTS["default_guess_interval_sec"])
     self.guess_max = cfg.get("guess_max", CONSTANTS["default_guess_max"])
     self.open_at_score, self.open_at_time = cfg.get("open_at", (None, None))
-    if self.open_at_time: self.open_at_time *= 60
+    if self.open_at_time: self.open_at_time *= 3600
     if "assignments" in cfg:
       self.initial_puzzles = cfg["initial_puzzles"]
 
