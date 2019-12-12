@@ -221,7 +221,6 @@ a#submit:hover {
 }
 
 a#puzzerr {
-    display: none;
     background-color: #c00;
     color: white;
     padding: 4px;
@@ -232,6 +231,22 @@ a#puzzerr {
     text-align: center;
     vertical-align: center;
 }
+
+a#puzzhints {
+    color: white;
+    border: 1px solid white;
+    padding: 3px;
+    font-weight: bold;
+    font-family: 'Merriweather Sans', sans-serif;
+    height: 20px;
+    width: 20px;
+    line-height: 20px;
+    text-align: center;
+    vertical-align: center;
+}
+
+#topnav > a.hidden { display: none; }
+#topnav > a.urgent { background-color: #c00; }
 
 #nonnav {
     display: flex;

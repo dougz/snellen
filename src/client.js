@@ -81,6 +81,12 @@ class H2020_Dispatcher {
                 "Hunt HQ has replied to your hint request on <b>" +
                     msg.title + "</b>.", 6000, null, "salmon",
                 "/guest_services?p=" + msg.puzzle_id);
+            if (puzzle_id == msg.puzzle_id) {
+                var el = goog.dom.getElement("puzzhints");
+                if (el) {
+                    goog.dom.classlist.add(el, "urgent");
+                }
+            }
         }
         this.dirty_activity = true;
     }
@@ -89,6 +95,12 @@ class H2020_Dispatcher {
     hints_open(msg) {
         if (hunt2020.guest_services) {
             hunt2020.guest_services.update_hints_open();
+        }
+        if (puzzle_id == msg.puzzle_id) {
+            var el = goog.dom.getElement("puzzhints");
+            if (el) {
+                goog.dom.classlist.remove(el, "hidden");
+            }
         }
         if (msg.title) {
             hunt2020.toast_manager.add_toast(
@@ -608,7 +620,7 @@ class H2020_SubmitPanel {
         }
 
         if (response.errata) {
-            goog.dom.getElement("puzzerr").style.display = "inline-block";
+            goog.dom.classlist.remove(goog.dom.getElement("puzzerr"), "hidden");
         }
     }
 
@@ -1166,6 +1178,7 @@ class H2020_GuestServices {
         goog.dom.getElement("hintui").style.display = "block";
 
         this.hint_displayed = data.puzzle_id;
+        localStorage.setItem("lh_" + data.puzzle_id, data.history.length);
 
         var ht = goog.dom.getElement("hinttext");
         if (data.history.length == 0) {
@@ -1482,6 +1495,21 @@ window.onload = function() {
         var e = goog.dom.getElement("emoji-picker-body");
         if (e) {
             goog.net.XhrIo.send(edb, goog.bind(emoji_builder, null, e));
+        }
+
+        if (last_hint) {
+            var x = localStorage.getItem("lh_" + puzzle_id);
+            if (x) {
+                x = parseInt(x, 10);
+            } else {
+                x = 0;
+            }
+            if (x < last_hint) {
+                var el = goog.dom.getElement("puzzhints");
+                if (el) {
+                    goog.dom.classlist.add(el, "urgent");
+                }
+            }
         }
     }
 

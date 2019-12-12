@@ -1181,7 +1181,7 @@ class Team(login.LoginUser):
       solve_duration = ps.solve_time - ps.open_time
       puzzle.solve_durations[self] = solve_duration
       puzzle.median_solve_duration = statistics.median(puzzle.solve_durations.values())
-      puzzle.adjust_hints_available_time();
+      puzzle.adjust_hints_available_time()
 
       durtxt = util.format_duration(solve_duration)
       puzzle.puzzle_log.add(now, f"Solved by {ps.admin_html_team} ({durtxt}).")

@@ -35,6 +35,9 @@ var sessionStorage;
 /** @type{string} */
 var page_class;
 
+/** @type{?number} */
+var last_hint;
+
 class Message {
     constructor() {
         /** @type{string} */

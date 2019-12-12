@@ -65,8 +65,8 @@ class PlayerHomePage(LandMapPage):
 class PuzzlePage(util.TeamPageHandler):
   @login.required("team")
   def get(self, shortname):
-    state = self.team.get_puzzle_state(shortname)
-    if not state or state.state == state.CLOSED:
+    ps = self.team.get_puzzle_state(shortname)
+    if not ps or ps.state == game.PuzzleState.CLOSED:
       return self.not_found()
 
     puzzle = game.Puzzle.get_by_shortname(shortname)
@@ -80,8 +80,15 @@ class PuzzlePage(util.TeamPageHandler):
       supertitle=""
 
     self.puzzle = puzzle
+
+    if ps.hints and ps.hints[-1].sender:
+      last_hint = len(ps.hints)
+    else:
+      last_hint = None
+
     self.render("puzzle_frame.html", thumb=None, supertitle=supertitle,
-                solved=(state.state == state.SOLVED))
+                solved=(ps.state == game.PuzzleState.SOLVED),
+                last_hint=last_hint)
 
 
 class ActivityLogPage(util.TeamPageHandler):
