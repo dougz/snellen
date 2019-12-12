@@ -362,7 +362,7 @@ class OffsetsPage(util.TeamPageHandler):
     for land in game.Land.BY_SHORTNAME.values():
       d = {}
       for n, i in land.icons.items():
-        if i.offset != [0,0]:
+        if i.offset != [0,0,0]:
           d[n] = i.offset
       if d:
         out[land.shortname] = d
