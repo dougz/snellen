@@ -200,12 +200,6 @@ def convert_static_files(out, options, lands):
              "jeon_paisa", "kobo", "centime", "luma", "dirham", "kopek"):
     to_convert.append((f"{mp}.png", f"{base}/media/{mp}.png"))
 
-  for fn in os.listdir(os.path.join(options.input_assets, "achievements")):
-    if not fn.endswith(".png"): continue
-    base = os.path.basename(fn)
-    to_convert.append((os.path.join("achievements", base),
-                       os.path.join(options.input_assets, "achievements", fn)))
-
   # Process .css files last.
   to_convert.sort(key=lambda x: (1 if x[0].endswith(".css") else 0, x[0]))
 
