@@ -300,10 +300,6 @@ class Logout(tornado.web.RequestHandler):
   def get(self, admin):
     cookie_name = Session.ADMIN_COOKIE_NAME if admin else Session.PLAYER_COOKIE_NAME
     session = Session.from_request(self, cookie_name)
-    if (session and session.team and
-        game.Global.STATE.event_start_time and
-        not session.was_admin):
-      session.team.achieve_now(game.Achievement.come_back, delay=1.0)
 
     # Uncookie the browser, delete the session, send them back to the
     # login page.

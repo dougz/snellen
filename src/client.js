@@ -1253,7 +1253,7 @@ class H2020_GuestServices {
                     target_found = true;
                 }
                 this.hintselect.appendChild(
-                    goog.dom.createDom("OPTION", d, it[1]));
+                    goog.dom.createDom("OPTION", d, it[1] + (it[2] ? " [solved]" : "")));
             }
 
             if (target_found) {

@@ -1370,7 +1370,8 @@ class Team(login.LoginUser):
     if self.cached_open_hints_data is not None:
       return self.cached_open_hints_data
 
-    oh = [[p.shortname, p.title] for p in sorted(self.hints_open, key=lambda p: p.sortkey)]
+    oh = [[p.shortname, p.title, self.puzzle_state[p].state == PuzzleState.SOLVED]
+          for p in sorted(self.hints_open, key=lambda p: p.sortkey)]
     d = {"available": oh}
     if self.current_hint_puzzlestate:
       d["current"] = self.current_hint_puzzlestate.puzzle.shortname

@@ -126,7 +126,7 @@ class UploadHandler(tornado.web.RequestHandler):
                 "balloons": "Balloon Vendor",
                 "safari": "Safari Adventure",
                 "cascade": "Cascade Bay",
-                "witch": "Witch's Hollow",
+                "hollow": "Wizard's Hollow",
                 "canyon": "Cactus Canyon",
                 "yesterday": "YesterdayLand",
                 }

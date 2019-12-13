@@ -123,15 +123,24 @@ async def tasker(username, cookie, client, options):
     complete_threshold = time.time() - 60
     for t in j.get("queue", ()):
       key = t.get("key", "")
-      if not key.startswith("t-"): continue
+      d = None
       if t["when"] < complete_threshold:
-        d = {"action": "complete_task", "key": key, "which": "done"}
-        print(f"ADMIN {username} completing {key}")
-      elif t["when"] < claim_threshold:
+        if key.startswith("t-"):
+          if not t.get("done_pending"):
+            d = {"action": "complete_task", "key": key, "which": "done"}
+            print(f"ADMIN {username} completing {key}")
+        else:
+          _, team_username, puzzle_id = key.split("-")
+          d = {"action": "hint_reply", "team_username": team_username,
+               "puzzle_id": puzzle_id, "text": "be smarter"}
+          print(f"ADMIN {username} replying to hint {key}")
+      elif not t["claimant"] and t["when"] < claim_threshold:
         d = {"action": "update_claim", "key": key, "which": "claim"}
         print(f"ADMIN {username} claiming {key}")
       else:
         continue
+
+      if not d: continue
 
       req = tornado.httpclient.HTTPRequest(
         f"{options.base_url}/admin/action",
@@ -187,6 +196,52 @@ async def solver(my_id, cookie, client, options):
     delay = -math.log(1.0 - random.random()) / solves_per_minute * 60
     await asyncio.sleep(delay)
     if not await solve_one(my_id, cookie, client, options): break
+    await hint_one(my_id, cookie, client, options)
+
+async def hint_one(my_id, cookie, client, options):
+  req = tornado.httpclient.HTTPRequest(
+    f"{options.base_url}/js/hintsopen",
+    connect_timeout=5.0,
+    request_timeout=10.0,
+    follow_redirects=False,
+    headers={"Cookie": cookie})
+
+  try:
+    response = await client.fetch(req)
+  except tornado.httpclient.HTTPClientError as e:
+    print(f"--- {my_id} solver puzzle fetch failed: {e} ---")
+    return
+
+  j = json.loads(response.body)
+
+  if j["current"]: return True # waiting for response
+
+  if not j["available"]: return True  # no hints available
+
+  a = [p for p in j["available"] if not p[2]]
+  if not a: return True  # all hint-available puzzles solved
+
+  shortname = random.choice(a)[0]
+  print(f"{my_id} requesting hint on {shortname}")
+
+  d = {"action": "hint_request", "puzzle_id": shortname, "text": "please help"}
+
+  req = tornado.httpclient.HTTPRequest(
+    f"{options.base_url}/action",
+    method="POST",
+    body=json.dumps(d),
+    follow_redirects=False,
+    headers={"Cookie": cookie})
+
+  try:
+    response = await client.fetch(req)
+  except tornado.httpclient.HTTPClientError as e:
+    print(f"--- {my_id} failed to submit: {e} ---")
+    return
+
+  if response.code == 204:
+    return True
+
 
 async def solve_one(my_id, cookie, client, options):
   req = tornado.httpclient.HTTPRequest(
