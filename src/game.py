@@ -922,7 +922,7 @@ class Team(login.LoginUser):
   @classmethod
   def get_by_login_username(cls, username):
     x = cls.BY_USERNAME.get(username)
-    if x: return
+    if x: return x
     return cls.ALT_USERNAME.get(username)
 
   def get_submit_id(self):
