@@ -263,7 +263,7 @@ class LoginSubmit(tornado.web.RequestHandler):
     if target:
       err_d["redirect_to"] = target
 
-    team = game.Team.get_by_username(username)
+    team = game.Team.get_by_login_username(username)
     if team:
       allowed = await team.check_password(password)
       if allowed:

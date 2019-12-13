@@ -7,6 +7,7 @@ import http.client
 import json
 import time
 import tornado.web
+import unicodedata
 
 import game
 import login
@@ -354,7 +355,13 @@ class TeamJsonHandler(util.AdminHandler):
   def build(cls):
     out = []
     for t in game.Team.all_teams():
-      out.append([t.username, t.name])
+      name = t.name
+      for k in name:
+        if unicodedata.category(k)[0] == "L":
+          break
+      else:
+        name += f" ({t.username})"
+      out.append([t.username, name])
     out.sort()
     cls.body = "var team_list = " + json.dumps(out) + ";\n"
     h = hashlib.md5(cls.body.encode("utf-8")).hexdigest()[:12]

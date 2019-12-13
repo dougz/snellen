@@ -504,6 +504,7 @@ class Submission:
 
 class Team(login.LoginUser):
   BY_USERNAME = {}
+  ALT_USERNAME = {}
 
   GLOBAL_FASTPASS_QUEUE = []
 
@@ -523,6 +524,8 @@ class Team(login.LoginUser):
     self.size = info["size"]
     self.remote_only = info["remote_only"]
     self.attrs = info.get("attrs", {})
+    alt = self.attrs.get("alt", None)
+    if alt: self.ALT_USERNAME[alt] = self
 
     save_state.add_instance("Team:" + username, self)
 
@@ -915,6 +918,12 @@ class Team(login.LoginUser):
   @classmethod
   def get_by_username(cls, username):
     return cls.BY_USERNAME.get(username)
+
+  @classmethod
+  def get_by_login_username(cls, username):
+    x = cls.BY_USERNAME.get(username)
+    if x: return
+    return cls.ALT_USERNAME.get(username)
 
   def get_submit_id(self):
     self.next_submit_id += 1
