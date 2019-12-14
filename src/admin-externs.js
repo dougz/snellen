@@ -162,11 +162,15 @@ class Erratum {
         /** @type{number} */
         this.when;
         /** @type{string} */
+        this.puzzle_id;
+        /** @type{string} */
+        this.title;
+        /** @type{string} */
+        this.sender;
+        /** @type{string} */
         this.text;
     }
 }
-
-
 
 class HintMessage {
     constructor() {
@@ -303,3 +307,5 @@ class Action {
         this.reload;
     }
 }
+
+

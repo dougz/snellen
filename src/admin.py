@@ -63,6 +63,17 @@ class ServerDataHandler(util.AdminHandler):
 
     self.return_json(d)
 
+class ErrataPage(util.AdminPageHandler):
+  @login.required("admin")
+  def get(self):
+    self.render("admin_errata.html")
+
+class ErrataDataHandler(util.AdminHandler):
+  @login.required("admin")
+  def get(self):
+    d = game.Global.STATE.get_errata_data()
+    self.return_json(d)
+
 class ListTeamsPage(util.AdminPageHandler):
   @login.required("admin")
   def get(self):
@@ -159,7 +170,7 @@ class PuzzleDataHandler(util.AdminHandler):
          "incorrect_answers": puzzle.incorrect_counts,
          "hint_time": puzzle.hints_available_time,
          "log": puzzle.puzzle_log.get_data(),
-         "errata": [{"when": e.when, "text": e.text} for e in puzzle.errata]}
+         "errata": [e.to_json() for e in puzzle.errata]}
     self.return_json(d)
 
 class FixPuzzlePage(util.AdminPageHandler):
@@ -670,6 +681,7 @@ def GetHandlers():
     (r"/admin/users$", AdminUsersPage),
     (r"/admin/server$", AdminServerPage),
     (r"/admin/visit(?:/(penny|loony))?$", VisitPage),
+    (r"/admin/errata$", ErrataPage),
 
     (r"/admin/action$", ActionHandler),
     (r"/admin/become/([a-z0-9_]+)(/confirmed)?$", BecomeTeamHandler),
@@ -686,6 +698,7 @@ def GetHandlers():
     (r"/admin/js/taskqueue$", TaskQueueHandler),
     (r"/admin/js/bbtaskqueue$", BigBoardTaskQueueDataHandler),
     (r"/admin/js/bbteam(/[a-z0-9_]+)?$", BigBoardTeamDataHandler),
+    (r"/admin/js/errata$", ErrataDataHandler),
     ]
   return handlers
 

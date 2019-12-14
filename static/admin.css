@@ -1029,3 +1029,12 @@ tr.submit-gray .submit-state { color: #666 }
     text-transform: uppercase;
     vertical-align: 0.1em;
 }
+
+.ErrataPage dt {
+    margin-top: 12px;
+    font-weight: bold;
+}
+
+.ErrataPage dd {
+    margin-top: 8px;
+}

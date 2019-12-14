@@ -1178,7 +1178,7 @@ class H2020_GuestServices {
         goog.dom.getElement("hintui").style.display = "block";
 
         this.hint_displayed = data.puzzle_id;
-        localStorage.setItem("lh_" + data.puzzle_id, data.history.length);
+        localStorage.setItem("lh_" + data.puzzle_id, "" + data.history.length);
 
         var ht = goog.dom.getElement("hinttext");
         if (data.history.length == 0) {

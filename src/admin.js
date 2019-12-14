@@ -49,6 +49,9 @@ class A2020_Dispatcher {
         if (msg.puzzle_id && puzzle_id == msg.puzzle_id && admin2020.puzzle_page) {
             admin2020.puzzle_page.update();
         }
+        if (admin2020.errata_page) {
+            admin2020.errata_page.update();
+        }
     }
 }
 
@@ -852,7 +855,9 @@ class A2020_PuzzlePage {
             for (var i = 0; i < data.errata.length; ++i) {
                 var e = data.errata[i];
 
-                var dt = goog.dom.createDom("DT", null, admin2020.time_formatter.format(e.when) + ":")
+                var dt = goog.dom.createDom(
+                    "DT", null, admin2020.time_formatter.format(e.when) +
+                        " (by " + e.sender + "):")
                 var dd = goog.dom.createDom("DD", null, e.text);
                 this.pperratalist.appendChild(dt);
                 this.pperratalist.appendChild(dd);
@@ -1048,6 +1053,7 @@ var admin2020 = {
     puzzle_list_page: null,
     fix_puzzle: null,
     home_page: null,
+    errata_page: null,
 }
 
 window.onload = function() {
@@ -1138,6 +1144,9 @@ window.onload = function() {
     }
     if (page_class == "AdminHomePage") {
         admin2020.home_page = new A2020_HomePage();
+    }
+    if (page_class == "ErrataPage") {
+        admin2020.errata_page = new A2020_ErrataPage();
     }
 }
 
@@ -1249,4 +1258,37 @@ class A2020_HomePage {
         this.homebestow.disabled = !this.homebestow.disabled;
     }
 }
+
+class A2020_ErrataPage {
+    constructor() {
+        /** @type{Element} */
+        this.eperrata = goog.dom.getElement("errata");
+
+        this.update();
+    }
+
+    update() {
+        goog.net.XhrIo.send("/admin/js/errata", Common_invoke_with_json(this, this.build));
+    }
+
+    /** param{Array<Erratum>} data */
+    build(data) {
+        console.log(data);
+        this.eperrata.innerHTML = "";
+
+        for (var i = 0; i < data.length; ++i) {
+            var e = data[i];
+
+            var dt = goog.dom.createDom(
+                "DT", null,
+                goog.dom.createDom("A", {href: "/admin/puzzle/" + e.puzzle_id}, e.title),
+                " (posted " + admin2020.time_formatter.format(e.when) + " by " + e.sender + ")");
+            var dd = goog.dom.createDom("DD", null);
+            dd.innerHTML = e.text;
+            this.eperrata.appendChild(dt);
+            this.eperrata.appendChild(dd);
+        }
+    }
+}
+
 

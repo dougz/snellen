@@ -2102,6 +2102,12 @@ class Erratum:
 
     puzzle.errata.insert(0, self)
 
+  def to_json(self):
+    return {"when": self.when,
+            "puzzle_id": self.puzzle.shortname,
+            "title": self.puzzle.title,
+            "sender": self.sender.fullname,
+            "text": self.text}
 
 class Global:
   STATE = None
@@ -2120,6 +2126,7 @@ class Global:
     self.task_queue = TaskQueue()
 
     self.errata = []
+    self.cached_errata_data = None
 
   @save_state
   def post_erratum(self, now, shortname, text, sender):
@@ -2128,8 +2135,14 @@ class Global:
     sender = login.AdminUser.get_by_username(sender)
     if not sender: return
     self.errata.insert(0, Erratum(now, puzzle, text, sender))
+    self.cached_errata_data = None
 
     puzzle.puzzle_log.add(now, f"An erratum was posted by <b>{sender.fullname}</b>.")
+
+  def get_errata_data(self):
+    if self.cached_errata_data is None:
+      self.cached_errata_data = [e.to_json() for e in self.errata]
+    return self.cached_errata_data
 
   async def stop_server(self):
     async with self.stop_cv:
