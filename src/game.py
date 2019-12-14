@@ -1038,7 +1038,9 @@ class Team(login.LoginUser):
       await asyncio.sleep(1.0)
 
   @save_state
-  def bestow_fastpass(self, now, expire):
+  def bestow_fastpass(self, now, expire, sender):
+    sender = login.AdminUser.get_by_username(sender)
+    self.admin_log.add(now, f"Bestowed a PennyPass by <b>{sender.fullname}</b>.")
     self.receive_fastpass(now, expire)
 
   def receive_fastpass(self, now, expire):

@@ -426,26 +426,22 @@ class ActionHandler(util.AdminHandler):
   @login.required("admin")
   async def post(self):
     self.action = self.args.get("action", "")
-
     fn = getattr(self, "ACTION_" + self.action, None)
     if fn:
       await fn()
-
     else:
       # Unknown (or no) "action" field.
       self.set_status(http.client.BAD_REQUEST.value)
 
   async def ACTION_bestow_fastpass(self):
     username = self.args.get("team_username", None)
-
     duration = CONSTANTS["pennypass_expiration_sec"]
-
     if username is None:
       for team in game.Team.all_teams():
-        team.bestow_fastpass(duration)
+        team.bestow_fastpass(duration, self.user.username)
     else:
       team = self.get_team(username)
-      team.bestow_fastpass(duration)
+      team.bestow_fastpass(duration, self.user.username)
     self.set_status(http.client.NO_CONTENT.value)
 
   async def ACTION_update_hint_time(self):

@@ -248,3 +248,43 @@ function Common_invoke_with_json_arg(obj, target, arg) {
         }
     }
 }
+
+class Common_enabler {
+    /** param{string} enable_id */
+    /** param{string} action_id */
+    /** param{function()} action */
+
+    constructor(enable_id, action_id, action) {
+        /** type{Element} */
+        this.enable_el = goog.dom.getElement(enable_id);
+        /** type{Element} */
+        this.action_el = goog.dom.getElement(action_id);
+
+        console.log(this.enable_el, this.action_el);
+
+        this.action = action;
+
+        this.enable_el.disabled = false;
+        this.action_el.disabled = true;
+
+        goog.events.listen(this.enable_el, goog.events.EventType.CLICK,
+                           goog.bind(this.do_enable, this));
+        goog.events.listen(this.action_el, goog.events.EventType.CLICK,
+                           goog.bind(this.do_action, this));
+    }
+
+    do_enable() {
+        console.log("do_enable");
+        this.action_el.disabled = !this.action_el.disabled;
+    }
+
+    do_action() {
+        this.action_el.blur();
+        this.action_el.disabled = true;
+        this.action();
+    }
+}
+
+
+
+

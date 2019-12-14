@@ -659,19 +659,12 @@ class A2020_TeamPage {
         this.tpscore = goog.dom.getElement("tpscore");
         /** @type{Element} */
         this.tpphone = goog.dom.getElement("tpphone");
-        /** @type{Element} */
-        this.bestow = goog.dom.getElement("bestowfastpass");
 
-        goog.events.listen(goog.dom.getElement("enablebestow"),
-                           goog.events.EventType.CLICK, goog.bind(this.enable, this));
-
-        goog.events.listen(this.bestow, goog.events.EventType.CLICK, function(e) {
-            A2020_DoAction({action: "bestow_fastpass",
-                            team_username: team_username},
-                           Common_expect_204);
-            e.target.blur();
-            e.target.disabled = true;
-        });
+        this.pennypass = new Common_enabler(
+            "tppassenable", "tppassbestow",
+            function(e) { A2020_DoAction({action: "bestow_fastpass",
+                                          team_username: team_username},
+                                         Common_expect_204); });
 
         var el = goog.dom.getElement("tpaddnote");
         goog.events.listen(el, goog.events.EventType.CLICK, function() {
@@ -699,10 +692,6 @@ class A2020_TeamPage {
         this.dot_labeler = new A2020_DotLabeler(this.tpsvg);
 
         this.update();
-    }
-
-    enable() {
-        this.bestow.disabled = !this.bestow.disabled;
     }
 
     update() {
@@ -1230,23 +1219,10 @@ class A2020_FixPuzzlePage {
 
 class A2020_HomePage {
     constructor() {
-        /** @type{Element} */
-        this.homeenable = goog.dom.getElement("homeenable");
-        /** @type{Element} */
-        this.homebestow = goog.dom.getElement("homebestow");
-
-        goog.events.listen(this.homeenable, goog.events.EventType.CLICK, goog.bind(this.enable, this));
-
-        goog.events.listen(this.homebestow, goog.events.EventType.CLICK, function(e) {
-            A2020_DoAction({action: "bestow_fastpass"},
-                           Common_expect_204);
-            e.target.blur();
-            e.target.disabled = true;
-        });
-    }
-
-    enable() {
-        this.homebestow.disabled = !this.homebestow.disabled;
+        this.pennypass_all = new Common_enabler(
+            "hppassenable", "hppassbestow",
+            function() { A2020_DoAction({action: "bestow_fastpass"},
+                                        Common_expect_204); });
     }
 }
 
