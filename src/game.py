@@ -1327,6 +1327,23 @@ class Team(login.LoginUser):
     return land_offsets
 
   def bb_data(self):
+    def state_from_ps(ps):
+      if ps.state == "open":
+        if ps.hints_available:
+          if ps.hints:
+            return "open-hint"
+          else:
+            return "available"
+        else:
+          return "open"
+      elif ps.state == "closed":
+        return "closed"
+      else:
+        if ps.hints:
+          return "solved-hint"
+        else:
+          return "solved"
+
     if not self.cached_bb_data:
       self.cached_bb_data = {
         "score": self.score,
@@ -1343,16 +1360,16 @@ class Team(login.LoginUser):
         ny = 2
         for p in land.all_puzzles:
           ps = self.puzzle_state[p]
-          used_hints = "-hint" if ps.hints else ""
+          st = state_from_ps(ps)
           if p.meta:
-            out.append(f'<circle cx="{lx+14.5}" cy="14.5" r="12" class="bb-{ps.state}{used_hints} bbp-{p.bbid}"/>')
+            out.append(f'<circle cx="{lx+14.5}" cy="14.5" r="12" class="bb-{st} bbp-{p.bbid}"/>')
           else:
             cx = nx * 15 + 7
             cy = ny * 15 + 7
             if p in land.additional_puzzles or p.submeta:
-              out.append(f'<rect x="{lx+cx-4}" y="{cy-4}" width="8" height="8" class="bb-{ps.state}{used_hints} bbp-{p.bbid}"/>')
+              out.append(f'<rect x="{lx+cx-4}" y="{cy-4}" width="8" height="8" class="bb-{st} bbp-{p.bbid}"/>')
             else:
-              out.append(f'<circle cx="{lx+cx}" cy="{cy}" r="5" class="bb-{ps.state}{used_hints} bbp-{p.bbid}"/>')
+              out.append(f'<circle cx="{lx+cx}" cy="{cy}" r="5" class="bb-{st} bbp-{p.bbid}"/>')
 
             while True:
               ny += 1
@@ -1366,12 +1383,12 @@ class Team(login.LoginUser):
       lx = [x["left"] for x in self.bb_label_info() if x["symbol"] == land.symbol][0]
       for (p, big, ny, r) in zip(land.all_puzzles, (False, True, True), (0, 1, 3), (5, 9, 12)):
         ps = self.puzzle_state[p]
-        used_hints = "-hint" if ps.hints else ""
+        st = state_from_ps(ps)
         cy = ny*15 + 7
         if big:
-          out.append(f'<circle cx="{lx+14.5}" cy="{cy+7.5}" r="{r}" class="bb-{ps.state}{used_hints} bbp-{p.bbid}"/>')
+          out.append(f'<circle cx="{lx+14.5}" cy="{cy+7.5}" r="{r}" class="bb-{st} bbp-{p.bbid}"/>')
         else:
-          out.append(f'<circle cx="{lx+14.5}" cy="{cy}" r="{r}" class="bb-{ps.state}{used_hints} bbp-{p.bbid}"/>')
+          out.append(f'<circle cx="{lx+14.5}" cy="{cy}" r="{r}" class="bb-{st} bbp-{p.bbid}"/>')
       lx += 30
 
       out.insert(0, f'<svg xmlns="http://www.w3.org/2000/svg" width="{lx}" height="74" viewBox="0 0 {lx} 74">')
@@ -1405,6 +1422,8 @@ class Team(login.LoginUser):
     ps.hints_available = True
     self.hints_open.add(puzzle)
     self.cached_open_hints_data = None
+    self.cached_bb_data = None
+    self.invalidate(puzzle)
     puzzle.puzzle_log.add(now, f"Hints available to {ps.admin_html_team}.")
     self.activity_log.add(now, f"Hints available for {puzzle.html}.")
     self.admin_log.add(now, f"Hints available for {ps.admin_html_puzzle}.")

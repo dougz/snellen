@@ -816,6 +816,10 @@ p.note {
     stroke: #ddd;
 }
 .bb-open {
+    fill: #8eddff;
+    stroke: #8eddff;
+}
+.bb-available {
     fill: #ffdd66;
     stroke: #ffdd66;
 }
