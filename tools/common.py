@@ -39,12 +39,17 @@ CONTENT_TYPES = {
 
 object_cache = {}
 
-def load_object_cache(bucket, creds):
+def load_object_cache(bucket, creds, prefix=None):
   page_token = None
   while True:
     url = f"https://www.googleapis.com/storage/v1/b/{bucket}/o"
     if page_token:
       url += f"?pageToken={page_token}"
+      if prefix:
+        url += "&prefix=" + prefix
+    else:
+      if prefix:
+        url += "?prefix=" + prefix
 
     r = requests.get(url, headers={"Authorization": creds.get()})
     if r.status_code == 401:
@@ -62,6 +67,15 @@ def load_object_cache(bucket, creds):
     if not page_token: break
 
   return object_cache
+
+
+def get_object(bucket, path, creds):
+  url = f"https://{bucket}.storage.googleapis.com/{path}"
+  r = requests.get(url, headers={"Authorization": creds.get()})
+  if r.status_code == 200:
+    return r.content
+  else:
+    return None
 
 
 def upload_object(source, bucket, path, content_type, data, creds, update=False):

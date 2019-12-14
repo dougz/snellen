@@ -4,8 +4,11 @@ import argparse
 import asyncio
 import base64
 from collections import namedtuple
+import difflib
 import hashlib
+import html
 import http
+import io
 import json
 import os
 import re
@@ -17,6 +20,7 @@ import tornado.netutil
 import tornado.template
 import tornado.web
 import traceback
+import zipfile
 
 import common
 import oauth2
@@ -38,6 +42,7 @@ class Land:
 
 SAVED_PUZZLES = {}
 STRIBS_APPROVED = set()
+OPTIONS = None
 
 SavedPuzzle = namedtuple("SavedPuzzle", ("timestamp", "who", "puzzle_url", "meta_url", "key"))
 
@@ -294,6 +299,114 @@ class ErrorPage(tornado.web.RequestHandler):
 
     self.render("preview_error.html", error=p.error_msg)
 
+class DiffPage(tornado.web.RequestHandler):
+  def get(self):
+    a = self.get_argument("a", None)
+    b = self.get_argument("b", None)
+
+    if not a or not b:
+      self.set_status(http.client.BAD_REQUEST.value)
+      return
+
+    an, ad = a.split(":", 1)
+    bn, bd = b.split(":", 1)
+
+    if bd < ad:
+      an, bn = bn, an
+      ad, bd = bd, ad
+
+    ap = f"saved/{an}/{ad}."
+    bp = f"saved/{bn}/{bd}."
+
+    files = common.load_object_cache(OPTIONS.save_bucket, OPTIONS.credentials, prefix="saved")
+    af = None
+    bf = None
+    for fn in files:
+      if fn.startswith(ap): af = fn
+      if fn.startswith(bp): bf = fn
+      if af and bf: break
+
+    az = common.get_object(OPTIONS.save_bucket, af, OPTIONS.credentials)
+    bz = common.get_object(OPTIONS.save_bucket, bf, OPTIONS.credentials)
+
+    if not az or not bz:
+      self.set_status(http.client.BAD_REQUEST.value)
+      return
+
+    az = zipfile.ZipFile(io.BytesIO(az), "r")
+    bz = zipfile.ZipFile(io.BytesIO(bz), "r")
+
+    afiles = az.namelist()
+    afiles.sort()
+    bfiles = bz.namelist()
+    bfiles.sort()
+
+    self.write("<html>")
+    self.write("""<head><style>
+    body { font-family: sans-serif; font-size: 16px; }
+    b { font-family: monospace; }
+    pre { background-color: #f8f8f8; padding: 16px 0 16px 16px; margin-left: 16px; font-size: 84%; }
+    .del { color: red; }
+    .add { color: green; }
+    .unch { color: #ccc; }
+    </style></head>""")
+    self.write("<body>")
+    self.write(f"<p>Comparing <b>{an} {ad}</b> &rarr; <b>{bn} {bd}</b>:</p>")
+
+    while afiles or bfiles:
+      if afiles and bfiles:
+        if afiles[0] == bfiles[0]:
+          self.compare(az, afiles[0], bz, bfiles[0])
+          afiles.pop(0)
+          bfiles.pop(0)
+        elif afiles[0] < bfiles[0]:
+          self.write(f"<p><b>{afiles[0]}</b> was removed.</p>")
+          afiles.pop(0)
+        else:
+          self.write(f"<p><b>{bfiles[0]}</b> was added.</p>")
+          bfiles.pop(0)
+      elif afiles:
+        for af in afiles:
+          self.write(f"<p><b>{af}</b> was removed.</p>")
+        del afiles[:]
+      else:
+        for bf in bfiles:
+          self.write(f"<p><b>{bf}</b> was added.</p>")
+        del bfiles[:]
+
+    self.write("</body></html>")
+
+  def compare(self, az, af, bz, bf):
+    ad = az.read(af)
+    bd = bz.read(bf)
+
+    if ad == bd:
+      self.write(f"<p class=unch><b>{af}</b> was unchanged.</p>")
+      return
+
+    self.write(f"<p><b>{af}</b> was changed.</p>")
+
+    ext = af.split(".")[-1]
+    if ext not in ("html", "txt", "yaml"): return
+
+    with open("/tmp/ad.html", "wb") as f: f.write(ad)
+    with open("/tmp/bd.html", "wb") as f: f.write(bd)
+
+    alines = ad.decode("utf-8").split("\n")
+    blines = bd.decode("utf-8").split("\n")
+
+    self.write("<pre>")
+    for i, line in enumerate(difflib.unified_diff(alines, blines)):
+      if i < 3: continue
+      if line.startswith("-"):
+        self.write("<span class=del>- " + html.escape(line[1:]) + "</span>\n")
+      elif line.startswith("+"):
+        self.write("<span class=add>+ " + html.escape(line[1:]) + "</span>\n")
+      else:
+        self.write("  " + html.escape(line[1:]) + "</span>\n")
+    self.write("</pre>")
+
+
 
 def load_saved_puzzles(options):
   global SAVED_PUZZLES
@@ -384,6 +497,8 @@ def main():
 
   load_saved_puzzles(options)
   load_approvals(options)
+  global OPTIONS
+  OPTIONS = options
 
   print("Load map config...")
   with open(os.path.join(options.event_dir, "map_config.json")) as f:
@@ -397,6 +512,7 @@ def main():
       (r"/(saved|i_am_stribs)", SavedPage),
       (r"/approve/(\S+)/([yn])$", ApproveHandler, {"options": options}),
       (r"/error/(\d+)", ErrorPage),
+      (r"/diff", DiffPage),
     ],
     template_path=options.template_path,
     options=options)

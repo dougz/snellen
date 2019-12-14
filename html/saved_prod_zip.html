@@ -8,27 +8,53 @@
     </style>
     <script>
       window.onload = function() {
-          var cbs = document.querySelectorAll("input[type='checkbox']");
-          for (var i = 0; i < cbs.length; ++i) {
-              var cb = cbs[i];
-              cb.addEventListener('change', (event) => {
-                  var el = event.target;
-                  var xhr = new XMLHttpRequest();
-                  xhr.onreadystatechange = function() {
-                      if (this.readyState == 4 && this.status != 204) {
-                          alert("failed!");
-                      }
+          var b = document.getElementById("requestdiff");
+          if (b) {
+              b.addEventListener("click", (event) => {
+                  var els = document.querySelectorAll("input.diff:checked");
+                  if (els.length != 2) {
+                      alert("Must check exactly two items.");
+                      return;
                   }
-                  xhr.open("GET", "/approve/" + el.id + "/" + (el.checked ? "y" : "n"),
-                           true);
-                  xhr.send();
+                  location.href = "/diff?a=" + els[0].id + "&b=" + els[1].id;
               });
+
+              b = document.getElementById("clearchecks");
+              b.addEventListener("click", (event) => {
+                  var els = document.querySelectorAll("input.diff:checked");
+                  for (var i = 0; i < els.length; ++i) {
+                      els[i].checked = false;
+                  }
+              });
+
+          } else {
+              var cbs = document.querySelectorAll("input[type='checkbox']");
+              for (var i = 0; i < cbs.length; ++i) {
+                  var cb = cbs[i];
+                  cb.addEventListener('change', (event) => {
+                      var el = event.target;
+                      var xhr = new XMLHttpRequest();
+                      xhr.onreadystatechange = function() {
+                          if (this.readyState == 4 && this.status != 204) {
+                              alert("failed!");
+                          }
+                      }
+                      xhr.open("GET", "/approve/" + el.id + "/" + (el.checked ? "y" : "n"),
+                               true);
+                      xhr.send();
+                  });
+              }
           }
       }
     </script>
   </head>
   <body>
     <h1>Snellen preview server (saved puzzles)</h1>
+
+    {% if not editable %}
+    <button id="requestdiff">Diff selected puzzles</button>
+    <button id="clearchecks">Clear checkboxes</button>
+    {% end %}
 
     <ul>
       {% for shortname, p in sorted(puzzles.items()) %}
@@ -45,6 +71,9 @@
             ({{item.who}})
             <a href="{{item.puzzle_url}}">puzzle</a>
             <a href="{{item.meta_url}}">meta</a>
+            {% if not editable %}
+            <input type="checkbox" class="diff" id="{{item.key}}">
+            {% end %}
           </li>
           {% end %}
         </ul>
