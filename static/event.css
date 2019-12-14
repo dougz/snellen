@@ -39,6 +39,29 @@ input, button, .emoji-input {
     border: 1px solid #bbb;
     background: linear-gradient(to bottom, #ccc, #ddd);
 }
+.miniaction {
+    font-family: 'Merriweather Sans', sans-serif;
+    color: white;
+    font-size: 70%;
+    padding: 0 8px;
+    margin: 4px 8px 4px 0;
+    box-sizing: border-box;
+    border: 1px solid #395483;
+    border-radius: 15px;
+    background: linear-gradient(to bottom, #4c70af, #436299);
+    outline: none;
+    user-select: none;
+}
+.miniaction:focus, .miniaction:hover {
+    color: yellow;
+    border: 1px solid #819ac7;
+    background: linear-gradient(to bottom, #436299, #4c70af);
+}
+.miniaction:disabled {
+    color: #888;
+    border: 1px solid #aaa;
+    background: linear-gradient(to bottom, #ccc, #ddd);
+}
 
 .disclaimer {
     text-align: center;
@@ -1052,6 +1075,12 @@ select option {
     color: black;
 }
 
+#hintcancel {
+    display: none;
+    align-self: center;
+    margin-left: 16px;
+}
+
 #hintui {
     display: none;
     background-color: #e7f1fd;
@@ -1086,6 +1115,14 @@ select option {
     margin: 8px 0 16px 32px;
     font-family: 'Inconsolata', monospace;
     white-space: pre-wrap;
+}
+
+#hinthistory dd.special {
+    font-size: 84%;
+    font-family: 'Merriweather Sans', sans-serif;
+    font-style: italic;
+    color: #666;
+    white-space: normal;
 }
 
 #hintentry {

@@ -1447,18 +1447,26 @@ class Team(login.LoginUser):
     prev = self.current_hint_puzzlestate
 
     if sender is None:
-      self.current_hint_puzzlestate = ps
       sender = self
-      if ps.hints:
-        puzzle.puzzle_log.add(now, f"{ps.admin_html_team} requested a followup hint.")
-        self.activity_log.add(now, f"Requested a followup hint on {puzzle.html}.")
-        self.admin_log.add(now, f"Requested a followup hint on {ps.admin_html_puzzle}.")
+      if text is None:
+        self.current_hint_puzzlestate = None
+        puzzle.puzzle_log.add(now, f"{ps.admin_html_team} canceled their hint request.")
+        self.activity_log.add(now, f"Canceled the hint request on {puzzle.html}.")
+        self.admin_log.add(now, f"Canceled the hint reque on {ps.admin_html_puzzle}.")
+        ps.hints.append(HintMessage(ps, now, sender, None, False))
+        Global.STATE.task_queue.remove(ps)
       else:
-        puzzle.puzzle_log.add(now, f"{ps.admin_html_team} requested a hint.")
-        self.activity_log.add(now, f"Requested a hint on {puzzle.html}.")
-        self.admin_log.add(now, f"Requested a hint on {ps.admin_html_puzzle}.")
-      ps.hints.append(HintMessage(ps, now, sender, text, False))
-      Global.STATE.task_queue.add(ps)
+        self.current_hint_puzzlestate = ps
+        if ps.hints:
+          puzzle.puzzle_log.add(now, f"{ps.admin_html_team} requested a followup hint.")
+          self.activity_log.add(now, f"Requested a followup hint on {puzzle.html}.")
+          self.admin_log.add(now, f"Requested a followup hint on {ps.admin_html_puzzle}.")
+        else:
+          puzzle.puzzle_log.add(now, f"{ps.admin_html_team} requested a hint.")
+          self.activity_log.add(now, f"Requested a hint on {puzzle.html}.")
+          self.admin_log.add(now, f"Requested a hint on {ps.admin_html_puzzle}.")
+        ps.hints.append(HintMessage(ps, now, sender, text, False))
+        Global.STATE.task_queue.add(ps)
     else:
       self.current_hint_puzzlestate = None
       sender = login.AdminUser.get_by_username(sender)

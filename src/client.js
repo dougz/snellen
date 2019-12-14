@@ -113,8 +113,6 @@ class H2020_Dispatcher {
 
     /** @param{Message} msg */
     update_header(msg) {
-        console.log(msg);
-
         var buzz = goog.dom.getElement("buzz");
         if (!buzz) return;
         buzz.innerHTML = msg.score;
@@ -538,7 +536,6 @@ class H2020_SubmitPanel {
 
     /** @param{SubmissionHistory} response */
     render_history(response) {
-        console.log(response);
         if (response.total) {
             var t = response.total;
             var c = response.correct;
@@ -1017,7 +1014,6 @@ class H2020_AudioManager {
     }
 
     start(url) {
-        console.log("audio", url, "requested");
         if (this.current && !this.current.ended) {
             // previous audio still playing, skip this one
             return;
@@ -1105,6 +1101,14 @@ class H2020_GuestServices {
         this.hintsome = goog.dom.getElement("hintsome");
         /** @type{Element} */
         this.hintselect = goog.dom.getElement("hintselect");
+        /** @type{Element} */
+        this.hintcancel = goog.dom.getElement("hintcancel");
+
+        goog.events.listen(
+            this.hintcancel, goog.events.EventType.CLICK,
+            function(e) {
+                H2020_DoAction({action: "cancel_hint"}, Common_expect_204);
+            });
 
         goog.events.listen(this.hintselect, goog.events.EventType.CHANGE,
                            goog.bind(this.select_puzzle, this));
@@ -1193,11 +1197,13 @@ class H2020_GuestServices {
                 "placeholder",
                 "Describe what you've tried, where you're stuck\u2026");
             ht.setAttribute("rows", "9");
+            this.hintrequest.innerHTML = "Send request";
         } else {
             ht.setAttribute(
                 "placeholder",
                 "Add a followup\u2026");
             ht.setAttribute("rows", "3");
+            this.hintrequest.innerHTML = "Send followup";
             this.history.innerHTML = "";
             var dl = goog.dom.createDom("DL");
             for (var i = 0; i < data.history.length; ++i) {
@@ -1205,8 +1211,12 @@ class H2020_GuestServices {
                 var dt = goog.dom.createDom(
                     "DT", null,
                     "At " + hunt2020.time_formatter.format(msg.when) + ", " + msg.sender + " wrote:");
-                var dd = goog.dom.createDom("DD", null);
-                dd.innerHTML = msg.text;
+                var dd = goog.dom.createDom("DD", msg.text ? null : "special");
+                if (msg.text) {
+                    dd.innerHTML = msg.text;
+                } else {
+                    dd.innerHTML = "(request canceled by team)";
+                }
                 dl.appendChild(dt);
                 dl.appendChild(dd);
             }
@@ -1223,6 +1233,7 @@ class H2020_GuestServices {
         H2020_DoAction({action: "hint_request",
                         puzzle_id: this.hint_selected,
                         text: text}, Common_expect_204);
+        this.hintrequest.blur();
     }
 
     /** @param{OpenHints} data */
@@ -1269,8 +1280,10 @@ class H2020_GuestServices {
             if (curr_title) {
                 this.hintcurr.style.display = "block";
                 this.hintcurr.innerHTML = "Waiting for reply on: <b>" + curr_title + "</b>";
+                this.hintcancel.style.display = "inline";
             } else {
                 this.hintcurr.style.display = "none";
+                this.hintcancel.style.display = "none";
             }
         } else {
             // No hints available.

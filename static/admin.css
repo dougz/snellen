@@ -475,7 +475,7 @@ body > p, body > h2 {
     white-space: pre-wrap;
 }
 
-#tpphinthistory dd.adminonly {
+#tpphinthistory dd.special {
     font-size: 84%;
     font-family: 'Merriweather Sans', sans-serif;
     font-style: italic;

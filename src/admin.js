@@ -191,8 +191,12 @@ class A2020_TeamPuzzlePage {
                     var dt = goog.dom.createDom(
                         "DT", null,
                         "At " + admin2020.time_formatter.format(msg.when) + ", " + msg.sender + " wrote:");
-                    var dd = goog.dom.createDom("DD", msg.admin_only ? "adminonly" : null);
-                    dd.innerHTML = msg.text;
+                    var dd = goog.dom.createDom("DD", (msg.admin_only || !msg.text) ? "special" : null);
+                    if (msg.text) {
+                        dd.innerHTML = msg.text;
+                    } else {
+                        dd.innerHTML = "(request canceled by team)";
+                    }
                     dl.appendChild(dt);
                     dl.appendChild(dd);
                 }

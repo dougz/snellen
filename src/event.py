@@ -313,6 +313,15 @@ class ActionHandler(util.AdminHandler):
     self.set_status(http.client.NO_CONTENT.value)
     await login.AdminUser.flush_messages()
 
+  async def ACTION_cancel_hint(self):
+    ps = self.team.current_hint_puzzlestate
+    self.set_status(http.client.NO_CONTENT.value)
+    if not ps:
+      # Nothing to cancel
+      return
+    self.team.add_hint_text(ps.puzzle.shortname, None, None)
+    await login.AdminUser.flush_messages()
+
   async def ACTION_cancel_submit(self):
     shortname = self.args.get("puzzle_id", "")
     submit_id = self.args.get("submit_id", -1)

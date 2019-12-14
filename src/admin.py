@@ -458,6 +458,7 @@ class ActionHandler(util.AdminHandler):
     try:
       text = self.args.get("hint_time")
       text = text.split(":")
+      while text and not text[0]: text.pop(0)
       text = [int(t, 10) for t in text]
 
       secs = 0
