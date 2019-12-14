@@ -5,6 +5,12 @@
       body { font-family: sans-serif; font-size: 18px; }
       li.puzzle { margin-top: 16px;  font-family: monospace; }
       .other { color: #999; }
+      div#diff { position: fixed;
+                 top: 0px;
+                 right: 0px;
+                 padding: 20px;
+                 background-color: #ddddff;
+               }
     </style>
     <script>
       window.onload = function() {
@@ -52,8 +58,10 @@
     <h1>Snellen preview server (saved puzzles)</h1>
 
     {% if not editable %}
-    <button id="requestdiff">Diff selected puzzles</button>
-    <button id="clearchecks">Clear checkboxes</button>
+    <div id="diff">
+      <button id="requestdiff">Diff selected puzzles</button>
+      <button id="clearchecks">Clear checkboxes</button>
+    </div>
     {% end %}
 
     <ul>

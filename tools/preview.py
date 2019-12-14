@@ -396,7 +396,7 @@ class DiffPage(tornado.web.RequestHandler):
     blines = bd.decode("utf-8").split("\n")
 
     self.write("<pre>")
-    for i, line in enumerate(difflib.unified_diff(alines, blines)):
+    for i, line in enumerate(difflib.unified_diff(alines, blines, n=10)):
       if i < 3: continue
       if line.startswith("-"):
         self.write("<span class=del>- " + html.escape(line[1:]) + "</span>\n")
