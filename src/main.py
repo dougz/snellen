@@ -191,8 +191,6 @@ def main():
                       help="Immediately start event.")
   parser.add_argument("--debug", action="store_true",
                       help="Serve debug javascript.")
-  parser.add_argument("--open_all", action="store_true",
-                      help="Open all puzzles immediately.")
   parser.add_argument("--placeholders", action="store_true",
                       help="Replace all puzzles with placeholders.")
   parser.add_argument("--default_credentials",

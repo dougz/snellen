@@ -437,6 +437,11 @@ class ActionHandler(util.AdminHandler):
     username = self.args.get("team_username", None)
     duration = CONSTANTS["pennypass_expiration_sec"]
     if username is None:
+      # User must have CONTROL_EVENT to give all teams a pass.
+      if not self.user.has_role(login.AdminRoles.CONTROL_EVENT):
+        self.set_status(http.client.UNAUTHORIZED.value)
+        return
+
       for team in game.Team.all_teams():
         team.bestow_fastpass(duration, self.user.username)
     else:
@@ -604,6 +609,32 @@ class ActionHandler(util.AdminHandler):
     team.invalidate(puzzle)
 
     self.set_status(http.client.NO_CONTENT.value)
+
+  async def ACTION_open_all_lands(self):
+    # User must have CONTROL_EVENT to open all lands
+    if not self.user.has_role(login.AdminRoles.CONTROL_EVENT):
+      self.set_status(http.client.UNAUTHORIZED.value)
+      return
+
+    for team in game.Team.all_teams():
+      team.open_all_lands()
+      await team.flush_messages()
+
+    self.set_status(http.client.NO_CONTENT.value)
+
+  async def ACTION_open_all_puzzles(self):
+    # User must have CONTROL_EVENT to open all puzzles
+    if not self.user.has_role(login.AdminRoles.CONTROL_EVENT):
+      self.set_status(http.client.UNAUTHORIZED.value)
+      return
+
+    for team in game.Team.all_teams():
+      team.open_all_puzzles()
+      await team.flush_messages()
+
+    self.set_status(http.client.NO_CONTENT.value)
+
+
 
 
 class VisitPage(util.AdminPageHandler):

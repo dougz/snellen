@@ -17,10 +17,11 @@ class H2020_Dispatcher {
         this.methods = {
             "history_change": goog.bind(this.history_change, this),
             "solve": goog.bind(this.solve, this),
-            "open": goog.bind(this.open, this),
+            "open_land": goog.bind(this.open_land, this),
             "update_start": goog.bind(this.update_start, this),
             "to_page": goog.bind(this.to_page, this),
             "hint_history": goog.bind(this.hint_history, this),
+            "update_fastpass": goog.bind(this.update_fastpass, this),
             "receive_fastpass": goog.bind(this.receive_fastpass, this),
             "apply_fastpass": goog.bind(this.apply_fastpass, this),
             "warn_fastpass": goog.bind(this.warn_fastpass, this),
@@ -188,13 +189,17 @@ class H2020_Dispatcher {
     }
 
     /** @param{Message} msg */
-    open(msg) {
+    open_land(msg) {
         hunt2020.toast_manager.add_toast(
             "<b>" + msg.title + "</b> is now open!", 6000, null, "blue",
             "/land/" + msg.land);
-        if (hunt2020.guest_services) hunt2020.guest_services.build_fastpass(msg.fastpass);
         this.dirty_activity = true;
         this.dirty_all_puzzles = true;
+    }
+
+    /** @param{Message} msg */
+    update_fastpass(msg) {
+        if (hunt2020.guest_services) hunt2020.guest_services.build_fastpass(msg.fastpass);
     }
 
     /** @param{Message} msg */
@@ -244,6 +249,7 @@ class H2020_Dispatcher {
     update_map(msg) {
         if (hunt2020.map_draw) hunt2020.map_draw.update_map(msg);
         this.dirty_all_puzzles = true;
+        this.dirty_activity = true;
     }
 
     /** @param{Message} msg */

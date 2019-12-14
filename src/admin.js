@@ -1223,6 +1223,16 @@ class A2020_HomePage {
             "hppassenable", "hppassbestow",
             function() { A2020_DoAction({action: "bestow_fastpass"},
                                         Common_expect_204); });
+
+        this.openlands_all = new Common_enabler(
+            "hplandenable", "hplandopen",
+            function() { A2020_DoAction({action: "open_all_lands"},
+                                        Common_expect_204); });
+
+        this.openpuzzles_all = new Common_enabler(
+            "hppuzzenable", "hppuzzopen",
+            function() { A2020_DoAction({action: "open_all_puzzles"},
+                                        Common_expect_204); });
     }
 }
 

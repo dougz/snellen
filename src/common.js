@@ -260,7 +260,7 @@ class Common_enabler {
         /** type{Element} */
         this.action_el = goog.dom.getElement(action_id);
 
-        console.log(this.enable_el, this.action_el);
+        if (!this.enable_el || !this.action_el) return;
 
         this.action = action;
 

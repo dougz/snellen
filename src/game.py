@@ -545,6 +545,9 @@ class Team(login.LoginUser):
     self.current_hint_puzzlestate = None
     self.outer_lands_state = "closed"
 
+    self.force_all_lands_open = self.attrs.get("all_lands_open", False)
+    self.force_all_puzzles_open = self.attrs.get("all_puzzles_open", False)
+
     self.message_mu = asyncio.Lock()
     self.message_serial = 1
     self.pending_messages = []
@@ -1479,11 +1482,22 @@ class Team(login.LoginUser):
                                     "team_username": self.username,
                                     "puzzle_id": puzzle.shortname}], flush=True)
 
+  @save_state
+  def open_all_lands(self, now):
+    if not self.force_all_lands_open:
+      self.force_all_lands_open = True
+      self.compute_puzzle_beam(now)
+      self.invalidate()
+
+  @save_state
+  def open_all_puzzles(self, now):
+    if not self.force_all_puzzles_open:
+      self.force_all_puzzles_open = True
+      self.compute_puzzle_beam(now)
+      self.invalidate()
+
   # BEAM!
   def compute_puzzle_beam(self, now):
-    #print("-----------------------------")
-    open_all = (OPTIONS.open_all or self.attrs.get("all_open", False))
-
     opened = []
     locked = []
 
@@ -1495,13 +1509,14 @@ class Team(login.LoginUser):
 
       open_count = self.fastpasses_used.get(land, 0)
 
-      if open_all:
+      if self.force_all_puzzles_open:
         open_count = 1000
       else:
-        if (since_start >= land.open_at_time or
-            (self.score >= land.open_at_score and
-             (land.open_at_score < CONSTANTS["outer_lands_score"] or
-              self.outer_lands_state == "open"))):
+        if (self.force_all_lands_open or
+            (since_start >= land.open_at_time or
+             (self.score >= land.open_at_score and
+              (land.open_at_score < CONSTANTS["outer_lands_score"] or
+               self.outer_lands_state == "open")))):
           open_count += land.initial_puzzles
 
       if open_count == 0:
@@ -1512,7 +1527,7 @@ class Team(login.LoginUser):
 
       stop_after = 1000
       skip12 = False
-      if not open_all and land.shortname == "cascade":
+      if not self.force_all_puzzles_open and land.shortname == "cascade":
         skip12 = True
         if self.puzzle_state[land.first_submeta].state == PuzzleState.SOLVED:
           self.open_puzzle(land.second_submeta, now)
@@ -1537,7 +1552,7 @@ class Team(login.LoginUser):
             open_count -= 1
 
     safari = Land.BY_SHORTNAME.get("safari", None)
-    if safari and (safari in self.open_lands or open_all):
+    if safari and (safari in self.open_lands or self.force_all_puzzles_open):
       answers = set()
       keepers_solved = 0
       for p in safari.puzzles:
@@ -1547,7 +1562,7 @@ class Team(login.LoginUser):
         if kps.state == PuzzleState.SOLVED:
           keepers_solved += 1
         elif kps.state == PuzzleState.CLOSED:
-          if open_all:
+          if self.force_all_puzzles_open:
             self.open_puzzle(kp, now)
           else:
             count = sum(1 for a in kp.keeper_answers if a in answers)
@@ -1557,7 +1572,7 @@ class Team(login.LoginUser):
               self.open_puzzle(kp, now)
       meta = Puzzle.get_by_shortname("safari_adventure")
       if (meta and self.puzzle_state[meta].state == PuzzleState.CLOSED and
-          (keepers_solved >= 5 or open_all)):
+          (keepers_solved >= 5 or self.force_all_puzzles_open)):
         self.open_puzzle(meta, now)
 
     if self.puzzle_state[Runaround.PUZZLE].state == PuzzleState.CLOSED:
@@ -1573,6 +1588,7 @@ class Team(login.LoginUser):
         self.cached_mapdata.pop(Land.BY_SHORTNAME["outer"], None)
         self.cached_mapdata.pop(Land.BY_SHORTNAME["inner_only"], None)
 
+    opened_one_land = False
     for st in self.puzzle_state.values():
       if st.state != PuzzleState.CLOSED:
         if st.puzzle.land.land_order >= 1000: continue
@@ -1584,11 +1600,15 @@ class Team(login.LoginUser):
           self.cached_mapdata.pop(Land.BY_SHORTNAME["outer"], None)
           self.cached_mapdata.pop(Land.BY_SHORTNAME["inner_only"], None)
           self.dirty_header = True
+          opened_one_land = True
           if now != Global.STATE.event_start_time:
-            self.send_messages([{"method": "open",
+            self.send_messages([{"method": "open_land",
                                  "title": html.escape(st.puzzle.land.title),
-                                 "land": st.puzzle.land.shortname,
-                                 "fastpass": self.get_fastpass_data()}])
+                                 "land": st.puzzle.land.shortname}])
+
+    if opened_one_land:
+      self.send_messages([{"method": "update_fastpass",
+                           "fastpass": self.get_fastpass_data()}])
 
     # Check for the first outer land
     if self.map_mode != "outer":
