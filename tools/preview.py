@@ -387,7 +387,7 @@ class DiffPage(tornado.web.RequestHandler):
     self.write(f"<p><b>{af}</b> was changed.</p>")
 
     ext = af.split(".")[-1]
-    if ext not in ("html", "txt", "yaml"): return
+    if ext not in ("html", "txt", "yaml", "css", "js", "json"): return
 
     with open("/tmp/ad.html", "wb") as f: f.write(ad)
     with open("/tmp/bd.html", "wb") as f: f.write(bd)
