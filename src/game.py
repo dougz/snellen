@@ -5,6 +5,7 @@ import datetime
 import hashlib
 import heapq
 import html
+import itertools
 import json
 import os
 import re
@@ -2100,14 +2101,18 @@ class Erratum:
     self.text = text
     self.sender = sender
 
-    puzzle.errata.insert(0, self)
+    self.json = {"when": self.when,
+                 "puzzle_id": self.puzzle.shortname,
+                 "title": self.puzzle.title,
+                 "sender": self.sender.fullname,
+                 "text": self.text}
+
+    if text:
+      puzzle.errata.insert(0, self)
 
   def to_json(self):
-    return {"when": self.when,
-            "puzzle_id": self.puzzle.shortname,
-            "title": self.puzzle.title,
-            "sender": self.sender.fullname,
-            "text": self.text}
+    return self.json
+
 
 class Global:
   STATE = None
@@ -2126,10 +2131,12 @@ class Global:
     self.task_queue = TaskQueue()
 
     self.errata = []
+    self.reloads = []
     self.cached_errata_data = None
 
   @save_state
   def post_erratum(self, now, shortname, text, sender):
+    if not text: return
     puzzle = Puzzle.get_by_shortname(shortname)
     if not puzzle: return
     sender = login.AdminUser.get_by_username(sender)
@@ -2139,9 +2146,22 @@ class Global:
 
     puzzle.puzzle_log.add(now, f"An erratum was posted by <b>{sender.fullname}</b>.")
 
+  @save_state
+  def save_reload(self, now, shortname, sender):
+    puzzle = Puzzle.get_by_shortname(shortname)
+    if not puzzle: return
+    sender = login.AdminUser.get_by_username(sender)
+    if not sender: return
+    self.reloads.append(Erratum(now, puzzle, "", sender))
+    self.cached_errata_data = None
+
+    puzzle.puzzle_log.add(now, f"Puzzle was reloaded by <b>{sender.fullname}</b>.")
+
   def get_errata_data(self):
     if self.cached_errata_data is None:
-      self.cached_errata_data = [e.to_json() for e in self.errata]
+      data = [e.to_json() for e in itertools.chain(self.errata, self.reloads)]
+      data.sort(key=lambda x: x["when"])
+      self.cached_errata_data = data
     return self.cached_errata_data
 
   async def stop_server(self):

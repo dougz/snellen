@@ -4,6 +4,7 @@ import dateutil.parser
 import hashlib
 import html
 import http.client
+import itertools
 import json
 import time
 import tornado.web
@@ -163,6 +164,10 @@ class PuzzleDataHandler(util.AdminHandler):
   def get(self, shortname):
     puzzle = self.get_puzzle(shortname)
 
+    errata = [e.to_json() for e in itertools.chain(game.Global.STATE.errata,
+                                                   game.Global.STATE.reloads) if e.puzzle == puzzle]
+    errata.sort(key=lambda x: x["when"])
+
     d = {"median_solve": puzzle.median_solve_duration,
          "open_count": len(puzzle.open_teams),
          "submitted_count": len(puzzle.submitted_teams),
@@ -170,7 +175,7 @@ class PuzzleDataHandler(util.AdminHandler):
          "incorrect_answers": puzzle.incorrect_counts,
          "hint_time": puzzle.hints_available_time,
          "log": puzzle.puzzle_log.get_data(),
-         "errata": [e.to_json() for e in puzzle.errata]}
+         "errata": errata}
     self.return_json(d)
 
 class FixPuzzlePage(util.AdminPageHandler):
@@ -521,6 +526,7 @@ class ActionHandler(util.AdminHandler):
              "message": f"Error: {message}<br>(Errata was not posted.)"}
         self.return_json(d)
       message = "Puzzle updated."
+      game.Global.STATE.save_reload(puzzle.shortname, self.user.username)
 
     if text:
       game.Global.STATE.post_erratum(puzzle.shortname, text, self.user.username)

@@ -1030,11 +1030,16 @@ tr.submit-gray .submit-state { color: #666 }
     vertical-align: 0.1em;
 }
 
-.ErrataPage dt {
+.ErrataPage dt, #pperratalist dt {
     margin-top: 12px;
     font-weight: bold;
 }
 
-.ErrataPage dd {
+.ErrataPage dd, #pperratalist dd {
     margin-top: 8px;
+}
+.ErrataPage dd.reload, #pperratalist dd.reload {
+    margin-top: 8px;
+    color: #999;
+    font-style: italic;
 }

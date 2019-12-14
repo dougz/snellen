@@ -852,16 +852,7 @@ class A2020_PuzzlePage {
         if (data.errata && data.errata.length > 0) {
             this.pperrata.style.display = "block";
             this.pperratalist.innerHTML = ""
-            for (var i = 0; i < data.errata.length; ++i) {
-                var e = data.errata[i];
-
-                var dt = goog.dom.createDom(
-                    "DT", null, admin2020.time_formatter.format(e.when) +
-                        " (by " + e.sender + "):")
-                var dd = goog.dom.createDom("DD", null, e.text);
-                this.pperratalist.appendChild(dt);
-                this.pperratalist.appendChild(dd);
-            }
+            A2020_ErrataPage.append_errata(this.pperratalist, data.errata);
         } else {
             this.pperrata.style.display = "none";
         }
@@ -1273,20 +1264,37 @@ class A2020_ErrataPage {
 
     /** param{Array<Erratum>} data */
     build(data) {
-        console.log(data);
-        this.eperrata.innerHTML = "";
+        if (data.length == 0) {
+            this.eperrata.innerHTML = "Nothing so far. (Fingers crossed!)";
+        } else {
+            this.eperrata.innerHTML = "";
+            A2020_ErrataPage.append_errata(this.eperrata, data);
+        }
+    }
 
+    static append_errata(el, data) {
+        var last_when = 0;
         for (var i = 0; i < data.length; ++i) {
             var e = data[i];
 
-            var dt = goog.dom.createDom(
-                "DT", null,
-                goog.dom.createDom("A", {href: "/admin/puzzle/" + e.puzzle_id}, e.title),
-                " (posted " + admin2020.time_formatter.format(e.when) + " by " + e.sender + ")");
-            var dd = goog.dom.createDom("DD", null);
-            dd.innerHTML = e.text;
-            this.eperrata.appendChild(dt);
-            this.eperrata.appendChild(dd);
+            if (e.when - last_when > 1.0) {
+                var dt = goog.dom.createDom(
+                    "DT", null,
+                    goog.dom.createDom("A", {href: "/admin/puzzle/" + e.puzzle_id}, e.title),
+                    " (posted " + admin2020.time_formatter.format(e.when) + " by " + e.sender + ")");
+                el.appendChild(dt);
+            }
+            last_when = e.when;
+
+            var dd;
+            if (e.text) {
+                dd = goog.dom.createDom("DD", null);
+                dd.innerHTML = e.text;
+            } else {
+                dd = goog.dom.createDom("DD", "reload");
+                dd.innerHTML = "Puzzle was reloaded.";
+            }
+            el.appendChild(dd);
         }
     }
 }
