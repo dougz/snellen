@@ -4,6 +4,7 @@ import argparse
 import bcrypt
 import json
 import os
+import re
 import yaml
 
 
@@ -26,13 +27,27 @@ def main():
 
   out = {}
   names = set()
+  logins = set()
   for i, (username, d) in enumerate(y["teams"].items()):
     print(f"{i+1}: {d['name']} ({username})")
 
     od = {}
 
+    # usernames and alt-usernames are case-insensitive
+    username = username.lower()
+    if "alt" in d:
+      d["alt"] = d["alt"].lower()
+    assert re.match(r"^[a-z][a-z0-9]*$", username)
+
     # No duplicate usernames
     assert username not in out
+
+    # Or logins.
+    assert username not in logins
+    logins.add(username)
+    if "alt" in d:
+      assert d["alt"] not in logins
+      logins.add(d["alt"])
 
     # No duplicate team names
     assert d["name"] not in names
