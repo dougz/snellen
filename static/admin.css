@@ -429,6 +429,16 @@ body > p, body > h2 {
     border: 1px solid #9caac1;
     background: linear-gradient(to bottom, #ced4e0, #e6eaf0);
 }
+.filterbox.left {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    margin-right: 0;
+}
+.filterbox.right {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    margin-left: 1px;
+}
 
 
 .inlineminiaction {
