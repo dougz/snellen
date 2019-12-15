@@ -125,7 +125,7 @@ class AdminUser(LoginUser):
 
 class Session:
   BY_KEY = {}
-  SESSION_TIMEOUT = 3600   # seconds
+  SESSION_TIMEOUT = 4 * 24 * 3600   # four days
   ADMIN_COOKIE_NAME = "ADMINSESSION"
   PLAYER_COOKIE_NAME = "SESSION"
 
