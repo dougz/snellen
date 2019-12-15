@@ -194,6 +194,10 @@ def convert_static_files(out, options, lands):
                       f"{base}/snellen/static/admin_fav_red/favicon-32x32.png"),
                      ("admin_fav_red/favicon-16x16.png",
                       f"{base}/snellen/static/admin_fav_red/favicon-16x16.png"),
+                     ("admin_fav_blue/favicon-32x32.png",
+                      f"{base}/snellen/static/admin_fav_blue/favicon-32x32.png"),
+                     ("admin_fav_blue/favicon-16x16.png",
+                      f"{base}/snellen/static/admin_fav_blue/favicon-16x16.png"),
                      ])
   for mp in ("thinkfun", "gr8ergood", "cluekeeper", "janestreet",
              "judy", "penny",

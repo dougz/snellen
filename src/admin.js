@@ -26,11 +26,6 @@ class A2020_Dispatcher {
         if (admin2020.bigboard) {
             admin2020.bigboard.refresh_taskqueue();
         }
-
-        var links = document.querySelectorAll("link[rel*='icon']");
-        for (var i = 0; i < links.length; ++i) {
-            links[i].href = msg.favicon["s" + links[i].getAttribute("sizes")];
-        }
     }
 
     /** @param{Message} msg */
@@ -365,16 +360,27 @@ class A2020_TaskQueue {
                             Common_invoke_with_json(this, this.render_queue));
     }
 
+    set_favicon_color(response, color) {
+        var links = document.querySelectorAll("link[rel*='icon']");
+        for (var i = 0; i < links.length; ++i) {
+            links[i].href = response.favicons[color]["s" + links[i].getAttribute("sizes")];
+        }
+    }
+
     /** @param{TaskQueue} response */
     render_queue(response) {
+        console.log(response);
+
         this.last_response = response;
         if (!response || response.queue.length == 0) {
             this.tbody.innerHTML = "<tr><td colspan=6 style=\"padding: 20px;\">No tasks are waiting.</td></tr>"
+            this.set_favicon_color(response, "green");
             return;
         }
         this.tbody.innerHTML = "";
         var now = (new Date()).getTime() / 1000.0;
         var count = 0;
+        var unclaimed = 0;
 
         response.queue.sort(this.comparators[this.sort_key]);
 
@@ -391,6 +397,7 @@ class A2020_TaskQueue {
                 claimlink = goog.dom.createDom("BUTTON", "action", "Unclaim");
             } else {
                 claimlink = goog.dom.createDom("BUTTON", "action", "Claim");
+                ++unclaimed;
             }
             goog.events.listen(claimlink, goog.events.EventType.CLICK,
                                goog.bind(this.claim_task, this, msg));
@@ -438,9 +445,16 @@ class A2020_TaskQueue {
         }
         admin2020.counter.reread();
 
+        var color;
         if (count == 0) {
             this.tbody.innerHTML = "<tr><td colspan=6 style=\"padding: 20px;\">All tasks have been filtered out.</td></tr>";
+            color = "green";
+        } else if (unclaimed > 0) {
+            color = "red";
+        } else {
+            color = "amber";
         }
+        this.set_favicon_color(response, color);
     }
 
     claim_task(msg) {

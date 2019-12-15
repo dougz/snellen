@@ -206,14 +206,7 @@ class AdminPageHandler(AdminHandler):
     if self.pageteam: d["team"] = self.pageteam
     if self.pagepuzzle: d["puzzle"] = self.pagepuzzle
 
-    bbdata = st.task_queue.get_bb_data()
-    color = "green"
-    if bbdata["size"] > 0:
-      if bbdata["claimed"] < bbdata["size"]:
-        color = "red"
-      else:
-        color = "amber"
-
+    color = "blue"
     d["favicon32"] = self.static_content[f"admin_fav_{color}/favicon-32x32.png"]
     d["favicon16"] = self.static_content[f"admin_fav_{color}/favicon-16x16.png"]
 

@@ -86,7 +86,17 @@ class TaskQueue:
 
     self.cached_json = None
     self.cached_bbdata = None
-    self.cached_favicon = None
+
+    self.favicon_data = {"red":
+                         {"s32x32": OPTIONS.static_content["admin_fav_red/favicon-32x32.png"],
+                          "s16x16": OPTIONS.static_content["admin_fav_red/favicon-16x16.png"]},
+                         "amber":
+                         {"s32x32": OPTIONS.static_content["admin_fav_amber/favicon-32x32.png"],
+                          "s16x16": OPTIONS.static_content["admin_fav_amber/favicon-16x16.png"]},
+                         "green":
+                         {"s32x32": OPTIONS.static_content["admin_fav_green/favicon-32x32.png"],
+                          "s16x16": OPTIONS.static_content["admin_fav_green/favicon-16x16.png"]},
+                         }
 
   def get_by_key(self, task_key):
     return self.tasks.get(task_key)
@@ -142,15 +152,9 @@ class TaskQueue:
   def change(self):
     self.cached_json = None
     self.cached_bbdata = None
-    self.cached_favicon = None
     if not save_state.REPLAYING:
       self.to_json()
-      login.AdminUser.send_messages([
-        {"method": "task_queue",
-         "favicon": {
-           "s32x32": OPTIONS.static_content[f"admin_fav_{self.cached_favicon}/favicon-32x32.png"],
-           "s16x16": OPTIONS.static_content[f"admin_fav_{self.cached_favicon}/favicon-16x16.png"]
-         }}], flush=True)
+      login.AdminUser.send_messages([{"method": "task_queue"}], flush=True)
 
   def get_bb_data(self):
     if self.cached_bbdata is None:
@@ -196,16 +200,8 @@ class TaskQueue:
       total += 1
       if task.claim: claimed += 1
 
-    self.cached_json = json.dumps({"queue": q})
+    self.cached_json = json.dumps({"queue": q, "favicons": self.favicon_data})
     self.cached_bbdata = {"size": total, "claimed": claimed}
-
-    if total > 0:
-      if claimed < total:
-        self.cached_favicon = "red"
-      else:
-        self.cached_favicon = "amber"
-    else:
-      self.cached_favicon = "green"
 
     return self.cached_json
 

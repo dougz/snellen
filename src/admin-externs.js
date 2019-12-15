@@ -47,6 +47,8 @@ class TaskQueue {
     constructor() {
         /** @type{Array<TaskQueueItem>} */
         this.queue;
+        /** @type{Object<string,Object<string,string>>} */
+        this.favicons;
     }
 }
 
