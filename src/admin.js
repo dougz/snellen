@@ -310,16 +310,17 @@ class A2020_TaskQueue {
         if (!sort) sort = "age";
         this.change_sort(sort, null);
 
-        this.comparators = {age: function(a, b) { return a.when - b.when; },
-                            team: function(a, b) {
-                                if (a.team < b.team) {
-                                    return -1;
-                                } else if (a.team > b.team) {
-                                    return 1;
-                                } else {
-                                    return 0;
-                                }
-                            }}
+        this.comparators = {}
+        this.comparators["age"] = function(a, b) { return a.when - b.when; }
+        this.comparators["team"] = function(a, b) {
+            if (a.team < b.team) {
+                return -1;
+            } else if (a.team > b.team) {
+                return 1;
+            } else {
+                return 0;
+            }
+        };
     }
 
     change_sort(newsort, e) {

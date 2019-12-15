@@ -307,5 +307,3 @@ class Action {
         this.reload;
     }
 }
-
-
