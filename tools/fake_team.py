@@ -30,7 +30,7 @@ squad stooth team teammate teapots tng tried turquoise twtw unclear
 unclear unseen uplate vaguely wafflehaus waslater whitelotus wizards
 wpi wranglers wwe leftout""".split()
 
-ADMIN = """dougz""".split()
+ADMIN = """fakedougz""".split()
 
 stats = {}
 LAUNCH = asyncio.Event()
@@ -46,326 +46,328 @@ def canonicalize_answer(text):
   return "".join(out)
 
 
-async def show_stats(options):
-  last = None
-  while True:
-    if last != stats:
-      last = copy.copy(stats)
-      print(f"{time.time()}: {last}")
-    await asyncio.sleep(1.0)
+class FakeUsers:
+  def __init__(self, options):
+    self.options = options
 
-    if not LAUNCH.is_set() and last.get("LOGIN", 0) == options.teams * options.browsers * options.tabs:
-      print("launching!")
-      LAUNCH.set()
+    soft, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
+    resource.setrlimit(resource.RLIMIT_NOFILE, (hard, hard))
+
+    tornado.httpclient.AsyncHTTPClient.configure(
+      "tornado.curl_httpclient.CurlAsyncHTTPClient", max_clients=10000)
+    self.client = tornado.httpclient.AsyncHTTPClient()
+
+    self.logins = asyncio.Semaphore(value=2)
+
+  async def main(self):
+    tasks = [self.simulate_team(username, "snth") for username in TEAMS[:self.options.teams]]
+    tasks.append(self.simulate_admin(ADMIN[0], "snth"))
+    tasks.append(self.show_stats())
+    await asyncio.gather(*tasks)
+
+  async def show_stats(self):
+    last = None
+    while True:
+      if last != stats:
+        last = copy.copy(stats)
+        print(f"{time.time()}: {last}")
+      await asyncio.sleep(1.0)
+
+      if not LAUNCH.is_set() and last.get("LOGIN", 0) == self.options.teams * self.options.browsers * self.options.tabs:
+        print("launching!")
+        LAUNCH.set()
+
+  async def simulate_team(self, username, password):
+    print(f"starting {username}")
+    tasks = [self.simulate_browser(f"{username}_{i}", username, password, i * .1)
+             for i in range(options.browsers)]
+    await asyncio.gather(*tasks)
+
+  async def simulate_admin(self, username, password):
+    # Submit the login page.
+    async with self.logins:
+      print(f"--- ADMIN {username} logging in ---")
+      req = tornado.httpclient.HTTPRequest(
+        f"{self.options.base_url}/login_submit",
+        method="POST",
+        body=f"username={username}&password={password}",
+        follow_redirects=False)
+
+      try:
+        response = await self.client.fetch(req)
+        assert False
+      except tornado.httpclient.HTTPClientError as e:
+        assert e.code == 302
+        cookie = e.response.headers["Set-Cookie"].split(";")[0]
+
+        print(f"--- ADMIN {username} logged in ---")
+
+    await self.tasker(username, cookie)
+
+  async def tasker(self, username, cookie):
+    while True:
+      req = tornado.httpclient.HTTPRequest(
+        f"{self.options.base_url}/admin/js/taskqueue",
+        connect_timeout=5.0,
+        request_timeout=10.0,
+        follow_redirects=False,
+        headers={"Cookie": cookie})
+
+      try:
+        response = await self.client.fetch(req)
+      except tornado.httpclient.HTTPClientError as e:
+        print(f"--- ADMIN {username} solver puzzle fetch failed: {e} ---")
+        return
+
+      j = json.loads(response.body)
+      count = 0
+      claim_threshold = time.time() - 30
+      complete_threshold = time.time() - 60
+      for t in j.get("queue", ()):
+        key = t.get("key", "")
+        d = None
+        if t["when"] < complete_threshold:
+          if key.startswith("t-"):
+            if not t.get("done_pending"):
+              d = {"action": "complete_task", "key": key, "which": "done"}
+              print(f"ADMIN {username} completing {key}")
+          else:
+            _, team_username, puzzle_id = key.split("-")
+            d = {"action": "hint_reply", "team_username": team_username,
+                 "puzzle_id": puzzle_id, "text": "be smarter"}
+            print(f"ADMIN {username} replying to hint {key}")
+        elif not t["claimant"] and t["when"] < claim_threshold:
+          d = {"action": "update_claim", "key": key, "which": "claim"}
+          print(f"ADMIN {username} claiming {key}")
+        else:
+          continue
+
+        if not d: continue
+
+        req = tornado.httpclient.HTTPRequest(
+          f"{self.options.base_url}/admin/action",
+          method="POST",
+          body=json.dumps(d),
+          follow_redirects=False,
+          headers={"Cookie": cookie})
+
+        try:
+          response = await self.client.fetch(req)
+        except tornado.httpclient.HTTPClientError as e:
+          print(f"--- ADMIN {username} failed to submit: {e} ---")
+          return
+
+        if response.code != 204:
+          print(f"--- ADMIN {username} got back: {response.code} ---")
+
+        count += 1
+        #if count >= 20: break
+
+      await asyncio.sleep(10)
 
 
-async def main(options):
-  soft, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
-  resource.setrlimit(resource.RLIMIT_NOFILE, (hard, hard))
 
-  client = tornado.httpclient.AsyncHTTPClient.configure(
-    "tornado.curl_httpclient.CurlAsyncHTTPClient", max_clients=10000)
-  client = tornado.httpclient.AsyncHTTPClient()
+  async def simulate_browser(self, my_id, username, password, delay):
+    await asyncio.sleep(delay)
 
-  logins = asyncio.Semaphore(value=2)
-  options.logins = logins
+    # Submit the login page.
 
-  await asyncio.gather(*[simulate_team(client, username, "snth", options) for username in TEAMS[:options.teams]],
-                       simulate_admin(client, ADMIN[0], "snth", options),
-                       show_stats(options))
+    async with self.logins:
+      print(f"--- {my_id} logging in ---")
+      req = tornado.httpclient.HTTPRequest(
+        f"{self.options.base_url}/login_submit",
+        method="POST",
+        body=f"username={username}&password={password}",
+        follow_redirects=False)
 
+      try:
+        response = await self.client.fetch(req)
+        assert False
+      except tornado.httpclient.HTTPClientError as e:
+        assert e.code == 302
+        cookie = e.response.headers["Set-Cookie"].split(";")[0]
 
-async def simulate_team(client, username, password, options):
-  print(f"starting {username}")
-  await asyncio.gather(*[simulate_browser(f"{username}_{i}", client, username, password, i * .1, options) for i in range(options.browsers)])
+      print(f"--- {my_id} logged in ---")
 
-async def simulate_admin(client, username, password, options):
+    await asyncio.gather(self.solver(my_id, cookie))
+    #*[self.simulate_tab(my_id, i, cookie) for i in range(options.tabs)])
 
-  # Submit the login page.
+  async def solver(self, my_id, cookie):
+    solves_per_minute = random.random() * 7 + 3
+    while True:
+      delay = -math.log(1.0 - random.random()) / solves_per_minute * 60
+      await asyncio.sleep(delay)
+      if not await self.solve_one(my_id, cookie): break
+      await self.hint_one(my_id, cookie)
 
-  async with options.logins:
-    print(f"--- ADMIN {username} logging in ---")
+  async def hint_one(self, my_id, cookie):
     req = tornado.httpclient.HTTPRequest(
-      f"{options.base_url}/login_submit",
-      method="POST",
-      body=f"username={username}&password={password}",
-      follow_redirects=False)
-
-    try:
-      response = await client.fetch(req)
-      assert False
-    except tornado.httpclient.HTTPClientError as e:
-      assert e.code == 302
-      cookie = e.response.headers["Set-Cookie"].split(";")[0]
-
-      print(f"--- ADMIN {username} logged in ---")
-
-  await tasker(username, cookie, client, options)
-
-async def tasker(username, cookie, client, options):
-  while True:
-    req = tornado.httpclient.HTTPRequest(
-      f"{options.base_url}/admin/js/taskqueue",
+      f"{self.options.base_url}/js/hintsopen",
       connect_timeout=5.0,
       request_timeout=10.0,
       follow_redirects=False,
       headers={"Cookie": cookie})
 
     try:
-      response = await client.fetch(req)
+      response = await self.client.fetch(req)
     except tornado.httpclient.HTTPClientError as e:
-      print(f"--- ADMIN {username} solver puzzle fetch failed: {e} ---")
+      print(f"--- {my_id} solver puzzle fetch failed: {e} ---")
       return
 
     j = json.loads(response.body)
-    count = 0
-    claim_threshold = time.time() - 30
-    complete_threshold = time.time() - 60
-    for t in j.get("queue", ()):
-      key = t.get("key", "")
-      d = None
-      if t["when"] < complete_threshold:
-        if key.startswith("t-"):
-          if not t.get("done_pending"):
-            d = {"action": "complete_task", "key": key, "which": "done"}
-            print(f"ADMIN {username} completing {key}")
-        else:
-          _, team_username, puzzle_id = key.split("-")
-          d = {"action": "hint_reply", "team_username": team_username,
-               "puzzle_id": puzzle_id, "text": "be smarter"}
-          print(f"ADMIN {username} replying to hint {key}")
-      elif not t["claimant"] and t["when"] < claim_threshold:
-        d = {"action": "update_claim", "key": key, "which": "claim"}
-        print(f"ADMIN {username} claiming {key}")
-      else:
-        continue
 
-      if not d: continue
+    if j["current"]: return True # waiting for response
 
+    if not j["available"]: return True  # no hints available
+
+    a = [p for p in j["available"] if not p[2]]
+    if not a: return True  # all hint-available puzzles solved
+
+    shortname = random.choice(a)[0]
+    print(f"{my_id} requesting hint on {shortname}")
+
+    d = {"action": "hint_request", "puzzle_id": shortname, "text": "please help"}
+
+    req = tornado.httpclient.HTTPRequest(
+      f"{self.options.base_url}/action",
+      method="POST",
+      body=json.dumps(d),
+      follow_redirects=False,
+      headers={"Cookie": cookie})
+
+    try:
+      response = await self.client.fetch(req)
+    except tornado.httpclient.HTTPClientError as e:
+      print(f"--- {my_id} failed to submit: {e} ---")
+      return
+
+    if response.code == 204:
+      return True
+
+
+  async def solve_one(self, my_id, cookie):
+    req = tornado.httpclient.HTTPRequest(
+      f"{self.options.base_url}/js/puzzles",
+      connect_timeout=5.0,
+      request_timeout=10.0,
+      follow_redirects=False,
+      headers={"Cookie": cookie})
+
+    try:
+      response = await self.client.fetch(req)
+    except tornado.httpclient.HTTPClientError as e:
+      print(f"--- {my_id} solver puzzle fetch failed: {e} ---")
+      return
+
+    j = json.loads(response.body)
+
+    open_puzzles = {}
+    for land in j["lands"]:
+      if "puzzles" not in land: continue
+      for p in land["puzzles"]:
+        url = p.get("url", "")
+        if url.startswith("/puzzle/"):
+          if "answer" not in p:
+            open_puzzles[url[8:]] = ()
+          elif p["answer"].endswith("\u2026"):
+            a = p["answer"].split(",")
+            a.pop()
+            open_puzzles[url[8:]] = [i.strip() for i in a]
+
+    if not open_puzzles:
+      print("all puzzles solved")
+      return len(j["lands"]) < 10
+
+    to_solve = random.choice(list(open_puzzles.keys()))
+
+    have = [canonicalize_answer(a) for a in open_puzzles[to_solve]]
+    #print(f"answers {INFO_DUMP['puzzles'][to_solve]} have {open_puzzles[to_solve]}")
+    for a in INFO_DUMP["puzzles"][to_solve]:
+      if a not in have:
+        break
+    print(f"{my_id} submitting {a} for {to_solve}")
+
+    d = {"action": "submit", "answer": a, "puzzle_id": to_solve}
+
+    req = tornado.httpclient.HTTPRequest(
+      f"{self.options.base_url}/action",
+      method="POST",
+      body=json.dumps(d),
+      follow_redirects=False,
+      headers={"Cookie": cookie})
+
+    try:
+      response = await self.client.fetch(req)
+    except tornado.httpclient.HTTPClientError as e:
+      print(f"--- {my_id} failed to submit: {e} ---")
+      return
+
+    if response.code == 204 or response.code == 409:
+      return True
+
+
+
+  async def simulate_tab(self, my_id, tab_num, cookie):
+    #print(f"--- {my_id}.{tab_num} starting {cookie} ---")
+
+    stats["LOGIN"] = stats.get("LOGIN", 0) + 1
+    await LAUNCH.wait()
+
+    #await asyncio.sleep(tab_num * 1.0)
+
+    # Now we can fetch the home page to get assigned a waiter_id.
+
+    req = tornado.httpclient.HTTPRequest(
+      f"{self.options.base_url}/",
+      connect_timeout=5.0,
+      request_timeout=10.0,
+      follow_redirects=False,
+      headers={"Cookie": cookie})
+
+    #print(f"--- {my_id}.{tab_num} fetching ---")
+    try:
+      response = await self.client.fetch(req)
+    except tornado.httpclient.HTTPClientError as e:
+      print(f"--- {my_id}.{tab_num} failed: {e} ---")
+      return
+
+    #print(f"--- {my_id}.{tab_num} fetched ---")
+
+    m = re.search(rb"(?:wid|waiter_id) = (\d+)", response.body)
+    wid = int(m.group(1))
+
+    print(f"--- {my_id}.{tab_num} wid {wid} ---")
+
+    serial = 0
+    stats[serial] = stats.get(serial, 0) + 1
+    while True:
+      #print(f"--- {my_id}.{tab_num} waiting (wid {wid}) ---")
       req = tornado.httpclient.HTTPRequest(
-        f"{options.base_url}/admin/action",
-        method="POST",
-        body=json.dumps(d),
+        f"{self.options.base_url}/wait/{wid}/{serial}/10",
         follow_redirects=False,
-        headers={"Cookie": cookie})
+        headers={"Cookie": cookie},
+        request_timeout=600.0)
+
+      old_serial = serial
 
       try:
-        response = await client.fetch(req)
+        response = await self.client.fetch(req)
       except tornado.httpclient.HTTPClientError as e:
-        print(f"--- ADMIN {username} failed to submit: {e} ---")
-        return
+        print(e)
+        continue
 
-      if response.code != 204:
-        print(f"--- ADMIN {username} got back: {response.code} ---")
+      #print(f"--- {my_id}.{tab_num} response ---")
+      d = json.loads(response.body)
+      for ser, msg in d:
+        serial = max(serial, ser)
+        #pprint.pprint(msg)
 
-      count += 1
-      #if count >= 20: break
+      stats[old_serial] -= 1
+      if not stats[old_serial]: del stats[old_serial]
+      stats[serial] = stats.get(serial, 0) + 1
 
-    await asyncio.sleep(10)
-
-
-
-async def simulate_browser(my_id, client, username, password, delay, options):
-  await asyncio.sleep(delay)
-
-  # Submit the login page.
-
-  async with options.logins:
-    print(f"--- {my_id} logging in ---")
-    req = tornado.httpclient.HTTPRequest(
-      f"{options.base_url}/login_submit",
-      method="POST",
-      body=f"username={username}&password={password}",
-      follow_redirects=False)
-
-    try:
-      response = await client.fetch(req)
-      assert False
-    except tornado.httpclient.HTTPClientError as e:
-      assert e.code == 302
-      cookie = e.response.headers["Set-Cookie"].split(";")[0]
-
-    print(f"--- {my_id} logged in ---")
-
-  await asyncio.gather(solver(my_id, cookie, client, options),
-                       *[simulate_tab(my_id, i, cookie, client, options) for i in range(options.tabs)])
-
-async def solver(my_id, cookie, client, options):
-  solves_per_minute = random.random() * 7 + 3
-  while True:
-    delay = -math.log(1.0 - random.random()) / solves_per_minute * 60
-    await asyncio.sleep(delay)
-    if not await solve_one(my_id, cookie, client, options): break
-    await hint_one(my_id, cookie, client, options)
-
-async def hint_one(my_id, cookie, client, options):
-  req = tornado.httpclient.HTTPRequest(
-    f"{options.base_url}/js/hintsopen",
-    connect_timeout=5.0,
-    request_timeout=10.0,
-    follow_redirects=False,
-    headers={"Cookie": cookie})
-
-  try:
-    response = await client.fetch(req)
-  except tornado.httpclient.HTTPClientError as e:
-    print(f"--- {my_id} solver puzzle fetch failed: {e} ---")
-    return
-
-  j = json.loads(response.body)
-
-  if j["current"]: return True # waiting for response
-
-  if not j["available"]: return True  # no hints available
-
-  a = [p for p in j["available"] if not p[2]]
-  if not a: return True  # all hint-available puzzles solved
-
-  shortname = random.choice(a)[0]
-  print(f"{my_id} requesting hint on {shortname}")
-
-  d = {"action": "hint_request", "puzzle_id": shortname, "text": "please help"}
-
-  req = tornado.httpclient.HTTPRequest(
-    f"{options.base_url}/action",
-    method="POST",
-    body=json.dumps(d),
-    follow_redirects=False,
-    headers={"Cookie": cookie})
-
-  try:
-    response = await client.fetch(req)
-  except tornado.httpclient.HTTPClientError as e:
-    print(f"--- {my_id} failed to submit: {e} ---")
-    return
-
-  if response.code == 204:
-    return True
-
-
-async def solve_one(my_id, cookie, client, options):
-  req = tornado.httpclient.HTTPRequest(
-    f"{options.base_url}/js/puzzles",
-    connect_timeout=5.0,
-    request_timeout=10.0,
-    follow_redirects=False,
-    headers={"Cookie": cookie})
-
-  try:
-    response = await client.fetch(req)
-  except tornado.httpclient.HTTPClientError as e:
-    print(f"--- {my_id} solver puzzle fetch failed: {e} ---")
-    return
-
-  j = json.loads(response.body)
-
-  open_puzzles = {}
-  for land in j["lands"]:
-    if "puzzles" not in land: continue
-    for p in land["puzzles"]:
-      url = p.get("url", "")
-      if url.startswith("/puzzle/"):
-        if "answer" not in p:
-          open_puzzles[url[8:]] = ()
-        elif p["answer"].endswith("\u2026"):
-          a = p["answer"].split(",")
-          a.pop()
-          open_puzzles[url[8:]] = [i.strip() for i in a]
-
-  if not open_puzzles:
-    print("all puzzles solved")
-    return len(j["lands"]) < 10
-
-  to_solve = random.choice(list(open_puzzles.keys()))
-
-  have = [canonicalize_answer(a) for a in open_puzzles[to_solve]]
-  #print(f"answers {INFO_DUMP['puzzles'][to_solve]} have {open_puzzles[to_solve]}")
-  for a in INFO_DUMP["puzzles"][to_solve]:
-    if a not in have:
-      break
-  print(f"{my_id} submitting {a} for {to_solve}")
-
-  d = {"action": "submit", "answer": a, "puzzle_id": to_solve}
-
-  req = tornado.httpclient.HTTPRequest(
-    f"{options.base_url}/action",
-    method="POST",
-    body=json.dumps(d),
-    follow_redirects=False,
-    headers={"Cookie": cookie})
-
-  try:
-    response = await client.fetch(req)
-  except tornado.httpclient.HTTPClientError as e:
-    print(f"--- {my_id} failed to submit: {e} ---")
-    return
-
-  if response.code == 204 or response.code == 409:
-    return True
-
-
-
-async def simulate_tab(my_id, tab_num, cookie, client, options):
-  #print(f"--- {my_id}.{tab_num} starting {cookie} ---")
-
-  stats["LOGIN"] = stats.get("LOGIN", 0) + 1
-  await LAUNCH.wait()
-
-  #await asyncio.sleep(tab_num * 1.0)
-
-  # Now we can fetch the home page to get assigned a waiter_id.
-
-  req = tornado.httpclient.HTTPRequest(
-    f"{options.base_url}/",
-    connect_timeout=5.0,
-    request_timeout=10.0,
-    follow_redirects=False,
-    headers={"Cookie": cookie})
-
-  #print(f"--- {my_id}.{tab_num} fetching ---")
-  try:
-    response = await client.fetch(req)
-  except tornado.httpclient.HTTPClientError as e:
-    print(f"--- {my_id}.{tab_num} failed: {e} ---")
-    return
-
-  #print(f"--- {my_id}.{tab_num} fetched ---")
-
-  m = re.search(rb"(?:wid|waiter_id) = (\d+)", response.body)
-  wid = int(m.group(1))
-
-  print(f"--- {my_id}.{tab_num} wid {wid} ---")
-
-  serial = 0
-  stats[serial] = stats.get(serial, 0) + 1
-  while True:
-    #print(f"--- {my_id}.{tab_num} waiting (wid {wid}) ---")
-    req = tornado.httpclient.HTTPRequest(
-      f"{options.base_url}/wait/{wid}/{serial}/10",
-      follow_redirects=False,
-      headers={"Cookie": cookie},
-      request_timeout=600.0)
-
-    old_serial = serial
-
-    try:
-      response = await client.fetch(req)
-    except tornado.httpclient.HTTPClientError as e:
-      print(e)
-      continue
-
-    #print(f"--- {my_id}.{tab_num} response ---")
-    d = json.loads(response.body)
-    for ser, msg in d:
-      serial = max(serial, ser)
-      #pprint.pprint(msg)
-
-    stats[old_serial] -= 1
-    if not stats[old_serial]: del stats[old_serial]
-    stats[serial] = stats.get(serial, 0) + 1
-
-    # random delay before waiting again, same as client.js
-    await asyncio.sleep(random.random() * .250)
+      # random delay before waiting again, same as client.js
+      await asyncio.sleep(random.random() * .250)
 
 
 if __name__ == "__main__":
@@ -383,8 +385,10 @@ if __name__ == "__main__":
       INFO_DUMP = json.load(f)
     pprint.pprint(INFO_DUMP)
 
+  fake = FakeUsers(options)
+
   async def go():
-    await main(options)
+    await fake.main()
 
   ioloop = tornado.ioloop.IOLoop.current()
   ioloop.run_sync(go)

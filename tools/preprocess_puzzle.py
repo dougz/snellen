@@ -269,7 +269,7 @@ class Puzzle:
 
   def rewrite_html(self, soup, asset_map, fn, errors):
     for i in soup.find_all():
-      for attr in ("src", "href"):
+      for attr in ("src", "href", "xlink:href"):
         if attr in i.attrs:
           v = i[attr]
           if v in asset_map:
