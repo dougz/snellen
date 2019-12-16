@@ -1173,7 +1173,9 @@ class A2020_FixPuzzlePage {
 
         var b = goog.bind(this.enable, this);
         goog.events.listen(this.fixdopost, goog.events.EventType.CHANGE, b);
-        goog.events.listen(this.fixdoreload, goog.events.EventType.CHANGE, b);
+        if (this.fixdoreload) {
+            goog.events.listen(this.fixdoreload, goog.events.EventType.CHANGE, b);
+        }
         goog.events.listen(this.fixenable, goog.events.EventType.CLICK, b);
 
         goog.events.listen(this.fixtext, goog.events.EventType.INPUT,
@@ -1188,7 +1190,7 @@ class A2020_FixPuzzlePage {
     enable(e) {
         this.fixtext.disabled = !this.fixdopost.checked;
 
-        if (this.fixdopost.checked || this.fixdoreload.checked) {
+        if (this.fixdopost.checked || (this.fixdoreload && this.fixdoreload.checked)) {
             if (e.target == this.fixenable) {
                 this.fixsubmit.disabled = !this.fixsubmit.disabled;
             } else {
@@ -1219,7 +1221,7 @@ class A2020_FixPuzzlePage {
         if (this.fixdopost.checked) {
             d["text"] = this.fixtext.value;
         }
-        if (this.fixdoreload.checked) {
+        if (this.fixdoreload && this.fixdoreload.checked) {
             d["reload"] = true;
         }
         A2020_DoAction(d, Common_invoke_with_json(this, this.submit_result));

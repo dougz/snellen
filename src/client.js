@@ -1516,7 +1516,7 @@ window.onload = function() {
             goog.net.XhrIo.send(edb, goog.bind(emoji_builder, null, e));
         }
 
-        if (last_hint) {
+        if (typeof last_hint !== "undefined" && last_hint) {
             var x = localStorage.getItem("lh_" + puzzle_id);
             if (x) {
                 x = parseInt(x, 10);

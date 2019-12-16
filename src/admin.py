@@ -182,8 +182,7 @@ class FixPuzzlePage(util.AdminPageHandler):
   @login.required("edit_puzzles")
   def get(self, shortname):
     puzzle = self.get_puzzle(shortname)
-    self.render("admin_fix_puzzle_page.html", puzzle_path=puzzle.path)
-
+    self.render("admin_fix_puzzle_page.html", puzzle_path=getattr(puzzle, "path", None))
 
 class TeamPuzzlePage(util.AdminPageHandler):
   @login.required("admin")

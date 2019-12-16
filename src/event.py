@@ -81,14 +81,8 @@ class PuzzlePage(util.TeamPageHandler):
 
     self.puzzle = puzzle
 
-    if ps.hints and ps.hints[-1].sender:
-      last_hint = len(ps.hints)
-    else:
-      last_hint = None
-
     self.render("puzzle_frame.html", thumb=None, supertitle=supertitle,
-                solved=(ps.state == game.PuzzleState.SOLVED),
-                last_hint=last_hint)
+                solved=(ps.state == game.PuzzleState.SOLVED))
 
 
 class ActivityLogPage(util.TeamPageHandler):

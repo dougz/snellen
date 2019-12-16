@@ -72,12 +72,18 @@ class TeamPageHandler(TeamHandler):
 
     if hasattr(self, "puzzle"):
       d["puzzle"] = self.puzzle
-      d["state"] = self.team.puzzle_state[self.puzzle]
+      ps = self.team.puzzle_state[self.puzzle]
+      d["state"] = ps
       script.append(
         f'var puzzle_id = "{self.puzzle.shortname}";\n'
         "var puzzle_init = null;\n"
       )
       style_css = self.puzzle.land.shortname + "/land.css"
+
+      if ps.hints and ps.hints[-1].sender:
+        d["last_hint"] = len(ps.hints)
+      else:
+        d["last_hint"] = None
     elif hasattr(self, "puzzle_id"):
       # Just set puzzle_id; don't pull in land CSS.
       d["puzzle"] = None

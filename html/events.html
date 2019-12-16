@@ -6,6 +6,12 @@
 {% if park_open %}
 <a id="submit">Submit</a>
 {% end %}
+<a id="puzzerr"{% if not puzzle.errata%} class="hidden"{% end %} href="/errata" title="Errata">!</a>
+<a id="puzzhints"{% if puzzle not in team.hints_open %} class="hidden"{% end %} href="/guest_services?p={{puzzle.shortname}}" title="Hints">H</a>
+{% end %}
+
+{% block head %}
+{% if last_hint %}<script>var last_hint = {{last_hint}};</script>{% end %}
 {% end %}
 
 {% block midnav %}
