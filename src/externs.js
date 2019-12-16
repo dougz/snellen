@@ -38,6 +38,10 @@ var page_class;
 /** @type{?number} */
 var last_hint;
 
+/** @type{string} */
+var event_hash;
+
+
 class Message {
     constructor() {
         /** @type{string} */

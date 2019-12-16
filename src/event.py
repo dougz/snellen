@@ -36,7 +36,8 @@ class LandMapPage(util.TeamPageHandler):
     self.land = land
     mapdata = self.team.get_land_data(land)
     json_data = "<script>var initial_json = """ + mapdata + ";</script>"
-    self.render("land.html", land=land, json_data=json_data)
+    self.render("land.html", land=land, json_data=json_data,
+                event_hash=game.Global.STATE.event_hash)
 
 class MapDataHandler(util.TeamHandler):
   @login.required("team")

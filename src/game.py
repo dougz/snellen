@@ -2233,7 +2233,8 @@ class Global:
   def start_event(self, now, timed):
     if self.event_start_time is not None: return
     self.event_start_time = now
-    print(f"starting event at {now}")
+    self.event_hash = hashlib.md5(str(now).encode("ascii")).hexdigest()[:8]
+    print(f"starting event at {now} hash is {self.event_hash}")
     for team in Team.BY_USERNAME.values():
       team.compute_puzzle_beam(self.event_start_time)
       team.open_puzzle(Event.PUZZLE, now)

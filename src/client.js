@@ -772,6 +772,14 @@ class H2020_MapDraw {
         /** @type{?string} */
         this.icon_name = null;
 
+        if (event_hash) {
+            var eh = localStorage.getItem("event_hash");
+            if (eh != event_hash) {
+                localStorage.clear();
+                localStorage.setItem("event_hash", event_hash);
+            }
+        }
+
         if (goog.DEBUG) {
             this.map_el.tabIndex = 0;
             goog.events.listen(this.map_el, goog.events.EventType.KEYDOWN,

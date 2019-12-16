@@ -2,6 +2,10 @@
 
 {% block title %}{{land.title}}{% end %}
 
+{% block head %}
+<script>var event_hash = "{{event_hash}}";</script>
+{% end %}
+
 {% block content %}
 {% if land.logo %}
 <img src="{{land.logo}}" id="logo">
