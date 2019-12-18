@@ -1017,6 +1017,10 @@ div.psign b {
     /*animation-delay: 1.0s;*/
 }
 
+video#parkopening {
+    width: 100%;
+}
+
 #videolist {
     display: flex;
     flex-direction: column;
