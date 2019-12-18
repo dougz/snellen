@@ -1798,6 +1798,11 @@ class Land:
         if item:
           item["puzzle"] = p
 
+    for land in cls.BY_SHORTNAME.values():
+      for p in land.all_puzzles:
+        if not p.style:
+          p.style = land.shortname + "/land.css"
+
 
 class Puzzle:
   BY_SHORTNAME = {}
@@ -1824,6 +1829,7 @@ class Puzzle:
     self.zip_version = None
     self.allow_duplicates = False
     self.wait_for_requested = False
+    self.style = None
 
     self.median_solve_duration = None
     self.solve_durations = {}     # {team: duration}
@@ -2344,6 +2350,7 @@ class Event:
     p.oncall = ""
     p.puzzletron_id = -1
     p.authors = ["Left Out"]
+    p.style = "default.css"
 
     p.title = "Events"
     p.url = "/events"
@@ -2396,7 +2403,7 @@ class Workshop:
 
     cls.pre_response = d["pre_response"]
     cls.post_response = d["post_response"]
-
+    cls.config = d
 
   def __init__(self, shortname, d):
     self.shortname = shortname
@@ -2428,11 +2435,14 @@ class Workshop:
     p.oncall = ""
     p.puzzletron_id = -1
     p.authors = ["Left Out"]
+    p.style = "default.css"
 
     p.title = "Workshop"
     p.url = "/workshop"
-    p.answers = {"MASHNOTE"}
-    p.display_answers = {"MASHNOTE": "MASH NOTE"}
+    da = cls.config["answer"]
+    a = Puzzle.canonicalize_answer(da)
+    p.answers = {a}
+    p.display_answers = {a: da}
     p.responses = {}
     p.html_body = None
     p.html_head = None
@@ -2458,8 +2468,11 @@ class Runaround:
 
   def __init__(self, d):
     self.shortname = d["land"]
+    self.land = Land.BY_SHORTNAME[self.shortname]
+    self.title = self.land.title
     self.answer = Puzzle.canonicalize_answer(d["answer"])
     self.display_answer = d["answer"]
+    self.instructions = d["instructions"]
 
   @classmethod
   def build(cls, d):
@@ -2474,6 +2487,7 @@ class Runaround:
     p.oncall = ""
     p.puzzletron_id = -1
     p.authors = ["Left Out"]
+    p.style = "runaround.css"
 
     p.title = "Heart of the Park"
     p.url = "/heart_of_the_park"
@@ -2498,7 +2512,8 @@ class Runaround:
       segments = {}
       for s in cls.SEGMENTS:
         if s.answer in ps.answers_found:
-          segments[s.shortname] = s.display_answer
+          segments[s.shortname] = {"answer": s.display_answer,
+                                   "instructions": s.instructions}
       team.send_messages([{"method": "segments_complete", "segments": segments}])
 
     p.on_correct_answer = on_correct_answer
@@ -2507,10 +2522,10 @@ class Runaround:
     land.all_puzzles.append(p)
     p.post_init(land, None)
 
-    # All land metas are needed to start the runaround ...
-    for land in Land.BY_SHORTNAME.values():
-      if land.meta_puzzle:
-        cls.REQUIRED_PUZZLES.add(land.meta_puzzle)
+    # # All land metas are needed to start the runaround ...
+    # for land in Land.BY_SHORTNAME.values():
+    #   if land.meta_puzzle:
+    #     cls.REQUIRED_PUZZLES.add(land.meta_puzzle)
 
     # ... plus the pressed-penny puzzle.
     cls.REQUIRED_PUZZLES.add(Workshop.PUZZLE)

@@ -14,3 +14,7 @@
     border-radius: 10px;
 }
 
+@media print {
+    #content { border: none; padding: none; }
+}
+

@@ -267,16 +267,11 @@ class H2020_Dispatcher {
 
     /** @param{Message} msg */
     segments_complete(msg) {
-        var els = document.querySelectorAll(".segmentcomplete");
-        if (els) {
-            for (var i = 0; i < els.length; ++i) {
-                var id = els[i].id.substr(8);
-                if (msg.segments[id]) {
-                    els[i].innerHTML = msg.segments[id];
-                } else {
-                    els[i].innerHTML = "";
-                }
-            }
+        for (const [s, e] of Object.entries(msg.segments)) {
+            var el = goog.dom.getElement("segment_" + s);
+            el.innerHTML = "&mdash; " + e.answer;
+            el = goog.dom.getElement("instructions_" + s);
+            el.innerHTML = e.instructions;
         }
     }
 }

@@ -156,7 +156,8 @@ class RunaroundPage(util.TeamPageHandler):
     ps = self.team.puzzle_state[self.puzzle]
     if ps.state == game.PuzzleState.CLOSED:
       return self.not_found()
-    self.render("runaround.html", segments=game.Runaround.SEGMENTS, ps=ps)
+    self.render("runaround.html", segments=game.Runaround.SEGMENTS, ps=ps,
+                static=OPTIONS.static_content)
 
 class RunaroundDataHandler(util.TeamHandler):
   @login.required("team", require_start=False)

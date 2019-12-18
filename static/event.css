@@ -1276,4 +1276,6 @@ a#ppicon3 {
     #nonnav { display: block; background: none; }
     #nonnav > a { display: none; }
     #landtitle { display: none; }
+    .RunaroundPage h3 { page-break-before: always; }
+    .RunaroundPage hr.b { display: none; }
 }

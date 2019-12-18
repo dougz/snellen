@@ -155,6 +155,10 @@ def convert_static_files(out, options, lands):
       if os.path.exists(fn):
         to_convert.append((os.path.join(land, xfn), fn))
 
+  to_convert.extend([
+    ("runaround.css", os.path.join(options.input_assets, "runaround.css")),
+  ])
+
   to_convert.extend([("mute.png", f"{base}/snellen/static/mute.png"),
                      ("emojisprite.png", f"{base}/snellen/static/emojisprite.png"),
                      ("pennypass.png", f"{base}/snellen/static/pennypass.png"),
@@ -199,6 +203,10 @@ def convert_static_files(out, options, lands):
                      ("admin_fav_blue/favicon-16x16.png",
                       f"{base}/snellen/static/admin_fav_blue/favicon-16x16.png"),
                      ])
+  for rp in ("safari.jpg", "space.jpg", "cascade_flow.png", "cascade_grid.png",
+             "cascade_start.jpg", "canyon.jpg", "studios_seal.png",
+             "studios_coins.png", "studios_wall.png"):
+    to_convert.append((f"runaround/{rp}", f"{base}/media/runaround/{rp}"))
   for mp in ("thinkfun", "gr8ergood", "cluekeeper", "janestreet",
              "judy", "penny",
              "jeon_paisa", "kobo", "centime", "luma", "dirham", "kopek"):

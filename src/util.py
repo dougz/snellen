@@ -78,7 +78,7 @@ class TeamPageHandler(TeamHandler):
         f'var puzzle_id = "{self.puzzle.shortname}";\n'
         "var puzzle_init = null;\n"
       )
-      style_css = self.puzzle.land.shortname + "/land.css"
+      style_css = self.puzzle.style
 
       if ps.hints and ps.hints[-1].sender:
         d["last_hint"] = len(ps.hints)
