@@ -82,7 +82,7 @@ class Message {
         this.passes;
         /** @type{?Array<boolean>} */
         this.completed;
-        /** @type{?Object<string,string>} */
+        /** @type{?Object<string,Segment>} */
         this.segments;
     }
 }
@@ -93,6 +93,8 @@ class Segment {
         this.shortname;
         /** @type{string} */
         this.answer;
+        /** @type{string} */
+        this.instructions;
     }
 }
 

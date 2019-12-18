@@ -1135,6 +1135,7 @@ class Team(login.LoginUser):
       self.cached_mapdata.pop(puzzle.land, None)
       self.cached_all_puzzles_data = None
       self.cached_jukebox_data = None
+      self.cached_open_hints_data = None
       if puzzle.meta:
         current_map = Land.BY_SHORTNAME[self.map_mode]
         self.cached_mapdata.pop(current_map, None)

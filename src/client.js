@@ -183,6 +183,11 @@ class H2020_Dispatcher {
         this.dirty_activity = true;
         this.dirty_all_puzzles = true;
 
+        if (hunt2020.guest_services) {
+            console.log("updating open hints");
+            hunt2020.guest_services.update_hints_open();
+        }
+
         if (typeof refresh_puzzle !== 'undefined' && refresh_puzzle) refresh_puzzle();
     }
 
@@ -267,11 +272,13 @@ class H2020_Dispatcher {
 
     /** @param{Message} msg */
     segments_complete(msg) {
-        for (const [s, e] of Object.entries(msg.segments)) {
-            var el = goog.dom.getElement("segment_" + s);
-            el.innerHTML = "&mdash; " + e.answer;
-            el = goog.dom.getElement("instructions_" + s);
-            el.innerHTML = e.instructions;
+        if (msg.segments) {
+            for (const [s, e] of Object.entries(msg.segments)) {
+                var el = goog.dom.getElement("segment_" + s);
+                el.innerHTML = "&mdash; " + e.answer;
+                el = goog.dom.getElement("instructions_" + s);
+                el.innerHTML = e.instructions;
+            }
         }
     }
 }
@@ -1118,8 +1125,8 @@ class H2020_GuestServices {
 
         /** @type{?string} */
         this.hint_selected = null;
-        /** @type{?string} */
-        this.hint_displayed = null;
+        /** @type{string} */
+        this.hint_displayed = "";
         /** @type{?string} */
         this.restricted_to = null;
 
@@ -1130,6 +1137,9 @@ class H2020_GuestServices {
 
         /** @type{Element} */
         this.hintrequest = goog.dom.getElement("hintrequest");
+
+        /** @type{Object<string, boolean>} */
+        this.solved = {};
 
         goog.events.listen(this.hintrequest, goog.events.EventType.CLICK,
                            goog.bind(this.submit, this));
@@ -1176,7 +1186,11 @@ class H2020_GuestServices {
     }
 
     select_puzzle(e) {
+        var old = this.hint_selected;
         this.hint_selected = this.hintselect.options[this.hintselect.selectedIndex].value;
+        if (old != this.hint_selected) {
+            this.textarea.value = "";
+        }
         this.hintselect.style.color = "black";
         this.update_hint_history();
     }
@@ -1242,6 +1256,7 @@ class H2020_GuestServices {
     /** @param{OpenHints} data */
     build_hints(data) {
         this.restricted_to = data.current;
+        this.solved = {};
         if (data.available.length > 0) {
             this.hintnone.style.display = "none";
             this.hintsome.style.display = "block";
@@ -1274,6 +1289,9 @@ class H2020_GuestServices {
                 }
                 this.hintselect.appendChild(
                     goog.dom.createDom("OPTION", d, it[1] + (it[2] ? " [solved]" : "")));
+                if (it[2]) {
+                    this.solved[it[0]] = true;
+                }
             }
 
             if (target_found) {
@@ -1298,10 +1316,15 @@ class H2020_GuestServices {
     }
 
     update_send_button() {
-        if (this.restricted_to && this.restricted_to != this.hint_displayed) {
+        if (this.solved[this.hint_displayed]) {
             this.hintrequest.disabled = true;
+            this.hintrequest.innerHTML = "Puzzle solved";
+        } else if (this.restricted_to && this.restricted_to != this.hint_displayed) {
+            this.hintrequest.disabled = true;
+            this.hintrequest.innerHTML = "Waiting for reply";
         } else {
             this.hintrequest.disabled = false;
+            this.hintrequest.innerHTML = "Send request";
         }
     }
 

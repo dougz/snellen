@@ -1144,6 +1144,7 @@ select option {
 
 #hintrequest {
     display: block;
+    width: 12em;
     margin-left: 12px;
     flex-grow: 0;
 }
