@@ -35,6 +35,8 @@ CONTENT_TYPES = {
   ".woff2": "font/woff2",
 
   ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+
+  ".unityweb": "application/octet-stream",
 }
 
 object_cache = {}
