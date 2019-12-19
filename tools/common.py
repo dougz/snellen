@@ -80,7 +80,7 @@ def get_object(bucket, path, creds):
 
 def upload_object(source, bucket, path, content_type, data, creds, update=False):
   if path in object_cache and not update:
-    print(f"    Already have {source} as {path} (cached)...")
+    #print(f"    Already have {source} as {path} (cached)...")
     return
 
   if not update:

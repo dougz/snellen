@@ -41,27 +41,20 @@ class Log:
 
 
 class HintMessage:
-  def __init__(self, parent, when, sender, text, admin_only):
+  def __init__(self, parent, when, sender, text, special=None):
     self.parent = parent  # PuzzleState
+    parent.cached_hint_data_team = None
+    parent.cached_hint_data_admin = None
     self.when = when
     # sender is either a Team or an AdminUser
     self.sender = sender
     self.text = text
-    self.admin_only = admin_only
 
-  def json_dict(self, for_admin=False):
-    d = {"when": self.when, "text": self.text}
-    if isinstance(self.sender, login.AdminUser):
-      if for_admin:
-        d["sender"] = self.sender.fullname
-      else:
-        d["sender"] = "Hunt HQ"
-    else:
-      d["sender"] = self.parent.team.name
-    if for_admin and self.admin_only:
-      d["admin_only"] = True
-    return d
-
+    # specials:
+    #   "cancel"  -- cancelled by player
+    #   "ack"     -- hq clicked "no reply needed"
+    #   "solved"  -- cancelled by solving
+    self.special = special
 
 class Task:
   def __init__(self, when, team, taskname, text, url, oncomplete, kind):
@@ -171,7 +164,7 @@ class TaskQueue:
     for ps in self.states:
       ts = 0
       for h in reversed(ps.hints):
-        if h.sender == ps.team:
+        if h.sender is None:
           ts = h.when
         else:
           break
@@ -225,6 +218,9 @@ class PuzzleState:
     self.claim = None          # AdminUser claiming hint response
     self.keeper_answers = 0
 
+    self.cached_hint_data_team = None
+    self.cached_hint_data_admin = None
+
     self.admin_url = f"/admin/team/{team.username}/puzzle/{puzzle.shortname}"
     self.admin_html_puzzle = (
       f'<a href="{self.admin_url}">{html.escape(puzzle.title)}</a> '
@@ -249,7 +245,6 @@ class PuzzleState:
       self.submissions.append(sub)
       sub.check_or_queue(now)
 
-
   def requeue_pending(self, now):
     self.requeue(self.remove_pending(), now)
 
@@ -261,6 +256,39 @@ class PuzzleState:
     after = self.remove_pending()
     self.submissions.append(sub)
     self.requeue(after, now)
+
+  def hint_request_outstanding(self):
+    return (self.hints and self.hints[-1].sender is None and
+            self.hints[-1].special is None)
+
+  def get_hint_data_team(self):
+    if self.cached_hint_data_team is not None:
+      return self.cached_hint_data_team
+
+    out = []
+    for hm in self.hints:
+      if hm.special == "ack": continue
+      d = {"when": hm.when, "text": hm.text,
+           "sender": "Hunt HQ" if hm.sender else self.team.name}
+      if hm.special: d["special"] = hm.special
+      out.append(d)
+
+    self.cached_hint_data_team = out
+    return out
+
+  def get_hint_data_admin(self):
+    if self.cached_hint_data_admin is not None:
+      return self.cached_hint_data_admin
+
+    out = []
+    for hm in self.hints:
+      d = {"when": hm.when, "text": hm.text,
+           "sender": hm.sender.fullname if hm.sender else self.team.name}
+      if hm.special: d["special"] = hm.special
+      out.append(d)
+
+    self.cached_hint_data_admin = out
+    return out
 
 
 
@@ -1124,6 +1152,14 @@ class Team(login.LoginUser):
       self.dirty_header = True
       self.last_score_change = now
       self.open_puzzles.remove(ps)
+
+      if ps.hint_request_outstanding():
+        ps.hints.append(HintMessage(ps, now, None, None, special="solved"))
+        if self.current_hint_puzzlestate == ps:
+          self.current_hint_puzzlestate = None
+        self.cached_open_hints_data = None
+        Global.STATE.task_queue.remove(ps)
+
       self.send_messages(
         [{"method": "solve",
           "puzzle_id": puzzle.shortname,
@@ -1438,7 +1474,7 @@ class Team(login.LoginUser):
 
     self.admin_log.add(now, f"<b>{sender.fullname}</b> marked hint request on {ps.admin_html_puzzle} as not needing reply.")
 
-    msg = HintMessage(ps, now, sender, "(no reply needed)", True)
+    msg = HintMessage(ps, now, sender, None, special="ack")
     ps.hints.append(msg)
 
     if self.current_hint_puzzlestate == ps:
@@ -1463,13 +1499,12 @@ class Team(login.LoginUser):
     prev = self.current_hint_puzzlestate
 
     if sender is None:
-      sender = self
       if text is None:
         self.current_hint_puzzlestate = None
         puzzle.puzzle_log.add(now, f"{ps.admin_html_team} canceled their hint request.")
         self.activity_log.add(now, f"Canceled the hint request on {puzzle.html}.")
         self.admin_log.add(now, f"Canceled the hint reque on {ps.admin_html_puzzle}.")
-        ps.hints.append(HintMessage(ps, now, sender, None, False))
+        ps.hints.append(HintMessage(ps, now, sender, None, special="cancel"))
         Global.STATE.task_queue.remove(ps)
       else:
         self.current_hint_puzzlestate = ps
@@ -1481,14 +1516,14 @@ class Team(login.LoginUser):
           puzzle.puzzle_log.add(now, f"{ps.admin_html_team} requested a hint.")
           self.activity_log.add(now, f"Requested a hint on {puzzle.html}.")
           self.admin_log.add(now, f"Requested a hint on {ps.admin_html_puzzle}.")
-        ps.hints.append(HintMessage(ps, now, sender, text, False))
+        ps.hints.append(HintMessage(ps, now, sender, text))
         Global.STATE.task_queue.add(ps)
     else:
       self.current_hint_puzzlestate = None
       sender = login.AdminUser.get_by_username(sender)
       ps.last_hq_sender = sender
       ps.claim = None
-      ps.hints.append(HintMessage(ps, now, sender, text, False))
+      ps.hints.append(HintMessage(ps, now, sender, text))
       Global.STATE.task_queue.remove(ps)
       team_message["notify"] = True
       team_message["title"] = puzzle.title

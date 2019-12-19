@@ -146,6 +146,8 @@ class HintMessage {
         this.when;
         /** @type{string} */
         this.text;
+        /** @type{?string} */
+        this.special;
     }
 }
 

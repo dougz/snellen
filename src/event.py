@@ -250,7 +250,7 @@ class HintHistoryHandler(util.TeamHandler):
     ps = self.team.get_puzzle_state(shortname)
     if not ps:
       return self.not_found()
-    d = {"history": [msg.json_dict() for msg in ps.hints if not msg.admin_only],
+    d = {"history": ps.get_hint_data_team(),
          "puzzle_id": ps.puzzle.shortname}
     self.return_json(d)
 

@@ -74,7 +74,7 @@ class H2020_Dispatcher {
     /** @param{Message} msg */
     hint_history(msg) {
         if (hunt2020.guest_services) {
-            hunt2020.guest_services.update_hint_history();
+            hunt2020.guest_services.update_hint_history(msg.puzzle_id);
             hunt2020.guest_services.update_hints_open();
         }
         if (msg.notify) {
@@ -184,7 +184,7 @@ class H2020_Dispatcher {
         this.dirty_all_puzzles = true;
 
         if (hunt2020.guest_services) {
-            console.log("updating open hints");
+            hunt2020.guest_services.update_hint_history(msg.puzzle_id);
             hunt2020.guest_services.update_hints_open();
         }
 
@@ -1192,16 +1192,19 @@ class H2020_GuestServices {
             this.textarea.value = "";
         }
         this.hintselect.style.color = "black";
-        this.update_hint_history();
+        this.update_hint_history(this.hint_selected);
     }
 
-    update_hint_history() {
-        goog.net.XhrIo.send("/js/hints/" + this.hint_selected,
-                            Common_invoke_with_json(this, this.render_hint_history));
+    update_hint_history(puzzle_id) {
+        if (puzzle_id == this.hint_selected) {
+            goog.net.XhrIo.send("/js/hints/" + this.hint_selected,
+                                Common_invoke_with_json(this, this.render_hint_history));
+        }
     }
 
     /** @param{HintHistory} data */
     render_hint_history(data) {
+        console.log(data);
         goog.dom.getElement("hintui").style.display = "block";
 
         this.hint_displayed = data.puzzle_id;
@@ -1228,11 +1231,16 @@ class H2020_GuestServices {
                 var dt = goog.dom.createDom(
                     "DT", null,
                     "At " + hunt2020.time_formatter.format(msg.when) + ", " + msg.sender + " wrote:");
-                var dd = goog.dom.createDom("DD", msg.text ? null : "special");
-                if (msg.text) {
-                    dd.innerHTML = msg.text;
+
+                var dd = goog.dom.createDom("DD", msg.special ? "special" : null);
+                if (msg.special) {
+                    if (msg.special == "cancel") {
+                        dd.innerHTML = "(request canceled by team)";
+                    } else if (msg.special == "solved") {
+                        dd.innerHTML = "(request canceled due to solving puzzle)";
+                    }
                 } else {
-                    dd.innerHTML = "(request canceled by team)";
+                    dd.innerHTML = msg.text;
                 }
                 dl.appendChild(dt);
                 dl.appendChild(dd);

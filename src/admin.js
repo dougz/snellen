@@ -140,6 +140,7 @@ class A2020_TeamPuzzlePage {
 
     /** @param{TeamPuzzlePageData} data */
     build(data) {
+        console.log(data);
         goog.dom.classlist.set(this.tppstate, "puzzlestate-" + data.state);
         this.tppstate.innerHTML = data.state;
 
@@ -186,11 +187,17 @@ class A2020_TeamPuzzlePage {
                     var dt = goog.dom.createDom(
                         "DT", null,
                         "At " + admin2020.time_formatter.format(msg.when) + ", " + msg.sender + " wrote:");
-                    var dd = goog.dom.createDom("DD", (msg.admin_only || !msg.text) ? "special" : null);
-                    if (msg.text) {
-                        dd.innerHTML = msg.text;
+                    var dd = goog.dom.createDom("DD", msg.special ? "special" : null);
+                    if (msg.special) {
+                        if (msg.special == "cancel") {
+                            dd.innerHTML = "(request canceled by team)";
+                        } else if (msg.special == "solved") {
+                            dd.innerHTML = "(puzzle was solved)";
+                        } else if (msg.special == "ack") {
+                            dd.innerHTML = "(no reply needed)";
+                        }
                     } else {
-                        dd.innerHTML = "(request canceled by team)";
+                        dd.innerHTML = msg.text;
                     }
                     dl.appendChild(dt);
                     dl.appendChild(dd);

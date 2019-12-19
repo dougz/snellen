@@ -200,7 +200,7 @@ class TeamPuzzleDataHandler(util.AdminHandler):
     if not ps:
       return self.not_found()
 
-    d = {"history": [msg.json_dict(for_admin=True) for msg in ps.hints],
+    d = {"history": ps.get_hint_data_admin(),
          "submits": [sub.json_dict() for sub in ps.submissions],
          "hints_open": ps.hints_available,
          "state": ps.state}
