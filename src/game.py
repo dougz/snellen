@@ -1164,7 +1164,7 @@ class Team(login.LoginUser):
         [{"method": "solve",
           "puzzle_id": puzzle.shortname,
           "title": html.escape(puzzle.title),
-          "audio": OPTIONS.static_content.get(puzzle.land.shortname + "/solve.mp3"),
+          "audio": puzzle.solve_audio,
         }])
 
       self.dirty_lands.add(puzzle.land.shortname)
@@ -1866,6 +1866,7 @@ class Puzzle:
     self.allow_duplicates = False
     self.wait_for_requested = False
     self.style = None
+    self.solve_audio = None
 
     self.median_solve_duration = None
     self.solve_durations = {}     # {team: duration}
@@ -1909,6 +1910,9 @@ class Puzzle:
       self.handle_answer = self.do_concierge_callback
       self.allow_duplicates = True
       self.wait_for_requested = True
+
+    land_audio = OPTIONS.static_content.get(land.shortname + "/solve.mp3")
+    if not self.solve_audio and land_audio: self.solve_audio = land_audio
 
   def do_concierge_callback(self, sub, now):
     sub.state = sub.REQUESTED
@@ -2472,6 +2476,7 @@ class Workshop:
     p.puzzletron_id = -1
     p.authors = ["Left Out"]
     p.style = "default.css"
+    p.solve_audio = OPTIONS.static_content.get("end_solve.mp3")
 
     p.title = "Workshop"
     p.url = "/workshop"
@@ -2524,6 +2529,7 @@ class Runaround:
     p.puzzletron_id = -1
     p.authors = ["Left Out"]
     p.style = "runaround.css"
+    p.solve_audio = OPTIONS.static_content.get("end_solve.mp3")
 
     p.title = "Heart of the Park"
     p.url = "/heart_of_the_park"

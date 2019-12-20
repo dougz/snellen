@@ -84,6 +84,7 @@ async def main_server(options):
         static_content[key] = "/debug/" + path
       else:
         static_content[key] = url
+  options.static_content = static_content
 
   for shortname, d in cfg["maps"].items():
     game.Land(shortname, d, options.event_dir)
@@ -99,7 +100,6 @@ async def main_server(options):
   if options.debug:
     debug.DebugPathHandler.set_static_content(static_content)
   login.Login.set_static_content(static_content)
-  options.static_content = static_content
 
   save_state.set_classes(AdminUser=login.AdminUser,
                          Team=game.Team,
