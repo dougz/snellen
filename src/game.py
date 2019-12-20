@@ -1503,7 +1503,7 @@ class Team(login.LoginUser):
         self.current_hint_puzzlestate = None
         puzzle.puzzle_log.add(now, f"{ps.admin_html_team} canceled their hint request.")
         self.activity_log.add(now, f"Canceled the hint request on {puzzle.html}.")
-        self.admin_log.add(now, f"Canceled the hint reque on {ps.admin_html_puzzle}.")
+        self.admin_log.add(now, f"Canceled the hint request on {ps.admin_html_puzzle}.")
         ps.hints.append(HintMessage(ps, now, sender, None, special="cancel"))
         Global.STATE.task_queue.remove(ps)
       else:
