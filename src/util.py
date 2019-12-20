@@ -122,6 +122,7 @@ class TeamPageHandler(TeamHandler):
     d["park_open"] = (game.Global.STATE.event_start_time is not None)
     d["has_errata"] = not not self.team.get_errata_data()
     d["logo_nav"] = self.static_content["logo-nav.png"]
+    d["eurl"] = self.static_content["emoji"]
 
     return d
 
