@@ -482,30 +482,11 @@ class Submission:
 
   @classmethod
   async def realtime_process_submit_queue(cls):
-    land_times = []
-    for land in Land.BY_SHORTNAME.values():
-      if land.open_at_time:
-        land_times.append(land.open_at_time)
-    land_times.sort(reverse=True)
-
     while True:
       now = time.time()
       teams = cls.process_submit_queue(now)
       for team in teams:
         asyncio.create_task(team.flush_messages())
-
-      if Global.STATE.event_start_time:
-        rel = now - Global.STATE.event_start_time
-        beam = False
-        while land_times and rel > land_times[-1]:
-          beam = True
-          land_times.pop()
-        if beam:
-          print("recomputing all beams")
-          for team in Team.all_teams():
-            team.compute_puzzle_beam(now)
-            team.invalidate()
-            await team.flush_messages()
 
       await asyncio.sleep(1.0)
 
@@ -524,6 +505,25 @@ class Submission:
         msgs = sub.check_answer(ct)
         sub.team.send_messages([{"method": "history_change", "puzzle_id": sub.puzzle.shortname}])
         teams.add(sub.team)
+
+    # Check for land opening by time.
+    if Global.STATE and Global.STATE.event_start_time:
+      beam = False
+      for land in Land.BY_SHORTNAME.values():
+        if not land.open_at_time: continue   # None or 0
+        rel = now - Global.STATE.event_start_time
+        if rel < land.open_at_time: continue # not yet
+        if land.time_unlocked: continue # already done
+        land.time_unlocked = True
+        print(f"recomputing all beams for {land.shortname} {rel}")
+        beam = True
+
+      if beam:
+        for team in Team.all_teams():
+          team.compute_puzzle_beam(now)
+          team.invalidate()
+          teams.add(team)
+
     return teams
 
 
@@ -1751,7 +1751,8 @@ class Land:
     self.guess_interval = cfg.get("guess_interval", CONSTANTS["default_guess_interval_sec"])
     self.guess_max = cfg.get("guess_max", CONSTANTS["default_guess_max"])
     self.open_at_score, self.open_at_time = cfg.get("open_at", (None, None))
-    if self.open_at_time: self.open_at_time *= 3600
+    self.time_unlocked = False
+    if self.open_at_time: self.open_at_time *= 2 # 3600
     if "assignments" in cfg:
       self.initial_puzzles = cfg["initial_puzzles"]
 
@@ -2288,17 +2289,6 @@ class Global:
     if timed and not save_state.REPLAYING:
       asyncio.create_task(self.notify_event_start())
     asyncio.create_task(login.AdminUser.flush_messages())
-
-    for land in Land.BY_SHORTNAME.values():
-      if land.open_at_time:
-        asyncio.create_task(self.beam_all(land.open_at_time))
-
-  async def beam_all(self, delay):
-    await asyncio.sleep(delay + 1)
-    now = time.time()
-    for team in Team.all_teams():
-      team.compute_puzzle_beam(now)
-      await team.flush_messages()
 
   def add_task(self, now, team, taskname, text, url, oncomplete, kind):
     team = Team.get_by_username(team)
