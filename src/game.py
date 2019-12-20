@@ -392,36 +392,37 @@ class Submission:
   def check_answer(self, now):
     self.submit_time = now
     answer = self.answer
-    if answer in self.puzzle.answers:
-      self.state = self.CORRECT
-      self.extra_response = None
 
-    elif answer in self.puzzle.responses:
-      response = self.puzzle.responses[answer]
-      if response is True:
-        # alternate correct answer
+    fn = getattr(self.puzzle, "handle_answer", None)
+    if fn:
+      fn(self, now)
+    else:
+      if answer in self.puzzle.answers:
         self.state = self.CORRECT
         self.extra_response = None
-        answer = self.puzzle.answers[0]
-      elif isinstance(response, str):
-        # partial-progress response
-        self.state = self.PARTIAL
-        self.extra_response = response
-      elif isinstance(response, (list, tuple)):
-        # task for HQ
-        self.state = self.REQUESTED
-        self.extra_response = response[0]
-        Global.STATE.add_task(now, self.team.username, answer.lower(),
-                              response[1], response[2], None, "puzzle")
-      elif response is None:
-        # incorrect but "honest guess"
-        self.state = self.INCORRECT
-        self.team.last_incorrect_answer = now
-        self.wrong_but_reasonable = True
-    else:
-      fn = getattr(self.puzzle, "handle_answer", None)
-      if fn:
-        fn(self, now)
+
+      elif answer in self.puzzle.responses:
+        response = self.puzzle.responses[answer]
+        if response is True:
+          # alternate correct answer
+          self.state = self.CORRECT
+          self.extra_response = None
+          answer = self.puzzle.answers[0]
+        elif isinstance(response, str):
+          # partial-progress response
+          self.state = self.PARTIAL
+          self.extra_response = response
+        elif isinstance(response, (list, tuple)):
+          # task for HQ
+          self.state = self.REQUESTED
+          self.extra_response = response[0]
+          Global.STATE.add_task(now, self.team.username, answer.lower(),
+                                response[1], response[2], None, "puzzle")
+        elif response is None:
+          # incorrect but "honest guess"
+          self.state = self.INCORRECT
+          self.team.last_incorrect_answer = now
+          self.wrong_but_reasonable = True
       else:
         self.state = self.INCORRECT
         self.team.last_incorrect_answer = now
@@ -443,13 +444,18 @@ class Submission:
     self.puzzle.puzzle_log.add(now, msg)
 
     if self.state == self.CORRECT:
+      self.check_answer_correct(now)
+
+    self.team.invalidate(self.puzzle)
+
+  def check_answer_correct(self, now):
       if len(self.puzzle.answers) > 1:
-        a = self.puzzle.display_answers[answer]
+        a = self.puzzle.display_answers[self.answer]
         self.team.activity_log.add(now, f"Got answer <b>{html.escape(a)}</b> for {self.puzzle.html}.")
         self.team.admin_log.add(now, f"Got answer <b>{html.escape(a)}</b> for {self.puzzle_state.admin_html_puzzle}.")
-      self.puzzle_state.answers_found.add(answer)
-      fn = getattr(self.puzzle, "on_correct_answer", None)
+      self.puzzle_state.answers_found.add(self.answer)
       self.team.cached_all_puzzles_data = None
+      fn = getattr(self.puzzle, "on_correct_answer", None)
       if fn: fn(now, self.team)
       if self.puzzle_state.answers_found == self.puzzle.answers:
         if not self.team.remote_only and self.puzzle in Workshop.PENNY_PUZZLES:
@@ -462,8 +468,6 @@ class Submission:
         self.team.dirty_lands.add(self.puzzle.land.shortname)
         self.team.cached_mapdata.pop(self.puzzle.land, None)
         self.team.compute_puzzle_beam(now)
-
-    self.team.invalidate(self.puzzle)
 
   def json_dict(self):
     if self.state == self.RESET:
@@ -1287,17 +1291,19 @@ class Team(login.LoginUser):
     if not sub: return None
     print(f"sub is {sub}")
 
-    if result == "complete":
-      sub.state = result
-    elif result == "no_answer":
+    if result == "no_answer":
       sub.state = "no answer"
       sub.extra_response = ("We did not reach you when we called.  Please check your "
                             "team contact number on the Guest Services page and submit again.")
-    else:
+    elif result == "wrong_number":
       sub.state = "wrong number"
       sub.extra_response = ("We did not reach you when we called.  Please check your "
                             "team contact number on the Guest Services page and submit again.")
-    sub.color = Submission.COLOR[sub.state]
+    elif sub.answer in sub.puzzle.answers:
+      sub.state = Submission.CORRECT
+      sub.check_answer_correct(now)
+    else:
+      sub.state = "complete"
 
   def get_puzzle_state(self, puzzle):
     if isinstance(puzzle, str):

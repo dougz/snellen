@@ -312,6 +312,8 @@ class A2020_TaskQueue {
         if (!sort) sort = "age";
         this.change_sort(sort, null);
 
+        this.concierge_re = new RegExp("^t-[a-z0-9_]+-concierge-callback");
+
         this.comparators = {}
         this.comparators["age"] = function(a, b) { return a.when - b.when; }
         this.comparators["team"] = function(a, b) {
@@ -423,7 +425,8 @@ class A2020_TaskQueue {
             }
 
             var done_el = null;
-            if (msg.key.charAt(0) == "t") {
+            console.log(msg.key);
+            if (msg.key.charAt(0) == "t" && msg.key.search(this.concierge_re) < 0) {
                 if (msg.done_pending) {
                     done_el = goog.dom.createDom("BUTTON", "inlineminiaction", "Undo done ");
                     var counter = goog.dom.createDom("SPAN", "counter");

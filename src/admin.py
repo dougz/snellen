@@ -675,7 +675,7 @@ class ConciergeHandler(util.AdminHandler):
     if not team: return self.not_found()
 
     print(f"team is {team}")
-    if result not in ("no_answer", "wrong_number", "complete"):
+    if result not in ("no_answer", "wrong_number", "complete", "correct"):
       return self.not_found()
 
     print(f"result is {result}")
