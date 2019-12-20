@@ -1362,6 +1362,15 @@ class H2020_GuestServices {
         }
 
         for (var i = 0; i < data.expire_time.length; ++i) {
+            if (i >= 6) {
+                var more = data.expire_time.length - 6;
+                if (more > 0) {
+                    var s = goog.dom.createDom("SPAN", null, "(plus " + more + " more\u2026)");
+                    fppasses.appendChild(s);
+                }
+                break;
+            }
+
             var s = goog.dom.createDom("SPAN", {className: "counter"});
             s.setAttribute("data-until", data.expire_time[i].toString());
             var d = goog.dom.createDom("DIV", "pennypass", s);

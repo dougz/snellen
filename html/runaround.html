@@ -40,439 +40,460 @@
   <h1 id="pagetitle">Heart of the Park</h1>
 
   <p class=flavor>You have entered a small underground chamber below
-  the center of the park. The room appears to be some sort of
-  entryway, but there is no other exit. At one end of the room, there
-  is writing on the wall. It reads:</p>
+    the center of the park. The room appears to be some sort of
+    entryway, but there is no other exit. At one end of the room, there
+    is writing on the wall. It reads:</p>
 
   <p>The park is dying. You must save it.</p>
 
   <p>The pennies you’ve generated are the first step. You’ll need them again, later.</p>
 
   <p>You’ve done a fantastic job exploring the park. You must now
-  <i>create emotional connections</i> to the park and each of its 10
-  lands. Visit them again and learn what is asked of you. Enter your
-  discoveries on this page for more information. When the time is
-  right, a different one of you will need to perform each task that
-  you discover.</p>
+    <i>create emotional connections</i> to the park and each of its 10
+    lands. Visit them again and learn what is asked of you. Enter your
+    discoveries on this page for more information. When the time is
+    right, a different one of you will need to perform each task that
+    you discover.</p>
 
   <p>Now go forth with the spirit of wonder in your hearts.</p>
 
   <dl id="index">
-  {% for s in segments %}
-  <dt class="segmenttitle"><a class="{{s.land.symbol.lower()}}" href="#{{s.land.symbol.lower()}}">{{s.title}}</a>
-    <span class=segmentcomplete id="segment_{{s.shortname}}">
-      {% if s.answer in ps.answers_found %} &mdash; {{s.display_answer}}{% end %}
-    </span>
-  </dt>
-  <dd id="instructions_{{s.shortname}}">
-    {% if s.answer in ps.answers_found %}{% raw s.instructions %}{% else %}&nbsp;{% end %}</dd>
-  {% end %}
+    {% for s in segments %}
+    <dt class="segmenttitle"><a class="{{s.land.symbol.lower()}}" href="#{{s.land.symbol.lower()}}">{{s.title}}</a>
+      <span class=segmentcomplete id="segment_{{s.shortname}}">
+        {% if s.answer in ps.answers_found %} &mdash; {{s.display_answer}}{% end %}
+      </span>
+    </dt>
+    <dd id="instructions_{{s.shortname}}">
+      {% if s.answer in ps.answers_found %}{% raw s.instructions %}{% else %}&nbsp;{% end %}</dd>
+    {% end %}
   </dl>
 
-  <a name="gc">
   <hr class="b">
-  <h3 class="gc">The Grand Castle</h3>
 
-  <div id="gc">
+  <div class=segment>
+    <a name="gc">
+      <h3 class="gc">The Grand Castle</h3>
 
-  <p><span class="kq">KING: </span>Welcome to our runaround!</p>
-  <p><span class="kq">QUEEN: </span>Oh, so you’re going to start?</p>
-  <p><span class="kq">KING: </span>Well, I thought we agreed that I would...</p>
-  <p><span class="kq">QUEEN: </span>We can’t agree on anything!</p>
-  <p><span class="kq">KING: </span>I’m sorry you think that, but it’s time to start the runaround.</p>
+      <div id="gc">
 
-  <br>
+        <p><span class="kq">KING: </span>Welcome to our runaround!</p>
+        <p><span class="kq">QUEEN: </span>Oh, so you’re going to start?</p>
+        <p><span class="kq">KING: </span>Well, I thought we agreed that I would...</p>
+        <p><span class="kq">QUEEN: </span>We can’t agree on anything!</p>
+        <p><span class="kq">KING: </span>I’m sorry you think that, but it’s time to start the runaround.</p>
 
-  <p><span class="kq">KING: </span>My good royal subjects!  Head to the grand castle so you can follow us around and adore us in awe.</p>
-  <p><span class="kq">QUEEN: </span>You should provide more explicit directions on where they should go.</p>
-  <p><span class="kq">KING: </span>And you should lobby for a 7th husband!</p>
-  <p><span class="kq">QUEEN: </span>Okay, good people. Now that you have found us, look above on the inspirational engraved message and take a word meaning “progress.”  It’s an eleven letter word, and take the 7th letter.</p>
-  <p><span class="kq">KING: </span>That word? No, no, they need THIS eleven letter word meaning “progress.”  The alphabetically earlier one. Take the last letter.</p>
-  <p><span class="kq">QUEEN: </span>Ugh… we can’t even agree on a simple runaround?!?</p>
+        <br>
 
-  <br>
+        <p><span class="kq">KING: </span>My good royal subjects!  Head to the grand castle so you can follow us around and adore us in awe.</p>
+        <p><span class="kq">QUEEN: </span>You should provide more explicit directions on where they should go.</p>
+        <p><span class="kq">KING: </span>And you should lobby for a 7th husband!</p>
+        <p><span class="kq">QUEEN: </span>Okay, good people. Now that you have found us, look above on the inspirational engraved message and take a word meaning “progress.”  It’s an eleven letter word, and take the 7th letter.</p>
+        <p><span class="kq">KING: </span>That word? No, no, they need THIS eleven letter word meaning “progress.”  The alphabetically earlier one. Take the last letter.</p>
+        <p><span class="kq">QUEEN: </span>Ugh… we can’t even agree on a simple runaround?!?</p>
 
-  <p><span class="kq">KING: </span>Okay, follow us through the double green doors to the stairs.</p>
-  <p><span class="kq">QUEEN: </span>But don’t go up the stairs just yet!</p>
-  <p><span class="kq">KING: </span>Did I say to go up the stairs?</p>
-  <p><span class="kq">QUEEN: </span>Did I say you could eat that entire pig before you passed out last night?</p>
-  <p><span class="kq">KING: </span>Whatever. Don’t go up the stairs, but look at the plaque near the artwork before you. Find something 8 letters long that could brighten things up.  Give me the 2nd letter.</p>
-  <p><span class="kq">QUEEN: </span>No, not that word, it’s eleven letters long and describes something that’s been brightened up. Give me the 8th letter.</p>
-  <p><span class="kq">KING: </span>Grr…</p>
+        <br>
 
-  <br>
+        <p><span class="kq">KING: </span>Okay, follow us through the double green doors to the stairs.</p>
+        <p><span class="kq">QUEEN: </span>But don’t go up the stairs just yet!</p>
+        <p><span class="kq">KING: </span>Did I say to go up the stairs?</p>
+        <p><span class="kq">QUEEN: </span>Did I say you could eat that entire pig before you passed out last night?</p>
+        <p><span class="kq">KING: </span>Whatever. Don’t go up the stairs, but look at the plaque near the artwork before you. Find something 8 letters long that could brighten things up.  Give me the 2nd letter.</p>
+        <p><span class="kq">QUEEN: </span>No, not that word, it’s eleven letters long and describes something that’s been brightened up. Give me the 8th letter.</p>
+        <p><span class="kq">KING: </span>Grr…</p>
 
-  <p><span class="kq">QUEEN: </span>Alrighty, my fair serfs. Follow us up the stairs two floors and out the door on the right.</p>
-  <p><span class="kq">KING: </span>From here you can admire the atrium of our beautiful castle.</p>
-  <p><span class="kq">QUEEN: </span>Behind you and to the right, leave the grand room behind you.</p>
-  <p><span class="kq">KING: </span>Just inside this hallway, opposite the red wall, is a grid of 20 rectangles.</p>
-  <p><span class="kq">QUEEN: </span>In the one marked 2002, take a twelve-letter word related to constructing buildings. Give me the seventh letter.</p>
-  <p><span class="kq">KING: </span>No, no!  It’s a six-letter word.  Please give me the fourth letter.</p>
+        <br>
 
-  <br>
+        <p><span class="kq">QUEEN: </span>Alrighty, my fair serfs. Follow us up the stairs two floors and out the door on the right.</p>
+        <p><span class="kq">KING: </span>From here you can admire the atrium of our beautiful castle.</p>
+        <p><span class="kq">QUEEN: </span>Behind you and to the right, leave the grand room behind you.</p>
+        <p><span class="kq">KING: </span>Just inside this hallway, opposite the red wall, is a grid of 20 rectangles.</p>
+        <p><span class="kq">QUEEN: </span>In the one marked 2002, take a twelve-letter word related to constructing buildings. Give me the seventh letter.</p>
+        <p><span class="kq">KING: </span>No, no!  It’s a six-letter word.  Please give me the fourth letter.</p>
 
-  <p><span class="kq">QUEEN: </span>Keep going down the hall and through the double doors. Take the stairs down one floor.</p>
-  <p><span class="kq">KING: </span>By the way, look at that magnificent city!  I should conquer that someday.</p>
-  <p><span class="kq">QUEEN: </span>It’s always conquering things with you isn’t it?</p>
-  <p><span class="kq">KING: </span>It’s what I do!  Anyway, head out of the stairs and turn right.</p>
-  <p><span class="kq">QUEEN: </span>Straight ahead on the right, are the names of many of our most beloved lords and ladies.</p>
-  <p><span class="kq">KING: </span>On the lowest glowing panel to the right of the bench, on the fourth row, you’ll see my longtime friend, who goes by Jimmy.  He was here in 1985, and I’d like the last letter of his first name.</p>
-  <p><span class="kq">QUEEN: </span>No, you imbecile!  He was here in 2008, and I’d like the fourth letter of his first name.</p>
-  <p><span class="kq">KING: </span>Aargh! Why do you always contradict everything I do?</p>
-  <p><span class="kq">QUEEN: </span>I don’t.</p>
-  <p><span class="kq">KING: </span>See!</p>
+        <br>
 
-  <br>
+        <p><span class="kq">QUEEN: </span>Keep going down the hall and through the double doors. Take the stairs down one floor.</p>
+        <p><span class="kq">KING: </span>By the way, look at that magnificent city!  I should conquer that someday.</p>
+        <p><span class="kq">QUEEN: </span>It’s always conquering things with you isn’t it?</p>
+        <p><span class="kq">KING: </span>It’s what I do!  Anyway, head out of the stairs and turn right.</p>
+        <p><span class="kq">QUEEN: </span>Straight ahead on the right, are the names of many of our most beloved lords and ladies.</p>
+        <p><span class="kq">KING: </span>On the lowest glowing panel to the right of the bench, on the fourth row, you’ll see my longtime friend, who goes by Jimmy.  He was here in 1985, and I’d like the last letter of his first name.</p>
+        <p><span class="kq">QUEEN: </span>No, you imbecile!  He was here in 2008, and I’d like the fourth letter of his first name.</p>
+        <p><span class="kq">KING: </span>Aargh! Why do you always contradict everything I do?</p>
+        <p><span class="kq">QUEEN: </span>I don’t.</p>
+        <p><span class="kq">KING: </span>See!</p>
 
-  <p><span class="kq">KING: </span>Okay, keep walking away from the atrium and through this building, heading up a small ramp.</p>
-  <p><span class="kq">QUEEN: </span>Follow us down one floor of stairs where you’ll notice a wonderful lady of the realm. She looks so powerful yet calm.</p>
-  <p><span class="kq">KING: </span>Find the topmost sentence on a blue background that contains a ten-letter form of transportation. Hand me the third letter.</p>
-  <p><span class="kq">QUEEN: </span>Horse pucky! It’s a seven-letter word, so give me the last letter!</p>
+        <br>
 
-  <br>
+        <p><span class="kq">KING: </span>Okay, keep walking away from the atrium and through this building, heading up a small ramp.</p>
+        <p><span class="kq">QUEEN: </span>Follow us down one floor of stairs where you’ll notice a wonderful lady of the realm. She looks so powerful yet calm.</p>
+        <p><span class="kq">KING: </span>Find the topmost sentence on a blue background that contains a ten-letter form of transportation. Hand me the third letter.</p>
+        <p><span class="kq">QUEEN: </span>Horse pucky! It’s a seven-letter word, so give me the last letter!</p>
 
-  <p><span class="kq">KING: </span>Exit the stairwell and right away you’ll see one of our most famous doctors.</p>
-  <p><span class="kq">QUEEN: </span>Please find a ten-letter word next to a slash that relates to finding your way around. I’d like the first letter, if you please.</p>
-  <p><span class="kq">KING: </span>Seriously?  Again?  Trust me when I tell you that it’s eight letters, and I need the fourth. Criminy, I wish we had less arguments.</p>
-  <p><span class="kq">QUEEN: </span>You mean FEWER arguments?</p>
+        <br>
 
-  <br>
+        <p><span class="kq">KING: </span>Exit the stairwell and right away you’ll see one of our most famous doctors.</p>
+        <p><span class="kq">QUEEN: </span>Please find a ten-letter word next to a slash that relates to finding your way around. I’d like the first letter, if you please.</p>
+        <p><span class="kq">KING: </span>Seriously?  Again?  Trust me when I tell you that it’s eight letters, and I need the fourth. Criminy, I wish we had less arguments.</p>
+        <p><span class="kq">QUEEN: </span>You mean FEWER arguments?</p>
 
-  <p><span class="kq">KING: </span>I swear to all that is righteous!  Okay, just around the corner to the right, you’ll see a series of photos with dates.</p>
-  <p><span class="kq">QUEEN: </span>Find the one in which a person is right side up, like me, and the other always seems to be doing the contrary..</p>
-  <p><span class="kq">KING: </span>I need a seven letter word meaning “a coming together.” Hand over the third letter, promptly, if you will.</p>
-  <p><span class="kq">QUEEN: </span>No, it’s ten letters and I’d like the second letter.</p>
-  <p><span class="kq">KING: </span>Planning a secret one, eh?</p>
-  <p><span class="kq">QUEEN: </span>The nerve!</p>
+        <br>
 
-  <br>
+        <p><span class="kq">KING: </span>I swear to all that is righteous!  Okay, just around the corner to the right, you’ll see a series of photos with dates.</p>
+        <p><span class="kq">QUEEN: </span>Find the one in which a person is right side up, like me, and the other always seems to be doing the contrary..</p>
+        <p><span class="kq">KING: </span>I need a seven letter word meaning “a coming together.” Hand over the third letter, promptly, if you will.</p>
+        <p><span class="kq">QUEEN: </span>No, it’s ten letters and I’d like the second letter.</p>
+        <p><span class="kq">KING: </span>Planning a secret one, eh?</p>
+        <p><span class="kq">QUEEN: </span>The nerve!</p>
 
-  <p><span class="kq">KING: </span>Okay, one more stop.</p>
-  <p><span class="kq">QUEEN: </span>Walk through the double doors, down the ramp and though this building, taking the stairwell down one floor. How bout that city?  Want to conquer that, too?</p>
-  <p><span class="kq">KING: </span>Too crowded!  Okay, head right when you exit the windowed door. You’ll see an area enclosed with glass.  Just to the left of it is a black plaque.  Locate the eleven-letter word meaning tutoring and pluck out the first letter, please.</p>
-  <p><span class="kq">QUEEN: </span>For one last time, it’s an eight-letter word and please grab the third letter.</p>
+        <br>
 
-  <br>
+        <p><span class="kq">KING: </span>Okay, one more stop.</p>
+        <p><span class="kq">QUEEN: </span>Walk through the double doors, down the ramp and though this building, taking the stairwell down one floor. How bout that city?  Want to conquer that, too?</p>
+        <p><span class="kq">KING: </span>Too crowded!  Okay, head right when you exit the windowed door. You’ll see an area enclosed with glass.  Just to the left of it is a black plaque.  Locate the eleven-letter word meaning tutoring and pluck out the first letter, please.</p>
+        <p><span class="kq">QUEEN: </span>For one last time, it’s an eight-letter word and please grab the third letter.</p>
 
-  <p><span class="kq">KING: </span>So...all of this arguing… I’m sorry.  I don’t mean it or anything.</p>
-  <p><span class="kq">QUEEN: </span>I know, is it really worth it?  I mean maybe we could find a middle ground.</p>
-  <p><span class="kq">KING: </span>That’s a great idea!  I’d be willing to meet you halfway!</p>
+        <br>
 
-  <hr class=s>
+        <p><span class="kq">KING: </span>So...all of this arguing… I’m sorry.  I don’t mean it or anything.</p>
+        <p><span class="kq">QUEEN: </span>I know, is it really worth it?  I mean maybe we could find a middle ground.</p>
+        <p><span class="kq">KING: </span>That’s a great idea!  I’d be willing to meet you halfway!</p>
 
-  <p><span class="kq">KING: </span>Now that the first part is out of the way, I still suspect you’re up to something.  Alright, loyal followers, walk toward the street and turn around and look at the red wall. See those four strange words stacked on each other?  That second one, that fits nicely in front of what we have so far.  Wait..really? Is that what’s on your mind?</p>
-  <p><span class="kq">QUEEN: </span>No!  Not at all!  In fact, during this whole runaround, I realized that we’ve sort of been agreeing all this time!</p>
-  <p><span class="kq">KING: </span>Oh my.  You’re right!  We were basically saying the same thing all along. I was so caught up in the details, too!</p>
-  <p><span class="kq">QUEEN: </span>I love you!</p>
-  <p><span class="kq">KING: </span>I adore you!</p>
-  <p><span class="kq">QUEEN: </span>I see what you did there.</p>
+        <hr class=s>
+
+        <p><span class="kq">KING: </span>Now that the first part is out of the way, I still suspect you’re up to something.  Alright, loyal followers, walk toward the street and turn around and look at the red wall. See those four strange words stacked on each other?  That second one, that fits nicely in front of what we have so far.  Wait..really? Is that what’s on your mind?</p>
+        <p><span class="kq">QUEEN: </span>No!  Not at all!  In fact, during this whole runaround, I realized that we’ve sort of been agreeing all this time!</p>
+        <p><span class="kq">KING: </span>Oh my.  You’re right!  We were basically saying the same thing all along. I was so caught up in the details, too!</p>
+        <p><span class="kq">QUEEN: </span>I love you!</p>
+        <p><span class="kq">KING: </span>I adore you!</p>
+        <p><span class="kq">QUEEN: </span>I see what you did there.</p>
+
+      </div>
+  </div>
+
+  <hr class="b">
+
+  <div class=segment>
+    <a name="sf">
+      <h3 class="sf">Storybook Forest</h3>
+
+      <p class=flavor>This stack of notecards was found inside the Kendall
+        Square Association tiny library at the SW corner of Main St. and
+        Ames.  (Note: there’s no need to look inside the actual
+        library.)</p>
+
+      <h4>Hansel’s Notes</h4>
+
+      <p>A witch is coming to eat us, so we’re hiding these here and running back home, following the breadcrumbs we dropped!  Thank goodness we planned ahead.</p>
+
+      <p><b>We’re dropping a breadcrumb!</b> We’re using the letter at the top of this tiny library and shifting it forward in the alphabet by the number of yellow-green boxes on the library.</p>
+
+      <p>We’re walking past the stone benches and turning to the left, arriving at a tiny library.</p>
+
+      <p>We’re heading out of the building and following the sidewalk to our left. As we’re passing the next building on our left, we’re noticing a bunch of colored circles, squiggles, helixes, and even a golden spiral (that’s ironically not gold!) on the walls inside the building.</p>
+
+      <p><b>We’re dropping a breadcrumb!</b> We’re using the last name of the donor of the metallic sculpture. The word below that donor is what we’re taking from the donor.</p>
+
+      <p>After the last green stripe, we’re turning left and heading 1 floor up.</p>
+
+      <p>We’re turning back and continuing down the hall, passing a bunch of red doors on our left.</p>
+
+      <p><b>We’re dropping a breadcrumb!</b>  We’re looking at the square gray panel and noticing what letter is positioned on top of itself.</p>
+
+      <p>We’re stopping on the first green stripe in the new hall and turning 135 degrees to the left.</p>
+
+      <p>We’re turning left out of the elevator and heading down the hall.</p>
+
+      <p>We’re backtracking slightly, entering the elevator, and heading down 3 floors.</p>
+
+      <p><b>We’re dropping a breadcrumb!</b>  We’re noting the word on the top of the poster (it’s followed by a roman numeral).  Interesting that you can switch the third letter to a different letter and then switch the middle two letters to make a new word... something that we hope neither of us becomes!  What is that new letter?</p>
+
+      <p>We’re looking at a tall reddish-orange poster.</p>
+
+      <p>We’re walking into the new building’s lobby, and heading past the elevators.</p>
+
+      <p><b>We’re dropping a breadcrumb!</b>  We’re seeing a tiny word that’s also sounds like an insect.  We’re noting the letter that’s closest to the yellow line.</p>
+
+      <p>Just before the floor changes, we’re turning around and looking up.</p>
+
+      <p>We’re following the direction of the coded path and we’re heading down the hall.</p>
+
+      <p><b>We’re dropping a breadcrumb!</b>  We’re following a coded path.  Two dashes, seven dots, and then what letter?</p>
+
+      <p>We’re heading up two flights.</p>
+
+      <p>When the hall widens, on the right we’re noticing a giant wooden arrow that’s pointing across to some stairs.</p>
+
+      <p>We’re continuing down the hall in the same direction.</p>
+
+      <p><b>We’re dropping a breadcrumb!</b>  Straight ahead, we’re looking at a sign commemorating a person who worked with food.  We’re noting one of the words has four occurrences of the same letter, which is what?</p>
+
+      <p>We’re continuing down the hall, turning left, back to the right and out of this building.</p>
+
+      <p><b>We’re dropping a breadcrumb!</b>  We’re looking for my favorite MIT alum, someone who shares my first name&mdash;in fact, it’s also his last name!  And if you look around, you’ll find something to make it easier. Once you’ve found him, just up and to the left of him, there’s a person with an eight-letter first name and an eight-letter last name.  What is his middle initial?</p>
+
+      <p>We’re turning right and following the hall to the left where we see an image of a familiar landmark.</p>
+
+      <p><b>We’re dropping a breadcrumb!</b>  We’re noticing several pairs of silver doors. On those doors, we’re noticing a series of four-digit numbers followed by a letter.  The letters are forming a sequence, but one is missing!  What is it?</p>
+
+      <p>We’re walking down one flight of stairs and looking through the amber windows.</p>
+
+      <p>We’re turning left away from the pictures and continuing down the hall, turning right, noticing some stairs to our left.</p>
+
+      <p><b>We’re dropping a breadcrumb!</b>  We’re looking at a set of three photos.  The bottom photo has three animals and a piece of equipment that is a homophone.  What does that equipment begin with?</p>
+
+      <p>Just in case we lose these cards and someone else finds them, we thought it’d be fun to hide a secret message.  Words 1 and 3 will be hidden along our path.  For word 2, take a look at the largest paragraph of text of the exhibit where we’re starting off (at the far left of the hallway). Take the fifth word of the second sentence. Drop the first letter and the last four. Then move the front of the remaining letters to the end.</p>
+
+      <p>We’re excited about our upcoming adventure.  Good thing we have all this bread!</p>
 
   </div>
 
-  <a name="sf">
   <hr class="b">
-  <h3 class="sf">Storybook Forest</h3>
 
-  <p class=flavor>This stack of notecards was found inside the Kendall
-  Square Association tiny library at the SW corner of Main St. and
-  Ames.  (Note: there’s no need to look inside the actual
-  library.)</p>
+  <div class=segment>
+    <a name="sp">
+      <h3 class="sp">Spaceopolis</h3>
 
-  <h4>Hansel’s Notes</h4>
+      <img class=r src="{{static['runaround/space.jpg']}}">
+      <p>Walk to this point in the space station.</p>
 
-  <p>A witch is coming to eat us, so we’re hiding these here and running back home, following the breadcrumbs we dropped!  Thank goodness we planned ahead.</p>
+      <p>You’re standing in the doorway as you hear a giant thump and explosion. The station’s artificial gravity drive is failing rapidly, and you feel the pressure on the soles of your feet diminish to nothing. At the last minute, you reach out and grab the red emergency jet pack (with black exhaust hose and yellow instruction panel) off the wall [don’t actually do this!].</p>
 
-  <p><b>We’re dropping a breadcrumb!</b> We’re using the letter at the top of this tiny library and shifting it forward in the alphabet by the number of yellow-green boxes on the library.</p>
+      <p>Directing the jet toward a large urn, now slowly drifting off the floor, you propel yourself backwards down the hall. As you are coasting backwards, a red exit sign passes above you – you have to slow down! Extending a toe, you manage to snag a black bracket, under a Control Sphere mounted on the wall. You decelerate, with your head extended down the corridor just in front of the Biosafety Level 1 Lab hatchway, and your stomach toward what used to be the ceiling. You twist your head 90° to your left (funny how different the world looks from this angle!), and you note the large blue symbol on a white wall.</p>
 
-  <p>We’re walking past the stone benches and turning to the left, arriving at a tiny library.</p>
+      <p>You realize that to bring the station back into control you have to press each of the eight red Emergency Reset Buttons under the Control Spheres on the wall, in the right order. You pull yourself up to your feet, hit the red button at hand, point your thruster away from the urn and propel yourself in the direction of where you started. After you pass the point where you picked up your jet pack, coast to the third Control Sphere and bring yourself to a stop. You press the red button, and the gravity drive comes back to life, but with the wrong vector!  You hear a loud crash as the urn slams into what is now the floor, and breaks on an alarm panel. You grab onto the bracket below the Control Sphere, but your grip fails, and you’re falling rapidly toward a void. Thinking quickly, you direct the jet pack just enough to stop you from falling into the void. Instead, you land hard on the green railing. Standing up, and leaning back on a cool surface, you take a deep breath, look ahead, and note the object that is now right in front of you.</p>
 
-  <p>We’re heading out of the building and following the sidewalk to our left. As we’re passing the next building on our left, we’re noticing a bunch of colored circles, squiggles, helixes, and even a golden spiral (that’s ironically not gold!) on the walls inside the building.</p>
+      <p>OK, you know what you gotta do now, get back to the Control Spheres which only start 15 meters straight up the shaft above you. You point your jet pack down and give it all she’s got. You lift off and start accelerating up the shaft. The jet pack starts to stutter - it’s running out of fuel! With a last impulse of acceleration, you reach out and just manage to slap the red button under the second Control Sphere. Gravity snaps off. Now floating in front of the Control Sphere, you grab onto the bracket under it, and reorient yourself so your feet are pointed away from the void and the slowly expanding cloud of urn shards. In this position, you note the second symbol of this Control Sphere’s primary label.</p>
 
-  <p><b>We’re dropping a breadcrumb!</b> We’re using the last name of the donor of the metallic sculpture. The word below that donor is what we’re taking from the donor.</p>
+      <p>With a big push you launch yourself down the corridor, feet first. You catch the lucite hemidisk attached to a Control Sphere. Grabbing the bracket, you put your feet back on the erstwhile ground, because this is getting really disorienting. You hit the ERB. You note the second symbol of this Control Sphere’s primary label.</p>
 
-  <p>After the last green stripe, we’re turning left and heading 1 floor up.</p>
+      <p>You rotate along your long axis, so that you are facing away from the urn shard cloud and void. Maintaining this orientation, you push off the bracket and begin to float backwards down the corridor. After an uneventful float, you bring yourself to a stop (while maintaining your orientation) at the control sphere immediately past a cluster of three alarm units, all flashing. Looking back a ways toward where you came from, you note a purple arch.</p>
 
-  <p>We’re turning back and continuing down the hall, passing a bunch of red doors on our left.</p>
+      <p>The next Control Sphere is far, so you give yourself a big push. It wasn’t the most precise. You fly down the corridor, glancing off walls, doorways and a hydration station. Eventually you grab onto a dark door handle almost across from the first blue Control Sphere going this direction. The lights are below you and your back is to the Control Sphere. A gentle push and you drift across the corridor to the Control Sphere, maintaining your orientation. This sphere is missing its Emergency Reset Button (it must have broken off during the gravitational havok), but you are able to activate its Emergency Reset function using your suits RFID transponder function. With your upper back directly against the Control Sphere, you see a square duct that extends across the corridor below you. There are two white cones connected by a conduit on the duct. Beneath a red oval light, you see two segments of a smaller, square-cross-section duct just beyond the corridor-spanning duct. You note its mirror image.</p>
 
-  <p><b>We’re dropping a breadcrumb!</b>  We’re looking at the square gray panel and noticing what letter is positioned on top of itself.</p>
+      <p>Pushing off, you drift across the corridor, and grabbing a succession of handles and door frames, you’re able to accelerate yourself back down the corridor, back toward the one remaining Control Sphere with an Emergency Reset Button in the cluster of Spheres closer to the void. As you drift down the corridor, you think to yourself that this is an impractical emergency protocol for resetting the gravity drives. You drag yourself to a stop at the last Control Sphere, and gaze at it longingly. You note its luminous blue geometry.</p>
 
-  <p>We’re stopping on the first green stripe in the new hall and turning 135 degrees to the left.</p>
+      <p>You’re running out of steam, but just one more button to go. You negotiate your way back down the corridor, bouncing from one point of contact to the next. You float all the way to the last control sphere (technically last, since they decreed that the even further sphere isn’t an official “Control Sphere”), grabbing its bracket to stabilize yourself. You slap the Emergency Reset Button, and with a whirr and hum, gravity reasserts itself, as you guide your feet back to the ground and return your weight to them. You note the first letter of the first court on the Evacuation Plan next to the control sphere.</p>
 
-  <p>We’re turning left out of the elevator and heading down the hall.</p>
+      <p>You’re famished from the exertion--time for a snack! You walk down the stairs two floors to the Commissary. While chowing down on some freeze-dried ice cream, you find yourself leaning against a glass wall, reading the plaque in the lab across from Commissary (whose contents are a tumultuous mess). You note the second and third words of the last line (not sentence!) of the third paragraph. How to rearrange this mess should be obvious.</p>
 
-  <p>We’re backtracking slightly, entering the elevator, and heading down 3 floors.</p>
+      <p><b>[6 3 8]</b></p>
 
-  <p><b>We’re dropping a breadcrumb!</b>  We’re noting the word on the top of the poster (it’s followed by a roman numeral).  Interesting that you can switch the third letter to a different letter and then switch the middle two letters to make a new word... something that we hope neither of us becomes!  What is that new letter?</p>
+  </div>
 
-  <p>We’re looking at a tall reddish-orange poster.</p>
-
-  <p>We’re walking into the new building’s lobby, and heading past the elevators.</p>
-
-  <p><b>We’re dropping a breadcrumb!</b>  We’re seeing a tiny word that’s also sounds like an insect.  We’re noting the letter that’s closest to the yellow line.</p>
-
-  <p>Just before the floor changes, we’re turning around and looking up.</p>
-
-  <p>We’re following the direction of the coded path and we’re heading down the hall.</p>
-
-  <p><b>We’re dropping a breadcrumb!</b>  We’re following a coded path.  Two dashes, seven dots, and then what letter?</p>
-
-  <p>We’re heading up two flights.</p>
-
-  <p>When the hall widens, on the right we’re noticing a giant wooden arrow that’s pointing across to some stairs.</p>
-
-  <p>We’re continuing down the hall in the same direction.</p>
-
-  <p><b>We’re dropping a breadcrumb!</b>  Straight ahead, we’re looking at a sign commemorating a person who worked with food.  We’re noting one of the words has four occurrences of the same letter, which is what?</p>
-
-  <p>We’re continuing down the hall, turning left, back to the right and out of this building.</p>
-
-  <p><b>We’re dropping a breadcrumb!</b>  We’re looking for my favorite MIT alum, someone who shares my first name&mdash;in fact, it’s also his last name!  And if you look around, you’ll find something to make it easier. Once you’ve found him, just up and to the left of him, there’s a person with an eight-letter first name and an eight-letter last name.  What is his middle initial?</p>
-
-  <p>We’re turning right and following the hall to the left where we see an image of a familiar landmark.</p>
-
-  <p><b>We’re dropping a breadcrumb!</b>  We’re noticing several pairs of silver doors. On those doors, we’re noticing a series of four-digit numbers followed by a letter.  The letters are forming a sequence, but one is missing!  What is it?</p>
-
-  <p>We’re walking down one flight of stairs and looking through the amber windows.</p>
-
-  <p>We’re turning left away from the pictures and continuing down the hall, turning right, noticing some stairs to our left.</p>
-
-  <p><b>We’re dropping a breadcrumb!</b>  We’re looking at a set of three photos.  The bottom photo has three animals and a piece of equipment that is a homophone.  What does that equipment begin with?</p>
-
-  <p>Just in case we lose these cards and someone else finds them, we thought it’d be fun to hide a secret message.  Words 1 and 3 will be hidden along our path.  For word 2, take a look at the largest paragraph of text of the exhibit where we’re starting off (at the far left of the hallway). Take the fifth word of the second sentence. Drop the first letter and the last four. Then move the front of the remaining letters to the end.</p>
-
-  <p>We’re excited about our upcoming adventure.  Good thing we have all this bread!</p>
-
-  <a name="sp">
   <hr class="b">
-  <h3 class="sp">Spaceopolis</h3>
 
-  <img class=r src="{{static['runaround/space.jpg']}}">
-  <p>Walk to this point in the space station.</p>
+  <div class=segment>
+    <a name="wh">
+      <h3 class="wh">Wizard's Hollow</h3>
 
-  <p>You’re standing in the doorway as you hear a giant thump and explosion. The station’s artificial gravity drive is failing rapidly, and you feel the pressure on the soles of your feet diminish to nothing. At the last minute, you reach out and grab the red emergency jet pack (with black exhaust hose and yellow instruction panel) off the wall [don’t actually do this!].</p>
+      <p class="flavor">One of my co-workers (who has been known to dabble in alchemy) will direct you on this runaround.</p>
 
-  <p>Directing the jet toward a large urn, now slowly drifting off the floor, you propel yourself backwards down the hall. As you are coasting backwards, a red exit sign passes above you – you have to slow down! Extending a toe, you manage to snag a black bracket, under a Control Sphere mounted on the wall. You decelerate, with your head extended down the corridor just in front of the Biosafety Level 1 Lab hatchway, and your stomach toward what used to be the ceiling. You twist your head 90° to your left (funny how different the world looks from this angle!), and you note the large blue symbol on a white wall.</p>
+      <p>Start on my left shoulder blade at the symbol for a major airline.</p>
+      <p>Travel east to something that’s red or dead. This is your 5th.</p>
+      <p>Travel southeast to someone from The Matrix.</p>
+      <p>Travel east and immediately remove the circle. This is your 4th.</p>
+      <p>Travel northeast. You’re no longer hungry!</p>
+      <p>Travel once to a tax group!</p>
+      <p>Travel east. This is your 1st.</p>
+      <p>Travel one space. Use your god-like power to control the seas.</p>
+      <p>Travel east. Thanks for testing this early!</p>
+      <p>Travel one space. Almost everyone is better than you but some are the same.</p>
+      <p>Travel south. This is your 2nd.</p>
+      <p>Travel east. It’s integral.</p>
+      <p>Travel southwest and stop to use the bathroom. This stinks!</p>
+      <p>Travel one space. Take a quick nap.</p>
+      <p>Travel south. This is your 6th.</p>
+      <p>Go back to the bathroom again. Are you feeling okay?</p>
+      <p>Travel east.</p>
+      <p>Travel one space. Remember to tag and share!</p>
+      <p>Go northeast. Is it time for March Madness yet?</p>
+      <p>Travel one space. You are 007’s superior.</p>
+      <p>Travel southeast. You’re a block, periodically.</p>
+      <p>Travel one space. Stay still the way a tree does.</p>
+      <p>Travel north from the middle of my top. This is your 9th.</p>
+      <p>Travel one space. Time for dessert!</p>
+      <p>Travel northeast to a long straight thing.</p>
+      <p>Travel southeast and immediately remove the center line. This is your 7th.</p>
+      <p>Travel one space. It’s a Deep Space.</p>
+      <p>Travel northeast. This is your 8th.</p>
+      <p>Travel north. This is your 3rd.</p>
 
-  <p>You realize that to bring the station back into control you have to press each of the eight red Emergency Reset Buttons under the Control Spheres on the wall, in the right order. You pull yourself up to your feet, hit the red button at hand, point your thruster away from the urn and propel yourself in the direction of where you started. After you pass the point where you picked up your jet pack, coast to the third Control Sphere and bring yourself to a stop. You press the red button, and the gravity drive comes back to life, but with the wrong vector!  You hear a loud crash as the urn slams into what is now the floor, and breaks on an alarm panel. You grab onto the bracket below the Control Sphere, but your grip fails, and you’re falling rapidly toward a void. Thinking quickly, you direct the jet pack just enough to stop you from falling into the void. Instead, you land hard on the green railing. Standing up, and leaning back on a cool surface, you take a deep breath, look ahead, and note the object that is now right in front of you.</p>
+  </div>
 
-  <p>OK, you know what you gotta do now, get back to the Control Spheres which only start 15 meters straight up the shaft above you. You point your jet pack down and give it all she’s got. You lift off and start accelerating up the shaft. The jet pack starts to stutter - it’s running out of fuel! With a last impulse of acceleration, you reach out and just manage to slap the red button under the second Control Sphere. Gravity snaps off. Now floating in front of the Control Sphere, you grab onto the bracket under it, and reorient yourself so your feet are pointed away from the void and the slowly expanding cloud of urn shards. In this position, you note the second symbol of this Control Sphere’s primary label.</p>
-
-  <p>With a big push you launch yourself down the corridor, feet first. You catch the lucite hemidisk attached to a Control Sphere. Grabbing the bracket, you put your feet back on the erstwhile ground, because this is getting really disorienting. You hit the ERB. You note the second symbol of this Control Sphere’s primary label.</p>
-
-  <p>You rotate along your long axis, so that you are facing away from the urn shard cloud and void. Maintaining this orientation, you push off the bracket and begin to float backwards down the corridor. After an uneventful float, you bring yourself to a stop (while maintaining your orientation) at the control sphere immediately past a cluster of three alarm units, all flashing. Looking back a ways toward where you came from, you note a purple arch.</p>
-
-  <p>The next Control Sphere is far, so you give yourself a big push. It wasn’t the most precise. You fly down the corridor, glancing off walls, doorways and a hydration station. Eventually you grab onto a dark door handle almost across from the first blue Control Sphere going this direction. The lights are below you and your back is to the Control Sphere. A gentle push and you drift across the corridor to the Control Sphere, maintaining your orientation. This sphere is missing its Emergency Reset Button (it must have broken off during the gravitational havok), but you are able to activate its Emergency Reset function using your suits RFID transponder function. With your upper back directly against the Control Sphere, you see a square duct that extends across the corridor below you. There are two white cones connected by a conduit on the duct. Beneath a red oval light, you see two segments of a smaller, square-cross-section duct just beyond the corridor-spanning duct. You note its mirror image.</p>
-
-  <p>Pushing off, you drift across the corridor, and grabbing a succession of handles and door frames, you’re able to accelerate yourself back down the corridor, back toward the one remaining Control Sphere with an Emergency Reset Button in the cluster of Spheres closer to the void. As you drift down the corridor, you think to yourself that this is an impractical emergency protocol for resetting the gravity drives. You drag yourself to a stop at the last Control Sphere, and gaze at it longingly. You note its luminous blue geometry.</p>
-
-  <p>You’re running out of steam, but just one more button to go. You negotiate your way back down the corridor, bouncing from one point of contact to the next. You float all the way to the last control sphere (technically last, since they decreed that the even further sphere isn’t an official “Control Sphere”), grabbing its bracket to stabilize yourself. You slap the Emergency Reset Button, and with a whirr and hum, gravity reasserts itself, as you guide your feet back to the ground and return your weight to them. You note the first letter of the first court on the Evacuation Plan next to the control sphere.</p>
-
-  <p>You’re famished from the exertion--time for a snack! You walk down the stairs two floors to the Commissary. While chowing down on some freeze-dried ice cream, you find yourself leaning against a glass wall, reading the plaque in the lab across from Commissary (whose contents are a tumultuous mess). You note the second and third words of the last line (not sentence!) of the third paragraph. How to rearrange this mess should be obvious.</p>
-
-  <p><b>[6 3 8]</b></p>
-
-  <a name="wh">
   <hr class="b">
-  <h3 class="wh">Wizard's Hollow</h3>
 
-  <p class="flavor">One of my co-workers (who has been known to dabble in alchemy) will direct you on this runaround.</p>
+  <div class=segment>
+    <a name="bt">
+      <h3 class="bt">Big Top Carnival</h3>
 
-  <p>Start on my left shoulder blade at the symbol for a major airline.</p>
-  <p>Travel east to something that’s red or dead. This is your 5th.</p>
-  <p>Travel southeast to someone from The Matrix.</p>
-  <p>Travel east and immediately remove the circle. This is your 4th.</p>
-  <p>Travel northeast. You’re no longer hungry!</p>
-  <p>Travel once to a tax group!</p>
-  <p>Travel east. This is your 1st.</p>
-  <p>Travel one space. Use your god-like power to control the seas.</p>
-  <p>Travel east. Thanks for testing this early!</p>
-  <p>Travel one space. Almost everyone is better than you but some are the same.</p>
-  <p>Travel south. This is your 2nd.</p>
-  <p>Travel east. It’s integral.</p>
-  <p>Travel southwest and stop to use the bathroom. This stinks!</p>
-  <p>Travel one space. Take a quick nap.</p>
-  <p>Travel south. This is your 6th.</p>
-  <p>Go back to the bathroom again. Are you feeling okay?</p>
-  <p>Travel east.</p>
-  <p>Travel one space. Remember to tag and share!</p>
-  <p>Go northeast. Is it time for March Madness yet?</p>
-  <p>Travel one space. You are 007’s superior.</p>
-  <p>Travel southeast. You’re a block, periodically.</p>
-  <p>Travel one space. Stay still the way a tree does.</p>
-  <p>Travel north from the middle of my top. This is your 9th.</p>
-  <p>Travel one space. Time for dessert!</p>
-  <p>Travel northeast to a long straight thing.</p>
-  <p>Travel southeast and immediately remove the center line. This is your 7th.</p>
-  <p>Travel one space. It’s a Deep Space.</p>
-  <p>Travel northeast. This is your 8th.</p>
-  <p>Travel north. This is your 3rd.</p>
+      <p>Hey, Big Top fans, this is Luma the Clown!</p>
 
-  <a name="bt">
+      <p>Honk!  Honk!  I have a big favor to ask of you. I usually carpool to the carnival with 10 of my best friends crammed into our tiny clown car.  And today’s my turn to drive everyone home!  Problem is, I’m defending my dissertation “Thermodynamic Transfers During Knock Knock Jokes,” so I can’t do the job!  Can you help me?</p>
+
+      <p>Our clown car is parked at the underground Stata Center parking lot garage, floor P1, section A. Get in your tiny car (it’s so tiny, it’s like it’s not actually there!), and have the 10 clowns listed below pile into the backseat.</p>
+
+      <p>The Clowns:
+        <ul>
+          <li>CHIPSY</li>
+          <li>COILY</li>
+          <li>GASSIE</li>
+          <li>MESSYFACE</li>
+          <li>MISS EGG</li>
+          <li>MR. OTIS</li>
+          <li>MRS. DOUSEFIRE</li>
+          <li>PHILAMENTA</li>
+          <li>SKETCHER</li>
+          <li>SPEEDY</li>
+        </ul>
+      </p>
+
+      <p>After each set of instructions, you’ll need to drop off one of my friends, who incidentally all are named after where they live&mdash;makes it easy to remember!</p>
+
+      <p>Well, whoop-dee-dee!  The first stop is located right here in P1, at the edge of section A. This clown lives in a small room marked with red and blue signs. Come to think of it, why did he even get in the car?<br>32-xxXx</p>
+
+      <p>Next drive your tiny clown car up stairway 6 to the street level. K-thonk, k-thonk, k-thonk!  As soon as you crash through the stairway door, drop off the next clown at the display on your immediate left.
+        <br>(xxxX-xxxx)
+      </p>
+
+      <p>Things are looking up! Follow the street past 4 red music notes. Whee! Then look for a flock of birds on the left.  Pretty nifty, huh?  Slam on the brakes real hard, so the next clown flies out the window and into their home on top of the wall (by the way, if that’s where they live, why aren’t they driving?).
+        <br>xxx-xxxX
+      </p>
+
+      <p>Hit the gas and continue forward, then turn left to drop off the next clown at the zany steps of their house on a yellow wall. Who designed that thing? It’s almost as crazy as my car!  And it looks like it’s about be trashed!
+        <br>xxXx
+      </p>
+
+      <p>Turn left to continue going down the main thoroughfare. Above and to the left, eventually you'll drive past a replica of a more environmentally friendly clown vehicle. Then knock down the door and drive across the road between two buildings, turning right to enter the building with 5 yellow steps. Tell the next clown to jump out just inside the hallway.
+        <br>xxxX
+      </p>
+
+      <p>Screech left and drive down the hall, eventually reaching a powerful contraption that provides energy for all our shows. Just past that, it’s time for the next clown to enter their home.  And what a strange looking home it is!  Am I coming or going? Wacky, wacky, wacky!
+        <br>xxxX
+      </p>
+
+      <p>Go through the next building, past the shiny scaffolding where the acrobats practice, and into the next building. Then tell the next clown to jump out on the right.
+        <br>x.xXum
+      </p>
+
+      <p>Buckle up tight again, because you’ll need to drive up one floor of stairs on your left. Turn right and drive back past the acrobat scaffolding. Drop off a clown after passing 3 pictures in the hallway that overlook the scaffolding.
+        <br>xx-Xxx-A
+      </p>
+
+      <p>Continue driving past the set of human dumbwaiters through a Really Large Entrance (for a tiny car!) made of double doors.  Bounce back and forth off the walls as you drive down the hall and turn right.  On your right, through the window, you'll see a storage rack of colorful tightropes for our flea circus!  Here's where you drop off a clown!
+        <br>xx-Xxx
+      </p>
+
+      <p>Wowzie, we’re almost done! Keep driving down the ramp and into the next building, down the long brightly colored hall. So many colors, doesn’t it feel like a circus? Drive across a walkway and into the next building where you'll see two display cases, the first of which is home to the final clown.
+        <br>3DP Photonic Crystal Models (xxxX)
+      </p>
+
+      <p>Oh, and one more thing. If you dropped off everyone correctly and were paying attention, you have your second word, but you need the first word, too!  It's the type of cross-sectioned skull that you can find on the top shelf in the first window.</p>
+
+      <p>Honk!  Honk!  Good luck getting everyone home!</p>
+
+  </div>
+
   <hr class="b">
-  <h3 class="bt">Big Top Carnival</h3>
 
-  <p>Hey, Big Top fans, this is Luma the Clown!</p>
+  <div class=segment>
+    <a name="cp">
+      <h3 class="cp">Creative Pictures Studios</h3>
 
-  <p>Honk!  Honk!  I have a big favor to ask of you. I usually carpool to the carnival with 10 of my best friends crammed into our tiny clown car.  And today’s my turn to drive everyone home!  Problem is, I’m defending my dissertation “Thermodynamic Transfers During Knock Knock Jokes,” so I can’t do the job!  Can you help me?</p>
+      <div class=emoji>
+        <p>
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f463.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f463.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f463.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f463.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f3db.png">
+          SSSSSSSSSSSSSS
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f4af.png">
 
-  <p>Our clown car is parked at the underground Stata Center parking lot garage, floor P1, section A. Get in your tiny car (it’s so tiny, it’s like it’s not actually there!), and have the 10 clowns listed below pile into the backseat.</p>
+          <br>
 
-  <p>The Clowns:
-    <ul>
-      <li>CHIPSY</li>
-      <li>COILY</li>
-      <li>GASSIE</li>
-      <li>MESSYFACE</li>
-      <li>MISS EGG</li>
-      <li>MR. OTIS</li>
-      <li>MRS. DOUSEFIRE</li>
-      <li>PHILAMENTA</li>
-      <li>SKETCHER</li>
-      <li>SPEEDY</li>
-    </ul>
-  </p>
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f440.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/2b06.png">
+          &nbsp;
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f46b.png">
+          <span class=s></span>
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/2795.png">
+          <span class=s></span>
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f52c.png">
+          <span class=s></span>
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f4da.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f3db.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f3db.png">
 
-  <p>After each set of instructions, you’ll need to drop off one of my friends, who incidentally all are named after where they live&mdash;makes it easy to remember!</p>
+          <br>
 
-  <p>Well, whoop-dee-dee!  The first stop is located right here in P1, at the edge of section A. This clown lives in a small room marked with red and blue signs. Come to think of it, why did he even get in the car?<br>32-xxXx</p>
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/270f.png">
+          <span class=s></span>
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f52c.png">
+          (2)
+        </p>
 
-  <p>Next drive your tiny clown car up stairway 6 to the street level. K-thonk, k-thonk, k-thonk!  As soon as you crash through the stairway door, drop off the next clown at the display on your immediate left.
-    <br>(xxxX-xxxx)
-  </p>
+        <p>
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/21aa.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f463.png">
 
-  <p>Things are looking up! Follow the street past 4 red music notes. Whee! Then look for a flock of birds on the left.  Pretty nifty, huh?  Slam on the brakes real hard, so the next clown flies out the window and into their home on top of the wall (by the way, if that’s where they live, why aren’t they driving?).
-    <br>xxx-xxxX
-  </p>
+          <br>
 
-  <p>Hit the gas and continue forward, then turn left to drop off the next clown at the zany steps of their house on a yellow wall. Who designed that thing? It’s almost as crazy as my car!  And it looks like it’s about be trashed!
-    <br>xxXx
-  </p>
-
-  <p>Turn left to continue going down the main thoroughfare. Above and to the left, eventually you'll drive past a replica of a more environmentally friendly clown vehicle. Then knock down the door and drive across the road between two buildings, turning right to enter the building with 5 yellow steps. Tell the next clown to jump out just inside the hallway.
-    <br>xxxX
-  </p>
-
-  <p>Screech left and drive down the hall, eventually reaching a powerful contraption that provides energy for all our shows. Just past that, it’s time for the next clown to enter their home.  And what a strange looking home it is!  Am I coming or going? Wacky, wacky, wacky!
-    <br>xxxX
-  </p>
-
-  <p>Go through the next building, past the shiny scaffolding where the acrobats practice, and into the next building. Then tell the next clown to jump out on the right.
-    <br>x.xXum
-  </p>
-
-  <p>Buckle up tight again, because you’ll need to drive up one floor of stairs on your left. Turn right and drive back past the acrobat scaffolding. Drop off a clown after passing 3 pictures in the hallway that overlook the scaffolding.
-    <br>xx-Xxx-A
-  </p>
-
-  <p>Continue driving past the set of human dumbwaiters through a Really Large Entrance (for a tiny car!) made of double doors.  Bounce back and forth off the walls as you drive down the hall and turn right.  On your right, through the window, you'll see a storage rack of colorful tightropes for our flea circus!  Here's where you drop off a clown!
-    <br>xx-Xxx
-  </p>
-
-  <p>Wowzie, we’re almost done! Keep driving down the ramp and into the next building, down the long brightly colored hall. So many colors, doesn’t it feel like a circus? Drive across a walkway and into the next building where you'll see two display cases, the first of which is home to the final clown.
-    <br>3DP Photonic Crystal Models (xxxX)
-  </p>
-
-  <p>Oh, and one more thing. If you dropped off everyone correctly and were paying attention, you have your second word, but you need the first word, too!  It's the type of cross-sectioned skull that you can find on the top shelf in the first window.</p>
-
-  <p>Honk!  Honk!  Good luck getting everyone home!</p>
-
-  <a name="cp">
-  <hr class="b">
-  <h3 class="cp">Creative Pictures Studios</h3>
-
-  <div class=emoji>
-    <p>
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f463.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f463.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f463.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f463.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f3db.png">
-      SSSSSSSSSSSSSS
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f4af.png">
-
-      <br>
-
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f440.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/2b06.png">
-      &nbsp;
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f46b.png">
-      <span class=s></span>
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/2795.png">
-      <span class=s></span>
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f52c.png">
-      <span class=s></span>
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f4da.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f3db.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f3db.png">
-
-      <br>
-
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/270f.png">
-      <span class=s></span>
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f52c.png">
-      (2)
-    </p>
-
-    <p>
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/21aa.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f463.png">
-
-      <br>
-
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f440.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/2b05.png">
-      &nbsp;
-      <img src="{{static['runaround/studios_seal.png']}}">
-      <span class=s></span>
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f440.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/2b05.png">
+          &nbsp;
+          <img src="{{static['runaround/studios_seal.png']}}">
+          <span class=s></span>
 
 
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f3b6.png">
-      <span class=s></span>
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f3b6.png">
+          <span class=s></span>
 
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/2795.png">
-      <span class=s></span>
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/2795.png">
+          <span class=s></span>
 
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f3b6.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f39e.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f3ad.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f3db.png">
-      <span class=s></span>
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f3b6.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f39e.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f3ad.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f3db.png">
+          <span class=s></span>
 
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f3a8.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f3ad.png">
-      <br>
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f3a8.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f3ad.png">
+          <br>
 
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/270f.png">
-      <span class=s></span>
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/270f.png">
+          <span class=s></span>
 
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f3b6.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f39e.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f3ad.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f3db.png">
-      (2)
-    </p>
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f3b6.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f39e.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f3ad.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f3db.png">
+          (2)
+        </p>
 
-    <p>
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f463.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f463.png">
-      <br>
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f6d1.png">
-      <img src="{{static['runaround/studios_wall.png']}}">
-      <br>
+        <p>
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f463.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f463.png">
+          <br>
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f6d1.png">
+          <img src="{{static['runaround/studios_wall.png']}}">
+          <br>
 
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f440.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/27a1.png">
-      &nbsp;
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f44d.png">
-      <span class=s></span>
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f440.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/27a1.png">
+          &nbsp;
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f44d.png">
+          <span class=s></span>
 
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f4a1.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f4a1.png">
-      <span class=s></span>
-      <img src="{{static['runaround/studios_coins.png']}}">
-      <span class=s></span>
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f4a1.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f4a1.png">
+          <span class=s></span>
+          <img src="{{static['runaround/studios_coins.png']}}">
+          <span class=s></span>
 
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f30f.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f30f.png">
       </br>
 
       <img src="https://snellen-test-event.storage.googleapis.com/emoji/270f.png">
@@ -481,322 +502,336 @@
       <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f4a1.png">
       <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f4a1.png">
       (4)
-    </p>
+        </p>
 
-    <p>
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/2b05.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f463.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f463.png">
-      <br>
+        <p>
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/2b05.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f463.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f463.png">
+          <br>
 
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f440.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/2b05.png">
-      &nbsp;
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f94c.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f94c.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f94c.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f41a.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f48e.png">
-      <br>
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f440.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/2b05.png">
+          &nbsp;
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f94c.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f94c.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f94c.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f41a.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f48e.png">
+          <br>
 
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/270f.png">
-      <span class=s></span>
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/270f.png">
+          <span class=s></span>
 
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f48e.png">
-      (1)
-    </p>
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f48e.png">
+          (1)
+        </p>
 
-    <p>
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f463.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f463.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f463.png">
-      <br>
+        <p>
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f463.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f463.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f463.png">
+          <br>
 
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f440.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/2b05.png">
-      &nbsp;
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f418.png">
-      <br>
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f440.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/2b05.png">
+          &nbsp;
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f418.png">
+          <br>
 
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f440.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/27a1.png">
-      &nbsp;
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f418.png">
-      <br>
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f440.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/27a1.png">
+          &nbsp;
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f418.png">
+          <br>
 
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f440.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/27a1.png">
-      &nbsp;
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f333.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f573.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f426.png">
-      <br>
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f440.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/27a1.png">
+          &nbsp;
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f333.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f573.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f426.png">
+          <br>
 
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/270f.png">
-      <span class=s></span>
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f426.png">
-      (3)
-    </p>
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/270f.png">
+          <span class=s></span>
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f426.png">
+          (3)
+        </p>
 
-    <p>
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f463.png">
-      <br>
+        <p>
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f463.png">
+          <br>
 
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f440.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/2b05.png">
-      &nbsp;
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f9ec.png">
-      <br>
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f440.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/2b05.png">
+          &nbsp;
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f9ec.png">
+          <br>
 
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f463.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f4f6.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f53c.png">
-      <br>
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f463.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f4f6.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f53c.png">
+          <br>
 
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f440.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/2b06.png">
-      &nbsp;
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f53a.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/33-20e3.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f955.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/35-20e3.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f440.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/2b06.png">
+          &nbsp;
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f53a.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/33-20e3.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f955.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/35-20e3.png">
 
-      <br>
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/270f.png">
-      <span class=s></span>
+          <br>
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/270f.png">
+          <span class=s></span>
 
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f53a.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/33-20e3.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f955.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/35-20e3.png">
-      (1)
-    </p>
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f53a.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/33-20e3.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f955.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/35-20e3.png">
+          (1)
+        </p>
 
-    <p>
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f463.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f4f6.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f53c.png">
-      <br>
+        <p>
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f463.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f4f6.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f53c.png">
+          <br>
 
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/2b05.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f463.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f463.png">
-      <br>
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/2b05.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f463.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f463.png">
+          <br>
 
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f440.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/2b05.png">
-      &nbsp;
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f6aa.png">
-      <br>
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f440.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/2b05.png">
+          &nbsp;
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f6aa.png">
+          <br>
 
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f463.png">
-      <br>
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f463.png">
+          <br>
 
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f440.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/2b05.png">
-      &nbsp;
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f6aa.png">
-      <br>
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f6d1.png">
-      <br>
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f440.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/2b05.png">
+          &nbsp;
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f6aa.png">
+          <br>
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f6d1.png">
+          <br>
 
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f440.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/2b05.png">
-      &nbsp;
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/26a0.png">
-      <span class=s></span>
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f441.png">
-      <span class=s></span>
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f6e1.png">
-      <span class=s></span>
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/2705.png">
-      <br>
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f440.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/2b05.png">
+          &nbsp;
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/26a0.png">
+          <span class=s></span>
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f441.png">
+          <span class=s></span>
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f6e1.png">
+          <span class=s></span>
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/2705.png">
+          <br>
 
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/270f.png">
-      <span class=s></span>
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f6e1.png">
-      (10)
-    </p>
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/270f.png">
+          <span class=s></span>
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f6e1.png">
+          (10)
+        </p>
 
-    <p>
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/2b05.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f463.png">
-      <br>
+        <p>
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/2b05.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f463.png">
+          <br>
 
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f440.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/2b05.png">
-      &nbsp;
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/2697.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f98c.png">
-      <br>
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f440.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/2b05.png">
+          &nbsp;
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/2697.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f98c.png">
+          <br>
 
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/270f.png">
-      <span class=s></span>
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/270f.png">
+          <span class=s></span>
 
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f532.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f532.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/35-20e3.png">
-      <span class=s></span>
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/31-20e3.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f532.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/33-20e3.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/34-20e3.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/32-20e3.png">
-      <span class=s></span>
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f532.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f532.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f532.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f532.png">
-      <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f532.png">
-    </p>
-</div>
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f532.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f532.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/35-20e3.png">
+          <span class=s></span>
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/31-20e3.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f532.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/33-20e3.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/34-20e3.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/32-20e3.png">
+          <span class=s></span>
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f532.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f532.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f532.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f532.png">
+          <img src="https://snellen-test-event.storage.googleapis.com/emoji/1f532.png">
+        </p>
+      </div>
 
-
-  <a name="sa">
-  <hr class="b">
-  <h3 class="sa">Safari Adventure</h3>
-
-  <p><b>Wildlife viewing hike (self guided, starting in building 2). See wild animals!</b></p>
-
-  <img id="safari" src="{{static['runaround/safari.jpg']}}">
-
-  <p>Exhibit: Start at this painting, which depicts a sunset view over the savanna. From this very spot, look out the large viewing window. You will see one of Safari Adventure’s most iconic views, a river, and beyond it, majestic mountains.</p>
-
-  <p>Exhibit: When you’re ready to go see the animals, start off down the long, straight path. At the junction turn left. Immediately on your right, you find stairs ascending to a viewing platform with tan bars and a wooden railing. Looking out, you can see at the edge of the distant meadow a large brown eagle.</p>
-
-  <p>Exhibit: Descend from the viewing platform the way you came. Make a right and pass through double glass doors. The path opens onto a clearing, and you see the base of a large tree. This is one of Safari Adventure’s renowned botanical exhibits, but you’re here to see animals, so as you pass the tree, turn left. </p>
-
-  <p>Exhibit: Follow the path past a display of the park’s research staff. When you reach a junction with diamonds, follow the left diamond to a double door that leads to an outdoor viewing area. In the distance, you can see a herd of large, bronze cats in a field. </p>
-
-  <p>Exhibit: Go back through the double doors, turning left. Proceed up until you come to the first viewing window on the left. From this low vantage, you can see a number of fireflies in the air. This exhibit is particularly beautiful at night. </p>
-
-  <p>Exhibit: Continue up and make your way to the right. At the fork, go left. The path leads to a long series of viewing areas before turning right. Through the final viewing window before this turn, you can’t miss the impressive banded cobra climbing a corner of its enclosure. </p>
-
-  <p>Exhibit: After following the path to the right, it quickly turns left. Follow it again to the left, passing the the familiar tree on your right. As you pass under a partly cloudy sky, you’ll come to a low, golden beam. Turn left and enter the safari sky tower. As you ascend you’ll pass a viewing area with a crooked wooden railing. Keep going until you arrive at a viewing area with a straight wooden railing. At this level of the sky tower, you can look down and see in two domed tortoises and one boxy tortoise in an elevated meadow. </p>
-
-  <p>Exhibit: Keep going up the sky tower from here. As you climb higher and higher, please respect all the posted warning signs. You’re way above the ground at this point, so whatever you do, don’t be alarmed. At the very top platform, through a small viewing window you can see a solitary green pigeon on a high perch. </p>
-
-  <p>Exhibit: After you’ve enjoyed the viewing, complete the tour by looking at the larger viewing area to your right. We hope you enjoyed this walking wildlife tour and found it relaxing. </p>
-
-  <a name="cb">
-  <hr class="b">
-  <h3 class="cb">Cascade Bay</h3>
-
-  <img class=r src="{{static['runaround/cascade_start.jpg']}}">
-  <p>Start your journey in building 5 across from, and above, this sign, in the outer of two large diameter pipes (which is appropriate because your location evokes pi). Flow toward and pass the fire doors.</p>
-
-  <p>As you move above green vinyl over bare copper, look down and to the right. Note the (1 2) on the starboard bow.</p>
-
-  <p>At the junction, move down and continue forward. Pass through an insulated valve and into the ceiling. Inside the ceiling where nobody can see you, branch off, diverting to your left in a smaller diameter and entering a room where everyone is welcome. Emerge into that room and follow the longest wall of the room before bending in a short elbow to flow down and split into two smaller pipes. Take the branch closer to (1 2). As you pass a courteous notice, note its seventh, eight and ninth words (3, 4, 5).</p>
-
-  <p>As you continue down, open the blue handled valve, if it isn’t already open, pass through it, and close it on your way through. Swirl and enter a U-shaped passage, entering the wall. Within the wall where nobody can see you, drop down an entire floor and emerge in the hallway in your largest diameter yet. Very close to the wall, flow up a large junction into an elbow that directs you parallel to your very first flow. Flow through a large, double elbow and continue on amidst stained insulation. As you approach a large air duct, note the green (6, 7, 8) on your cladding. </p>
-
-  <p>Continue on, parallel to the large air duct, until you reach a large elbow. Follow it, then immediately drop into a smaller diameter at a junction. Cross over the duct. At the T-junction don’t go down to the dead-end, but instead flow up, through an elbow and over some galvanized cladding into the wall. At a junction in the wall where nobody can see you, go left, flowing behind the wall. Before you pass above the fountain, note a facility for (9) oceanic detection devices.</p>
-
-  <p>Continue on. Still within the wall, before it ends, find your way into a pipe (of similar diameter to your very first pipe) that emerges out of the wall, passes through elbows, and then descends. Go through three elbows and a drop through pressure gauges and flow valves that oppose your direction of travel. Squeeze your way past these obstacles. At the junction, flow downward. As you pass through the floor, Seep out through a leaky fitting and back into the wall toward (9), where nobody can see you. Seep into a small diameter pipe, flowing parallel to your very first flow, and emerge under the landing. Follow two elbows, pass through a junction without diverting, then two elbows and ascend, two elbows, through a junction, three elbows, and at the junction, turn and pass through the wall. Two more elbows and you arrive at a terminal fitting. An errant smoker releases you. As you are disgorged out into to the open air, note the (10 11) to the east as you begin to fall toward the floor. </p>
-
-  <p>Collect in a puddle, and flow across the floor to the double doors, and freedom. On the way, note above you the No 1. (12) and who made it (13).</p>
-
-  <div class=c>
-    <table>
-      <tr><th>1</th><td>_ _ _ _</td></tr>
-      <tr><th>2</th><td>_ _ _ _ _ _ _ _ _</td></tr>
-      <tr><th>3</th><td>_ _</td></tr>
-      <tr><th>4</th><td>_ _ _</td></tr>
-      <tr><th>5</th><td>_ _ _ _ _</td></tr>
-      <tr><th>6</th><td>_ _ _ _ _</td></tr>
-      <tr><th>7</th><td>_ _ _</td></tr>
-      <tr><th>8</th><td>_ _ _</td></tr>
-      <tr><th>9</th><td>_ _ _ _ _ _ _ _ _ _</td></tr>
-      <tr><th>10</th><td>_ _ _ _ _ _ _ _</td></tr>
-      <tr><th>11</th><td>_ _ _ _ _ _</td></tr>
-      <tr><th>12</th><td>_ _ _ _ _</td></tr>
-      <tr><th>13</th><td>_ _ _ _ _ _ _</td></tr>
-    </table>
   </div>
 
-  <img class=rr src="{{static['runaround/cascade_flow.png']}}">
-  <div>
-    <h5>Rules for dripping words:</h5>
-    <ol>
-      <li>Words flow in, one letter at a time, in sequence.</li>
-      <li>A letter is unsupported if there is no wall or letter below it.</li>
-      <li>For all other behaviors, follow the flow chart.</li>
-    </ol>
-  </div>
-
-  <div class=c>
-    <img class=c src="{{static['runaround/cascade_grid.png']}}">
-  </div>
-
-  <a name="cc">
   <hr class="b">
-  <h3 class="cc">Cactus Canyon</h3>
 
-  <p>Let’s start this rodeo by takin’ a gander at the wanted posters of the oldest and nastiest group of cowboys there ever was.  Ride on over to the hallway near 7-434, but look just around the corner, closer to the outside part of this here building.</p>
+  <div class=segment>
 
-  <img class=l src="{{static['runaround/canyon.jpg']}}">
-  <p>High up on the left side of the wall&mdash;there they are. Calling themselves the Crimson Gang, and they’ve been infiltratin’ our jurisdiction, I hear. Look at them all smug and naked, thinkin’ they own the world. Well, as the sheriff of Cactus Canyon, I’m commissioning you to take them out one by one.</p>
+    <a name="sa">
+      <h3 class="sa">Safari Adventure</h3>
 
-  <p>Your first villain is nearby. If you’re facing the wanted posters (like the one in the photo to the left), turn around back past 7-434, and head towards the neverending trail. Ride past the mechanical people-hoister, and turn right into the saloon.  Turn left down a long hall, but don’t go very far at all.</p>
+      <p><b>Wildlife viewing hike (self guided, starting in building 2). See wild animals!</b></p>
 
-  <p>Word on the streets is that Abe Crimson is challengin’ you to a duel! But that rascal is hiding, and he could be anywhere. Look for him nearby at an orange and white warning poster above a panel.</p>
+      <img id="safari" src="{{static['runaround/safari.jpg']}}">
 
-  <p>Suddenly, from behind you, Abe yells, “Long Lounge, 4th Floor, S RAMP, 4th Floor, Campus Map!”</p>
+      <p>Exhibit: Start at this painting, which depicts a sunset view over the savanna. From this very spot, look out the large viewing window. You will see one of Safari Adventure’s most iconic views, a river, and beyond it, majestic mountains.</p>
 
-  <p>Now turn around and draw!</p>
+      <p>Exhibit: When you’re ready to go see the animals, start off down the long, straight path. At the junction turn left. Immediately on your right, you find stairs ascending to a viewing platform with tan bars and a wooden railing. Looking out, you can see at the edge of the distant meadow a large brown eagle.</p>
 
-  <p>Abe Crimson reaches for his gun, but you’re too quick!  He falls to the floor, like a petrified tumbleweed of failure.</p>
+      <p>Exhibit: Descend from the viewing platform the way you came. Make a right and pass through double glass doors. The path opens onto a clearing, and you see the base of a large tree. This is one of Safari Adventure’s renowned botanical exhibits, but you’re here to see animals, so as you pass the tree, turn left. </p>
 
-  <p>Keep headin’ down that long hall, cause more danger is afoot!  Take a look/see at all these colored windows, depictin’ all sorts of strange things.  Rumor is that nasty ol’ Becca Crimson is hiding out near the 3rd set of windows from the end of the hall.  So let’s ride on down there.</p>
+      <p>Exhibit: Follow the path past a display of the park’s research staff. When you reach a junction with diamonds, follow the left diamond to a double door that leads to an outdoor viewing area. In the distance, you can see a herd of large, bronze cats in a field. </p>
 
-  <p>When you get there, on your left, turn to look at a photo of the strangest thing&mdash;people playing a sport with a ball, but there’s no hoop for the ball. What in tarnation?!  Suddenly you hear a voice behind you.</p>
+      <p>Exhibit: Go back through the double doors, turning left. Proceed up until you come to the first viewing window on the left. From this low vantage, you can see a number of fireflies in the air. This exhibit is particularly beautiful at night. </p>
 
-  <p>She yells “Corporate gunslinger, plain gunslinger, pancaked collapse, mountainous circle, corporate gunslinger!”</p>
+      <p>Exhibit: Continue up and make your way to the right. At the fork, go left. The path leads to a long series of viewing areas before turning right. Through the final viewing window before this turn, you can’t miss the impressive banded cobra climbing a corner of its enclosure. </p>
 
-  <p>Now turn around and draw!</p>
+      <p>Exhibit: After following the path to the right, it quickly turns left. Follow it again to the left, passing the the familiar tree on your right. As you pass under a partly cloudy sky, you’ll come to a low, golden beam. Turn left and enter the safari sky tower. As you ascend you’ll pass a viewing area with a crooked wooden railing. Keep going until you arrive at a viewing area with a straight wooden railing. At this level of the sky tower, you can look down and see in two domed tortoises and one boxy tortoise in an elevated meadow. </p>
 
-  <p>Becky Crimson crumples like a dead cactus in the midday sun. Nice job, pardner!</p>
+      <p>Exhibit: Keep going up the sky tower from here. As you climb higher and higher, please respect all the posted warning signs. You’re way above the ground at this point, so whatever you do, don’t be alarmed. At the very top platform, through a small viewing window you can see a solitary green pigeon on a high perch. </p>
 
-  <p>Ride on down the hall.  At the end, take a quick left, then right.  As you make your way down this gulch, look ahead and you’ll see the camp of the Crimson Deadly Duelers. That means there’s gotta be another rascal ‘round here somewhar!</p>
+      <p>Exhibit: After you’ve enjoyed the viewing, complete the tour by looking at the larger viewing area to your right. We hope you enjoyed this walking wildlife tour and found it relaxing. </p>
 
-  <p>Turn right, then left quickly… I think we’re close.  Best to take it slow and careful here.  Looks like Charlie Crimson is nearby. Sit down on the bench and wait for the right moment. Okay, let’s do this! Slowly take 7 paces forward.</p>
+  </div>
 
-  <p>All of sudden you hear a raspy voice crying, “Apple, Wood, Shell, Bullet, Shell, Colored Smudgy Thing!”</p>
+  <hr class="b">
 
-  <p>Turn left and draw!</p>
+  <div class=segment>
+    <a name="cb">
+      <h3 class="cb">Cascade Bay</h3>
 
-  <p>You expect Charlie to fall to the ground, but you only graze his shoulder!  Scared, Charlie rides off as fast as he can.  Well, at least he didn’t finish you!</p>
+      <img class=r src="{{static['runaround/cascade_start.jpg']}}">
+      <p>Start your journey in building 5 across from, and above, this sign, in the outer of two large diameter pipes (which is appropriate because your location evokes pi). Flow toward and pass the fire doors.</p>
 
-  <p>Shaking off the sweat, you ride after Charlie down the long “Alley” ahead of you. Steer left at the end of the hall just before the stairs and look for a display case on your left.  Hmmm. You may have lost the trail of Charlie, but somethin’ tells me that wily ol’ Darlene Crimson is nearby and it’s time to teach her a lesson.</p>
+      <p>As you move above green vinyl over bare copper, look down and to the right. Note the (1 2) on the starboard bow.</p>
 
-  <p>Turn towards the door with a number ending in the same two digits. As you’re trying to figure out what those buttons on the handle are for, you hear a voice behind you.</p>
+      <p>At the junction, move down and continue forward. Pass through an insulated valve and into the ceiling. Inside the ceiling where nobody can see you, branch off, diverting to your left in a smaller diameter and entering a room where everyone is welcome. Emerge into that room and follow the longest wall of the room before bending in a short elbow to flow down and split into two smaller pipes. Take the branch closer to (1 2). As you pass a courteous notice, note its seventh, eight and ninth words (3, 4, 5).</p>
 
-  <p>Darlene yells, “Green Axolotl, Gold Axolotl, Gator, Maize, Gator, Anteater, Tarantula!”</p>
+      <p>As you continue down, open the blue handled valve, if it isn’t already open, pass through it, and close it on your way through. Swirl and enter a U-shaped passage, entering the wall. Within the wall where nobody can see you, drop down an entire floor and emerge in the hallway in your largest diameter yet. Very close to the wall, flow up a large junction into an elbow that directs you parallel to your very first flow. Flow through a large, double elbow and continue on amidst stained insulation. As you approach a large air duct, note the green (6, 7, 8) on your cladding. </p>
 
-  <p>Turn around and draw!</p>
+      <p>Continue on, parallel to the large air duct, until you reach a large elbow. Follow it, then immediately drop into a smaller diameter at a junction. Cross over the duct. At the T-junction don’t go down to the dead-end, but instead flow up, through an elbow and over some galvanized cladding into the wall. At a junction in the wall where nobody can see you, go left, flowing behind the wall. Before you pass above the fountain, note a facility for (9) oceanic detection devices.</p>
 
-  <p>“Unnnhhnh...too slow.  Us Crimson folk are always too slow,” Darlene sighs as she hits the ground like a yellow-belly piano player during a barroom brawl.</p>
+      <p>Continue on. Still within the wall, before it ends, find your way into a pipe (of similar diameter to your very first pipe) that emerges out of the wall, passes through elbows, and then descends. Go through three elbows and a drop through pressure gauges and flow valves that oppose your direction of travel. Squeeze your way past these obstacles. At the junction, flow downward. As you pass through the floor, Seep out through a leaky fitting and back into the wall toward (9), where nobody can see you. Seep into a small diameter pipe, flowing parallel to your very first flow, and emerge under the landing. Follow two elbows, pass through a junction without diverting, then two elbows and ascend, two elbows, through a junction, three elbows, and at the junction, turn and pass through the wall. Two more elbows and you arrive at a terminal fitting. An errant smoker releases you. As you are disgorged out into to the open air, note the (10 11) to the east as you begin to fall toward the floor. </p>
 
-  <p>Keep going past the cases and past a bunch of lariats dangling from the wall. Ride the mechanical people-hoister down one floor, and when you exit, turn to the left, and left again to find a series of five famous books.  Walking towards the wall, as you pass in front of the middle one (on your left) you hear the voice of Edward Crimson.</p>
+      <p>Collect in a puddle, and flow across the floor to the double doors, and freedom. On the way, note above you the No 1. (12) and who made it (13).</p>
 
-  <p>He screams, “Axe head, Left page, Right page!”</p>
+      <div class=c>
+        <table>
+          <tr><th>1</th><td>_ _ _ _</td></tr>
+          <tr><th>2</th><td>_ _ _ _ _ _ _ _ _</td></tr>
+          <tr><th>3</th><td>_ _</td></tr>
+          <tr><th>4</th><td>_ _ _</td></tr>
+          <tr><th>5</th><td>_ _ _ _ _</td></tr>
+          <tr><th>6</th><td>_ _ _ _ _</td></tr>
+          <tr><th>7</th><td>_ _ _</td></tr>
+          <tr><th>8</th><td>_ _ _</td></tr>
+          <tr><th>9</th><td>_ _ _ _ _ _ _ _ _ _</td></tr>
+          <tr><th>10</th><td>_ _ _ _ _ _ _ _</td></tr>
+          <tr><th>11</th><td>_ _ _ _ _ _</td></tr>
+          <tr><th>12</th><td>_ _ _ _ _</td></tr>
+          <tr><th>13</th><td>_ _ _ _ _ _ _</td></tr>
+        </table>
+      </div>
 
-  <p>Turn to the left and draw!</p>
+      <img class=rr src="{{static['runaround/cascade_flow.png']}}">
+      <div>
+        <h5>Rules for dripping words:</h5>
+        <ol>
+          <li>Words flow in, one letter at a time, in sequence.</li>
+          <li>A letter is unsupported if there is no wall or letter below it.</li>
+          <li>For all other behaviors, follow the flow chart.</li>
+        </ol>
+      </div>
 
-  <p>Your aim is true, as Eddie joins the great gold mine in the sky.</p>
+      <div class=c>
+        <img class=c src="{{static['runaround/cascade_grid.png']}}">
+      </div>
 
-  <p>You holster your gun, happy that almost all of your foes were eliminated.  But then from around the corner you hear shots ring out.  They penetrate your stomach.  What?  How could?</p>
+  </div>
 
-  <p>Charlie Crimson emerges snickering, “You should have finished me when you had the chance.”</p>
+  <hr class="b">
 
-  <p>You grow dizzy.  Staring at the books, you wish you were more religious. You turn to the right, and then fall back into a long black grave that eerily seemed to be dug ahead of time for this very moment.</p>
+  <div class=segment>
+    <a name="cc">
+      <h3 class="cc">Cactus Canyon</h3>
 
-  <p>You lay there looking at the stars&mdash;five on the left, three on the right.  As you slowly drift off, you think “Right 2, Left 3, Left 5, Right 3, Right 1” and wonder what you should have done differently that first time you dueled Charlie.</p>
+      <p>Let’s start this rodeo by takin’ a gander at the wanted posters of the oldest and nastiest group of cowboys there ever was.  Ride on over to the hallway near 7-434, but look just around the corner, closer to the outside part of this here building.</p>
 
-  <p>As you start to lose consciousness, you turn to the left and look at the beginning, so to speak.  The words are quite blurry, but you can make out a four-letter word on the bottom line that seems appropriate for this tale. This’ll be your first word, and what you got from the duels will be your second.</p>
+      <img class=l src="{{static['runaround/canyon.jpg']}}">
+      <p>High up on the left side of the wall&mdash;there they are. Calling themselves the Crimson Gang, and they’ve been infiltratin’ our jurisdiction, I hear. Look at them all smug and naked, thinkin’ they own the world. Well, as the sheriff of Cactus Canyon, I’m commissioning you to take them out one by one.</p>
 
-  <p>The End</p>
+      <p>Your first villain is nearby. If you’re facing the wanted posters (like the one in the photo to the left), turn around back past 7-434, and head towards the neverending trail. Ride past the mechanical people-hoister, and turn right into the saloon.  Turn left down a long hall, but don’t go very far at all.</p>
+
+      <p>Word on the streets is that Abe Crimson is challengin’ you to a duel! But that rascal is hiding, and he could be anywhere. Look for him nearby at an orange and white warning poster above a panel.</p>
+
+      <p>Suddenly, from behind you, Abe yells, “Long Lounge, 4th Floor, S RAMP, 4th Floor, Campus Map!”</p>
+
+      <p>Now turn around and draw!</p>
+
+      <p>Abe Crimson reaches for his gun, but you’re too quick!  He falls to the floor, like a petrified tumbleweed of failure.</p>
+
+      <p>Keep headin’ down that long hall, cause more danger is afoot!  Take a look/see at all these colored windows, depictin’ all sorts of strange things.  Rumor is that nasty ol’ Becca Crimson is hiding out near the 3rd set of windows from the end of the hall.  So let’s ride on down there.</p>
+
+      <p>When you get there, on your left, turn to look at a photo of the strangest thing&mdash;people playing a sport with a ball, but there’s no hoop for the ball. What in tarnation?!  Suddenly you hear a voice behind you.</p>
+
+      <p>She yells “Corporate gunslinger, plain gunslinger, pancaked collapse, mountainous circle, corporate gunslinger!”</p>
+
+      <p>Now turn around and draw!</p>
+
+      <p>Becky Crimson crumples like a dead cactus in the midday sun. Nice job, pardner!</p>
+
+      <p>Ride on down the hall.  At the end, take a quick left, then right.  As you make your way down this gulch, look ahead and you’ll see the camp of the Crimson Deadly Duelers. That means there’s gotta be another rascal ‘round here somewhar!</p>
+
+      <p>Turn right, then left quickly… I think we’re close.  Best to take it slow and careful here.  Looks like Charlie Crimson is nearby. Sit down on the bench and wait for the right moment. Okay, let’s do this! Slowly take 7 paces forward.</p>
+
+      <p>All of sudden you hear a raspy voice crying, “Apple, Wood, Shell, Bullet, Shell, Colored Smudgy Thing!”</p>
+
+      <p>Turn left and draw!</p>
+
+      <p>You expect Charlie to fall to the ground, but you only graze his shoulder!  Scared, Charlie rides off as fast as he can.  Well, at least he didn’t finish you!</p>
+
+      <p>Shaking off the sweat, you ride after Charlie down the long “Alley” ahead of you. Steer left at the end of the hall just before the stairs and look for a display case on your left.  Hmmm. You may have lost the trail of Charlie, but somethin’ tells me that wily ol’ Darlene Crimson is nearby and it’s time to teach her a lesson.</p>
+
+      <p>Turn towards the door with a number ending in the same two digits. As you’re trying to figure out what those buttons on the handle are for, you hear a voice behind you.</p>
+
+      <p>Darlene yells, “Green Axolotl, Gold Axolotl, Gator, Maize, Gator, Anteater, Tarantula!”</p>
+
+      <p>Turn around and draw!</p>
+
+      <p>“Unnnhhnh...too slow.  Us Crimson folk are always too slow,” Darlene sighs as she hits the ground like a yellow-belly piano player during a barroom brawl.</p>
+
+      <p>Keep going past the cases and past a bunch of lariats dangling from the wall. Ride the mechanical people-hoister down one floor, and when you exit, turn to the left, and left again to find a series of five famous books.  Walking towards the wall, as you pass in front of the middle one (on your left) you hear the voice of Edward Crimson.</p>
+
+      <p>He screams, “Axe head, Left page, Right page!”</p>
+
+      <p>Turn to the left and draw!</p>
+
+      <p>Your aim is true, as Eddie joins the great gold mine in the sky.</p>
+
+      <p>You holster your gun, happy that almost all of your foes were eliminated.  But then from around the corner you hear shots ring out.  They penetrate your stomach.  What?  How could?</p>
+
+      <p>Charlie Crimson emerges snickering, “You should have finished me when you had the chance.”</p>
+
+      <p>You grow dizzy.  Staring at the books, you wish you were more religious. You turn to the right, and then fall back into a long black grave that eerily seemed to be dug ahead of time for this very moment.</p>
+
+      <p>You lay there looking at the stars&mdash;five on the left, three on the right.  As you slowly drift off, you think “Right 2, Left 3, Left 5, Right 3, Right 1” and wonder what you should have done differently that first time you dueled Charlie.</p>
+
+      <p>As you start to lose consciousness, you turn to the left and look at the beginning, so to speak.  The words are quite blurry, but you can make out a four-letter word on the bottom line that seems appropriate for this tale. This’ll be your first word, and what you got from the duels will be your second.</p>
+
+      <p>The End</p>
+
+  </div>
 
 </div>
 
