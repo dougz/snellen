@@ -815,6 +815,10 @@ class A2020_PuzzlePage {
         this.pperrata = goog.dom.getElement("pperrata");
          /** @type{Element} */
         this.pperratalist = goog.dom.getElement("pperratalist");
+         /** @type{Element} */
+        this.pphintreplies = goog.dom.getElement("pphintreplies");
+         /** @type{Element} */
+        this.pphintreplylist = goog.dom.getElement("pphintreplylist");
 
         var el = goog.dom.getElement("hinttimechange");
         goog.events.listen(el, goog.events.EventType.CLICK, function() {
@@ -873,6 +877,26 @@ class A2020_PuzzlePage {
             A2020_ErrataPage.append_errata(this.pperratalist, data.errata);
         } else {
             this.pperrata.style.display = "none";
+        }
+
+        if (data.hint_replies && data.hint_replies.length > 0) {
+            console.log(data.hint_replies);
+            this.pphintreplies.style.display = "block";
+            this.pphintreplylist.innerHTML = "";
+            for (var i = 0; i < data.hint_replies.length; ++i) {
+                var msg = data.hint_replies[i];
+                var dt = goog.dom.createDom(
+                    "DT", null,
+                    admin2020.time_formatter.format(msg.when) + " ",
+                    goog.dom.createDom("B", null, msg.sender),
+                    " to " + msg.team);
+                var dd = goog.dom.createDom("DD")
+                dd.innerHTML = msg.text;
+                this.pphintreplylist.appendChild(dt);
+                this.pphintreplylist.appendChild(dd);
+            }
+        } else {
+            this.pphintreplies.style.display = "none";
         }
 
         twemoji.parse(goog.dom.getElement("admincontent"));

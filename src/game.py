@@ -1539,8 +1539,10 @@ class Team(login.LoginUser):
       sender = login.AdminUser.get_by_username(sender)
       ps.last_hq_sender = sender
       ps.claim = None
-      ps.hints.append(HintMessage(ps, now, sender, text))
+      hm = HintMessage(ps, now, sender, text)
+      ps.hints.append(hm)
       Global.STATE.task_queue.remove(ps)
+      ps.puzzle.hint_replies.append(hm)
       team_message["notify"] = True
       team_message["title"] = puzzle.title
 
@@ -1892,6 +1894,7 @@ class Puzzle:
     self.open_teams = set()
     self.submitted_teams = set()
     self.errata = []
+    self.hint_replies = []
 
     save_state.add_instance("Puzzle:" + shortname, self)
 
@@ -2166,6 +2169,15 @@ class Puzzle:
           now - ps.open_time >= self.hints_available_time):
         t.open_hints(self.shortname)
         asyncio.create_task(t.flush_messages())
+
+  def get_hint_reply_data(self, last=None):
+    out = []
+    for hm in reversed(self.hint_replies):
+      d = {"when": hm.when, "text": hm.text,
+           "team": hm.parent.team.name,
+           "sender": hm.sender.fullname}
+      out.append(d)
+    return out
 
   @staticmethod
   def canonicalize_answer(text):

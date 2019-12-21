@@ -175,7 +175,8 @@ class PuzzleDataHandler(util.AdminHandler):
          "incorrect_answers": puzzle.incorrect_counts,
          "hint_time": puzzle.hints_available_time,
          "log": puzzle.puzzle_log.get_data(),
-         "errata": errata}
+         "errata": errata,
+         "hint_replies": puzzle.get_hint_reply_data()}
     self.return_json(d)
 
 class FixPuzzlePage(util.AdminPageHandler):

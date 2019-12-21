@@ -156,6 +156,8 @@ class PuzzlePageData {
         this.hint_time;
         /** @type{Array<Erratum>} */
         this.errata;
+        /** @type{Array<HintMessage>} */
+        this.hint_replies;
     }
 }
 
@@ -184,6 +186,8 @@ class HintMessage {
         this.text;
         /** @type{?string} */
         this.special;
+        /** @type{?string} */
+        this.team;
     }
 }
 

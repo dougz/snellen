@@ -1022,8 +1022,22 @@ tr.submit-gray .submit-state { color: #666 }
     display: none;
 }
 
+#pphintreplies {
+    display: none;
+}
+
 .PuzzlePage dt { font-weight: bold; margin-left: 8px; }
 .PuzzlePage dd { margin-bottom: 8px; }
+
+.PuzzlePage dl#pphintreplylist dt {
+    font-size: 84%;
+    font-weight: normal;
+}
+.PuzzlePage dl#pphintreplylist dd {
+    font-family: 'Inconsolata', monospace;
+    font-size: 84%;
+    white-space: pre-wrap;
+}
 
 .AdminHomePage li { line-height: 40px; }
 
