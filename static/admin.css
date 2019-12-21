@@ -14,7 +14,7 @@ body {
 a { text-decoration: none; }
 
 img.emoji {
-    width: 3ex;
+    width: 2ex;
     margin-bottom: -2px;
 }
 
@@ -780,8 +780,7 @@ p.note {
     padding-top: 12px;
     word-wrap: normal;
     text-overflow: ellipsis;
-    overflow-x: hidden;
-    /*white-space: nowrap;*/
+    overflow: hidden;
     vertical-align: bottom;
     z-index: 100;
 }

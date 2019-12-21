@@ -57,6 +57,13 @@ function A2020_DoAction(data, callback) {
                         admin2020.serializer.serialize(data));
 }
 
+class A2020_TeamListPage {
+    constructor() {
+        console.log("hello");
+        twemoji.parse(goog.dom.getElement("admincontent"));
+    }
+}
+
 class A2020_PuzzleListPage {
     constructor() {
         twemoji.parse(goog.dom.getElement("admincontent"));
@@ -518,7 +525,6 @@ class A2020_Autocomplete {
         for (var i = 0; i < data.length; ++i) {
             this.search.push(data[i][1].toLowerCase());
         }
-
         this.select = select;
         for (var i = 0; i < select.childNodes.length; ++i) {
             var el = select.childNodes[i];
@@ -579,6 +585,7 @@ class A2020_Autocomplete {
         if (matches == 0) {
             this.dropdown.appendChild(goog.dom.createDom("SPAN", "ac-none", "No matches."));
         }
+        twemoji.parse(this.dropdown);
         if (matches == 1) this.move_highlight(1);
     }
 
@@ -1055,6 +1062,7 @@ class A2020_BigBoard {
         for (var i = 0; i < this.team_els.length; ++i) {
             this.teamdiv.appendChild(this.team_els[i]);
         }
+        twemoji.parse(this.teamdiv);
     }
 
     refresh_taskqueue() {
@@ -1083,6 +1091,7 @@ var admin2020 = {
     puzzle_page: null,
     team_puzzle_page: null,
     server_page: null,
+    team_list_page: null,
     puzzle_list_page: null,
     fix_puzzle: null,
     home_page: null,
@@ -1172,7 +1181,10 @@ window.onload = function() {
     if (page_class == "TeamPuzzlePage") {
         admin2020.team_puzzle_page = new A2020_TeamPuzzlePage();
     }
-    if (page_class == "ListPuzzles") {
+    if (page_class == "ListTeamsPage") {
+        admin2020.team_list_page = new A2020_TeamListPage();
+    }
+    if (page_class == "ListPuzzlesPage") {
         admin2020.puzzle_list_page = new A2020_PuzzleListPage();
     }
     if (page_class == "AdminHomePage") {
