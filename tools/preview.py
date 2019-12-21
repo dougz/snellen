@@ -124,7 +124,7 @@ class ApproveHandler(tornado.web.RequestHandler):
 
 class UploadHandler(tornado.web.RequestHandler):
   LAND_NAMES = {"castle": "The Grand Castle",
-                "forest": "Enchanted Forest",
+                "forest": "Storybook Forest",
                 "space": "Spaceopolis",
                 "bigtop": "Big Top Carnival",
                 "studios": "Creative Pictures Studios",
