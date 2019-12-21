@@ -170,12 +170,7 @@ class Puzzle:
               # partial progress
               self.responses[k] = v
             elif isinstance(v, dict):
-              if set(v.keys()) == {"reply", "task"}:
-                self.responses[k] = [v["reply"], v["task"], None]
-              elif set(v.keys()) == {"reply", "task", "task_url"}:
-                self.responses[k] = [v["reply"], v["task"], v["task_url"]]
-              else:
-                errors.append(f"Bad response to '{k}'.")
+              self.responses[k] = v
             else:
               errors.append(f"Bad response to '{k}'.")
 

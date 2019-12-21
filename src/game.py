@@ -412,12 +412,22 @@ class Submission:
           # partial-progress response
           self.state = self.PARTIAL
           self.extra_response = response
-        elif isinstance(response, (list, tuple)):
+        elif isinstance(response, dict):
           # task for HQ
           self.state = self.REQUESTED
-          self.extra_response = response[0]
+          if self.team.remote_only:
+            self.extra_response = response.get(
+              "remote_reply", response.get("reply", "Request sent."))
+            t = response.get(
+              "remote_task", response.get("task", "Unknown task."))
+            u = response.get("remote_task_url", response.get("task_url"))
+          else:
+            self.extra_response = response.get("reply", "Request sent.")
+            t = response.get("task", "Unknown task.")
+            u = response.get("task_url")
+
           Global.STATE.add_task(now, self.team.username, answer.lower(),
-                                response[1], response[2], None, "puzzle")
+                                t, u, None, "puzzle")
         elif response is None:
           # incorrect but "honest guess"
           self.state = self.INCORRECT
@@ -2172,8 +2182,14 @@ class Puzzle:
   def respace_text(text):
     if text is None: return None
     if text is True: return True
-    if isinstance(text, (list, tuple)):
-      return tuple(Puzzle.respace_text(t) for t in text)
+    if isinstance(text, dict):
+      out = {}
+      for k, v in text.items():
+        if k.endswith("url"):
+          out[k] = v
+        else:
+          out[k] = Puzzle.respace_text(v)
+      return out
     else:
       return " ".join(text.split()).strip()
 

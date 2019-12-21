@@ -1,3 +1,4 @@
+{% import pprint %}
 <html>
   <head>
     <title>{{puzzle.title}} Preview</title>
@@ -26,6 +27,7 @@
       .solution { background-color: #990000; }
       .for_ops { background-color: #000099; }
       p { margin-bottom: 4px; }
+      pre { white-space: pre-wrap; }
     </style>
   </head>
   <body>
@@ -84,10 +86,7 @@
 	    {% if r is None %}<i>incorrect (no penalty)</i>
             {% elif r is True %}<i>alternate correct answer</i>
             {% elif isinstance(r, str) %}{% raw r %}
-            {% else %}<b>(reply)</b> {% raw r[0] %} <b>(task)</b>
-            {% if r[2] %}<a href="{% raw r[2] %}">{% raw r[1] %}</a>
-            {% else %}{% raw r[1] %}
-            {% end %}
+            {% else %}<pre>{{ pprint.pformat(r) }}</pre>
             {% end %}
 	  </p>
 	  {% end %}
