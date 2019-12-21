@@ -164,7 +164,7 @@ class TaskQueue:
     for ps in self.states:
       ts = 0
       for h in reversed(ps.hints):
-        if h.sender is None:
+        if h.sender is None and not h.special:
           ts = h.when
         else:
           break
@@ -745,10 +745,10 @@ class Team(login.LoginUser):
     if self.score_to_go and 0 < self.score_to_go <= 10:
       if use_buzz:
         num = self.score_to_go * 1000
-        d["to_go"] = f"Generate <b>{num:,}</b> more buzz to unlock the next land!"
+        d["to_go"] = f"Generate <b>{num:,}</b> more Buzz to unlock the next land!"
       else:
         num = self.score_to_go * 10000
-        d["to_go"] = f"Generate <b>{num:,}</b> more wonder to unlock the next land!"
+        d["to_go"] = f"Generate <b>{num:,}</b> more Wonder to unlock the next land!"
     return d
 
   def get_land_data(self, land):
@@ -1218,7 +1218,7 @@ class Team(login.LoginUser):
       if puzzle in Workshop.PENNY_PUZZLES:
         if self.remote_only:
           if self.puzzle_state[Workshop.PUZZLE].state == PuzzleState.CLOSED:
-            self.admin_log.add(now, f"Skipped Loony visit for remote-only team.")
+            self.admin_log.add(now, f"Skipped Loonie Toonie visit for remote-only team.")
             self.open_puzzle(Workshop.PUZZLE, now)
         else:
           dirty = False
@@ -1226,7 +1226,7 @@ class Team(login.LoginUser):
             if penny.puzzle == puzzle:
               if not self.pennies_earned and not self.pennies_collected:
                 Global.STATE.add_task(now, self.username, f"loony-visit",
-                                      "Loony visit", None,
+                                      "Loonie Toonie visit", None,
                                       self.complete_loony_visit, "visit")
                 Global.STATE.add_task(now, self.username, f"penny-{penny.shortname}",
                                       f"First penny: {penny.name}", None,
@@ -1264,7 +1264,7 @@ class Team(login.LoginUser):
       asyncio.create_task(self.flush_messages())
 
   def complete_loony_visit(self, task, when):
-    self.admin_log.add(when, f"Completed the Loony visit.")
+    self.admin_log.add(when, f"Completed the Loonie Toonie visit.")
     self.open_puzzle(Workshop.PUZZLE, when)
     self.cached_all_puzzles_data = None
     self.dirty_lands.add("home")

@@ -16,6 +16,10 @@ input, button, .emoji-input {
     font-family: 'Merriweather Sans', sans-serif;
 }
 
+textarea {
+    font-size: 16px;
+}
+
 .action {
     font-family: 'Merriweather Sans', sans-serif;
     font-weight: 700;
