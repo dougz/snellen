@@ -470,10 +470,17 @@ class Submission:
       if self.puzzle_state.answers_found == self.puzzle.answers:
         if not self.team.remote_only and self.puzzle in Workshop.PENNY_PUZZLES:
           if self.team.puzzle_state[Workshop.PUZZLE].state == PuzzleState.CLOSED:
+            # No loony visit yet: "expect a visit soon"
             self.extra_response = Workshop.pre_response
           else:
+            # Workshop already open: "new thing in the workshop"
             self.extra_response = Workshop.post_response
-        self.team.solve_puzzle(self.puzzle, now)
+        more_extra = self.team.solve_puzzle(self.puzzle, now)
+        if more_extra:
+          if self.extra_response:
+            self.extra_response += "<br>" + more_extra
+          else:
+            self.extra_response = more_extra
       else:
         self.team.dirty_lands.add(self.puzzle.land.shortname)
         self.team.cached_mapdata.pop(self.puzzle.land, None)
@@ -743,7 +750,11 @@ class Team(login.LoginUser):
          "passes": len(self.fastpasses_available),
          }
     if self.score_to_go and 0 < self.score_to_go <= 10:
-      if use_buzz:
+
+      if self.score + self.score_to_go == CONSTANTS["outer_lands_score"]:
+        num = self.score_to_go * 1000
+        d["to_go"] = f"Generate <b>{num:,}</b> more Buzz to receive a special visit!"
+      elif use_buzz:
         num = self.score_to_go * 1000
         d["to_go"] = f"Generate <b>{num:,}</b> more Buzz to unlock the next land!"
       else:
@@ -1154,6 +1165,7 @@ class Team(login.LoginUser):
         self.cached_mapdata.pop(puzzle.land, None)
 
   def solve_puzzle(self, puzzle, now):
+    extra_response = None
     ps = self.puzzle_state[puzzle]
     msgs = []
     if ps.state != PuzzleState.SOLVED:
@@ -1200,6 +1212,7 @@ class Team(login.LoginUser):
                                 "Penny visit", None,
                                 self.complete_penny_visit, "visit")
           self.outer_lands_triggered = "triggered"
+          extra_response = "Expect a special visit soon!"
 
       new_videos = 0
       for s, v in CONSTANTS["videos_by_score"].items():
@@ -1251,6 +1264,7 @@ class Team(login.LoginUser):
       self.admin_log.add(now, f"{ps.admin_html_puzzle} solved ({durtxt}).")
 
       self.compute_puzzle_beam(now)
+      return extra_response
 
   def collect_penny(self, task, when):
     p = task.key.split("-")[-1]

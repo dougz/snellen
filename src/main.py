@@ -52,7 +52,7 @@ def make_app(options, static_dir, **kwargs):
 def dump_info(fn):
   plist = {}
   for p in game.Puzzle.BY_SHORTNAME.values():
-    plist[p.shortname] = list(p.answers)
+    plist[p.shortname] = [p.meta, list(p.answers)]
 
   d = {"puzzles": plist}
   with open(fn, "w") as f:

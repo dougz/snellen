@@ -187,10 +187,15 @@ class SimTeam(SimBrowser):
       print("all puzzles solved")
       return len(j["lands"]) < 10
 
-    to_solve = random.choice(list(open_puzzles.keys()))
+    for i in range(5):
+      to_solve = random.choice(list(open_puzzles.keys()))
+      # Don't solve metas.
+      if not INFO_DUMP["puzzles"][to_solve][0]: break
+    else:
+      return True
 
     have = [canonicalize_answer(a) for a in open_puzzles[to_solve]]
-    for a in INFO_DUMP["puzzles"][to_solve]:
+    for a in INFO_DUMP["puzzles"][to_solve][1]:
       if a not in have:
         break
     print(f"{self.username} submitting {a} for {to_solve}")

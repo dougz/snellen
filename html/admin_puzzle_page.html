@@ -67,10 +67,7 @@
 	{% if r is None %}<i>incorrect (no penalty)</i>
 	{% elif r is True %}<i>alternate correct answer</i>
         {% elif isinstance(r, str) %}{% raw r %}
-        {% else %}<b>(reply)</b> {% raw r[0] %} <b>(task)</b>
-          {% if r[2] %}<a href="{% raw r[2] %}">{% raw r[1] %}</a>
-          {% else %}{% raw r[1] %}
-          {% end %}
+        {% else %}<pre>{{ str(r) }}</pre>
         {% end %}
       </p>
       {% end %}
