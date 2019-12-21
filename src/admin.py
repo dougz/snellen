@@ -115,7 +115,7 @@ class TeamDataHandler(util.AdminHandler):
          "log": team.admin_log.get_data(),
          "svg": team.bb_data()["svg"],
          "score": team.score,
-         "phone": team.attrs.get("phone", "(unknown)")}
+         "phone": html.escape(team.attrs.get("phone", "(unknown)"))}
     self.return_json(d)
 
 class PuzzleContentPage(util.AdminPageHandler):

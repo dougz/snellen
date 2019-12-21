@@ -60,7 +60,7 @@
   {% end %}
 
   <div class="entry">
-    <input type="text" id="newphone" class="entryentry" size=30 value={{team.attrs.get("phone", "")}}>
+    <input type="text" id="newphone" class="entryentry" size=30 value="{{team.attrs.get("phone", "")}}">
     <button id="newphonesubmit" class="entrysubmit">Update contact phone</button>
     <span id="newphonesaved">Contact phone updated.</span>
   </div>
