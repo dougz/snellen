@@ -461,6 +461,7 @@ class A2020_TaskQueue {
             this.tbody.appendChild(tr);
         }
         admin2020.counter.reread();
+        twemoji.parse(this.tbody);
 
         var color;
         if (count == 0) {

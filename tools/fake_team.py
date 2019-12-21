@@ -189,8 +189,10 @@ class SimTeam(SimBrowser):
 
     for i in range(5):
       to_solve = random.choice(list(open_puzzles.keys()))
+      if to_solve == "concierge_services": continue
       # Don't solve metas.
-      if not INFO_DUMP["puzzles"][to_solve][0]: break
+      meta = INFO_DUMP["puzzles"][to_solve][0]
+      if not meta or random.random() < 0.1: break
     else:
       return True
 
