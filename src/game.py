@@ -788,12 +788,13 @@ class Team(login.LoginUser):
     for i in mainmap.icons.values():
       if i.to_land not in self.open_lands: continue
       d = { "name": i.to_land.title,
+            "icon": i.name,
             "xywh": i.image.pos_size,
             "poly": i.image.poly,
             "url": i.to_land.url,
             "icon_url": i.image.url,
             "mask_url": i.mask.url,
-            "offset": [0,0,0] }
+            "offset": i.offset }
       if i.to_land.meta_puzzle:
         p = i.to_land.meta_puzzle
         ps = self.puzzle_state[p]
@@ -812,24 +813,26 @@ class Team(login.LoginUser):
     e = mainmap.icons.get("events")
     if e:
       d = {"name": "Events",
+           "icon": e.name,
            "xywh": e.image.pos_size,
            "poly": e.image.poly,
            "url": "/events",
            "icon_url": e.image.url,
            "mask_url": e.mask.url,
            "nolist": True,
-           "offset": [-5,0,0]}
+           "offset": e.offset}
       items.append((("@",), d))
 
     # Add workshop
     e = mainmap.icons.get("workshop")
     if e:
       d = {"name": "Workshop",
+           "icon": e.name,
            "xywh": e.image.pos_size,
            "poly": e.image.poly,
            "icon_url": e.image.url,
            "mask_url": e.mask.url,
-           "offset": [-5,0,0]}
+           "offset": e.offset}
 
       if self.puzzle_state[Workshop.PUZZLE].state == PuzzleState.CLOSED:
         warning = mainmap.icons.get("warning")
@@ -854,7 +857,8 @@ class Team(login.LoginUser):
       d = {"xywh": e.image.pos_size,
            "poly": e.image.poly,
            "icon_url": e.image.url,
-           "offset": [0,0,0]}
+           "icon": e.name,
+           "offset": e.offset}
       if work:
         d["name"] = "Heart of the Park"
         d["url"] = "/heart_of_the_park"
