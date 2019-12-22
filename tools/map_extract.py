@@ -106,6 +106,8 @@ def main():
   parser.add_argument("--background_color",
                       default="#f8f8f8",
                       help="Background color for map")
+  parser.add_argument("--output_yaml", default="land.yaml",
+                      help="File for yaml data output")
 
   parser.add_argument("html",
                       help="Image map HTML")
@@ -170,7 +172,7 @@ def main():
           under_patch.image.save(os.path.join(options.output_dir, f"under_{name}.png"))
 
   y = { "icons": icons }
-  with open(os.path.join(options.output_dir, "land.yaml"), "w") as f:
+  with open(os.path.join(options.output_dir, options.output_yaml), "w") as f:
     f.write(yaml.dump(y))
 
 

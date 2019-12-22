@@ -821,34 +821,34 @@ class Team(login.LoginUser):
            "offset": [-5,0,0]}
       items.append((("@",), d))
 
-    # # Add workshop
-    # e = mainmap.icons.get("workshop")
-    # if e:
-    #   d = {"name": "Workshop",
-    #        "xywh": e.image.pos_size,
-    #        "poly": e.image.poly,
-    #        "icon_url": e.image.url,
-    #        "mask_url": e.mask.url,
-    #        "offset": [-5,0,0]}
+    # Add workshop
+    e = mainmap.icons.get("workshop")
+    if e:
+      d = {"name": "Workshop",
+           "xywh": e.image.pos_size,
+           "poly": e.image.poly,
+           "icon_url": e.image.url,
+           "mask_url": e.mask.url,
+           "offset": [-5,0,0]}
 
-    #   if self.puzzle_state[Workshop.PUZZLE].state == PuzzleState.CLOSED:
-    #     warning = mainmap.icons.get("warning")
-    #     dd = {"icon_url": warning.image.url,
-    #           "xywh": warning.image.pos_size}
-    #     d["special"] = dd
-    #     d["nolist"] = True
-    #   else:
-    #     d["url"] = "/workshop"
-    #     d["spaceafter"] = True
+      if self.puzzle_state[Workshop.PUZZLE].state == PuzzleState.CLOSED:
+        warning = mainmap.icons.get("warning")
+        dd = {"icon_url": warning.image.url,
+              "xywh": warning.image.pos_size}
+        d["special"] = dd
+        d["nolist"] = True
+      else:
+        d["url"] = "/workshop"
+        d["spaceafter"] = True
 
-    #   items.append((("@",), d))
+      items.append((("@",), d))
 
     # Add statue
     work = False
     if self.puzzle_state[Runaround.PUZZLE].state == PuzzleState.CLOSED:
       e = mainmap.icons.get("statue")
     else:
-      e = mainmap.icons.get("statue2")
+      e = mainmap.icons.get("statue_open")
       work = True
     if e:
       d = {"xywh": e.image.pos_size,
