@@ -770,10 +770,20 @@ class Team(login.LoginUser):
     print(f"mapdata cache miss: {self.username} mainmap")
 
     items = []
-    mapdata = {"base_url": mainmap.base_img,
+
+    for i, land in enumerate(("canyon", "cascade", "safari", "studios")):
+      if Land.BY_SHORTNAME[land] in self.open_lands:
+        base_img = mainmap.base_img[4-i]
+        base_size = mainmap.base_size[4-i]
+        break
+    else:
+      base_img = mainmap.base_img[0]
+      base_size = mainmap.base_size[0]
+        
+    mapdata = {"base_url": base_img,
                "shortname": mainmap.shortname,
-               "width": mainmap.base_size[0],
-               "height": mainmap.base_size[1]}
+               "width": base_size[0],
+               "height": base_size[1]}
 
     for i in mainmap.icons.values():
       if i.to_land not in self.open_lands: continue

@@ -111,6 +111,7 @@ def main():
                       help="Image map HTML")
   parser.add_argument("source_image")
   parser.add_argument("--under_image", default=None)
+  parser.add_argument("--under_html", default=None)
 
   options = parser.parse_args()
 
@@ -118,6 +119,11 @@ def main():
   options.background_color = tuple(int(options.background_color[i*2+1:i*2+3], 16) for i in range(3))
 
   html_map = get_polys(options.html)
+  if options.under_html:
+    under_map = get_polys(options.under_html)
+  else:
+    under_map = html_map
+  
   source_image = Image.open(options.source_image).convert("RGBA")
   if options.under_image:
     under_image = Image.open(options.under_image).convert("RGBA")
@@ -151,15 +157,17 @@ def main():
       patch.highlight.save(os.path.join(options.output_dir, f"mask_{name}.png"))
 
     if under_image:
-      under_patch = Patch(under_image, coords)
+      under_coords = under_map.get(name)
+      if under_coords:
+        under_patch = Patch(under_image, under_coords)
 
-      if under_patch.image:
-        od = {}
-        out["under"] = od
-        od["pos"] = under_patch.origin
-        od["poly"] = under_patch.coords_str
-        od["size"] = under_patch.size
-        under_patch.image.save(os.path.join(options.output_dir, f"under_{name}.png"))
+        if under_patch.image:
+          od = {}
+          out["under"] = od
+          od["pos"] = under_patch.origin
+          od["poly"] = under_patch.coords_str
+          od["size"] = under_patch.size
+          under_patch.image.save(os.path.join(options.output_dir, f"under_{name}.png"))
 
   y = { "icons": icons }
   with open(os.path.join(options.output_dir, "land.yaml"), "w") as f:
