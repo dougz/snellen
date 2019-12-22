@@ -3,8 +3,8 @@
 @import url('https://fonts.googleapis.com/css?family=Inconsolata&display=block');
 
 body {
-    background: url(@@STATIC:inner_only/land_clouds.png@@) top repeat-x,
-		url(@@STATIC:inner_only/land_tree.png@@) bottom repeat-x,
+    background: url(@@STATIC:mainmap/land_clouds.png@@) top repeat-x,
+		url(@@STATIC:mainmap/land_tree.png@@) bottom repeat-x,
 		#c3dffb;
     font-family: 'Merriweather Sans', sans-serif;
     margin: 0;

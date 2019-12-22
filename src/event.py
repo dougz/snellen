@@ -25,32 +25,35 @@ class LandMapPage(util.TeamPageHandler):
     self.show_map(shortname)
 
   def show_map(self, shortname):
-    if shortname == "home":
-      land = game.Land.BY_SHORTNAME[self.team.map_mode]
+    if shortname == "mainmap":
+      j = self.team.get_mainmap_data()
+      land = game.Land.BY_SHORTNAME["mainmap"]
+      self.land = land
     else:
       land = game.Land.BY_SHORTNAME.get(shortname, None)
       if not land:
         return self.not_found()
       if land not in self.team.open_lands:
         return self.not_found()
-    self.land = land
-    mapdata = self.team.get_land_data(land)
-    json_data = "<script>var initial_json = """ + mapdata + ";</script>"
+      self.land = land
+      j = self.team.get_land_data(land)
+    json_data = "<script>var initial_json = """ + j + ";</script>"
     self.render("land.html", land=land, json_data=json_data,
                 event_hash=game.Global.STATE.event_hash)
 
 class MapDataHandler(util.TeamHandler):
   @login.required("team")
   def get(self, shortname):
-    if shortname == "home":
-      land = game.Land.BY_SHORTNAME[self.team.map_mode]
+    if shortname == "mainmap":
+      j = self.team.get_mainmap_data()
     else:
       land = game.Land.BY_SHORTNAME.get(shortname, None)
       if not land:
         return self.not_found()
       if land not in self.team.open_lands:
         return self.not_found()
-    self.return_json(self.team.get_land_data(land))
+      j = self.team.get_land_data(land)
+    self.return_json(j)
 
 
 class PlayerHomePage(LandMapPage):
@@ -61,7 +64,7 @@ class PlayerHomePage(LandMapPage):
                   open_time=game.Global.STATE.expected_start_time,
                   css=(self.static_content["notopen.css"],))
       return
-    self.show_map("home")
+    self.show_map("mainmap")
 
 class PuzzlePage(util.TeamPageHandler):
   @login.required("team")

@@ -97,10 +97,12 @@ class TeamPageHandler(TeamHandler):
       d["puzzle"] = None
       script.append(f"var puzzle_id = null;\n")
 
+    print(style_css)
     if style_css in self.static_content:
       d["css"].append(self.static_content[style_css])
     else:
       d["css"].append(self.static_content["default.css"])
+    print(d["css"])
 
     script.append(f"""var wid = {wid}; var received_serial = {serial};\n""")
     script.append(f"""var initial_header = {json.dumps(self.team.get_header_data())};\n""")

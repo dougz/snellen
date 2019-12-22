@@ -576,7 +576,6 @@ class Team(login.LoginUser):
     save_state.add_instance("Team:" + username, self)
 
     self.next_submit_id = 1
-    self.map_mode = "outer"   # BTS3 hack
     self.open_lands = {}
     self.sorted_open_lands = []
     self.open_puzzles = set()    # PuzzleState objects
@@ -762,6 +761,110 @@ class Team(login.LoginUser):
         d["to_go"] = f"Generate <b>{num:,}</b> more Wonder to unlock the next land!"
     return d
 
+  def get_mainmap_data(self):
+    mainmap = Land.BY_SHORTNAME["mainmap"]
+
+    if mainmap in self.cached_mapdata:
+      print(f" mapdata cache hit: {self.username} mainmap")
+      return self.cached_mapdata[mainmap]
+    print(f"mapdata cache miss: {self.username} mainmap")
+
+    items = []
+    mapdata = {"base_url": mainmap.base_img,
+               "shortname": mainmap.shortname,
+               "width": mainmap.base_size[0],
+               "height": mainmap.base_size[1]}
+
+    for i in mainmap.icons.values():
+      if i.to_land not in self.open_lands: continue
+      d = { "name": i.to_land.title,
+            "xywh": i.image.pos_size,
+            "poly": i.image.poly,
+            "url": i.to_land.url,
+            "icon_url": i.image.url,
+            "mask_url": i.mask.url,
+            "offset": [0,0,0] }
+      if i.to_land.meta_puzzle:
+        p = i.to_land.meta_puzzle
+        ps = self.puzzle_state[p]
+        if ps.state == PuzzleState.SOLVED:
+          d["solved"] = True
+          d["answer"] = ", ".join(sorted(p.display_answers[a] for a in ps.answers_found))
+      items.append((("A", i.to_land.sortkey), d))
+
+      if i.under:
+        dd = {"icon_url": i.under.url,
+              "xywh": i.under.pos_size}
+        # Sort these before any puzzle title
+        items.append((("@",), dd))
+      
+    # Add events
+    e = mainmap.icons.get("events")
+    if e:
+      d = {"name": "Events",
+           "xywh": e.image.pos_size,
+           "poly": e.image.poly,
+           "url": "/events",
+           "icon_url": e.image.url,
+           "mask_url": e.mask.url,
+           "nolist": True,
+           "offset": [-5,0,0]}
+      items.append((("@",), d))
+
+    # # Add workshop
+    # e = mainmap.icons.get("workshop")
+    # if e:
+    #   d = {"name": "Workshop",
+    #        "xywh": e.image.pos_size,
+    #        "poly": e.image.poly,
+    #        "icon_url": e.image.url,
+    #        "mask_url": e.mask.url,
+    #        "offset": [-5,0,0]}
+
+    #   if self.puzzle_state[Workshop.PUZZLE].state == PuzzleState.CLOSED:
+    #     warning = mainmap.icons.get("warning")
+    #     dd = {"icon_url": warning.image.url,
+    #           "xywh": warning.image.pos_size}
+    #     d["special"] = dd
+    #     d["nolist"] = True
+    #   else:
+    #     d["url"] = "/workshop"
+    #     d["spaceafter"] = True
+
+    #   items.append((("@",), d))
+
+    # Add statue
+    work = False
+    if self.puzzle_state[Runaround.PUZZLE].state == PuzzleState.CLOSED:
+      e = mainmap.icons.get("statue")
+    else:
+      e = mainmap.icons.get("statue2")
+      work = True
+    if e:
+      d = {"xywh": e.image.pos_size,
+           "poly": e.image.poly,
+           "icon_url": e.image.url,
+           "offset": [0,0,0]}
+      if work:
+        d["name"] = "Heart of the Park"
+        d["url"] = "/heart_of_the_park"
+        d["mask_url"] = e.mask.url
+        d["spaceafter"] = True
+      else:
+        d["nolist"] = True
+      items.append((("@",), d))
+      
+    items.sort(key=lambda i: i[0])
+    for i, (sk, d) in enumerate(items):
+      if i < len(items)-1 and sk[0] != items[i+1][0][0]:
+        d["spaceafter"] = True
+    mapdata["items"] = [i[1] for i in items]
+
+    mapdata = json.dumps(mapdata)
+    self.cached_mapdata[mainmap] = mapdata
+    return mapdata
+               
+  
   def get_land_data(self, land):
     if land in self.cached_mapdata:
       print(f" mapdata cache hit: {self.username} {land.shortname}")
@@ -803,160 +906,77 @@ class Team(login.LoginUser):
            "special": iod}
       items.append(((-1, "@",), d))
 
-    if land.puzzles:
-      # This is a land map page (the items are puzzles).
+    # This is a land map page (the items are puzzles).
 
-      keepers = []
+    keepers = []
 
-      for i in land.icons.values():
-        if not i.puzzle: continue
+    for i in land.icons.values():
+      if not i.puzzle: continue
 
-        p = i.puzzle
-        ps = self.puzzle_state[p]
-        if ps.state == PuzzleState.CLOSED: continue
+      p = i.puzzle
+      ps = self.puzzle_state[p]
+      if ps.state == PuzzleState.CLOSED: continue
 
-        d = {"name": p.title,
-             "icon": i.name,
-             "url": p.url,
-             "icon_url": i.image.url,
-             "mask_url": i.mask.url,
-             "offset": i.offset}
+      d = {"name": p.title,
+           "icon": i.name,
+           "url": p.url,
+           "icon_url": i.image.url,
+           "mask_url": i.mask.url,
+           "offset": i.offset}
 
-        if hasattr(p, "keeper_answers"):
-          # compute the position later
-          d["xywh"] = None
-          keepers.append((p.keeper_order, d, i.image.size))
-        else:
-          d["xywh"] = i.image.pos_size
-
-        if i.image.poly: d["poly"] = i.image.poly
-
-        if ps.answers_found:
-          d["answer"] = ", ".join(sorted(p.display_answers[a] for a in ps.answers_found))
-
-        if ps.state == PuzzleState.OPEN:
-          if "answer" in d: d["answer"] += ", \u2026"
-          d["solved"] = False
-          if (now - ps.open_time < CONSTANTS["new_puzzle_seconds"] and
-              ps.open_time != Global.STATE.event_start_time):
-            d["new_open"] = ps.open_time + CONSTANTS["new_puzzle_seconds"]
-        elif ps.state == PuzzleState.SOLVED:
-          d["solved"] = True
-
-        if show_solved:
-          d["answer"] = ", ".join(sorted(p.display_answers.values()))
-          d["solved"] = True
-
-        items.append((p.sortkey, d))
-
-        if i.under:
-          dd = {"icon_url": i.under.url,
-                "xywh": i.under.pos_size}
-          # Sort these before any puzzle title
-          items.append(((-1, "@",), dd))
-        if i.emptypipe2:
-          if ps.state == PuzzleState.SOLVED:
-            pipe = getattr(i, f"fullpipe{need_base}")
-          else:
-            pipe = getattr(i, f"emptypipe{need_base}")
-          dd = {"icon_url": pipe.url, "xywh": pipe.pos_size}
-          # Sort these before any puzzle title
-          items.append(((-1, "@",), dd))
-
-      if keepers:
-        KEEPER_PITCH = 44
-        keepers.sort(key=lambda x: x[0])
-        rx = 476 - KEEPER_PITCH * (len(keepers)-1)
-        for i, (_, d, (w, h)) in enumerate(keepers):
-          # position of the bottom center
-          cx = rx + i * KEEPER_PITCH * 2
-          cy = (327, 215)[(i+len(keepers))%2]
-          cx -= w // 2
-          cy -= h
-          d["xywh"] = [cx, cy, w, h]
-          d["poly"] = f"{cx},{cy},{cx+w},{cy},{cx+w},{cy+h},{cx},{cy+h}"
-
-    else:
-      for i in land.icons.values():
-        # This is a main map page (the items are other lands).
-
-        if i.to_land not in self.open_lands: continue
-        d = { "name": i.to_land.title,
-              "xywh": i.image.pos_size,
-              "poly": i.image.poly,
-              "url": i.to_land.url,
-              "icon_url": i.image.url,
-              "mask_url": i.mask.url,
-              "offset": [0,0,0] }
-        if i.to_land.meta_puzzle:
-          p = i.to_land.meta_puzzle
-          ps = self.puzzle_state[p]
-          if ps.state == PuzzleState.SOLVED:
-            d["solved"] = True
-            d["answer"] = ", ".join(sorted(p.display_answers[a] for a in ps.answers_found))
-        items.append((("A", i.to_land.sortkey), d))
-
-        if i.under:
-          dd = {"icon_url": i.under.url,
-                "xywh": i.under.pos_size}
-          # Sort these before any puzzle title
-          items.append((("@",), dd))
-
-      # Add events
-      e = land.icons.get("events")
-      if e:
-        d = {"name": "Events",
-             "xywh": e.image.pos_size,
-             "poly": e.image.poly,
-             "url": "/events",
-             "icon_url": e.image.url,
-             "mask_url": e.mask.url,
-             "nolist": True,
-             "offset": [-5,0,0]}
-        items.append((("@",), d))
-
-      # Add workshop
-      e = land.icons.get("workshop")
-      if e:
-        d = {"name": "Workshop",
-             "xywh": e.image.pos_size,
-             "poly": e.image.poly,
-             "icon_url": e.image.url,
-             "mask_url": e.mask.url,
-             "offset": [-5,0,0]}
-
-        if self.puzzle_state[Workshop.PUZZLE].state == PuzzleState.CLOSED:
-          warning = land.icons.get("warning")
-          dd = {"icon_url": warning.image.url,
-                "xywh": warning.image.pos_size}
-          d["special"] = dd
-          d["nolist"] = True
-        else:
-          d["url"] = "/workshop"
-          d["spaceafter"] = True
-
-        items.append((("@",), d))
-
-      # Add statue
-      work = False
-      if self.puzzle_state[Runaround.PUZZLE].state == PuzzleState.CLOSED:
-        e = land.icons.get("statue")
+      if hasattr(p, "keeper_answers"):
+        # compute the position later
+        d["xywh"] = None
+        keepers.append((p.keeper_order, d, i.image.size))
       else:
-        e = land.icons.get("statue2")
-        work = True
-      if e:
-        d = {"xywh": e.image.pos_size,
-             "poly": e.image.poly,
-             "icon_url": e.image.url,
-             "offset": [0,0,0]}
-        if work:
-          d["name"] = "Heart of the Park"
-          d["url"] = "/heart_of_the_park"
-          d["mask_url"] = e.mask.url
-          d["spaceafter"] = True
+        d["xywh"] = i.image.pos_size
+
+      if i.image.poly: d["poly"] = i.image.poly
+
+      if ps.answers_found:
+        d["answer"] = ", ".join(sorted(p.display_answers[a] for a in ps.answers_found))
+
+      if ps.state == PuzzleState.OPEN:
+        if "answer" in d: d["answer"] += ", \u2026"
+        d["solved"] = False
+        if (now - ps.open_time < CONSTANTS["new_puzzle_seconds"] and
+            ps.open_time != Global.STATE.event_start_time):
+          d["new_open"] = ps.open_time + CONSTANTS["new_puzzle_seconds"]
+      elif ps.state == PuzzleState.SOLVED:
+        d["solved"] = True
+
+      if show_solved:
+        d["answer"] = ", ".join(sorted(p.display_answers.values()))
+        d["solved"] = True
+
+      items.append((p.sortkey, d))
+
+      if i.under:
+        dd = {"icon_url": i.under.url,
+              "xywh": i.under.pos_size}
+        # Sort these before any puzzle title
+        items.append(((-1, "@",), dd))
+      if i.emptypipe2:
+        if ps.state == PuzzleState.SOLVED:
+          pipe = getattr(i, f"fullpipe{need_base}")
         else:
-          d["nolist"] = True
-        items.append((("@",), d))
+          pipe = getattr(i, f"emptypipe{need_base}")
+        dd = {"icon_url": pipe.url, "xywh": pipe.pos_size}
+        # Sort these before any puzzle title
+        items.append(((-1, "@",), dd))
+
+    if keepers:
+      KEEPER_PITCH = 44
+      keepers.sort(key=lambda x: x[0])
+      rx = 476 - KEEPER_PITCH * (len(keepers)-1)
+      for i, (_, d, (w, h)) in enumerate(keepers):
+        # position of the bottom center
+        cx = rx + i * KEEPER_PITCH * 2
+        cy = (327, 215)[(i+len(keepers))%2]
+        cx -= w // 2
+        cy -= h
+        d["xywh"] = [cx, cy, w, h]
+        d["poly"] = f"{cx},{cy},{cx+w},{cy},{cx+w},{cy+h},{cx},{cy+h}"
 
     items.sort(key=lambda i: i[0])
     for i, (sk, d) in enumerate(items):
@@ -1199,9 +1219,9 @@ class Team(login.LoginUser):
       self.cached_jukebox_data = None
       self.cached_open_hints_data = None
       if puzzle.meta:
-        current_map = Land.BY_SHORTNAME[self.map_mode]
+        current_map = Land.BY_SHORTNAME["mainmap"]
         self.cached_mapdata.pop(current_map, None)
-        self.dirty_lands.add("home")
+        self.dirty_lands.add("mainmap")
       self.invalidate(puzzle)
 
       if self.score >= CONSTANTS["outer_lands_score"] and self.outer_lands_state == "closed":
@@ -1281,9 +1301,8 @@ class Team(login.LoginUser):
     self.admin_log.add(when, f"Completed the Loonie Toonie visit.")
     self.open_puzzle(Workshop.PUZZLE, when)
     self.cached_all_puzzles_data = None
-    self.dirty_lands.add("home")
-    self.cached_mapdata.pop(Land.BY_SHORTNAME["outer"], None)
-    self.cached_mapdata.pop(Land.BY_SHORTNAME["inner_only"], None)
+    self.dirty_lands.add("mainmap")
+    self.cached_mapdata.pop(Land.BY_SHORTNAME["mainmap"], None)
     self.invalidate(Workshop.PUZZLE)
     if not save_state.REPLAYING:
       asyncio.create_task(self.flush_messages())
@@ -1675,9 +1694,8 @@ class Team(login.LoginUser):
         self.open_puzzle(Runaround.PUZZLE, now)
         self.invalidate(Runaround.PUZZLE)
         self.cached_all_puzzles_data = None
-        self.dirty_lands.add("home")
-        self.cached_mapdata.pop(Land.BY_SHORTNAME["outer"], None)
-        self.cached_mapdata.pop(Land.BY_SHORTNAME["inner_only"], None)
+        self.dirty_lands.add("mainmap")
+        self.cached_mapdata.pop(Land.BY_SHORTNAME["mainmap"], None)
 
     opened_one_land = False
     for st in self.puzzle_state.values():
@@ -1687,9 +1705,8 @@ class Team(login.LoginUser):
           self.open_lands[st.puzzle.land] = now
           self.sorted_open_lands = [land for land in self.open_lands.keys() if land.land_order]
           self.sorted_open_lands.sort(key=lambda land: land.land_order)
-          self.dirty_lands.add("home")
-          self.cached_mapdata.pop(Land.BY_SHORTNAME["outer"], None)
-          self.cached_mapdata.pop(Land.BY_SHORTNAME["inner_only"], None)
+          self.dirty_lands.add("mainmap")
+          self.cached_mapdata.pop(Land.BY_SHORTNAME["mainmap"], None)
           self.dirty_header = True
           opened_one_land = True
           if now != Global.STATE.event_start_time:
@@ -1701,15 +1718,7 @@ class Team(login.LoginUser):
       self.send_messages([{"method": "update_fastpass",
                            "fastpass": self.get_fastpass_data()}])
 
-    # Check for the first outer land
-    if self.map_mode != "outer":
-      if (Land.BY_SHORTNAME.get("studios") in self.open_lands or
-          Land.BY_SHORTNAME.get("cascade") in self.open_lands):
-        self.map_mode = "outer"
-        self.dirty_lands.add("home")
-        self.cached_mapdata.pop(Land.BY_SHORTNAME["outer"], None)
-        self.cached_mapdata.pop(Land.BY_SHORTNAME["inner_only"], None)
-    current_map = Land.BY_SHORTNAME[self.map_mode]
+    current_map = Land.BY_SHORTNAME["mainmap"]
     if current_map not in self.open_lands:
       self.open_lands[current_map] = now
 
@@ -1770,10 +1779,7 @@ class Land:
     print(f"  Adding land \"{shortname}\"...")
 
     self.BY_SHORTNAME[shortname] = self
-    if shortname in ("inner_only", "outer"):
-      self.shortname = "home"
-    else:
-      self.shortname = shortname
+    self.shortname = shortname
     self.title = cfg["title"]
     self.sortkey = (util.make_sortkey(self.title), id(self))
     self.logo = cfg.get("logo")
@@ -1791,7 +1797,7 @@ class Land:
     self.base_img = cfg["base_img"]
     self.base_size = cfg["base_size"]
 
-    if shortname in ("inner_only", "outer"):
+    if shortname == "mainmap":
       self.url = "/"
     else:
       self.url = "/land/" + shortname
