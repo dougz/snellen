@@ -14,10 +14,6 @@
     border-radius: 10px;
 }
 
-#landtitle {
-    display: none;
-}
-
 @media print {
     #content { border: none; padding: none; }
 }

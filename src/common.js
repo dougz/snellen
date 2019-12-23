@@ -115,7 +115,7 @@ class Common_Waiter {
         // For HTTP/2, we can wait on the same connection we used to
         // load the page.  For HTTP/1.1, we use a sharded domain to
         // get around browser per-host connection limit.
-        if (protocol == "h2") {
+        if (true || protocol == "h2") {
             console.log("waiter uses protocol", protocol, ": main domain");
             this.base_url = base_url + "/" + wid;
         } else {
