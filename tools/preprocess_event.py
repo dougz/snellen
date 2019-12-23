@@ -16,7 +16,7 @@ import oauth2
 SECRET_KEY_LENGTH = 16
 
 BASE_IMG = "map_base{}.png"
-
+CLOUD_IMG = "cloud{}.png"
 
 def upload_file(path, options, processor=None):
   ext = os.path.splitext(path)[1].lower()
@@ -77,9 +77,18 @@ def convert_map(shortname, d, options):
       out["base_size"].append(get_image_size(base_img))
       out["base_img"].append(upload_file(base_img, options))
       i += 1
-
   assert out["base_img"]
 
+  i = 0
+  out["cloud_img"] = []
+  while True:
+    cloud_img = os.path.join(options.input_assets, shortname,
+                             CLOUD_IMG.format(i))
+    if not os.path.exists(cloud_img): break
+    out["cloud_img"].append(upload_file(cloud_img, options))
+    i += 1
+  if not i: out.pop("cloud_img")
+    
   if "logo" in d:
     src_image = os.path.join(options.input_assets, shortname,
                              d["logo"])
