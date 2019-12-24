@@ -167,6 +167,7 @@ def convert_static_files(out, options, lands):
   to_convert.extend([
     ("runaround.css", os.path.join(options.input_assets, "runaround.css")),
     ("end_solve.mp3", os.path.join(options.input_assets, "end_solve.mp3")),
+    ("events_solve.mp3", os.path.join(options.input_assets, "events_solve.mp3")),
   ])
 
   to_convert.extend([("mute.png", f"{base}/snellen/static/mute.png"),
@@ -192,11 +193,19 @@ def convert_static_files(out, options, lands):
                      ("video3.mp4", f"{base}/media/video3.mp4"),
                      ("video4.mp4", f"{base}/media/video4.mp4"),
                      ("video5.mp4", f"{base}/media/video5.mp4"),
+                     ("video6.mp4", f"{base}/media/video6.mp4"),
                      ("thumb1.png", f"{base}/media/thumb1.png"),
                      ("thumb2.png", f"{base}/media/thumb2.png"),
                      ("thumb3.png", f"{base}/media/thumb3.png"),
                      ("thumb4.png", f"{base}/media/thumb4.png"),
                      ("thumb5.png", f"{base}/media/thumb5.png"),
+                     ("thumb6.png", f"{base}/media/thumb6.png"),
+                     ("poster1.png", f"{base}/media/poster1.png"),
+                     ("poster2.png", f"{base}/media/poster2.png"),
+                     ("poster3.png", f"{base}/media/poster3.png"),
+                     ("poster4.png", f"{base}/media/poster4.png"),
+                     ("poster5.png", f"{base}/media/poster5.png"),
+                     ("poster6.png", f"{base}/media/poster6.png"),
                      ("admin_fav_green/favicon-32x32.png",
                       f"{base}/snellen/static/admin_fav_green/favicon-32x32.png"),
                      ("admin_fav_green/favicon-16x16.png",

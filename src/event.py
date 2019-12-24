@@ -120,7 +120,8 @@ class VideosDataHandler(util.TeamHandler):
   def get(self):
     urls = []
     for i in range(1, self.team.videos+1):
-      urls.append(OPTIONS.static_content.get(f"video{i}.mp4"))
+      urls.append({"video": OPTIONS.static_content.get(f"video{i}.mp4"),
+                   "poster": OPTIONS.static_content.get(f"poster{i}.png")})
     self.return_json(urls)
 
 class EventsPage(util.TeamPageHandler):
@@ -130,7 +131,9 @@ class EventsPage(util.TeamPageHandler):
     ps = self.team.puzzle_state[self.puzzle]
     completed = [e.answer in ps.answers_found for e in game.Event.ALL_EVENTS]
 
-    self.render("events.html", events=game.Event.ALL_EVENTS, completed=completed)
+    self.render("events.html", events=game.Event.ALL_EVENTS,
+                completed=completed,
+                solved=(ps.state == game.PuzzleState.SOLVED))
 
 class WorkshopPage(util.TeamPageHandler):
   @login.required("team", require_start=False)
@@ -139,7 +142,8 @@ class WorkshopPage(util.TeamPageHandler):
     ps = self.team.puzzle_state[self.puzzle]
     if ps.state == game.PuzzleState.CLOSED:
       return self.not_found()
-    self.render("workshop.html", allow_submit=game.Workshop.submit_filter(ps))
+    self.render("workshop.html", allow_submit=game.Workshop.submit_filter(ps),
+                solved=(ps.state == game.PuzzleState.SOLVED))
 
 class WorkshopDataHandler(util.TeamHandler):
   @login.required("team", require_start=False)
@@ -160,7 +164,8 @@ class RunaroundPage(util.TeamPageHandler):
     if ps.state == game.PuzzleState.CLOSED:
       return self.not_found()
     self.render("runaround.html", segments=game.Runaround.SEGMENTS, ps=ps,
-                static=OPTIONS.static_content)
+                static=OPTIONS.static_content,
+                solved=(ps.state == game.PuzzleState.SOLVED))
 
 class RunaroundDataHandler(util.TeamHandler):
   @login.required("team", require_start=False)

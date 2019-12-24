@@ -1638,7 +1638,7 @@ class H2020_Videos {
         goog.net.XhrIo.send("/js/videos", Common_invoke_with_json(this, this.build));
     }
 
-    /** param{Array<string>} data */
+    /** param{Array<Video>} data */
     build(data) {
         if (data.length == 0) {
             this.video_div.innerHTML = "No videos available yet.";
@@ -1646,9 +1646,13 @@ class H2020_Videos {
         }
         this.video_div.innerHTML = "";
         for (var i = 0; i < data.length; ++i) {
-            var el = goog.dom.createDom("VIDEO", {className: "storyvideo",
-                                                  controls: true},
-                                        goog.dom.createDom("SOURCE", {src: data[i]}));
+            var el = goog.dom.createDom("H3", null, "Video " + (i+1));
+            this.video_div.appendChild(el);
+            el = goog.dom.createDom("VIDEO", {className: "storyvideo",
+                                                controls: true,
+                                                preload: "none",
+                                                poster: data[i].poster},
+              goog.dom.createDom("SOURCE", {src: data[i].video}));
             this.video_div.appendChild(el);
         }
     }

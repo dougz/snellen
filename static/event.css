@@ -1031,6 +1031,10 @@ video#parkopening {
     align-items: center;
 }
 
+#videolist h3 {
+    margin-top: 24px;
+}
+
 .videothumb {
     margin-top: 12px;
 }

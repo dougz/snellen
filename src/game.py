@@ -1263,6 +1263,8 @@ class Team(login.LoginUser):
                                 self.complete_penny_visit, "visit")
           self.outer_lands_triggered = "triggered"
           extra_response = "Expect a special visit soon!"
+      if puzzle is Runaround.PUZZLE:
+        extra_response = Runaround.solve_response
 
       new_videos = 0
       for s, v in CONSTANTS["videos_by_score"].items():
@@ -2467,6 +2469,7 @@ class Event:
     p.puzzletron_id = -1
     p.authors = ["Left Out"]
     p.style = "default.css"
+    p.solve_audio = OPTIONS.static_content.get("events_solve.mp3")
 
     p.title = "Events"
     p.url = "/events"
@@ -2595,6 +2598,7 @@ class Runaround:
   def build(cls, d):
     for dd in d["minis"]:
       cls.SEGMENTS.append(Runaround(dd))
+    cls.solve_response = d["solve_response"]
 
   @classmethod
   def post_init(cls):

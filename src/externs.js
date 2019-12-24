@@ -336,3 +336,12 @@ class Action {
         this.land;
     }
 }
+
+class Video {
+  constructor() {
+    /** @type{string} */
+    this.video;
+    /** @type{string} */
+    this.poster;
+  }
+}

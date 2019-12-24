@@ -3,7 +3,11 @@
 {% block title %}Heart of the Park{% end %}
 
 {% block topnav_extraright %}
+{% if solved %}
+<a id="submit" class="submitsolved">Solved</a>
+{% else %}
 <a id="submit">Submit</a>
+{% end %}
 <a id="puzzerr"{% if not puzzle.errata%} class="hidden"{% end %} href="/errata" title="Errata">!</a>
 <a id="puzzhints"{% if puzzle not in team.hints_open %} class="hidden"{% end %} href="/guest_services?p={{puzzle.shortname}}" title="Hints">H</a>
 {% end %}
