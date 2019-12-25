@@ -8,10 +8,10 @@
 <table class=info>
   <tr><th>title</th>
     <td class=h1>{{puzzle.title}}<br>
-      <a class="content" href="/admin/show/puzzle/{{puzzle.shortname}}">&#x25b6;&#xfe0e; puzzle</a>
-      <a class="content" href="/admin/show/solution/{{puzzle.shortname}}">&#x25b6;&#xfe0e; solution</a>
+      <a class="content" target="_blank" href="/admin/show/puzzle/{{puzzle.shortname}}">&#x25b6;&#xfe0e; puzzle</a>
+      <a class="content" target="_blank" href="/admin/show/solution/{{puzzle.shortname}}">&#x25b6;&#xfe0e; solution</a>
       {% if puzzle.for_ops_url %}
-      <a class="content" href="{{puzzle.for_ops_url}}">&#x25b6;&#xfe0e; hunt ops</a>
+      <a class="content" target="_blank" href="{{puzzle.for_ops_url}}">&#x25b6;&#xfe0e; hunt ops</a>
       {% else %}
       <span>MISSING hunt ops info!</span>
       {% end %}
