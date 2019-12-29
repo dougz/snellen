@@ -88,7 +88,7 @@ def convert_map(shortname, d, options):
     out["cloud_img"].append(upload_file(cloud_img, options))
     i += 1
   if not i: out.pop("cloud_img")
-    
+
   if "logo" in d:
     src_image = os.path.join(options.input_assets, shortname,
                              d["logo"])
@@ -180,6 +180,7 @@ def convert_static_files(out, options, lands):
                      ("visit-compiled.js", f"{base}/snellen/bin/visit-compiled.js"),
                      ("client-compiled.js", f"{base}/snellen/bin/client-compiled.js"),
                      ("admin.css", f"{base}/snellen/static/admin.css"),
+                     ("admin-lite.css", f"{base}/snellen/static/admin-lite.css"),
                      ("event.css", f"{base}/snellen/static/event.css"),
                      ("default.css", f"{base}/snellen/static/default.css"),
                      ("login.css", f"{base}/snellen/static/login.css"),

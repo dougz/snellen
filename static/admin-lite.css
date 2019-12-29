@@ -1,0 +1,202 @@
+@import url('https://fonts.googleapis.com/css?family=Inconsolata&display=block');
+@import url('https://fonts.googleapis.com/css?family=Merriweather+Sans&display=block');
+@import url('https://fonts.googleapis.com/css?family=Open+Sans:600,700&display=block&text=0123456789');
+
+#topnav {
+    min-width: 1060px;
+    height: 44px;
+    font-size: 18px;
+    color: white;
+    border-bottom: 1px solid black;
+    padding: 8px 40px 8px 20px;
+    box-sizing: border-box;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    z-index: 1000;
+
+    position: fixed;
+    top: 0;
+    width: 100vw;
+
+    user-select: none;
+}
+
+#topnav a { color: white; }
+
+/* The spacer should take up all the extra space, forcing the items
+   before it to the left and those after it to the right. */
+#topnav .spacer {
+    flex-grow: 100;
+}
+
+#topnav > span, #topnav > a {
+    margin: 0 20px;
+}
+
+span#home {
+    margin-left: 0;
+}
+
+#topnav #title {
+    font-weight: bold;
+    font-size: 120%;
+}
+
+#nonnav {
+    margin-top: 44px;
+}
+
+#dropdown {
+    position: relative;
+    display: inline-block;
+    height: 40px;
+    padding: 0;
+}
+
+#dropbtn {
+    font-family: 'Merriweather', sans-serif;
+    font-size: 18px;
+    height: 40px;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    margin-left: 1px;
+    padding: 0 12px;
+}
+
+#dropdown:hover #dropbtn {
+    background-color: #777;
+}
+
+#dropdown-content {
+    display: none;
+    position: absolute;
+    left: 0;
+    /*background-color: #777;*/
+    border: 1px solid black;
+    border-top: none;
+    min-width: 200px;
+    z-index: 999;
+}
+
+#dropdown:hover #dropdown-content {
+    display: block;
+}
+
+#dropdown-content a {
+    padding: 12px 16px;
+    border-top: 1px solid #00000022;
+    display: block;
+    color: #eee;
+}
+#dropdown-content a:hover {
+    background-color: #333;
+    opacity: 1.0;
+    color: #fff;
+}
+
+
+
+/** autocompletes in topnav */
+
+.ac label {
+    font-weight: bold;
+}
+
+.ac-select {
+    display: inline;
+    position: relative;
+}
+
+#topnav .ac-select {
+    align-self: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.ac-select-input {
+    width: 200px;
+    font-family: 'Merriweather Sans', sans-serif;
+    padding: 8px;
+    box-sizing: border-box;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    outline: none;
+}
+.ac-select-input:focus {
+    border: 1px solid #666;
+}
+
+#topnav .ac-select-input {
+    width: 80px;
+    font-family: 'Merriweather Sans', sans-serif;
+    font-size: 70%;
+    padding: 2px 8px;
+    border: none;
+    background-color: #ffffff33;
+    margin: 0 4px;
+    color: white;
+}
+
+
+#topnav .ac-select-input::placeholder {
+    color: #ffffffcc;
+    text-align: center;
+}
+
+
+.ac-select-dropdown {
+    display: none;
+    position: absolute;
+    left: 0px;
+    top: 32px;
+    background: #f8f8f8;
+    border: 1px solid #666;
+    border-radius: 8px;
+    width: 500px;
+    box-sizing: border-box;
+    padding: 4px 0;
+    z-index: 100;
+    box-shadow: 2px 2px 4px #55555533;
+}
+
+.ac-selected {
+    background-color: #ffff00;
+}
+
+.ac-row {
+    display: block;
+    color: #222;
+    padding: 4px 8px;
+    cursor: pointer;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.ac-row:hover {
+    background-color: #ffffcc;
+}
+
+.ac-match {
+    color: black;
+    font-weight: bold;
+}
+
+.ac-none {
+    display: block;
+    padding: 4px 16px;
+    color: #999;
+}
+
+.ac-overflow {
+    display: block;
+    padding: 4px 16px;
+    color: #999;
+}
+
+

@@ -184,11 +184,8 @@ span#home {
     display: flex;
     flex-direction: column;
     align-items: center;
-
     margin-top: 44px;
     min-height: calc(100vh - 44px);
-    background: #c3dffb;
-    padding: 100px 0 260px 0;
 }
 
 #content {

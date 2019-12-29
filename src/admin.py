@@ -145,6 +145,7 @@ class PuzzleContentPage(util.AdminPageHandler):
   def get_template_namespace(self):
     land = self.pagepuzzle.land
     d = super().get_template_namespace()
+    d["css"] = [self.static_content["event.css"], self.static_content["admin-lite.css"]]
     css = f"{land.shortname}/land.css"
     if css in self.static_content:
       d["css"].append(self.static_content[css])
