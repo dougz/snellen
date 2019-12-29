@@ -80,7 +80,7 @@ def main():
     timestamp, fn = latest[shortname]
 
     outfn = f"{shortname}.{timestamp}.zip"
-    oldts = current.get(shortname)
+    oldts = current.pop(shortname, None)
     if oldts == timestamp:
       print(f"Already have {shortname}.{timestamp}.zip")
       continue
@@ -97,6 +97,13 @@ def main():
 
     with open(os.path.join(options.output_dir, outfn), "wb") as f:
       f.write(r.content)
+
+  if current:
+    print("Extra puzzles:")
+    for k in current:
+      print(f"  {k}")
+  else:
+    print("No extra puzzles.")
 
 
 if __name__ == "__main__":

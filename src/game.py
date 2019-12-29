@@ -410,7 +410,7 @@ class Submission:
           # Note: alternate correct answers are only supported for
           # single-answer puzzles.
           for a in self.puzzle.answers:
-            answer = a
+            self.answer = answer = a
             break
         elif isinstance(response, str):
           # partial-progress response
@@ -783,7 +783,7 @@ class Team(login.LoginUser):
     else:
       base_img = mainmap.base_img[0]
       base_size = mainmap.base_size[0]
-        
+
     mapdata = {"base_url": base_img,
                "shortname": mainmap.shortname,
                "width": base_size[0],
@@ -812,7 +812,7 @@ class Team(login.LoginUser):
               "xywh": i.under.pos_size}
         # Sort these before any puzzle title
         items.append((("@",), dd))
-      
+
     # Add events
     e = mainmap.icons.get("events")
     if e:
@@ -883,7 +883,7 @@ class Team(login.LoginUser):
     d = {"xywh": [0, 0] + base_size,
          "icon_url": cloud_img}
     items.append((("~",), d))
-      
+
     items.sort(key=lambda i: i[0])
     for i, (sk, d) in enumerate(items):
       if i < len(items)-1 and sk[0] != items[i+1][0][0]:
@@ -893,8 +893,8 @@ class Team(login.LoginUser):
     mapdata = json.dumps(mapdata)
     self.cached_mapdata[mainmap] = mapdata
     return mapdata
-               
-  
+
+
   def get_land_data(self, land):
     if land in self.cached_mapdata:
       print(f" mapdata cache hit: {self.username} {land.shortname}")
@@ -1830,7 +1830,7 @@ class Land:
     self.base_size = cfg["base_size"]
 
     self.cloud_img = cfg.get("cloud_img")
-    
+
     if shortname == "mainmap":
       self.url = "/"
     else:
