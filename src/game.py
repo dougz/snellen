@@ -230,10 +230,11 @@ class PuzzleState:
     self.admin_html_team = f'<a href="{self.admin_url}">{html.escape(team.name)}</a>'
 
   def remove_pending(self):
+    count = 0
     for count, sub in enumerate(reversed(self.submissions)):
       if sub.state != sub.PENDING:
         break
-    if not count: return[]
+    if not count: return []
 
     after = self.submissions[-count:]
     del self.submissions[-count:]
