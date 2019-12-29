@@ -1,5 +1,4 @@
 @import url('https://fonts.googleapis.com/css?family=Merriweather+Sans&display=block');
-@import url('https://fonts.googleapis.com/css?family=Merriweather&display=block');
 @import url('https://fonts.googleapis.com/css?family=Inconsolata&display=block');
 @import url('https://fonts.googleapis.com/css?family=Open+Sans:600,700&display=block&text=0123456789');
 
@@ -49,7 +48,7 @@ body {
 a { text-decoration: none; }
 
 #topnav {
-    font-family: 'Merriweather', sans-serif;
+    font-family: 'Merriweather Sans', sans-serif;
 
     min-width: 1060px;
     height: 40px;
@@ -94,7 +93,7 @@ a { text-decoration: none; }
 }
 
 #dropbtn {
-    font-family: 'Merriweather', sans-serif;
+    font-family: 'Merriweather Sans', sans-serif;
     font-size: 18px;
     /*min-width: 200px;*/
     background-color: #666;
