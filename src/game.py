@@ -1528,17 +1528,14 @@ class Team(login.LoginUser):
 
     return self.cached_open_hints_data
 
-  @save_state
   def open_hints(self, now, puzzle):
-    puzzle = Puzzle.get_by_shortname(puzzle)
-    if not puzzle: return
     ps = self.puzzle_state[puzzle]
     if ps.hints_available: return
     ps.hints_available = True
     self.hints_open.add(puzzle)
     self.cached_open_hints_data = None
     self.cached_bb_data = None
-    self.invalidate(puzzle)
+    self.invalidate(puzzle, flush=False)
     puzzle.puzzle_log.add(now, f"Hints available to {ps.admin_html_team}.")
     self.activity_log.add(now, f"Hints available for {puzzle.html}.")
     self.admin_log.add(now, f"Hints available for {ps.admin_html_puzzle}.")
@@ -1823,7 +1820,7 @@ class Land:
     self.guess_max = cfg.get("guess_max", CONSTANTS["default_guess_max"])
     self.open_at_score, self.open_at_time = cfg.get("open_at", (None, None))
     self.time_unlocked = False
-    if self.open_at_time: self.open_at_time *= CONSTANTS["open_at_multiplier"]
+    if self.open_at_time: self.open_at_time *= CONSTANTS["time_scale"]
     if "assignments" in cfg:
       self.initial_puzzles = cfg["initial_puzzles"]
 
@@ -1930,9 +1927,8 @@ class Puzzle:
     self.url = f"/puzzle/{shortname}"
     self.admin_url = f"/admin/puzzle/{shortname}"
     self.points = 1
+    self.hints_available_time = CONSTANTS["failsafe_hint_time"] * CONSTANTS["time_scale"]
     self.hints_available_time_auto = True
-    self.hints_available_time = CONSTANTS["start_hint_available_sec"]
-    self.hints_available_solves = CONSTANTS["start_hint_available_solves"]
     self.emojify = False
     self.explanations = {}
     self.puzzle_log = Log()
@@ -2191,6 +2187,14 @@ class Puzzle:
     return cls.BY_SHORTNAME.values()
 
   @save_state
+  def open_hints_for(self, now, team_usernames):
+    for t in team_usernames:
+      t = Team.get_by_username(t)
+      t.open_hints(now, self)
+    if not save_state.REPLAYING and team_usernames:
+      asyncio.create_task(login.AdminUser.flush_messages())
+
+  @save_state
   def set_hints_available_time(self, now, new_time, admin_user):
     self.hints_available_time_auto = False
     self.hints_available_time = new_time
@@ -2202,10 +2206,12 @@ class Puzzle:
 
   def adjust_hints_available_time(self):
     if not self.hints_available_time_auto: return
-    if len(self.solve_durations) < self.hints_available_solves: return
+    N = CONSTANTS["hint_available_solves"]
+    if len(self.solve_durations) < N: return
     dur = list(self.solve_durations.values())
     heapq.heapify(dur)
-    m = statistics.median(heapq.nsmallest(self.hints_available_solves, dur))
+    m = max(heapq.nsmallest(N, dur))
+    m = max(m, CONSTANTS["no_hints_before"] * CONSTANTS["time_scale"])
     self.hints_available_time = m
     if not save_state.REPLAYING:
       self.invalidate()
@@ -2216,13 +2222,21 @@ class Puzzle:
     login.AdminUser.send_messages([d], flush=flush)
 
   def maybe_open_hints(self, now):
-    msg = [{"method": "hints_open", "puzzle_id": self.shortname, "title": self.title}]
+    if not Global.STATE.event_start_time: return
+    open_time = now - Global.STATE.event_start_time
+    if open_time < CONSTANTS["global_no_hints_before"] * CONSTANTS["time_scale"]: return
+
+    open_for = []
     for t in Team.all_teams():
       ps = t.puzzle_state[self]
       if (ps.state == PuzzleState.OPEN and
           not ps.hints_available and
           now - ps.open_time >= self.hints_available_time):
-        t.open_hints(self.shortname)
+        open_for.append(t)
+    if open_for:
+      print(f"opening hints for {len(open_for)} team(s)")
+      ps.puzzle.open_hints_for([t.username for t in open_for])
+      for t in open_for:
         asyncio.create_task(t.flush_messages())
 
   def get_hint_reply_data(self, last=None):
@@ -2263,16 +2277,27 @@ class Puzzle:
   @classmethod
   async def realtime_open_hints(cls):
     while True:
-      now = time.time()
-      for t in Team.all_teams():
-        flush = False
-        for ps in t.open_puzzles:
-          if not ps.hints_available and now - ps.open_time >= ps.puzzle.hints_available_time:
-            t.open_hints(ps.puzzle.shortname)
-            flush = True
-        if flush:
-          asyncio.create_task(t.flush_messages())
       await asyncio.sleep(10.0)
+
+      now = time.time()
+
+      if not Global.STATE.event_start_time: continue
+      open_time = now - Global.STATE.event_start_time
+      if open_time < CONSTANTS["global_no_hints_before"] * CONSTANTS["time_scale"]: continue
+
+      needs_flush = set()
+      for p in Puzzle.all_puzzles():
+        open_for = []
+        for t in p.open_teams:
+          ps = t.puzzle_state[p]
+          if not ps.hints_available and now - ps.open_time >= ps.puzzle.hints_available_time:
+            open_for.append(t.username)
+            needs_flush.add(t)
+        if open_for:
+          p.open_hints_for(open_for)
+
+      for t in needs_flush:
+        asyncio.create_task(t.flush_messages())
 
 
 class Erratum:
@@ -2488,7 +2513,7 @@ class Event:
     p.hints_available_solves = 1000
 
     def on_correct_answer(now, team):
-      team.receive_fastpass(now, CONSTANTS["pennypass_expiration_sec"])
+      team.receive_fastpass(now, CONSTANTS["pennypass_expiration"] * CONSTANTS["time_scale"])
       ps = team.puzzle_state[cls.PUZZLE]
       completed = [e.answer in ps.answers_found for e in cls.ALL_EVENTS]
       team.send_messages([{"method": "event_complete", "completed": completed}])

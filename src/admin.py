@@ -436,7 +436,7 @@ class ActionHandler(util.AdminHandler):
 
   async def ACTION_bestow_fastpass(self):
     username = self.args.get("team_username", None)
-    duration = CONSTANTS["pennypass_expiration_sec"]
+    duration = CONSTANTS["pennypass_expiration"] * CONSTANTS["time_scale"]
     if username is None:
       # User must have CONTROL_EVENT to give all teams a pass.
       if not self.user.has_role(login.AdminRoles.CONTROL_EVENT):
