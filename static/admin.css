@@ -441,7 +441,7 @@ body > p, body > h2 {
 .inlineminiaction {
     font-family: 'Open Sans', 'Merriweather Sans', sans-serif;
     color: white;
-    font-size: 70%;
+    font-size: 84%;
     padding: 0 8px;
     margin: 0 0 0 8px;
     box-sizing: border-box;
@@ -546,6 +546,7 @@ p.note {
 #taskqueue {
     border-collapse: collapse;
     border-spacing: 2px;
+    font-size: 84%;
 }
 
 #taskqueue td {
@@ -565,17 +566,17 @@ p.note {
 }
 
 #taskqueue .tqtime {
-    width: 100px;
+    width: 60px;
     text-overflow: ellipsis;
 }
 
 #taskqueue .tqteam {
-    min-width: 300px;
+    min-width: 260px;
     text-overflow: ellipsis;
 }
 
 #taskqueue .tqwhat {
-    min-width: 300px;
+    min-width: 360px;
     text-overflow: ellipsis;
 }
 
