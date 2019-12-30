@@ -270,7 +270,7 @@ class Puzzle:
           if v in asset_map:
             vv = asset_map[v]
             if vv:
-              print(f"  Rewriting <{i.name} {attr}=\"{v}\"> to {vv}")
+              #print(f"  Rewriting <{i.name} {attr}=\"{v}\"> to {vv}")
               i[attr] = vv
             else:
               errors.append(f"{fn} can't refer to {v}")

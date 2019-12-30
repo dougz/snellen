@@ -2543,7 +2543,7 @@ class Event:
     half = (len(teams_by_size)+1) // 2
     for i, (_, t) in enumerate(teams_by_size):
       if i < half:
-        e.team_time[t] = "10:30am Saturday"
+        e.team_time[t] = "11am Saturday"
       else:
         e.team_time[t] = "9am Saturday"
     e.time = None
