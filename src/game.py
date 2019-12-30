@@ -1915,7 +1915,10 @@ class Land:
     for land in cls.BY_SHORTNAME.values():
       for p in land.all_puzzles:
         if not p.style:
-          p.style = land.shortname + "/land.css"
+          if OPTIONS.debug:
+            p.style = land.shortname + "/land.css"
+          else:
+            p.style = land.shortname + "/land-compiled.css"
 
 
 class Puzzle:

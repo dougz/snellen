@@ -60,9 +60,14 @@ class PlayerHomePage(LandMapPage):
   @login.required("team", require_start=False)
   def get(self):
     if not game.Global.STATE.event_start_time:
+      if self.application.settings.get("debug"):
+        css = self.static_content["notopen.css"]
+      else:
+        css = self.static_content["notopen-compiled.css"]
+
       self.render("not_started.html",
                   open_time=game.Global.STATE.expected_start_time,
-                  css=(self.static_content["notopen.css"],))
+                  css=(css,))
       return
     self.show_map("mainmap")
 

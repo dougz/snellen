@@ -237,12 +237,17 @@ class Login(tornado.web.RequestHandler):
       default_username = None
       default_password = None
 
+    if self.application.settings.get("debug"):
+      css = self.static_content["login.css"]
+    else:
+      css = self.static_content["login-compiled.css"]
+
     self.render("login.html",
                 bad_login=bad_login,
                 default_username=default_username,
                 default_password=default_password,
                 target=target,
-                c=self.static_content["login.css"],
+                c=css,
                 logo=self.static_content["logo.png"])
 
 

@@ -223,6 +223,7 @@ def main():
 
   game.OPTIONS = options
   event.OPTIONS = options
+  admin.OPTIONS = options
 
   soft, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
   try:

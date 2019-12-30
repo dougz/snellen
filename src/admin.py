@@ -15,6 +15,8 @@ import login
 import util
 import wait_proxy
 
+OPTIONS = None
+
 class AdminHomePage(util.AdminPageHandler):
   @login.required("admin")
   def get(self):
@@ -145,12 +147,9 @@ class PuzzleContentPage(util.AdminPageHandler):
   def get_template_namespace(self):
     land = self.pagepuzzle.land
     d = super().get_template_namespace()
-    d["css"] = [self.static_content["event.css"], self.static_content["admin-lite.css"]]
-    css = f"{land.shortname}/land.css"
-    if css in self.static_content:
-      d["css"].append(self.static_content[css])
-    else:
-      d["css"].append(self.static_content["default.css"])
+    d["css"] = [self.static_content[f"event{'' if OPTIONS.debug else '-compiled'}.css"],
+                self.static_content["admin-lite.css"],
+                self.static_content[self.pagepuzzle.style]]
     return d
 
 

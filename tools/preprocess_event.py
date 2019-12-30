@@ -159,7 +159,7 @@ def convert_static_files(out, options, lands):
       if fn.startswith("land_") and fn.endswith(".png"):
         to_convert.append((os.path.join(land, fn), os.path.join(land_dir, fn)))
 
-    for xfn in ("land.css", "solve.mp3", "fastpass.png"):
+    for xfn in ("land.css", "land-compiled.css", "solve.mp3", "fastpass.png"):
       fn = os.path.join(options.input_assets, land, xfn)
       if os.path.exists(fn):
         to_convert.append((os.path.join(land, xfn), fn))
@@ -185,9 +185,13 @@ def convert_static_files(out, options, lands):
                      ("admin.css", f"{base}/snellen/static/admin.css"),
                      ("admin-lite.css", f"{base}/snellen/static/admin-lite.css"),
                      ("event.css", f"{base}/snellen/static/event.css"),
+                     ("event-compiled.css", f"{base}/snellen/bin/event-compiled.css"),
                      ("default.css", f"{base}/snellen/static/default.css"),
+                     ("default-compiled.css", f"{base}/snellen/bin/default-compiled.css"),
                      ("login.css", f"{base}/snellen/static/login.css"),
+                     ("login-compiled.css", f"{base}/snellen/bin/login-compiled.css"),
                      ("notopen.css", f"{base}/snellen/static/notopen.css"),
+                     ("notopen-compiled.css", f"{base}/snellen/bin/notopen-compiled.css"),
                      ("logo.png", f"{base}/snellen/static/logo.png"),
                      ("logo-nav.png", f"{base}/snellen/static/logo-nav.png"),
                      ("emoji.json", f"{base}/snellen/static/emoji.json"),

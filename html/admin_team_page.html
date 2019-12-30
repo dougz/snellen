@@ -12,7 +12,7 @@
 <table class=info>
   <tr><th>team</th><td class=h1>{{team.name}}</td></tr>
   <tr><th>username</th><td class=mono>{{team.username}}</td></tr>
-  <tr><th></th><td><a href="/admin/become/{{team.username}}">become this team</a></td></tr>
+  <tr><th></th><td><a target="_blank" href="/admin/become/{{team.username}}">become this team</a></td></tr>
   <tr><th>location</th><td>{{team.attrs.get("location", "Unknown")}}
       {% if team.remote_only %}<span class=remote>Remote Only</span>{% end %}
   </td></tr>

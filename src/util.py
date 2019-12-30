@@ -60,6 +60,11 @@ class TeamPageHandler(TeamHandler):
   def get_template_namespace(self):
     d = {"team": self.team}
 
+    if self.application.settings.get("debug"):
+      css = ".css"
+    else:
+      css = "-compiled.css"
+
     wid = wait_proxy.Server.new_waiter_id()
     serial = self.team.next_serial() - 1
 
@@ -67,7 +72,7 @@ class TeamPageHandler(TeamHandler):
 
     script = ["<script>"]
     script.append(f"""var page_class = \"{obfuscated_class}\";\n""")
-    d["css"] = [self.static_content["event.css"]]
+    d["css"] = [self.static_content[f"event{css}"]]
     style_css = None
 
     if hasattr(self, "puzzle"):
@@ -92,7 +97,7 @@ class TeamPageHandler(TeamHandler):
     elif hasattr(self, "land"):
       d["puzzle"] = None
       script.append(f"var puzzle_id = null;\n")
-      style_css = self.land.shortname + "/land.css"
+      style_css = f"{self.land.shortname}/land{css}"
     else:
       d["puzzle"] = None
       script.append(f"var puzzle_id = null;\n")
@@ -100,7 +105,7 @@ class TeamPageHandler(TeamHandler):
     if style_css in self.static_content:
       d["css"].append(self.static_content[style_css])
     else:
-      d["css"].append(self.static_content["default.css"])
+      d["css"].append(self.static_content[f"default{css}"])
 
     script.append(f"""var wid = {wid}; var received_serial = {serial};\n""")
     script.append(f"""var initial_header = {json.dumps(self.team.get_header_data())};\n""")
