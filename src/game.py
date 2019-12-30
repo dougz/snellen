@@ -1056,6 +1056,7 @@ class Team(login.LoginUser):
       return
 
     sub = Submission(now, submit_id, self, puzzle, answer)
+    if not sub.answer: return ""
     if not ps.puzzle.allow_duplicates:
       for s in ps.submissions:
         if s.answer == sub.answer:

@@ -341,7 +341,7 @@ class ActionHandler(util.AdminHandler):
     if not puzzle: return self.not_found()
     submit_id = self.team.get_submit_id()
     result = self.team.submit_answer(submit_id, shortname, answer)
-    if result:
+    if result is not None:
       self.write(result)
       self.set_status(http.client.CONFLICT.value)
     else:
