@@ -168,6 +168,9 @@ def convert_static_files(out, options, lands):
     ("runaround.css", os.path.join(options.input_assets, "runaround.css")),
     ("end_solve.mp3", os.path.join(options.input_assets, "end_solve.mp3")),
     ("events_solve.mp3", os.path.join(options.input_assets, "events_solve.mp3")),
+    ("reveal.mp3", os.path.join(options.input_assets, "reveal.mp3")),
+    ("reveal_over.png", os.path.join(options.input_assets, "reveal_over.png")),
+    ("reveal_under.png", os.path.join(options.input_assets, "reveal_under.png")),
   ])
 
   to_convert.extend([("mute.png", f"{base}/snellen/static/mute.png"),

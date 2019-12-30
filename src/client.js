@@ -41,7 +41,9 @@ class H2020_Dispatcher {
         this.dirty_all_puzzles = false;
     }
     post_dispatch() {
-        console.log("dirty activity", this.dirty_activity, "all_puzzles", this.dirty_all_puzzles);
+        if (goog.DEBUG) {
+            console.log("dirty activity", this.dirty_activity, "all_puzzles", this.dirty_all_puzzles);
+        }
         if (this.dirty_activity && hunt2020.activity) hunt2020.activity.update();
         if (this.dirty_all_puzzles && hunt2020.all_puzzles) hunt2020.all_puzzles.update();
     }
@@ -170,8 +172,13 @@ class H2020_Dispatcher {
         if (msg.audio) {
             hunt2020.audio_manager.start(msg.audio);
         }
-        hunt2020.toast_manager.add_toast(
-            "<b>" + msg.title + "</b> was solved!", 6000, true, "blue", "/puzzle/" + msg.puzzle_id);
+        if (msg.video_url) {
+            hunt2020.toast_manager.special_toast(msg, 12000);
+        } else {
+            hunt2020.toast_manager.add_toast(
+                "<b>" + msg.title + "</b> was solved!", 6000, true, "blue",
+                "/puzzle/" + msg.puzzle_id);
+        }
 
         if (puzzle_id == msg.puzzle_id) {
             var el = goog.dom.getElement("submit");
@@ -738,6 +745,38 @@ class H2020_ToastManager {
         }
     }
 
+    special_toast(msg, timeout) {
+        this.serial += 1;
+        var img = goog.dom.createDom("IMG", {src: msg.url});
+        var over = goog.dom.createDom("IMG", {src: msg.video_url});
+
+        var inner = goog.dom.createDom("DIV", "specialtoast toastblue", img, over);
+        inner.style.width = "600px";
+        inner.style.height = "481px";
+        var outer = goog.dom.createDom("DIV", "specialtoasts", inner);
+
+        this.toasts += 1;
+        this.toasts_div.appendChild(outer);
+        setTimeout(goog.bind(this.expire_special, this, outer), timeout);
+
+        if (msg.to_go) {
+            inner.style.cursor = "pointer";
+            goog.events.listen(inner, goog.events.EventType.CLICK, function(e) {
+                window.location = msg.to_go;
+                e.stopPropagation();
+            });
+        }
+        goog.events.listen(outer, goog.events.EventType.CLICK,
+                           goog.bind(this.expire_special, this, outer));
+    }
+
+    expire_special(t) {
+        goog.dom.classlist.add(t, "specialhidden");
+        setTimeout(t => {
+            goog.dom.removeNode(t);
+        }, 600);
+    }
+
     expire_toast(t) {
         goog.dom.classlist.addRemove(t, "toast", "toasthidden");
         setTimeout(goog.bind(this.delete_toast, this, t), 600);
@@ -1053,7 +1092,9 @@ class H2020_AudioManager {
             console.log("cancelling sound; too late");
             this.current.pause();
         }
-        console.log("playback has started after", delay, "ms");
+        if (goog.DEBUG) {
+            console.log("playback has started after", delay, "ms");
+        }
     }
 
     toggle_mute() {
@@ -1206,7 +1247,6 @@ class H2020_GuestServices {
 
     /** @param{HintHistory} data */
     render_hint_history(data) {
-        console.log(data);
         goog.dom.getElement("hintui").style.display = "block";
 
         this.hint_displayed = data.puzzle_id;
@@ -1509,8 +1549,6 @@ function refresh_header(dispatcher) {
 }
 
 window.onload = function() {
-    console.log("page init");
-
     hunt2020.serializer = new goog.json.Serializer();
     hunt2020.time_formatter = new Common_TimeFormatter();
     hunt2020.counter = new Common_Counter(hunt2020.time_formatter);

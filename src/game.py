@@ -1238,12 +1238,14 @@ class Team(login.LoginUser):
         self.cached_open_hints_data = None
         Global.STATE.task_queue.remove(ps)
 
-      self.send_messages(
-        [{"method": "solve",
-          "puzzle_id": puzzle.shortname,
-          "title": html.escape(puzzle.title),
-          "audio": puzzle.solve_audio,
-        }])
+      msg = {"method": "solve",
+             "puzzle_id": puzzle.shortname,
+             "title": html.escape(puzzle.title),
+             "audio": puzzle.solve_audio,
+      }
+      if puzzle.solve_extra:
+        msg.update(puzzle.solve_extra)
+      self.send_messages([msg])
 
       self.dirty_lands.add(puzzle.land.shortname)
       self.cached_mapdata.pop(puzzle.land, None)
@@ -1938,6 +1940,7 @@ class Puzzle:
     self.wait_for_requested = False
     self.style = None
     self.solve_audio = None
+    self.solve_extra = None
 
     self.median_solve_duration = None
     self.solve_durations = {}     # {team: duration}
@@ -2582,7 +2585,10 @@ class Workshop:
     p.puzzletron_id = -1
     p.authors = ["Left Out"]
     p.style = "default.css"
-    p.solve_audio = OPTIONS.static_content.get("end_solve.mp3")
+    p.solve_audio = OPTIONS.static_content.get("reveal.mp3")
+    p.solve_extra = {"url": OPTIONS.static_content.get("reveal_under.png"),
+                     "video_url": OPTIONS.static_content.get("reveal_over.png"),
+                     "to_go": "/heart_of_the_park"}
 
     p.title = "Workshop"
     p.url = "/workshop"

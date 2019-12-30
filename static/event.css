@@ -794,6 +794,49 @@ span.solved img.emoji {
 
 /** notifications **/
 
+div.specialtoasts {
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    background: #000000cc;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.specialhidden {
+    animation: fadeOut 0.5s ease-in both;
+}
+
+div.specialtoast {
+    position: relative;
+    padding: 32px;
+    box-shadow: 0 0 12px black;
+    box-sizing: content-box;
+    border-radius: 12px;
+    animation: fadeIn 0.5s ease-out both;
+    user-select: none;
+}
+
+div.specialtoast img {
+    position: absolute;
+    left: 32px;
+    top: 32px;
+}
+
+@keyframes slideout {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-90px); }
+}
+
+div.specialtoast img + img {
+    animation: slideout 7s ease-in forwards;
+}
+
+
 div.toasts {
     width: 320px;
     position: fixed;

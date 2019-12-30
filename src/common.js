@@ -156,7 +156,9 @@ class Common_Waiter {
     }
 
     waitcomplete(e) {
-        console.log("wait response is", e.target.getStatus());
+        if (goog.DEBUG) {
+            console.log("wait response is", e.target.getStatus());
+        }
         if (e.target.getStatus() >= 500) {
             this.saw_error = true;
         }
@@ -186,7 +188,9 @@ class Common_Waiter {
             for (var i = 0; i < msgs.length; ++i) {
                 this.serial = /** @type{number} */ (msgs[i][0]);
                 var msg = /** @type{Object} */ (msgs[i][1]);
-                console.log("dispatching", msg);
+                if (goog.DEBUG) {
+                    console.log("dispatching", msg);
+                }
                 this.dispatcher.dispatch(msg);
             }
             if (this.dispatcher.post_dispatch) this.dispatcher.post_dispatch();
@@ -274,7 +278,6 @@ class Common_enabler {
     }
 
     do_enable() {
-        console.log("do_enable");
         this.action_el.disabled = !this.action_el.disabled;
     }
 
