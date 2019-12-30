@@ -839,7 +839,8 @@ class Team(login.LoginUser):
            "mask_url": e.mask.url,
            "offset": e.offset}
 
-      if self.puzzle_state[Workshop.PUZZLE].state == PuzzleState.CLOSED:
+      ps = self.puzzle_state[Workshop.PUZZLE]
+      if ps.state == PuzzleState.CLOSED:
         warning = mainmap.icons.get("warning")
         dd = {"icon_url": warning.image.url,
               "xywh": warning.image.pos_size}
@@ -848,6 +849,9 @@ class Team(login.LoginUser):
       else:
         d["url"] = "/workshop"
         d["spaceafter"] = True
+        if ps.state == PuzzleState.SOLVED:
+          d["solved"] = True
+          d["answer"] = ", ".join(sorted(ps.puzzle.display_answers[a] for a in ps.answers_found))
 
       items.append((("@",), d))
 
