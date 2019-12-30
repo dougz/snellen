@@ -2592,7 +2592,8 @@ class Workshop:
     p.solve_audio = OPTIONS.static_content.get("reveal.mp3")
     p.solve_extra = {"url": OPTIONS.static_content.get("reveal_under.png"),
                      "video_url": OPTIONS.static_content.get("reveal_over.png"),
-                     "to_go": "/heart_of_the_park"}
+                     "to_go": "/heart_of_the_park",
+                     "text": "<b>Workshop</b> was solved!"}
 
     p.title = "Workshop"
     p.url = "/workshop"

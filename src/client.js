@@ -750,9 +750,14 @@ class H2020_ToastManager {
         var img = goog.dom.createDom("IMG", {src: msg.url});
         var over = goog.dom.createDom("IMG", {src: msg.video_url});
 
-        var inner = goog.dom.createDom("DIV", "specialtoast toastblue", img, over);
-        inner.style.width = "600px";
-        inner.style.height = "481px";
+        var p = goog.dom.createDom("P");
+        p.innerHTML = msg.text;
+        var div = goog.dom.createDom("DIV", null, img, over);
+        div.style.width = "600px";
+        div.style.height = "481px";
+
+        var inner = goog.dom.createDom("DIV", "specialtoast toastblue", p, div);
+
         var outer = goog.dom.createDom("DIV", "specialtoasts", inner);
 
         this.toasts += 1;

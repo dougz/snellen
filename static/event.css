@@ -803,6 +803,7 @@ div.specialtoasts {
     background: #000000cc;
 
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
 }
@@ -821,10 +822,15 @@ div.specialtoast {
     user-select: none;
 }
 
-div.specialtoast img {
+div.specialtoast p {
+    text-align: center;
+    margin-top: 0;
+    color: white;
+    width: 600px;
+}
+
+div.specialtoast div img {
     position: absolute;
-    left: 32px;
-    top: 32px;
 }
 
 @keyframes slideout {
@@ -832,8 +838,8 @@ div.specialtoast img {
     100% { transform: translateX(-90px); }
 }
 
-div.specialtoast img + img {
-    animation: slideout 7s ease-in forwards;
+div.specialtoast div img + img {
+    animation: slideout 7.25s ease-in forwards;
 }
 
 
