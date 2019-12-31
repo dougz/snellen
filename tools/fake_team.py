@@ -63,8 +63,9 @@ class Simulation:
     teams = [SimTeam(self, username, "snth") for username in TEAMS[:self.options.teams]]
     tasks = [t.go() for t in teams]
 
-    admin = SimAdmin(self, ADMIN[0], "snth")
-    tasks.append(admin.go())
+    if self.options.admin:
+      admin = SimAdmin(self, ADMIN[0], "snth")
+      tasks.append(admin.go())
 
     #tasks.append(self.show_stats())
     await asyncio.gather(*tasks)
@@ -357,6 +358,7 @@ if __name__ == "__main__":
   parser.add_argument("-a", "--info_dump", default=None)
   parser.add_argument("-u", "--base_url", default="http://snellen.fun")
   parser.add_argument("--slow", action="store_true", default=None)
+  parser.add_argument("--admin", action="store_true", default=None)
   options = parser.parse_args()
 
   if options.info_dump:

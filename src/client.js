@@ -173,7 +173,7 @@ class H2020_Dispatcher {
             hunt2020.audio_manager.start(msg.audio);
         }
         if (msg.video_url) {
-            hunt2020.toast_manager.special_toast(msg, 12000);
+            hunt2020.toast_manager.special_toast(msg, 15000);
         } else {
             hunt2020.toast_manager.add_toast(
                 "<b>" + msg.title + "</b> was solved!", 6000, true, "blue",

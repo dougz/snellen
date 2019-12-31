@@ -5,6 +5,7 @@ import bcrypt
 import json
 import os
 import yaml
+import re
 
 
 def make_hash(password):
@@ -27,9 +28,14 @@ def main():
   out = {}
   names = set()
   for i, (username, d) in enumerate(y["admins"].items()):
-    print(f"{i+1}: {d['name']} ({username})")
-
     od = {}
+
+    u = re.sub(r"[^a-z0-9_]", "", username.lower())
+    if u != username:
+      print(f"{i+1}: {d['name']} ({u}) (was {username})")
+      username = u
+    else:
+      print(f"{i+1}: {d['name']} ({username})")
 
     # No duplicate usernames
     assert username not in out, f"Duplicate username {username}!"
