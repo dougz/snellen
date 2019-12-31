@@ -8,8 +8,7 @@
 {% else %}
 <a id="submit">Submit</a>
 {% end %}
-<a id="puzzerr"{% if not puzzle.errata%} class="hidden"{% end %} href="/errata" title="Errata">!</a>
-<a id="puzzhints"{% if puzzle not in team.hints_open %} class="hidden"{% end %} href="/guest_services?p={{puzzle.shortname}}" title="Hints">H</a>
+<a id="puzzhints"{% if puzzle not in team.hints_open %} class="hidden"{% end %} href="/guest_services?p={{puzzle.shortname}}" title="Hints">Hints</a>
 {% end %}
 
 {% block midnav %}
@@ -64,9 +63,10 @@
 {% block content %}
 <a href="{{puzzle.land.url}}"><h1 id="landtitle">{{puzzle.land.title}}</h1></a>
 
-<div id="content">
+<div id="content" class="{{page_class}}">
 
   <h2 id="puzzletitle"><div id=vspace></div>{% raw supertitle %}{{puzzle.title}}</h2>
+  <div id="errata"></div>
   <div id="puzz">
     {% raw puzzle.html_body %}
   </div>

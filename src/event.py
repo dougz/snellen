@@ -249,7 +249,8 @@ class SubmitHistoryHandler(util.TeamHandler):
          "history": [sub.json_dict() for sub in ps.submissions if sub.state != sub.RESET],
          }
     if ps.puzzle.errata:
-      d["errata"] = True
+      d["errata"] = [{"when": e.when, "text": e.text} for e in reversed(ps.puzzle.errata)]
+
     if ((len(ps.puzzle.answers) > 1 or ps.puzzle.land.shortname == "safari")
         and ps.puzzle.land.land_order < 1000):
       d["correct"] = len(ps.answers_found)

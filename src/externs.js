@@ -133,7 +133,7 @@ class SubmissionHistory {
         this.width;
         /** @type{?number} */
         this.height;
-        /** @type{?boolean} */
+        /** @type{?Array<Erratum>} */
         this.errata;
     }
 }

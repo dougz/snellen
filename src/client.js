@@ -518,6 +518,9 @@ class H2020_SubmitPanel {
         /** @type{boolean} */
         this.has_overlay = false;
 
+        /** @type{Element} */
+        this.errata = goog.dom.getElement("errata");
+
         this.build();
     }
 
@@ -641,7 +644,16 @@ class H2020_SubmitPanel {
         }
 
         if (response.errata) {
-            goog.dom.classlist.remove(goog.dom.getElement("puzzerr"), "hidden");
+            if (goog.DEBUG) {
+                console.log(response);
+            }
+            this.errata.style.display = "block";
+            this.errata.innerHTML = "";
+            for (const e of response.errata) {
+                var p = goog.dom.createElement("P");
+                p.innerHTML = "<b>Erratum posted " + hunt2020.time_formatter.format(e.when) + ":</b> " + e.text;
+                this.errata.appendChild(p);
+            }
         }
     }
 
