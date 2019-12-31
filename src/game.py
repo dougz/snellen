@@ -157,8 +157,9 @@ class TaskQueue:
   def to_json(self):
     if self.cached_json is not None: return self.cached_json
 
-    total = 0
-    claimed = 0
+    summary = {}
+    for k in ("hint", "puzzle", "visit", "penny"):
+      summary[k] = [0, 0]
 
     q = []
     for ps in self.states:
@@ -176,8 +177,8 @@ class TaskQueue:
                 "last_sender": ps.last_hq_sender.fullname if ps.last_hq_sender else None,
                 "key": "h-" + ps.team.username + "-" + ps.puzzle.shortname,
                 "target": f"/admin/team/{ps.team.username}/puzzle/{ps.puzzle.shortname}"})
-      total += 1
-      if ps.claim: claimed += 1
+      summary["hint"][1] += 1
+      if ps.claim: summary["hint"][0] += 1
     for task in self.tasks.values():
       d = {"team": task.team.name,
            "kind": task.kind,
@@ -190,11 +191,11 @@ class TaskQueue:
       w = self.pending_removal.get(task.key)
       if w: d["done_pending"] = w
       q.append(d)
-      total += 1
-      if task.claim: claimed += 1
+      summary[task.kind][1] += 1
+      if task.claim: summary[task.kind][0] += 1
 
     self.cached_json = json.dumps({"queue": q, "favicons": self.favicon_data})
-    self.cached_bbdata = {"size": total, "claimed": claimed}
+    self.cached_bbdata = {"by_kind": summary}
 
     return self.cached_json
 

@@ -72,6 +72,7 @@ td.h1 a.content {
 .lightergray { background-color: #b1a296; }
 
 .color-home { background-color: #ff6363; }
+.color-bb { background-color: #444; }
 .color-users { background-color: #ff6363; }
 .color-team { background-color: #341677; }
 .color-puzzle { background-color: #000272; }
@@ -716,6 +717,11 @@ p.note {
     display: block;
     padding: 4px 16px;
     color: #999;
+}
+
+#bbtaskqueue img {
+    width: 24px;
+    margin-bottom: -3px;
 }
 
 #bblabel {

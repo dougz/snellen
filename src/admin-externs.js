@@ -77,10 +77,8 @@ class TaskQueueItem {
 
 class BBTaskQueue {
     constructor() {
-        /** @type{?number} */
-        this.size;
-        /** @type{?number} */
-        this.claimed;
+        /** @type{Object<string,Array<number>>} */
+        this.by_kind;
     }
 }
 

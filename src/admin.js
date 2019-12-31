@@ -1074,7 +1074,12 @@ class A2020_BigBoard {
     /** @param{BBTaskQueue} data */
     update_taskqueue(data) {
         if (!data) return;
-        this.taskqueue.innerHTML = "" + data.size + " (" + (data.size - data.claimed) + ")";
+        var bk = data.by_kind;
+        this.taskqueue.innerHTML =
+            "<img src=\"" + eurl + "1f9ae.png\"> " + bk["hint"][0] + "/" + bk["hint"][1] + " &nbsp; " +
+            "<img src=\"" + eurl + "2708.png\"> " + bk["visit"][0] + "/" + bk["visit"][1] + " &nbsp; " +
+            "<img src=\"" + eurl + "1f7e4.png\"> " + bk["penny"][0] + "/" + bk["penny"][1] + " &nbsp; " +
+            "<img src=\"" + eurl + "1f9e9.png\"> " + bk["puzzle"][0] + "/" + bk["puzzle"][1];
     }
 }
 
