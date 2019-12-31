@@ -1203,20 +1203,17 @@ class Team(login.LoginUser):
     self.invalidate()
     return True
 
-  def open_puzzle(self, puzzle, now):
-    #print(f"opening {puzzle.title}")
-    state = self.puzzle_state[puzzle]
-    if state.state == state.CLOSED:
-      state.state = state.OPEN
-      state.open_time = now
-      self.open_puzzles.add(state)
+  def open_puzzle(self, puzzle, now, opened_list):
+    ps = self.puzzle_state[puzzle]
+    if ps.state == PuzzleState.CLOSED:
+      ps.state = PuzzleState.OPEN
+      ps.open_time = now
+      if opened_list is not None: opened_list.append(puzzle)
+      self.open_puzzles.add(ps)
       puzzle.open_teams.add(self)
       self.cached_all_puzzles_data = None
       self.cached_errata_data = None
       if puzzle.land.land_order < 1000:
-        puzzle.puzzle_log.add(now, f"Opened by {state.admin_html_team}.")
-        self.activity_log.add(now, f"{puzzle.html} opened.")
-        self.admin_log.add(now, f"{state.admin_html_puzzle} opened.")
         self.dirty_lands.add(puzzle.land.shortname)
         self.cached_mapdata.pop(puzzle.land, None)
 
@@ -1234,6 +1231,8 @@ class Team(login.LoginUser):
       self.dirty_header = True
       self.last_score_change = now
       self.open_puzzles.remove(ps)
+
+      self.activity_log.add(now, f"{puzzle.html} solved.")
 
       if ps.hint_request_outstanding():
         ps.hints.append(HintMessage(ps, now, None, None, special="solved"))
@@ -1267,7 +1266,7 @@ class Team(login.LoginUser):
           self.complete_penny_visit(now)
         else:
           Global.STATE.add_task(now, self.username, f"penny-visit",
-                                "Penny visit", None,
+                                "Penny character visit", None,
                                 self.complete_penny_visit, "visit")
           self.outer_lands_triggered = "triggered"
           extra_response = "Expect a special visit soon!"
@@ -1275,15 +1274,20 @@ class Team(login.LoginUser):
         extra_response = Runaround.solve_response
 
       new_videos = 0
-      for s, v in CONSTANTS["videos_by_score"].items():
+      for v, s in enumerate(CONSTANTS["videos_by_score"]):
         if self.score >= s:
-          new_videos = max(new_videos, v)
+          new_videos = max(new_videos, v+1)
       if new_videos > self.videos:
         self.videos = new_videos
+        thumb = OPTIONS.static_content.get(f"thumb{self.videos}.png")
+        self.activity_log.add(
+          now,
+          "A new Park History video is available!<br>"
+          f"<a href=\"/about_the_park#history\"><img class=videothumb src=\"{thumb}\"></a>")
         self.send_messages([
           {"method": "video",
            "video_url": OPTIONS.static_content.get(f"video{self.videos}.mp4"),
-           "thumb": OPTIONS.static_content.get(f"thumb{self.videos}.png"),
+           "thumb": thumb,
           }])
 
       # If this puzzle rewards you with a penny (land meta or events),
@@ -1292,7 +1296,7 @@ class Team(login.LoginUser):
         if self.remote_only:
           if self.puzzle_state[Workshop.PUZZLE].state == PuzzleState.CLOSED:
             self.admin_log.add(now, f"Skipped Loonie Toonie visit for remote-only team.")
-            self.open_puzzle(Workshop.PUZZLE, now)
+            self.open_puzzle(Workshop.PUZZLE, now, None)
         else:
           dirty = False
           for penny in Workshop.ALL_PENNIES.values():
@@ -1320,7 +1324,6 @@ class Team(login.LoginUser):
 
       durtxt = util.format_duration(solve_duration)
       puzzle.puzzle_log.add(now, f"Solved by {ps.admin_html_team} ({durtxt}).")
-      self.activity_log.add(now, f"{puzzle.html} solved.")
       self.admin_log.add(now, f"{ps.admin_html_puzzle} solved ({durtxt}).")
 
       self.compute_puzzle_beam(now)
@@ -1339,7 +1342,7 @@ class Team(login.LoginUser):
 
   def complete_loony_visit(self, task, when):
     self.admin_log.add(when, f"Completed the Loonie Toonie visit.")
-    self.open_puzzle(Workshop.PUZZLE, when)
+    self.open_puzzle(Workshop.PUZZLE, when, None)
     self.cached_all_puzzles_data = None
     self.dirty_lands.add("mainmap")
     self.cached_mapdata.pop(Land.BY_SHORTNAME["mainmap"], None)
@@ -1682,9 +1685,9 @@ class Team(login.LoginUser):
       if not self.force_all_puzzles_open and land.shortname == "cascade":
         skip12 = True
         if self.puzzle_state[land.first_submeta].state == PuzzleState.SOLVED:
-          self.open_puzzle(land.second_submeta, now)
+          self.open_puzzle(land.second_submeta, now, opened)
           if self.puzzle_state[land.second_submeta].state == PuzzleState.SOLVED:
-            self.open_puzzle(land.meta_puzzle, now)
+            self.open_puzzle(land.meta_puzzle, now, opened)
           else:
             stop_after = 13
         else:
@@ -1695,8 +1698,7 @@ class Team(login.LoginUser):
         if skip12 and 1 <= i <= 2: continue
         if self.puzzle_state[p].state == PuzzleState.CLOSED:
           if open_count > 0 or p.meta or p.submeta:
-            self.open_puzzle(p, now)
-            opened.append(p)
+            self.open_puzzle(p, now, opened)
           else:
             break
         if self.puzzle_state[p].state == PuzzleState.OPEN:
@@ -1715,17 +1717,17 @@ class Team(login.LoginUser):
           keepers_solved += 1
         elif kps.state == PuzzleState.CLOSED:
           if self.force_all_puzzles_open:
-            self.open_puzzle(kp, now)
+            self.open_puzzle(kp, now, opened)
           else:
             count = sum(1 for a in kp.keeper_answers if a in answers)
             if kps.keeper_answers == 0 and count >= kp.keeper_needed:
               kps.keeper_answers = min(len(answers)+2, safari.total_keeper_answers)
             if 0 < kps.keeper_answers <= len(answers):
-              self.open_puzzle(kp, now)
+              self.open_puzzle(kp, now, opened)
       meta = Puzzle.get_by_shortname("safari_adventure")
       if (meta and self.puzzle_state[meta].state == PuzzleState.CLOSED and
           (keepers_solved >= 5 or self.force_all_puzzles_open)):
-        self.open_puzzle(meta, now)
+        self.open_puzzle(meta, now, opened)
 
     if self.puzzle_state[Runaround.PUZZLE].state == PuzzleState.CLOSED:
       for p in Runaround.REQUIRED_PUZZLES:
@@ -1733,13 +1735,13 @@ class Team(login.LoginUser):
           break
       else:
         # Open the runaround!
-        self.open_puzzle(Runaround.PUZZLE, now)
+        self.open_puzzle(Runaround.PUZZLE, now, opened)
         self.invalidate(Runaround.PUZZLE)
         self.cached_all_puzzles_data = None
         self.dirty_lands.add("mainmap")
         self.cached_mapdata.pop(Land.BY_SHORTNAME["mainmap"], None)
 
-    opened_one_land = False
+    lands_opened = set()
     for st in self.puzzle_state.values():
       if st.state != PuzzleState.CLOSED:
         if st.puzzle.land.land_order >= 1000: continue
@@ -1750,15 +1752,29 @@ class Team(login.LoginUser):
           self.dirty_lands.add("mainmap")
           self.cached_mapdata.pop(Land.BY_SHORTNAME["mainmap"], None)
           self.dirty_header = True
-          opened_one_land = True
+          lands_opened.add(st.puzzle.land)
           if now != Global.STATE.event_start_time:
+            title = html.escape(st.puzzle.land.title)
             self.send_messages([{"method": "open_land",
-                                 "title": html.escape(st.puzzle.land.title),
+                                 "title": title,
                                  "land": st.puzzle.land.shortname}])
 
-    if opened_one_land:
+    if lands_opened:
       self.send_messages([{"method": "update_fastpass",
                            "fastpass": self.get_fastpass_data()}])
+
+    for puzzle in opened:
+      ps = self.puzzle_state[puzzle]
+
+      if puzzle.land in lands_opened:
+        lands_opened.discard(puzzle.land)
+        title = html.escape(puzzle.land.title)
+        self.activity_log.add(now, f"<b>{title}</b> is now open!")
+
+      puzzle.puzzle_log.add(now, f"Opened by {ps.admin_html_team}.")
+      self.activity_log.add(now, f"{puzzle.html} opened.")
+      self.admin_log.add(now, f"{ps.admin_html_puzzle} opened.")
+
 
     current_map = Land.BY_SHORTNAME["mainmap"]
     if current_map not in self.open_lands:
@@ -2368,6 +2384,10 @@ class Global:
 
     puzzle.puzzle_log.add(now, f"An erratum was posted by <b>{sender.fullname}</b>.")
 
+    for t in puzzle.open_teams:
+      t.activity_log.add(now, f"An erratum was posted for {puzzle.html}.")
+
+
   @save_state
   def save_reload(self, now, shortname, sender):
     puzzle = Puzzle.get_by_shortname(shortname)
@@ -2414,7 +2434,7 @@ class Global:
     print(f"starting event at {now} hash is {self.event_hash}")
     for team in Team.BY_USERNAME.values():
       team.compute_puzzle_beam(self.event_start_time)
-      team.open_puzzle(Event.PUZZLE, now)
+      team.open_puzzle(Event.PUZZLE, now, None)
       team.invalidate(flush=False)
     if timed and not save_state.REPLAYING:
       asyncio.create_task(self.notify_event_start())

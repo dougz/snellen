@@ -66,11 +66,7 @@ async def main_server(options):
   with open(os.path.join(options.event_dir, "map_config.json")) as f:
     cfg = json.load(f)
 
-  # Transform the keys in the videos_by_score dict to numbers.
   c = cfg["constants"]
-  vs = dict((int(k), v) for (k, v) in c["videos_by_score"].items())
-  c["videos_by_score"] = vs
-
   game.CONSTANTS = c
   admin.CONSTANTS = c
 

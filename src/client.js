@@ -61,6 +61,7 @@ class H2020_Dispatcher {
 
     /** @param{Message} msg */
     history_change(msg) {
+        this.dirty_activity = true;
         if (msg.puzzle_id == puzzle_id) {
             hunt2020.submit_panel.update_history();
         }

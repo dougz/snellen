@@ -31,7 +31,7 @@
     </div>
     <div id="submitentry">
       {% if puzzle.emojify %}
-        <input type=hidden id="answer" name="answer" maxlength=40>
+        <input type=hidden id="answer" name="answer" maxlength=60>
         <div id="emoji-answer" contenteditable="true"></div>
         <span id="emoji-picker-button" class="fa fa-smile-o"></span>
         <div id="emoji-picker">
@@ -43,7 +43,7 @@
           </div>
         </div>
       {% else %}
-        <input type=text maxlength=40 id="answer" name="answer" spellcheck="false">
+        <input type=text maxlength=60 id="answer" name="answer" spellcheck="false">
       {% end %}
       <button class="action" id="submitsubmit">Submit</button>
     </div>
