@@ -1524,8 +1524,12 @@ class Team(login.LoginUser):
     if self.cached_open_hints_data is not None:
       return self.cached_open_hints_data
 
-    oh = [[p.shortname, p.title, self.puzzle_state[p].state == PuzzleState.SOLVED]
-          for p in sorted(self.hints_open, key=lambda p: p.sortkey)]
+    oh = []
+    for p in sorted(self.hints_open, key=lambda p: p.sortkey):
+      ps = self.puzzle_state[p]
+      if ps.state == PuzzleState.SOLVED and not ps.hints: continue
+      oh.append([p.shortname, p.title, ps.state == PuzzleState.SOLVED])
+
     d = {"available": oh}
     if self.current_hint_puzzlestate:
       d["current"] = self.current_hint_puzzlestate.puzzle.shortname
@@ -1538,6 +1542,7 @@ class Team(login.LoginUser):
   def open_hints(self, now, puzzle):
     ps = self.puzzle_state[puzzle]
     if ps.hints_available: return
+    if ps.state == PuzzleState.SOLVED: return
     ps.hints_available = True
     self.hints_open.add(puzzle)
     self.cached_open_hints_data = None
