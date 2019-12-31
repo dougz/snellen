@@ -722,7 +722,13 @@ div#submitentry {
 
 img.emoji {
     width: 3ex;
-    margin-bottom: -2px;
+    margin: 0 2px -2px 2px;
+}
+
+#emoji-answer img.emoji {
+    margin: 0 2px -4px 2px;
+    height: 20px;
+    width: 20px;
 }
 
 span.solved img.emoji {

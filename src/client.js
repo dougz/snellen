@@ -311,9 +311,14 @@ class H2020_EmojiPicker {
         goog.events.listen(this.emojiinput, goog.events.EventType.KEYDOWN,
             goog.bind(this.onkeydown, this));
         goog.events.listen(this.emojiinput, goog.events.EventType.INPUT,
-            goog.bind(this.oninput, this));
+                           goog.bind(this.oninput, this));
         goog.events.listen(this.emojiinput, goog.events.EventType.PASTE,
-            goog.bind(this.onpaste, this));
+                           goog.bind(this.onpaste, this));
+
+        goog.events.listen(this.emojiinput, goog.events.EventType.DRAGOVER,
+                           e => e.preventDefault());
+        goog.events.listen(this.emojiinput, goog.events.EventType.DROP,
+                           e => e.preventDefault());
 
         /** @type{?Element} */
         this.pickerbutton = goog.dom.getElement("emoji-picker-button");
@@ -363,7 +368,7 @@ class H2020_EmojiPicker {
             text = text.replace(goog.dom.getOuterHtml(children[i]), children[i].alt);
           }
         }
-        this.input.value = this.sanitize_input(text, this.max_input_length());;
+        this.input.value = this.sanitize_input(text, this.max_input_length());
     }
 
     onpaste(event) {
@@ -371,10 +376,8 @@ class H2020_EmojiPicker {
         event.stopPropagation();
         var text = event.getBrowserEvent().clipboardData.getData("text/plain");
         text = this.sanitize_input(text, this.max_input_length() - this.input.value.length);
-        if (typeof twemoji !== 'undefined') {
-          text = twemoji.parse(text);
-        }
-        document.execCommand("insertHTML", false, text);
+        document.execCommand("insertText", false, text);
+        twemoji.parse(this.emojiinput);
     }
 
     sanitize_input(text, maxlength) {
@@ -523,7 +526,12 @@ class H2020_SubmitPanel {
         this.table = goog.dom.getElement("submit_table_body");
         this.top_note = goog.dom.getElement("top_note");
         this.entry = goog.dom.getElement("submitentry");
-        goog.events.listen(this.input, goog.events.EventType.KEYDOWN, goog.bind(this.onkeydown, this));
+        goog.events.listen(this.input, goog.events.EventType.KEYDOWN,
+                           goog.bind(this.onkeydown, this));
+        goog.events.listen(this.input, goog.events.EventType.DRAGOVER,
+                           e => e.preventDefault());
+        goog.events.listen(this.input, goog.events.EventType.DROP,
+                           e => e.preventDefault());
 
         if (goog.dom.getElement("emoji-picker-button")) {
           this.emoji_picker = new H2020_EmojiPicker(this);
