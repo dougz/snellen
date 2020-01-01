@@ -158,7 +158,8 @@ class SimTeam(SimBrowser):
 
     print(f"{self.username} logged in")
     if self.sim.options.slow:
-      solves_per_minute = random.random() * 0.4 + 0.1
+      minutes_per_solve = random.random() * 30 + 15
+      solves_per_minute = 1.0 / minutes_per_solve
     else:
       solves_per_minute = random.random() * 7 + 3
 

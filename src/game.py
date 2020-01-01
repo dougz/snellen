@@ -2323,6 +2323,7 @@ class Puzzle:
         open_for = []
         for t in p.open_teams:
           ps = t.puzzle_state[p]
+          if ps.state == PuzzleState.SOLVED: continue
           if not ps.hints_available and now - ps.open_time >= ps.puzzle.hints_available_time:
             open_for.append(t.username)
             needs_flush.add(t)
