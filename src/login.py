@@ -248,7 +248,11 @@ class Login(tornado.web.RequestHandler):
                 default_password=default_password,
                 target=target,
                 c=css,
-                logo=self.static_content["logo.png"])
+                logo=self.static_content["logo.png"],
+                favicon32=self.static_content[f"favicon-32x32.png"],
+                favicon16=self.static_content[f"favicon-16x16.png"])
+
+
 
 
 class LoginSubmit(tornado.web.RequestHandler):

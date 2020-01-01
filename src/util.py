@@ -128,6 +128,8 @@ class TeamPageHandler(TeamHandler):
     d["has_errata"] = not not self.team.get_errata_data()
     d["logo_nav"] = self.static_content["logo-nav.png"]
     d["eurl"] = self.static_content["emoji"]
+    d["favicon32"] = self.static_content[f"favicon-32x32.png"]
+    d["favicon16"] = self.static_content[f"favicon-16x16.png"]
 
     return d
 

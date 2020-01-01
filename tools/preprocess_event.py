@@ -230,6 +230,8 @@ def convert_static_files(out, options, lands):
                       f"{base}/snellen/static/admin_fav_blue/favicon-32x32.png"),
                      ("admin_fav_blue/favicon-16x16.png",
                       f"{base}/snellen/static/admin_fav_blue/favicon-16x16.png"),
+                     ("favicon-32x32.png", f"{base}/snellen/static/favicon-32x32.png"),
+                     ("favicon-16x16.png", f"{base}/snellen/static/favicon-16x16.png"),
                      ])
   for rp in ("safari.jpg", "space.jpg", "cascade_flow.png", "cascade_grid.png",
              "cascade_start.jpg", "canyon.jpg", "studios_seal.png",
