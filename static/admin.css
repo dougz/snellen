@@ -422,6 +422,7 @@ body > p, body > h2 {
     background: linear-gradient(to bottom, #4c70af, #436299);
     outline: none;
     user-select: none;
+    text-align: center;
 }
 .filterbox.off {
     border: 1px solid #9caac1;
@@ -570,6 +571,8 @@ p.note {
 #taskqueue #filters {
     text-align: right;
 }
+
+#tqfilters img { width: 24px; }
 
 #taskqueue .tqtime {
     width: 60px;

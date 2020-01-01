@@ -62,7 +62,6 @@ function A2020_DoAction(data, callback) {
 
 class A2020_TeamListPage {
     constructor() {
-        console.log("hello");
         twemoji.parse(goog.dom.getElement("admincontent"));
     }
 }
@@ -144,7 +143,9 @@ class A2020_TeamPuzzlePage {
 
     /** @param{TeamPuzzlePageData} data */
     build(data) {
-        console.log(data);
+        if (goog.DEBUG) {
+            console.log(data);
+        }
         goog.dom.classlist.set(this.tppstate, "puzzlestate-" + data.state);
         this.tppstate.innerHTML = data.state;
 
@@ -285,6 +286,7 @@ class A2020_TaskQueue {
         el.innerHTML = "";
 
         var kinds = ["hint", "visit", "penny", "puzzle"];
+        var emoji = ["1f9ae", "2708", "1f7e4", "1f9e9"];
         this.filter = {};
 
         var saved = [];
@@ -297,8 +299,12 @@ class A2020_TaskQueue {
 
         for (var i = 0; i < kinds.length; ++i) {
             var k = kinds[i];
+            var e = eurl + emoji[i] + ".png";
             this.filter[k] = saved.includes(k);
-            var cb = goog.dom.createDom("BUTTON", this.filter[k] ? "filterbox" : "filterbox off", k);
+            var cb = goog.dom.createDom("BUTTON", this.filter[k] ? "filterbox" : "filterbox off",
+                                        goog.dom.createDom("IMG", {src: e}),
+                                        goog.dom.createDom("BR"),
+                                        k);
             goog.events.listen(cb, goog.events.EventType.CLICK,
                                goog.bind(this.toggle_filter, this, k));
             el.appendChild(cb);
@@ -353,9 +359,9 @@ class A2020_TaskQueue {
     toggle_filter(kind, e) {
         this.filter[kind] = !this.filter[kind];
         if (this.filter[kind]) {
-            goog.dom.classlist.remove(e.target, "off");
+            goog.dom.classlist.remove(e.currentTarget, "off");
         } else {
-            goog.dom.classlist.add(e.target, "off");
+            goog.dom.classlist.add(e.currentTarget, "off");
         }
         var save = ""
         for (var k in this.filter) {
@@ -382,8 +388,9 @@ class A2020_TaskQueue {
 
     /** @param{TaskQueue} response */
     render_queue(response) {
-        console.log(response);
-
+        if (goog.DEBUG) {
+            console.log(response);
+        }
         this.last_response = response;
         if (!response || response.queue.length == 0) {
             this.tbody.innerHTML = "<tr><td colspan=6 style=\"padding: 20px;\">No tasks are waiting.</td></tr>"
@@ -429,7 +436,6 @@ class A2020_TaskQueue {
             }
 
             var done_el = null;
-            console.log(msg.key);
             if (msg.key.charAt(0) == "t" && msg.key.search(this.concierge_re) < 0) {
                 if (msg.done_pending) {
                     done_el = goog.dom.createDom("BUTTON", "inlineminiaction", "Undo done ");
@@ -885,7 +891,6 @@ class A2020_PuzzlePage {
         }
 
         if (data.hint_replies && data.hint_replies.length > 0) {
-            console.log(data.hint_replies);
             this.pphintreplies.style.display = "block";
             this.pphintreplylist.innerHTML = "";
             for (var i = 0; i < data.hint_replies.length; ++i) {
@@ -1384,7 +1389,6 @@ class A2020_ListPuzzlesPage {
         this.comparators["hint"] = function(a, b) { return a.hint_time - b.hint_time; };
 
         for (var k in this.comparators) {
-            console.log(k);
             var el = goog.dom.getElement("plsort_" + k);
             goog.events.listen(el, goog.events.EventType.CLICK,
                                goog.bind(this.change_sort, this, k));
@@ -1400,7 +1404,6 @@ class A2020_ListPuzzlesPage {
     }
 
     change_sort(newsort, e) {
-        console.log(newsort, e);
         if (this.sort_key == newsort) {
             this.sort_reverse = !this.sort_reverse;
             if (this.sort_reverse) {
