@@ -474,19 +474,7 @@ class Submission:
       fn = getattr(self.puzzle, "on_correct_answer", None)
       if fn: fn(now, self.team)
       if self.puzzle_state.answers_found == self.puzzle.answers:
-        if not self.team.remote_only and self.puzzle in Workshop.PENNY_PUZZLES:
-          if self.team.puzzle_state[Workshop.PUZZLE].state == PuzzleState.CLOSED:
-            # No loony visit yet: "expect a visit soon"
-            self.extra_response = Workshop.pre_response
-          else:
-            # Workshop already open: "new thing in the workshop"
-            self.extra_response = Workshop.post_response
-        more_extra = self.team.solve_puzzle(self.puzzle, now)
-        if more_extra:
-          if self.extra_response:
-            self.extra_response += "<br>" + more_extra
-          else:
-            self.extra_response = more_extra
+        self.extra_response = self.team.solve_puzzle(self.puzzle, now)
       else:
         self.team.dirty_lands.add(self.puzzle.land.shortname)
         self.team.cached_mapdata.pop(self.puzzle.land, None)
@@ -1219,7 +1207,7 @@ class Team(login.LoginUser):
         self.cached_mapdata.pop(puzzle.land, None)
 
   def solve_puzzle(self, puzzle, now):
-    extra_response = None
+    extra_response = []
     ps = self.puzzle_state[puzzle]
     msgs = []
     if ps.state != PuzzleState.SOLVED:
@@ -1270,9 +1258,9 @@ class Team(login.LoginUser):
                                 "Penny character visit", None,
                                 self.complete_penny_visit, "visit")
           self.outer_lands_triggered = "triggered"
-          extra_response = "Expect a special visit soon!"
+          extra_response.append("Expect a special visit soon!")
       if puzzle is Runaround.PUZZLE:
-        extra_response = Runaround.solve_response
+        extra_response.append(Runaround.solve_response)
 
       new_videos = 0
       for v, s in enumerate(CONSTANTS["videos_by_score"]):
@@ -1294,14 +1282,22 @@ class Team(login.LoginUser):
       # If this puzzle rewards you with a penny (land meta or events),
       # request a visit and/or record that you're owed a penny.
       if puzzle in Workshop.PENNY_PUZZLES:
-        if self.remote_only:
-          if self.puzzle_state[Workshop.PUZZLE].state == PuzzleState.CLOSED:
-            self.admin_log.add(now, f"Skipped Loonie Toonie visit for remote-only team.")
-            self.open_puzzle(Workshop.PUZZLE, now, None)
-        else:
-          dirty = False
-          for penny in Workshop.ALL_PENNIES.values():
-            if penny.puzzle == puzzle:
+        earned = self.earned_pennies()
+        if earned:
+          if self.remote_only:
+            if self.puzzle_state[Workshop.PUZZLE].state == PuzzleState.CLOSED:
+              self.admin_log.add(now, f"Skipped Loonie Toonie visit for remote-only team.")
+              self.open_puzzle(Workshop.PUZZLE, now, None)
+          else:
+            if self.puzzle_state[Workshop.PUZZLE].state == PuzzleState.CLOSED:
+              # No LT visit yet: "expect a visit soon"
+              extra_response.append(Workshop.pre_response)
+            else:
+              # Workshop already open: "new thing in the workshop"
+              extra_response.append(Workshop.post_response)
+
+            dirty = False
+            for penny in earned:
               if not self.pennies_earned and not self.pennies_collected:
                 Global.STATE.add_task(now, self.username, f"loony-visit",
                                       "Loonie Toonie visit", None,
@@ -1315,8 +1311,8 @@ class Team(login.LoginUser):
                                       self.collect_penny, "penny")
               self.pennies_earned.append(penny)
               dirty = True
-          if dirty:
-            self.send_messages([{"method": "pennies"}])
+            if dirty:
+              self.send_messages([{"method": "pennies"}])
 
       solve_duration = ps.solve_time - ps.open_time
       puzzle.solve_durations[self] = solve_duration
@@ -1328,7 +1324,20 @@ class Team(login.LoginUser):
       self.admin_log.add(now, f"{ps.admin_html_puzzle} solved ({durtxt}).")
 
       self.compute_puzzle_beam(now)
-      return extra_response
+      if extra_response: return "<br>".join(extra_response)
+
+  # Return any pennies that are newly-earned.
+  def earned_pennies(self):
+    out = []
+    for penny in Workshop.ALL_PENNIES.values():
+      if penny in self.pennies_collected: continue
+      if penny in self.pennies_earned: continue
+      for p in penny.puzzles:
+        if self.puzzle_state[p].state != PuzzleState.SOLVED:
+          break
+      else:
+        out.append(penny)
+    return out
 
   def collect_penny(self, task, when):
     p = task.key.split("-")[-1]
@@ -2625,7 +2634,11 @@ class Workshop:
   def __init__(self, shortname, d):
     self.shortname = shortname
     self.name = d["name"]
-    self.puzzle = d["puzzle"]
+    p = d["puzzle"]
+    if isinstance(p, str):
+      self.puzzles = {d["puzzle"]}
+    else:
+      self.puzzles = set(d["puzzle"])
 
     self.ALL_PENNIES[shortname] = self
 
@@ -2636,12 +2649,15 @@ class Workshop:
   @classmethod
   def post_init(cls):
     missing = []
-    for p in cls.ALL_PENNIES.values():
-      shortname = p.puzzle
-      p.puzzle = Puzzle.get_by_shortname(shortname)
-      if not p.puzzle:
-        missing.append(shortname)
-      cls.PENNY_PUZZLES.add(p.puzzle)
+    for penny in cls.ALL_PENNIES.values():
+      pset = set()
+      for shortname in penny.puzzles:
+        pp = Puzzle.get_by_shortname(shortname)
+        if not pp:
+          missing.append(shortname)
+        pset.add(pp)
+        cls.PENNY_PUZZLES.add(pp)
+      penny.puzzles = pset
 
     if missing:
       raise ValueError(f"missing pennies: {', '.join(missing)}")
