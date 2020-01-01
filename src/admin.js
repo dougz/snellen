@@ -1389,24 +1389,40 @@ class A2020_ListPuzzlesPage {
             goog.events.listen(el, goog.events.EventType.CLICK,
                                goog.bind(this.change_sort, this, k));
         }
-        this.sort_key = "order";
+        this.sort_key = null;
         this.sort_reverse = false;
+        this.change_sort("order", null);
 
         this.last_response = null;
+
 
         this.update();
     }
 
     change_sort(newsort, e) {
+        console.log(newsort, e);
         if (this.sort_key == newsort) {
             this.sort_reverse = !this.sort_reverse;
+            if (this.sort_reverse) {
+                goog.dom.classlist.add(goog.dom.getElement("plsort_" + newsort), "sortup");
+                goog.dom.classlist.remove(goog.dom.getElement("plsort_" + newsort), "sortdown");
+            } else {
+                goog.dom.classlist.add(goog.dom.getElement("plsort_" + newsort), "sortdown");
+                goog.dom.classlist.remove(goog.dom.getElement("plsort_" + newsort), "sortup");
+            }
         } else {
             this.sort_key = newsort;
+            this.sort_reverse = false;
             for (var k in this.comparators) {
                 if (k == newsort) {
-                    goog.dom.classlist.remove(goog.dom.getElement("plsort_" + k), "off");
+                    if (this.sort_reverse) {
+                        goog.dom.classlist.add(goog.dom.getElement("plsort_" + k), "sortup");
+                    } else {
+                        goog.dom.classlist.add(goog.dom.getElement("plsort_" + k), "sortdown");
+                    }
                 } else {
-                    goog.dom.classlist.add(goog.dom.getElement("plsort_" + k), "off");
+                    goog.dom.classlist.remove(goog.dom.getElement("plsort_" + k), "sortup");
+                    goog.dom.classlist.remove(goog.dom.getElement("plsort_" + k), "sortdown");
                 }
             }
         }
@@ -1450,7 +1466,7 @@ class A2020_ListPuzzlesPage {
                  style: "background-color: " + row.color},
                 row.symbol);
 
-            tr.appendChild(goog.dom.createDom("TD", null, sp));
+            tr.appendChild(goog.dom.createDom("TD", "c", sp));
             tr.appendChild(goog.dom.createDom("TD", null,
                                               goog.dom.createDom("A", {href: row.url}, row.title)));
             tr.appendChild(goog.dom.createDom("TD", "r", this.number(row.open_count)));

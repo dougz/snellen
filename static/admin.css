@@ -1084,20 +1084,34 @@ tr.submit-gray .submit-state { color: #666 }
     border-collapse: collapse;
     font-family: 'Open Sans', 'Merriweather Sans', sans-serif;
 }
-.ListPuzzlesPage tr.h th {
+.ListPuzzlesPage td, .ListPuzzlesPage th {
+    padding: 4px;
+}
+
+.ListPuzzlesPage th {
     background-color: #bfc0dc;
     color: #fff;
+    text-align: center;
+    cursor: pointer;
+    padding-left: 30px;
+}
+.ListPuzzlesPage th.sortup { padding-left: 0; }
+.ListPuzzlesPage th.sortdown { padding-left: 0; }
+.ListPuzzlesPage th.sortup::before {
+    display: inline-block;
+    width: 30px;
+    content: "\a0\25b2";
+}
+.ListPuzzlesPage th.sortdown::before {
+    display: inline-block;
+    width: 30px;
+    content: "\a0\25bc";
 }
 
-.ListPuzzlesPage .r {
-    text-align: right;
-}
+.ListPuzzlesPage .r { text-align: right; }
+.ListPuzzlesPage .c { text-align: center; }
 .ListPuzzlesPage .h {
     background-color: #eee;
-}
-
-.ListPuzzlesPage td, .ListPuzzlesPage th {
-    padding: 4px 12px;
 }
 
 .ListPuzzlesPage .manual {
