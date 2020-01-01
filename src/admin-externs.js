@@ -335,7 +335,11 @@ class ListPuzzleData {
         /** @type{number} */
         this.submitted_count;
         /** @type{number} */
+        this.incorrect_count;
+        /** @type{number} */
         this.solved_count;
+        /** @type{?number} */
+        this.median_solve;
         /** @type{boolean} */
         this.errata;
     }

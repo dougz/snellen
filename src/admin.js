@@ -1374,7 +1374,12 @@ class A2020_ListPuzzlesPage {
         this.comparators["order"] = function(a, b) { return a.order - b.order; };
         this.comparators["open"] = function(a, b) { return a.open_count - b.open_count; };
         this.comparators["submitted"] = function(a, b) { return a.submitted_count - b.submitted_count; };
+        this.comparators["incorrect"] = function(a, b) { return a.incorrect_count - b.incorrect_count; };
         this.comparators["solved"] = function(a, b) { return a.solved_count - b.solved_count; };
+        this.comparators["mediansolve"] = function(a, b) {
+            return (a.median_solve ? a.median_solve : 1000000) -
+                (b.median_solve ? b.median_solve : 1000000);
+        }
         this.comparators["unsolved"] = function(a, b) { return a.unsolved_count - b.unsolved_count; };
         this.comparators["hint"] = function(a, b) { return a.hint_time - b.hint_time; };
 
@@ -1446,10 +1451,15 @@ class A2020_ListPuzzlesPage {
                 row.symbol);
 
             tr.appendChild(goog.dom.createDom("TD", null, sp));
-            tr.appendChild(goog.dom.createDom("TD", null, row.title));
+            tr.appendChild(goog.dom.createDom("TD", null,
+                                              goog.dom.createDom("A", {href: row.url}, row.title)));
             tr.appendChild(goog.dom.createDom("TD", "r", this.number(row.open_count)));
             tr.appendChild(goog.dom.createDom("TD", "r", this.number(row.submitted_count)));
+            tr.appendChild(goog.dom.createDom("TD", "r", this.number(row.incorrect_count)));
             tr.appendChild(goog.dom.createDom("TD", "r", this.number(row.solved_count)));
+            tr.appendChild(goog.dom.createDom("TD", "r",
+                                              row.median_solve ?
+                                              admin2020.time_formatter.duration(row.median_solve) : ""));
             tr.appendChild(goog.dom.createDom("TD", "r", this.number(row.unsolved_count)));
             tr.appendChild(goog.dom.createDom("TD", row.hint_time_auto ? "r" : "r manual",
                                               admin2020.time_formatter.duration(row.hint_time)));

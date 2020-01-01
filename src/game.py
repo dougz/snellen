@@ -1979,7 +1979,7 @@ class Puzzle:
     self.median_solve_duration = None
     self.solve_durations = {}     # {team: duration}
     self.incorrect_answers = {}   # {answer: {teams}}
-    self.incorrect_counts = []    # [count: answer]
+    self.incorrect_counts = []    # [(count, answer)]
     self.open_teams = set()
     self.submitted_teams = set()
     self.errata = []
@@ -2005,6 +2005,8 @@ class Puzzle:
            "solved_count": len(self.solve_durations),
            "unsolved_count": len(self.open_teams) - len(self.solve_durations),
            "errata": True if self.errata else False,
+           "median_solve": self.median_solve_duration,
+           "incorrect_count": sum(i[0] for i in self.incorrect_counts),
            }
 
     self.cached_admin_data = out
