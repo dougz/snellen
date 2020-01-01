@@ -1731,7 +1731,7 @@ class H2020_Errata {
 
     /** param{Array<Erratum>} data */
     build(data) {
-        var dl = goog.dom.getElement("errata");
+        var dl = goog.dom.getElement("erlist");
         dl.innerHTML = "";
         for (var i = 0; i < data.length; ++i) {
             var e = data[i];

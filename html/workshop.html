@@ -8,7 +8,6 @@
 {% else %}
 <a id="submit" style="display: none;">Submit</a>
 {% end %}
-<a id="puzzerr"{% if not puzzle.errata%} class="hidden"{% end %} href="/errata" title="Errata">!</a>
 <a id="puzzhints"{% if puzzle not in team.hints_open %} class="hidden"{% end %} href="/guest_services?p={{puzzle.shortname}}" title="Hints">H</a>
 {% end %}
 
@@ -44,6 +43,7 @@
 {% block content %}
 <div id="content">
   <h1 id="pagetitle">Workshop</h1>
+  <div id="errata"></div>
 
   <p>The Workshop is Penny Park’s R&D lab, as well as the storage site
   of various mysterious machines and contraptions. Its denizen is the

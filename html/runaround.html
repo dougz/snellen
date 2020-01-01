@@ -8,7 +8,6 @@
 {% else %}
 <a id="submit">Submit</a>
 {% end %}
-<a id="puzzerr"{% if not puzzle.errata%} class="hidden"{% end %} href="/errata" title="Errata">!</a>
 <a id="puzzhints"{% if puzzle not in team.hints_open %} class="hidden"{% end %} href="/guest_services?p={{puzzle.shortname}}" title="Hints">H</a>
 {% end %}
 
@@ -42,6 +41,7 @@
 {% block content %}
 <div id="content" class="{{page_class}}">
   <h1 id="pagetitle">Heart of the Park</h1>
+  <div id="errata"></div>
 
   <p class=flavor>You have entered a small underground chamber below
     the center of the park. The room appears to be some sort of

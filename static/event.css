@@ -1315,12 +1315,12 @@ a#ppicon3 {
     margin-bottom: 32px;
 }
 
-.ErrataPage #errata dt {
+.ErrataPage #erlist dt {
     margin-top: 12px;
     font-weight: bold;
 }
 
-.ErrataPage #errata dd {
+.ErrataPage #erlist dd {
     margin-top: 8px;
 }
 
