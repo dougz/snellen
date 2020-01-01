@@ -437,6 +437,11 @@ body > p, body > h2 {
     border-bottom-left-radius: 0;
     margin-left: 1px;
 }
+.filterbox.middle {
+    border-radius: 0;
+    margin-left: 1px;
+    margin-right: 1px;
+}
 
 
 .inlineminiaction {
@@ -1073,4 +1078,17 @@ tr.submit-gray .submit-state { color: #666 }
     margin-top: 8px;
     color: #999;
     font-style: italic;
+}
+
+.ListPuzzlesPage .r {
+    text-align: right;
+}
+
+.ListPuzzlesPage td, .ListPuzzlesPage th {
+    padding: 2px 8px;
+}
+
+.ListPuzzlesPage .manual {
+    color: red;
+    font-weight: bold;
 }

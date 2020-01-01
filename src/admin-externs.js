@@ -311,3 +311,34 @@ class Action {
         this.reload;
     }
 }
+
+class ListPuzzleData {
+    constructor() {
+        /** @type{string} */
+        this.url;
+        /** @type{string} */
+        this.title;
+        /** @type{string} */
+        this.symbol;
+        /** @type{string} */
+        this.color;
+        /** @type{number} */
+        this.order;
+        /** @type{number} */
+        this.hint_time;
+        /** @type{boolean} */
+        this.hint_time_auto;
+        /** @type{number} */
+        this.open_count;
+        /** @type{number} */
+        this.submitted_count;
+        /** @type{number} */
+        this.solved_count;
+        /** @type{boolean} */
+        this.errata;
+    }
+}
+
+
+
+

@@ -1400,6 +1400,7 @@ class Team(login.LoginUser):
 
   def invalidate(self, puzzle=None, flush=True):
     self.cached_bb_data = None
+    if puzzle: puzzle.cached_admin_data = None
     login.AdminUser.notify_update(self, puzzle, flush=flush)
 
   def get_jukebox_data(self):
@@ -1923,6 +1924,10 @@ class Land:
     by_land_order.sort()
     cls.ordered_lands = [i[1] for i in by_land_order]
 
+    for i, land in enumerate(cls.ordered_lands):
+      for j, p in enumerate(land.all_puzzles):
+        p.release_order = (i+1) * 100 + (j+1)
+
     jukebox = Puzzle.get_by_shortname("jukebox")
     land = cls.BY_SHORTNAME.get("yesterday", None)
     if jukebox and land:
@@ -1980,7 +1985,28 @@ class Puzzle:
     self.errata = []
     self.hint_replies = []
 
+    self.cached_admin_data = None
+
     save_state.add_instance("Puzzle:" + shortname, self)
+
+  def get_admin_data(self):
+    if self.cached_admin_data: return self.cached_admin_data
+
+    out = {"url": self.admin_url,
+           "title": self.title,
+           "symbol": self.land.symbol,
+           "color": self.land.color,
+           "order": self.release_order,
+           "hint_time": self.hints_available_time,
+           "hint_time_auto": self.hints_available_time_auto,
+           "open_count": len(self.open_teams),
+           "submitted_count": len(self.submitted_teams),
+           "solved_count": len(self.solve_durations),
+           "errata": True if self.errata else False,
+           }
+
+    self.cached_admin_data = out
+    return out
 
   def post_init(self, land, icon):
     self.land = land
@@ -1995,6 +2021,7 @@ class Puzzle:
     self.bbid = Puzzle.NEXT_BBID
     Puzzle.NEXT_BBID += 1
 
+    self.html_title = html.escape(self.title)
     self.html = (f'<a href="{self.url}"><span class=puzzletitle>{html.escape(self.title)}</span></a> '
                  f'<span class="landtag" style="background-color: {land.color};">{land.symbol}</span>')
     self.admin_html = (f'<a href="{self.admin_url}"><span class=puzzletitle>{html.escape(self.title)}</span></a> '
@@ -2250,6 +2277,7 @@ class Puzzle:
       self.invalidate()
 
   def invalidate(self, flush=True):
+    self.cached_admin_data = None
     d = {"method": "update",
          "puzzle_id": self.shortname}
     login.AdminUser.send_messages([d], flush=flush)
@@ -2549,6 +2577,7 @@ class Event:
     p.points = 0  # no buzz/wonder for finishing
     p.hints_available_time = 96 * 3600
     p.hints_available_solves = 1000
+    p.release_order = 0
 
     def on_correct_answer(now, team):
       team.receive_fastpass(now, CONSTANTS["pennypass_expiration"] * CONSTANTS["time_scale"])
@@ -2641,6 +2670,7 @@ class Workshop:
     p.points = 0  # no buzz/wonder for finishing
     p.hints_available_time = 96 * 3600
     p.hints_available_solves = 1000
+    p.release_order = 10000
 
     p.submit_filter = cls.submit_filter
 
@@ -2696,6 +2726,7 @@ class Runaround:
     p.points = 0  # no buzz/wonder for finishing
     p.hints_available_time = 96 * 3600
     p.hints_available_solves = 1000
+    p.release_order = 10001
 
     def on_correct_answer(now, team):
       ps = team.puzzle_state[cls.PUZZLE]

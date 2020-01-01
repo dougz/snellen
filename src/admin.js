@@ -47,6 +47,9 @@ class A2020_Dispatcher {
         if (admin2020.errata_page) {
             admin2020.errata_page.update();
         }
+        if (admin2020.puzzle_list_page) {
+            admin2020.puzzle_list_page.update();
+        }
     }
 }
 
@@ -60,12 +63,6 @@ function A2020_DoAction(data, callback) {
 class A2020_TeamListPage {
     constructor() {
         console.log("hello");
-        twemoji.parse(goog.dom.getElement("admincontent"));
-    }
-}
-
-class A2020_PuzzleListPage {
-    constructor() {
         twemoji.parse(goog.dom.getElement("admincontent"));
     }
 }
@@ -321,8 +318,8 @@ class A2020_TaskQueue {
 
         this.concierge_re = new RegExp("^t-[a-z0-9_]+-concierge-callback");
 
-        this.comparators = {}
-        this.comparators["age"] = function(a, b) { return a.when - b.when; }
+        this.comparators = {};
+        this.comparators["age"] = function(a, b) { return a.when - b.when; };
         this.comparators["team"] = function(a, b) {
             if (a.team < b.team) {
                 return -1;
@@ -1191,7 +1188,7 @@ window.onload = function() {
         admin2020.team_list_page = new A2020_TeamListPage();
     }
     if (page_class == "ListPuzzlesPage") {
-        admin2020.puzzle_list_page = new A2020_PuzzleListPage();
+        admin2020.puzzle_list_page = new A2020_ListPuzzlesPage();
     }
     if (page_class == "AdminHomePage") {
         admin2020.home_page = new A2020_HomePage();
@@ -1359,3 +1356,101 @@ class A2020_ErrataPage {
 }
 
 
+class A2020_ListPuzzlesPage {
+    constructor() {
+        /** @type{Element} */
+        this.plbody = goog.dom.getElement("plbody");
+
+        this.comparators = {}
+        this.comparators["title"] = function(a, b) {
+            if (a.title < b.title) {
+                return -1;
+            } else if (a.title > b.title) {
+                return 1;
+            } else {
+                return 0;
+            }
+        };
+        this.comparators["order"] = function(a, b) { return a.order - b.order; };
+        this.comparators["open"] = function(a, b) { return a.open_count - b.open_count; };
+        this.comparators["submitted"] = function(a, b) { return a.submitted_count - b.submitted_count; };
+        this.comparators["solved"] = function(a, b) { return a.solved_count - b.solved_count; };
+        this.comparators["hint"] = function(a, b) { return a.hint_time - b.hint_time; };
+
+        for (var k in this.comparators) {
+            console.log(k);
+            var el = goog.dom.getElement("plsort_" + k);
+            goog.events.listen(el, goog.events.EventType.CLICK,
+                               goog.bind(this.change_sort, this, k));
+        }
+        this.sort_key = "order";
+        this.sort_reverse = false;
+
+        this.last_response = null;
+
+        this.update();
+    }
+
+    change_sort(newsort, e) {
+        if (this.sort_key == newsort) {
+            this.sort_reverse = !this.sort_reverse;
+        } else {
+            this.sort_key = newsort;
+            for (var k in this.comparators) {
+                if (k == newsort) {
+                    goog.dom.classlist.remove(goog.dom.getElement("plsort_" + k), "off");
+                } else {
+                    goog.dom.classlist.add(goog.dom.getElement("plsort_" + k), "off");
+                }
+            }
+        }
+
+        if (e) {
+            e.target.blur();
+        }
+        if (this.last_response) {
+            this.render(this.last_response);
+        }
+    }
+
+    update() {
+        goog.net.XhrIo.send("/admin/js/puzzles", Common_invoke_with_json(this, this.render));
+    }
+
+    number(n) {
+        return n ? ("" + n) : "";
+    }
+
+    /** param{Array<ListPuzzleData>} data */
+    render(data) {
+        this.plbody.innerHTML = "";
+
+        this.last_response = data;
+
+        data.sort(this.comparators[this.sort_key]);
+        if (this.sort_reverse) {
+            data.reverse();
+        }
+
+        for (const row of data) {
+            var tr = goog.dom.createDom("TR");
+
+            var sp = goog.dom.createDom(
+                "SPAN",
+                {className: "landtag",
+                 style: "background-color: " + row.color},
+                row.symbol);
+
+            tr.appendChild(goog.dom.createDom("TD", null, sp));
+            tr.appendChild(goog.dom.createDom("TD", null, row.title));
+            tr.appendChild(goog.dom.createDom("TD", "r", this.number(row.open_count)));
+            tr.appendChild(goog.dom.createDom("TD", "r", this.number(row.submitted_count)));
+            tr.appendChild(goog.dom.createDom("TD", "r", this.number(row.solved_count)));
+            tr.appendChild(goog.dom.createDom("TD", row.hint_time_auto ? "r" : "r manual",
+                                              admin2020.time_formatter.duration(row.hint_time)));
+            this.plbody.appendChild(tr);
+        }
+
+        twemoji.parse(this.plbody);
+    }
+}

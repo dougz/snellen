@@ -5,22 +5,30 @@
 
 {% block content %}
 
-<ul id="pllist">
-  {% for land in lands %}
-  <h3>{{land.title}} <span class="landtag" style="background-color: {{land.color}}">{{land.symbol}}</span></h3>
-  <ul>
-    {% for p in land.all_puzzles %}
-    <li><span class=mono>{{p.shortname}}</span>: <a href="/admin/puzzle/{{p.shortname}}">{{p.title}}</a><br>
-      {% set answers = sorted(list(p.display_answers.values())) %}
-      {% for i, a in enumerate(answers) %}
-      {% if i > 0 %}<br/>{% end %}
-      <b>{{a}}</b>
-      {% if a in p.explanations %}<br/><span class="explain">{{p.explanations[a]}}</span>{% end %}
-      {% end %}
-    </li>
-    {% end %}
-  </ul>
-  {% end %}
-</ul>
+<table id="pltable">
+  <thead>
+    <tr>
+      <th colspan=5 id="filters">Sort by:
+        <span id="plsorts">
+          <button class="filterbox left" id="plsort_order">release order</button><!--
+          --><button class="filterbox middle off" id="plsort_open"># open</button><!--
+          --><button class="filterbox middle off" id="plsort_submitted"># submitted</button><!--
+          --><button class="filterbox middle off" id="plsort_solved"># solved</button><!--
+          --><button class="filterbox middle off" id="plsort_hint">hint time</button><!--
+          --><button class="filterbox right off" id="plsort_title">title</button>
+        </span>
+    </tr>
+    <tr>
+      <th>land</th>
+      <th>title</th>
+      <th class="r">open</th>
+      <th class="r">submitted</th>
+      <th class="r">solved</th>
+      <th class="r">hint time</th>
+    </tr>
+  </thead>
+  <tbody id="plbody">
+  </tbody>
+</table>
 
 {% end %}

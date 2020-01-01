@@ -240,9 +240,13 @@ class BecomeTeamHandler(util.AdminPageHandler):
 class ListPuzzlesPage(util.AdminPageHandler):
   @login.required("admin")
   def get(self):
-    self.render("admin_list_puzzles.html",
-                lands=game.Land.ordered_lands)
+    self.render("admin_list_puzzles.html")
 
+class ListPuzzlesDataHandler(util.AdminHandler):
+  @login.required("admin")
+  def get(self):
+    x = [p.get_admin_data() for p in game.Puzzle.all_puzzles()]
+    self.return_json(x)
 
 class PuzzlePage(util.AdminPageHandler):
   @login.required("admin")
@@ -733,6 +737,7 @@ def GetHandlers():
     (r"/admin/js/bbtaskqueue$", BigBoardTaskQueueDataHandler),
     (r"/admin/js/bbteam(/[a-z0-9_]+)?$", BigBoardTeamDataHandler),
     (r"/admin/js/errata$", ErrataDataHandler),
+    (r"/admin/js/puzzles", ListPuzzlesDataHandler),
     ]
   return handlers
 

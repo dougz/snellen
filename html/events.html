@@ -10,7 +10,6 @@
 <a id="submit">Submit</a>
 {% end %}
 {% end %}
-<a id="puzzerr"{% if not puzzle.errata%} class="hidden"{% end %} href="/errata" title="Errata">!</a>
 <a id="puzzhints"{% if puzzle not in team.hints_open %} class="hidden"{% end %} href="/guest_services?p={{puzzle.shortname}}" title="Hints">H</a>
 {% end %}
 
@@ -46,6 +45,7 @@
 {% block content %}
 <div id="content">
   <h1 id="pagetitle">Events</h1>
+  <div id="errata"></div>
 
   {% for i, e in enumerate(events) %}
   <h3 class=eventtitle>{{e.title}} <span class=eventcomplete id="event{{i}}">{{"Completed" if completed[i] else ""}}</span></h3>
