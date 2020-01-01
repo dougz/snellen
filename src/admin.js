@@ -1363,9 +1363,9 @@ class A2020_ListPuzzlesPage {
 
         this.comparators = {}
         this.comparators["title"] = function(a, b) {
-            if (a.title < b.title) {
+            if (a.title_sort < b.title_sort) {
                 return -1;
-            } else if (a.title > b.title) {
+            } else if (a.title_sort > b.title_sort) {
                 return 1;
             } else {
                 return 0;
@@ -1375,6 +1375,7 @@ class A2020_ListPuzzlesPage {
         this.comparators["open"] = function(a, b) { return a.open_count - b.open_count; };
         this.comparators["submitted"] = function(a, b) { return a.submitted_count - b.submitted_count; };
         this.comparators["solved"] = function(a, b) { return a.solved_count - b.solved_count; };
+        this.comparators["unsolved"] = function(a, b) { return a.unsolved_count - b.unsolved_count; };
         this.comparators["hint"] = function(a, b) { return a.hint_time - b.hint_time; };
 
         for (var k in this.comparators) {
@@ -1432,8 +1433,11 @@ class A2020_ListPuzzlesPage {
             data.reverse();
         }
 
+        var i = 0;
         for (const row of data) {
-            var tr = goog.dom.createDom("TR");
+            i += 1;
+
+            var tr = goog.dom.createDom("TR", (i%3==0) ? "h" : null);
 
             var sp = goog.dom.createDom(
                 "SPAN",
@@ -1446,6 +1450,7 @@ class A2020_ListPuzzlesPage {
             tr.appendChild(goog.dom.createDom("TD", "r", this.number(row.open_count)));
             tr.appendChild(goog.dom.createDom("TD", "r", this.number(row.submitted_count)));
             tr.appendChild(goog.dom.createDom("TD", "r", this.number(row.solved_count)));
+            tr.appendChild(goog.dom.createDom("TD", "r", this.number(row.unsolved_count)));
             tr.appendChild(goog.dom.createDom("TD", row.hint_time_auto ? "r" : "r manual",
                                               admin2020.time_formatter.duration(row.hint_time)));
             this.plbody.appendChild(tr);

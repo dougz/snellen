@@ -1994,6 +1994,7 @@ class Puzzle:
 
     out = {"url": self.admin_url,
            "title": self.title,
+           "title_sort": self.title_sortkey,
            "symbol": self.land.symbol,
            "color": self.land.color,
            "order": self.release_order,
@@ -2002,6 +2003,7 @@ class Puzzle:
            "open_count": len(self.open_teams),
            "submitted_count": len(self.submitted_teams),
            "solved_count": len(self.solve_durations),
+           "unsolved_count": len(self.open_teams) - len(self.solve_durations),
            "errata": True if self.errata else False,
            }
 
@@ -2017,7 +2019,8 @@ class Puzzle:
       group = 1
     else:
       group = 2
-    self.sortkey = (group, util.make_sortkey(self.title), id(self))
+    self.title_sortkey = util.make_sortkey(self.title)
+    self.sortkey = (group, self.title_sortkey, id(self))
     self.bbid = Puzzle.NEXT_BBID
     Puzzle.NEXT_BBID += 1
 

@@ -425,7 +425,7 @@ body > p, body > h2 {
 }
 .filterbox.off {
     border: 1px solid #9caac1;
-    background: linear-gradient(to bottom, #ced4e0, #e6eaf0);
+    background: linear-gradient(to bottom, #b5bfd1, #ced4e0);
 }
 .filterbox.left {
     border-top-right-radius: 0;
@@ -1080,12 +1080,24 @@ tr.submit-gray .submit-state { color: #666 }
     font-style: italic;
 }
 
+.ListPuzzlesPage table {
+    border-collapse: collapse;
+    font-family: 'Open Sans', 'Merriweather Sans', sans-serif;
+}
+.ListPuzzlesPage tr.h th {
+    background-color: #bfc0dc;
+    color: #fff;
+}
+
 .ListPuzzlesPage .r {
     text-align: right;
 }
+.ListPuzzlesPage .h {
+    background-color: #eee;
+}
 
 .ListPuzzlesPage td, .ListPuzzlesPage th {
-    padding: 2px 8px;
+    padding: 4px 12px;
 }
 
 .ListPuzzlesPage .manual {

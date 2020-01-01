@@ -319,6 +319,8 @@ class ListPuzzleData {
         /** @type{string} */
         this.title;
         /** @type{string} */
+        this.title_sort;
+        /** @type{string} */
         this.symbol;
         /** @type{string} */
         this.color;
