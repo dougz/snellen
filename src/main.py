@@ -141,10 +141,6 @@ async def main_server(options):
   if options.start_event:
     game.Global.STATE.start_event(False)
 
-  now = time.time()
-  for team in game.Team.all_teams():
-    team.compute_puzzle_beam(now)
-
   for team in game.Team.BY_USERNAME.values():
     team.discard_messages()
 
