@@ -97,6 +97,8 @@ class Puzzle:
     if self.max_queued is not None and not isinstance(self.max_queued, int):
       errors.append("max_queued is not an integer.")
 
+    self.scrum = y.get("scrum", False)
+
     print(f"Puzzle {self.shortname} \"{self.title}\" (prefix {self.prefix})")
 
     # Answer(s) must be a nonempty list of nonempty strings.
@@ -302,7 +304,7 @@ class Puzzle:
     d = {}
     for n in ("shortname title oncall puzzletron_id max_queued "
               "answers responses emojify authors "
-              "zip_version "
+              "zip_version scrum "
               "html_head html_body solution_head solution_body "
               "for_ops_url extra").split():
       v = getattr(self, n)

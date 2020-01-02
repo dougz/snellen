@@ -2180,6 +2180,9 @@ class Puzzle:
     self.zip_version = j.get("zip_version")
     self.max_queued = j.get("max_queued", CONSTANTS["default_max_queued"])
     self.extra = j.get("extra")
+    self.scrum = j.get("scrum", False)
+    if self.scrum:
+      self.title = "TEAMWORK TIME: " + self.title
 
     if "incorrect_responses" in j and "responses" not in j:
       j["responses"] = j.pop("incorrect_responses")
