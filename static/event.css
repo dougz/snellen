@@ -1338,6 +1338,9 @@ a#ppicon3 {
     margin: 12px 0;
 }
 
+#wsearned { display: none; }
+#wscoll { display: none; }
+
 @media print {
     html { background: none; }
     #topnav { display: none; }

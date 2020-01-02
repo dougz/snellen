@@ -338,6 +338,8 @@ class ListPuzzleData {
         this.incorrect_count;
         /** @type{number} */
         this.solved_count;
+        /** @type{number} */
+        this.unsolved_count;
         /** @type{?number} */
         this.median_solve;
         /** @type{boolean} */
