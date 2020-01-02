@@ -39,6 +39,12 @@ class AdminUsersPage(util.AdminPageHandler):
                 users=login.AdminUser.all_users(),
                 user=self.user)
 
+class LandsPage(util.AdminPageHandler):
+  @login.required("admin")
+  def get(self):
+    self.render("admin_lands.html",
+                lands=game.Land.ordered_lands)
+
 class AdminServerPage(util.AdminPageHandler):
   @login.required("admin")
   def get(self):
@@ -461,22 +467,9 @@ class ActionHandler(util.AdminHandler):
     if not puzzle:
       return self.not_found()
 
-    try:
-      text = self.args.get("hint_time")
-      text = text.split(":")
-      while text and not text[0]: text.pop(0)
-      text = [int(t, 10) for t in text]
-
-      secs = 0
-      if text: secs += text.pop()
-      if text: secs += 60 * text.pop()
-      if text: secs += 3600 * text.pop()
-      if text:
-        raise tornado.web.HTTPError(http.client.BAD_REQUEST)
-
-    except (KeyError, ValueError):
+    secs = util.parse_duration(self.args.get("hint_time"))
+    if secs is None:
       raise tornado.web.HTTPError(http.client.BAD_REQUEST)
-
     if secs < 0:
       secs = 0
 
@@ -641,7 +634,73 @@ class ActionHandler(util.AdminHandler):
 
     self.set_status(http.client.NO_CONTENT.value)
 
+  async def ACTION_update_lands(self):
+    changes = []
+    errors = []
 
+    current_scores = [x.open_at_score for x in game.Land.ordered_lands]
+    current_times = [x.open_at_time for x in game.Land.ordered_lands]
+    current_counts = [x.initial_puzzles for x in game.Land.ordered_lands]
+
+    for k, v in self.args.items():
+      if k == "action": continue
+      kn = k.split("_")
+      if len(kn) != 2:
+        self.set_status(http.client.BAD_REQUEST.value)
+        return
+      try:
+        k = kn[0]
+        n = int(kn[1])
+        land = game.Land.ordered_lands[n]
+
+        if k == "score":
+          try:
+            score = int(v)
+            if score != land.open_at_score:
+              changes.append(f"{land.title} open score changed from {land.open_at_score} to {score}.")
+              current_scores[n] = score
+          except ValueError:
+            errors.append(f"Failed to parse {html.escape(v)} as score.")
+        elif k == "time":
+          secs = util.parse_duration(v)
+          if secs is None:
+            errors.append(f"Failed to parse {html.escape(v)} as duration.")
+          elif secs != land.open_at_time:
+              changes.append(f"{land.title} open time changed from {util.format_duration(land.open_at_time)} "
+                             f"to {util.format_duration(secs)}.")
+              current_times[n] = secs
+        elif k == "count":
+          try:
+            count = int(v)
+            if count != land.initial_puzzles:
+              changes.append(f"{land.title} initial puzzles changed from {land.initial_puzzles} to {count}.")
+              current_counts[n] = count
+          except ValueError:
+            errors.append(f"Failed to parse {html.escape(v)} as puzzle count.")
+
+      except (KeyError, ValueError, IndexError):
+        self.set_status(http.client.BAD_REQUEST.value)
+        return
+
+    for i in range(len(game.Land.ordered_lands)-1):
+      if current_scores[i] > current_scores[i+1]:
+        errors.append("Can't change land order by score.")
+        break
+      if current_times[i] > current_times[i+1]:
+        errors.append("Can't change land order by time.")
+        break
+
+    if errors:
+      self.return_json({"success": False, "messages": errors})
+    elif changes:
+      game.Global.STATE.update_lands(current_scores, current_times, current_counts)
+
+      for team in game.Team.all_teams():
+        await team.flush_messages()
+
+      self.return_json({"success": True, "messages": changes})
+    else:
+      self.return_json({"success": False, "messages": ["No change."]})
 
 
 class VisitPage(util.AdminPageHandler):
@@ -718,6 +777,7 @@ def GetHandlers():
     (r"/admin/team/([a-z0-9_]+)$", TeamPage),
     (r"/admin/team/([a-z0-9_]+)/puzzle/([a-z0-9_]+)$", TeamPuzzlePage),
     (r"/admin/teams$", ListTeamsPage),
+    (r"/admin/lands$", LandsPage),
     (r"/admin/users$", AdminUsersPage),
     (r"/admin/server$", AdminServerPage),
     (r"/admin/visit(?:/(penny|loony))?$", VisitPage),

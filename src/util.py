@@ -245,6 +245,22 @@ def format_duration(sec):
   out = f"{hours:02d}:{mins:02d}:{sec:02d}".lstrip("0:")
   return out
 
+def parse_duration(s):
+  try:
+    s = s.split(":")
+    while s and not s[0]: s.pop(0)
+    s = [int(t, 10) for t in s]
+
+    secs = 0
+    if s: secs += s.pop()
+    if s: secs += 60 * s.pop()
+    if s: secs += 3600 * s.pop()
+    if s: return None
+    return secs
+  except (KeyError, ValueError):
+    return None
+
+
 def make_sortkey(s):
   s = [k for k in s.lower() if k in string.ascii_lowercase + " "]
   s = "".join(s).split()

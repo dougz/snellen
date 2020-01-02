@@ -1121,3 +1121,34 @@ tr.submit-gray .submit-state { color: #666 }
     color: red;
     font-weight: bold;
 }
+
+.LandsPage table {
+    border-collapse: collapse;
+}
+
+.LandsPage th {
+    padding: 4px 12px;
+    background-color: #ffd8d8;
+}
+
+.LandsPage td {
+    padding: 4px 12px;
+}
+.LandsPage .r { text-align: right; }
+.LandsPage .p { padding: 8px 21px 8px 4px; }
+
+.LandsPage table {
+    font-family: 'Open Sans', 'Merriweather Sans', sans-serif;
+    font-size: 16px;
+}
+
+.LandsPage input {
+    padding: 2px 8px;
+    width: 100px;
+    text-align: right;
+    font-family: 'Open Sans', 'Merriweather Sans', sans-serif;
+    font-size: 16px;
+}
+
+.LandsPage .failure { color: red; }
+.LandsPage .success { color: green; }

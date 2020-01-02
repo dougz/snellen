@@ -1,0 +1,49 @@
+{% extends "admin_base.html" %}
+{% block colorscheme %}color-users{% end %}
+
+{% block title %}Lands{% end %}
+
+{% block content %}
+
+<p><b>This page does not update automatically.  Refresh to see changes.</b></p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Land</th>
+      <th>Open score</th>
+      <th>Open time</th>
+      <th>Initial puzzles</th>
+      <th>Teams open</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% set empty = True %}
+    {% for ol, land in enumerate(lands) %}
+    <tr>
+      {% if land.open_teams or not user.has_role("control_event") %}
+      <td>{{land.title}}</td>
+      <td class="r p">{{land.open_at_score}}</td>
+      <td class="r p">{{format_duration(land.open_at_time)}}</td>
+      <td class="r p">{{land.initial_puzzles}}</td>
+      <td class="r">{{len(land.open_teams)}}</td>
+      {% else %}
+      {% set empty = False %}
+      <td>{{land.title}}</td>
+      <td class="r"><input type="text" id="score_{{ol}}" value="{{land.open_at_score}}"></td>
+      <td class="r"><input type="text" id="time_{{ol}}" value="{{format_duration(land.open_at_time)}}"></td>
+      <td class="r"><input type="text" id="count_{{ol}}" value="{{land.initial_puzzles}}"></td>
+      {% end %}
+    </tr>
+    {% end %}
+  </tbody>
+</table>
+
+{% if not empty and user.has_role("control_event") %}
+<button id="lpenable" class="action">Enable &#x25b6;&#xfe0e;&#x25b6;&#xfe0e;</button>
+<button id="lpupdate" class="action" disabled>Update lands</button>
+
+<ul id="result"></ul>
+{% end %}
+
+{% end %}

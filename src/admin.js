@@ -1104,6 +1104,7 @@ var admin2020 = {
     fix_puzzle: null,
     home_page: null,
     errata_page: null,
+    lands_page: null,
 }
 
 window.onload = function() {
@@ -1200,6 +1201,9 @@ window.onload = function() {
     }
     if (page_class == "ErrataPage") {
         admin2020.errata_page = new A2020_ErrataPage();
+    }
+    if (page_class == "LandsPage") {
+        admin2020.lands_page = new A2020_LandsPage();
     }
 }
 
@@ -1360,6 +1364,37 @@ class A2020_ErrataPage {
     }
 }
 
+class A2020_LandsPage {
+    constructor() {
+        this.update = new Common_enabler(
+            "lpenable", "lpupdate", goog.bind(this.send_update, this));
+    }
+
+    send_update() {
+        var inputs = document.querySelectorAll("table input");
+        var d = {action: "update_lands"}
+        var empty = true;
+        for (var input of inputs) {
+            d[input.id] = input.value;
+            empty = false;
+        }
+        if (empty) return;
+        A2020_DoAction(d, Common_invoke_with_json(this, this.update_result));
+    }
+
+    /** param{LandResponse} */
+    update_result(data) {
+        if (goog.DEBUG) {
+            console.log(data);
+        }
+        var result = goog.dom.getElement("result");
+        result.innerHTML = "";
+        goog.dom.classlist.add(result, data.success ? "success" : "failure");
+        for (const text of data.messages) {
+            result.appendChild(goog.dom.createDom("LI", null, text));
+        }
+    }
+}
 
 class A2020_ListPuzzlesPage {
     constructor() {

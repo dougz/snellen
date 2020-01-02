@@ -345,6 +345,11 @@ class ListPuzzleData {
     }
 }
 
-
-
-
+class LandResponse {
+    constructor() {
+        /** @type{boolean} */
+        this.success;
+        /** @type{Array<string>} */
+        this.messages;
+    }
+}

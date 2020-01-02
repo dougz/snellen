@@ -499,7 +499,12 @@ class Submission:
   async def realtime_process_submit_queue(cls):
     while True:
       now = time.time()
-      teams = cls.process_submit_queue(now)
+      teams, beam = cls.process_submit_queue(now)
+
+      if beam:
+        Global.STATE.compute_all_beams()
+        teams.update(Team.all_teams())
+
       for team in teams:
         asyncio.create_task(team.flush_messages())
 
@@ -522,8 +527,8 @@ class Submission:
         teams.add(sub.team)
 
     # Check for land opening by time.
+    beam = False
     if Global.STATE and Global.STATE.event_start_time:
-      beam = False
       for land in Land.BY_SHORTNAME.values():
         if not land.open_at_time: continue   # None or 0
         rel = now - Global.STATE.event_start_time
@@ -533,13 +538,7 @@ class Submission:
         print(f"recomputing all beams for {land.shortname} {rel}")
         beam = True
 
-      if beam:
-        for team in Team.all_teams():
-          team.compute_puzzle_beam(now)
-          team.invalidate()
-          teams.add(team)
-
-    return teams
+    return teams, beam
 
 
 class Team(login.LoginUser):
@@ -583,8 +582,8 @@ class Team(login.LoginUser):
     self.current_hint_puzzlestate = None
     self.outer_lands_state = "closed"
 
-    self.force_all_lands_open = self.attrs.get("all_lands_open", False)
-    self.force_all_puzzles_open = self.attrs.get("all_puzzles_open", False)
+    self.force_all_lands_open = False #self.attrs.get("all_lands_open", False)
+    self.force_all_puzzles_open = False #self.attrs.get("all_puzzles_open", False)
 
     self.message_mu = asyncio.Lock()
     self.message_serial = 1
@@ -1758,6 +1757,7 @@ class Team(login.LoginUser):
         if st.puzzle.land.land_order >= 1000: continue
         if st.puzzle.land not in self.open_lands:
           self.open_lands[st.puzzle.land] = now
+          st.puzzle.land.open_teams.add(self)
           self.sorted_open_lands = [land for land in self.open_lands.keys() if land.land_order]
           self.sorted_open_lands.sort(key=lambda land: land.land_order)
           self.dirty_lands.add("mainmap")
@@ -1912,6 +1912,8 @@ class Land:
     self.additional_puzzles = tuple(self.icons[i].puzzle for i in cfg.get("additional_order", ()))
     self.base_min_puzzles = tuple(self.icons[i].puzzle for i in cfg.get("base_min_puzzles", ()))
     self.all_puzzles = self.additional_puzzles + self.puzzles
+
+    self.open_teams = set()
 
     if self.shortname == "cascade":
       self.first_submeta = self.icons["lazyriver"].puzzle
@@ -2418,6 +2420,23 @@ class Global:
     self.errata = []
     self.reloads = []
     self.cached_errata_data = None
+
+  @save_state
+  def compute_all_beams(self, now):
+    for team in Team.all_teams():
+      team.compute_puzzle_beam(now)
+      team.invalidate()
+
+  @save_state
+  def update_lands(self, now, scores, times, counts):
+    for i, land in enumerate(Land.ordered_lands):
+      land.open_at_score = scores[i]
+      land.open_at_time = times[i]
+      land.initial_puzzles = counts[i]
+
+    for team in Team.all_teams():
+      team.compute_puzzle_beam(now)
+      team.invalidate()
 
   @save_state
   def post_erratum(self, now, shortname, text, sender):
