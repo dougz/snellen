@@ -145,8 +145,6 @@ class Common_Waiter {
         /** @type{number} */
         this.respond_deadline = 10;
 
-
-
         goog.events.listen(this.xhr, goog.net.EventType.COMPLETE,
                            goog.bind(this.waitcomplete, this));
     }
@@ -221,7 +219,9 @@ class Common_Waiter {
 function Common_expect_204(e) {
     var code = e.target.getStatus();
     if (code != 204) {
-        alert(e.target.getResponseText());
+        if (goog.DEBUG) {
+            alert(e.target.getResponseText());
+        }
     }
 }
 
@@ -234,7 +234,9 @@ function Common_invoke_with_json(obj, target) {
         } else if (code == 204) {
             cb();
         } else {
-            alert(e.target.getResponseText());
+            if (goog.DEBUG) {
+                alert(e.target.getResponseText());
+            }
         }
     }
 }
@@ -248,7 +250,9 @@ function Common_invoke_with_json_arg(obj, target, arg) {
         } else if (code == 204) {
             cb();
         } else {
-            alert(e.target.getResponseText());
+            if (goog.DEBUG) {
+                alert(e.target.getResponseText());
+            }
         }
     }
 }

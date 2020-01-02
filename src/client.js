@@ -678,7 +678,9 @@ class H2020_SubmitPanel {
                         hunt2020.toast_manager.add_toast("Invalid submission.", 5000, null, "salmon");
                     }
                 } else if (code != 204) {
-                    alert(e.target.getResponseText());
+                    if (goog.DEBUG) {
+                        alert(e.target.getResponseText());
+                    }
                 }
             });
     }
