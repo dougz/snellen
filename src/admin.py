@@ -141,8 +141,10 @@ class PuzzleContentPage(util.AdminPageHandler):
       head = puzzle.solution_head
       body = puzzle.solution_body
 
+    errata = [{"when": util.format_timestamp(e.when, with_ref=False), "text": e.text} for e in puzzle.errata]
+
     self.render("admin_puzzle_frame.html", supertitle=supertitle,
-                head=head, body=body)
+                head=head, body=body, errata=errata)
 
   def get_template_namespace(self):
     land = self.pagepuzzle.land

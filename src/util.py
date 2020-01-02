@@ -252,14 +252,14 @@ def make_sortkey(s):
     s.pop(0)
   return "".join(s)
 
-def format_timestamp(ts):
+def format_timestamp(ts, with_ref=True):
   if ts is None:
     return "\u2014"
   else:
     ref = game.Global.STATE.event_start_time
-    t = time.strftime("%a %-I:%M:%S%p", time.localtime(ts))
+    t = time.strftime("%a %-I:%M:%S %p", time.localtime(ts))
     t = t[:-2] + t[-2:].lower()
-    if ref:
+    if with_ref and ref:
       return t + " (" + format_duration(ts-ref) + " into hunt)"
     else:
       return t

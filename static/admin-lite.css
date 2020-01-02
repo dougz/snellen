@@ -199,4 +199,6 @@ span#home {
     color: #999;
 }
 
-
+#errata {
+    display: block;
+}

@@ -15,6 +15,13 @@
   <div id="content">
 
     <h2 id="puzzletitle"><div id=vspace></div>{% raw supertitle %}{{puzzle.title}}</h2>
+    {% if errata %}
+    <div id="errata">
+      {% for e in errata %}
+      <p><b>Erratum posted {{e["when"]}}:</b> {% raw e["text"] %}</p>
+      {% end %}
+    </div>
+    {% end %}
     <div id="puzz">
       {% raw body %}
     </div>
