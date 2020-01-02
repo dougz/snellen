@@ -582,8 +582,8 @@ class Team(login.LoginUser):
     self.current_hint_puzzlestate = None
     self.outer_lands_state = "closed"
 
-    self.force_all_lands_open = False #self.attrs.get("all_lands_open", False)
-    self.force_all_puzzles_open = False #self.attrs.get("all_puzzles_open", False)
+    self.force_all_lands_open = self.attrs.get("all_lands_open", False)
+    self.force_all_puzzles_open = self.attrs.get("all_puzzles_open", False)
 
     self.message_mu = asyncio.Lock()
     self.message_serial = 1
@@ -1313,6 +1313,11 @@ class Team(login.LoginUser):
             if dirty:
               self.send_messages([{"method": "pennies"}])
 
+      if puzzle == Runaround.PUZZLE:
+        Global.STATE.add_task(now, self.username, f"final-machine",
+                              f"Machine interaction!", None,
+                              self.complete_machine_interaction, "visit")
+
       solve_duration = ps.solve_time - ps.open_time
       puzzle.solve_durations[self] = solve_duration
       puzzle.median_solve_duration = statistics.median(puzzle.solve_durations.values())
@@ -1369,6 +1374,9 @@ class Team(login.LoginUser):
     self.invalidate()
     if not save_state.REPLAYING:
       asyncio.create_task(self.flush_messages())
+
+  def complete_machine_interaction(self, task, when):
+    print("completed machine interaction")
 
   @save_state
   def concierge_update(self, now, submit_id, result):
