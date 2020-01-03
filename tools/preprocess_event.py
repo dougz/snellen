@@ -237,7 +237,7 @@ def convert_static_files(out, options, lands):
              "cascade_start.jpg", "canyon.jpg", "studios_seal.png",
              "studios_coins.png", "studios_wall.png", "yesterday_start.png"):
     to_convert.append((f"runaround/{rp}", f"{base}/media/runaround/{rp}"))
-  for mp in ("thinkfun", "gr8ergood", "cluekeeper", "janestreet",
+  for mp in ("thinkfun", "gr8ergood", "cluekeeper", "janestreet", "grandmaster",
              "judy", "penny",
              "jeon_paisa", "kobo", "centime", "luma", "dirham", "kopek"):
     to_convert.append((f"{mp}.png", f"{base}/media/{mp}.png"))

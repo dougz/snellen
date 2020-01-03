@@ -1136,6 +1136,7 @@ tr.submit-gray .submit-state { color: #666 }
 }
 .LandsPage .r { text-align: right; }
 .LandsPage .p { padding: 8px 21px 8px 4px; }
+.LandsPage .modified { color: red; }
 
 .LandsPage table {
     font-family: 'Open Sans', 'Merriweather Sans', sans-serif;

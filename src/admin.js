@@ -1372,6 +1372,10 @@ class A2020_LandsPage {
     constructor() {
         this.update = new Common_enabler(
             "lpenable", "lpupdate", goog.bind(this.send_update, this));
+        for (var el of document.querySelectorAll("table input")) {
+            goog.events.listen(el, goog.events.EventType.KEYDOWN,
+                               e => goog.dom.classlist.add(e.currentTarget, "modified"));
+        }
     }
 
     send_update() {
