@@ -641,8 +641,13 @@ class ActionHandler(util.AdminHandler):
       return
 
     game.Global.STATE.close_hunt()
+    msg = [{"method": "close_hunt",
+            "text":
+            ("<b>The 2020 MIT Mystery Hunt has ended!  Thanks for playing!</b><br><br>"
+             "The site should remain up through the wrap-up, but submissions and "
+             "hint requests are now disabled.")}]
     for team in game.Team.all_teams():
-      team.send_messages([{"method": "close_hunt"}])
+      team.send_messages(msg)
       await team.flush_messages()
 
     self.set_status(http.client.NO_CONTENT.value)

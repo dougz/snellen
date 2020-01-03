@@ -77,9 +77,7 @@ class H2020_Dispatcher {
         if (hunt2020.guest_services) {
             hunt2020.guest_services.close_hunt();
         }
-        hunt2020.toast_manager.add_toast(
-            "The 2020 MIT Mystery Hunt has ended!  Thanks for playing!",
-            30000, null, "salmon", null);
+        hunt2020.toast_manager.add_toast(msg.text, 30000, null, "salmon", null);
     }
 
     /** @param{Message} msg */
@@ -1621,6 +1619,10 @@ function refresh_header(dispatcher) {
 }
 
 window.onload = function() {
+    if (typeof hunt_closed === 'undefined') {
+        hunt_closed = false;
+    }
+
     hunt2020.serializer = new goog.json.Serializer();
     hunt2020.time_formatter = new Common_TimeFormatter();
     hunt2020.counter = new Common_Counter(hunt2020.time_formatter);

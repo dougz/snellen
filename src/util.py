@@ -73,8 +73,6 @@ class TeamPageHandler(TeamHandler):
     script = ["<script>"]
     if game.Global.STATE.hunt_closed:
       script.append("var hunt_closed = true;\n")
-    else:
-      script.append("var hunt_closed = false;\n")
     script.append(f"""var page_class = \"{obfuscated_class}\";\n""")
     d["css"] = [self.static_content[f"event{css}"]]
     style_css = None
