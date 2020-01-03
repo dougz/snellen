@@ -1,6 +1,7 @@
 import asyncio
 import collections
 import copy
+import csv
 import datetime
 import hashlib
 import heapq
@@ -442,6 +443,9 @@ class Submission:
       else:
         self.state = self.INCORRECT
         self.team.last_incorrect_answer = now
+
+    Global.STATE.log_submit(now, self.team.username, self.puzzle.shortname,
+                            self.raw_answer, answer, self.state)
 
     self.puzzle.submitted_teams.add(self.team)
     if self.state == self.INCORRECT:
@@ -2418,6 +2422,12 @@ class Global:
   # Spread preloading out over this many seconds.
   PRELOAD_SPREAD = 30
 
+  SUBMIT_LOG_FILE = None
+
+  @classmethod
+  def set_submit_log_filename(cls, fn):
+    cls.SUBMIT_LOG_FILE = fn
+
   @save_state
   def __init__(self, now):
     self.options = None
@@ -2437,6 +2447,25 @@ class Global:
     self.reloads = []
     self.cached_errata_data = None
     self.preload_urls = None
+
+    self.submit_log = None
+    self.submit_writer = None
+
+    if self.SUBMIT_LOG_FILE:
+      self.submit_log = open(self.SUBMIT_LOG_FILE, "w")
+      self.submit_writer = csv.writer(self.submit_log)
+      self.submit_writer.writerow(["time", "unix_time", "team", "puzzle",
+                                   "input", "canonical", "result"])
+
+  def log_submit(self, when, team_username, shortname,
+                 answer, canonical_answer, result):
+    if not self.submit_writer: return
+    w = datetime.datetime.fromtimestamp(when)
+    when_fmt = w.strftime("%Y-%m-%d %H:%M:%S")
+    self.submit_writer.writerow([when_fmt, when, team_username, shortname,
+                                 answer, canonical_answer, result])
+    self.submit_log.flush()
+
 
   @save_state
   def compute_all_beams(self, now):

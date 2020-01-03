@@ -62,6 +62,9 @@ async def main_server(options):
   if options.debug:
     game.Submission.PER_ANSWER_DELAY = 20
 
+  game.Global.set_submit_log_filename(
+    os.path.join(options.event_dir, "submit_log.csv"))
+
   print("Load map config...")
   with open(os.path.join(options.event_dir, "map_config.json")) as f:
     cfg = json.load(f)
