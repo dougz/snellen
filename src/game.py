@@ -2415,6 +2415,7 @@ class Global:
   @save_state
   def __init__(self, now):
     self.options = None
+    self.hunt_closed = False
     self.event_start_time = None
     self.expected_start_time = int(now + OPTIONS.start_delay)
     Global.STATE = self
@@ -2461,7 +2462,6 @@ class Global:
     for t in puzzle.open_teams:
       t.activity_log.add(now, f"An erratum was posted for {puzzle.html}.")
 
-
   @save_state
   def save_reload(self, now, shortname, sender):
     puzzle = Puzzle.get_by_shortname(shortname)
@@ -2472,6 +2472,10 @@ class Global:
     self.cached_errata_data = None
 
     puzzle.puzzle_log.add(now, f"Puzzle was reloaded by <b>{sender.fullname}</b>.")
+
+  @save_state
+  def close_hunt(self, now):
+    self.hunt_closed = True
 
   def get_errata_data(self):
     if self.cached_errata_data is None:

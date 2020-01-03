@@ -1312,6 +1312,10 @@ class A2020_HomePage {
             "hppuzzenable", "hppuzzopen",
             function() { A2020_DoAction({action: "open_all_puzzles"},
                                         Common_expect_204); });
+        this.closehunt = new Common_enabler(
+            "hpcloseenable", "hpclosehunt",
+            function() { A2020_DoAction({action: "close_hunt"},
+                                        Common_expect_204); });
     }
 }
 

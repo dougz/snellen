@@ -41,6 +41,8 @@ var last_hint;
 /** @type{string} */
 var event_hash;
 
+/** @type{?boolean} */
+var hunt_closed;
 
 class Message {
     constructor() {

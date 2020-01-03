@@ -30,6 +30,9 @@ var page_class;
 /** @type{Storage} */
 var localStorage;
 
+/** @type{?boolean} */
+var hunt_closed;
+
 class Message {
     constructor() {
         /** @type{string} */

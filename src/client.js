@@ -33,6 +33,7 @@ class H2020_Dispatcher {
             "segments_complete": goog.bind(this.segments_complete, this),
             "post_erratum": goog.bind(this.post_erratum, this),
             "pennies": goog.bind(this.pennies, this),
+            "close_hunt": goog.bind(this.close_hunt, this),
         }
     }
 
@@ -65,6 +66,20 @@ class H2020_Dispatcher {
         if (msg.puzzle_id == puzzle_id) {
             hunt2020.submit_panel.update_history();
         }
+    }
+
+    /** @param{Message} msg */
+    close_hunt(msg) {
+        hunt_closed = true;
+        if (hunt2020.submit_panel) {
+            hunt2020.submit_panel.close_hunt();
+        }
+        if (hunt2020.guest_services) {
+            hunt2020.guest_services.close_hunt();
+        }
+        hunt2020.toast_manager.add_toast(
+            "The 2020 MIT Mystery Hunt has ended!  Thanks for playing!",
+            30000, null, "salmon", null);
     }
 
     /** @param{Message} msg */
@@ -525,6 +540,10 @@ class H2020_SubmitPanel {
     }
 
     build() {
+        if (hunt_closed) {
+            this.close_hunt();
+        }
+
         this.submitpanel = goog.dom.getElement("submitpanel");
         this.input = goog.dom.getElement("answer");
         this.table = goog.dom.getElement("submit_table_body");
@@ -658,6 +677,7 @@ class H2020_SubmitPanel {
     }
 
     submit() {
+        if (hunt_closed) return;
         var answer = this.input.value;
         if (answer == "") return;
         this.input.value = "";
@@ -720,6 +740,18 @@ class H2020_SubmitPanel {
     close() {
         goog.dom.classlist.addRemove(this.submitpanel, "panel-visible",
                                      "panel-invisible");
+    }
+
+    close_hunt() {
+        console.log("panel closing hunt");
+        var el = goog.dom.getElement("submit");
+        if (el) {
+            el.innerHTML = "closed";
+        }
+        el = goog.dom.getElement("submitsubmit");
+        if (el) {
+            el.disabled = true;
+        }
     }
 }
 
@@ -1230,15 +1262,23 @@ class H2020_GuestServices {
         /** @type{Element} */
         this.newphone = goog.dom.getElement("newphone");
 
+        if (hunt_closed) {
+            this.close_hunt();
+        }
+
         goog.events.listen(goog.dom.getElement("newphonesubmit"), goog.events.EventType.CLICK,
                            goog.bind(this.update_phone, this));
-
 
         if (window.performance.navigation.type == 2) {
             this.update_hints_open();
         } else {
             this.build_hints((/** @type{GuestServicesData} */ (initial_json)).hints);
         }
+    }
+
+    close_hunt() {
+        this.hintcancel.disabled = true;
+        this.hintrequest.disabled = true;
     }
 
     update_phone() {
@@ -1322,6 +1362,7 @@ class H2020_GuestServices {
     }
 
     submit() {
+        if (hunt_closed) return;
         var text = this.textarea.value;
         if (text == "") return;
         this.textarea.value = "";
@@ -1403,6 +1444,9 @@ class H2020_GuestServices {
         } else {
             this.hintrequest.disabled = false;
             this.hintrequest.innerHTML = "Send request";
+        }
+        if (hunt_closed) {
+            this.hintrequest.disabled = true;
         }
     }
 

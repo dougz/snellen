@@ -634,6 +634,19 @@ class ActionHandler(util.AdminHandler):
 
     self.set_status(http.client.NO_CONTENT.value)
 
+  async def ACTION_close_hunt(self):
+    # User must have CONTROL_EVENT to close hunt
+    if not self.user.has_role(login.AdminRoles.CONTROL_EVENT):
+      self.set_status(http.client.UNAUTHORIZED.value)
+      return
+
+    game.Global.STATE.close_hunt()
+    for team in game.Team.all_teams():
+      team.send_messages([{"method": "close_hunt"}])
+      await team.flush_messages()
+
+    self.set_status(http.client.NO_CONTENT.value)
+
   async def ACTION_update_lands(self):
     changes = []
     errors = []
