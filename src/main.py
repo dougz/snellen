@@ -146,6 +146,8 @@ async def main_server(options):
 
   game.Global.STATE.task_queue.build()
 
+  game.Global.STATE.maybe_preload()
+
   app = make_app(options, cfg["static"], autoreload=False)
 
   server = tornado.httpserver.HTTPServer(app)

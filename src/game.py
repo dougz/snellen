@@ -754,7 +754,7 @@ class Team(login.LoginUser):
         d["to_go"] = f"Generate <b>{num:,}</b> more Wonder to unlock the next land!"
     return d
 
-  def get_mainmap_data(self):
+  def get_mainmap_data(self, forced_lands=()):
     mainmap = Land.BY_SHORTNAME["mainmap"]
 
     if mainmap in self.cached_mapdata:
@@ -779,7 +779,8 @@ class Team(login.LoginUser):
                "height": base_size[1]}
 
     for i in mainmap.icons.values():
-      if i.to_land not in self.open_lands: continue
+      if (i.to_land not in self.open_lands and
+          i.to_land not in forced_lands): continue
       d = { "name": i.to_land.title,
             "icon": i.name,
             "xywh": i.image.pos_size,
@@ -2412,6 +2413,11 @@ class Erratum:
 class Global:
   STATE = None
 
+  # Start preloading images this long before puzzles open.
+  PRELOAD_ADVANCE = 45
+  # Spread preloading out over this many seconds.
+  PRELOAD_SPREAD = 30
+
   @save_state
   def __init__(self, now):
     self.options = None
@@ -2420,6 +2426,7 @@ class Global:
     self.expected_start_time = int(now + OPTIONS.start_delay)
     Global.STATE = self
     asyncio.create_task(self.future_start())
+    asyncio.create_task(self.future_send_preload())
 
     self.stopping = False
     self.stop_cv = asyncio.Condition()
@@ -2429,6 +2436,7 @@ class Global:
     self.errata = []
     self.reloads = []
     self.cached_errata_data = None
+    self.preload_urls = None
 
   @save_state
   def compute_all_beams(self, now):
@@ -2494,6 +2502,7 @@ class Global:
     if self.event_start_time: return
     self.expected_start_time = when
     asyncio.create_task(self.future_start())
+    asyncio.create_task(self.future_send_preload())
     asyncio.create_task(self.update_event_start_teams())
 
   async def future_start(self):
@@ -2503,6 +2512,20 @@ class Global:
     now = time.time()
     if not self.event_start_time and now >= self.expected_start_time:
       self.start_event(True)
+
+  async def future_send_preload(self):
+    delay = self.expected_start_time - self.PRELOAD_ADVANCE - time.time()
+    if delay > 0:
+      await asyncio.sleep(delay)
+    if not self.preload_urls: return
+    now = time.time()
+    if (not self.event_start_time and
+        now >= self.expected_start_time - self.PRELOAD_ADVANCE):
+      msg = [{"method": "preload", "maps": self.preload_urls,
+              "spread": self.PRELOAD_SPREAD}]
+      for t in Team.all_teams():
+        t.send_messages(msg)
+        await t.flush_messages()
 
   @save_state
   def start_event(self, now, timed):
@@ -2562,6 +2585,32 @@ class Global:
 
   def bb_task_queue_data(self):
     return self.task_queue.get_bb_data()
+
+  def maybe_preload(self):
+    if self.event_start_time:
+      print("Skipping preload; event has started.")
+      return
+
+    initial_lands = [land for land in Land.ordered_lands if land.open_at_score == 0]
+    print(f"Initial lands: {initial_lands}")
+
+    count = 0
+    for t in Team.all_teams():
+      if t.force_all_lands_open: continue
+      if t.force_all_puzzles_open: continue
+      map_data = t.get_mainmap_data(forced_lands=initial_lands)
+      count += 1
+    print(f"Precomputed initial map for {count} teams.")
+
+    map_data = json.loads(map_data)
+    urls = [map_data["base_url"]]
+    for d in map_data["items"]:
+      u = d.get("icon_url")
+      if u: urls.append(u)
+      u = d.get("mask_url")
+      if u: urls.append(u)
+
+    self.preload_urls = urls
 
 
 class MiscLand:

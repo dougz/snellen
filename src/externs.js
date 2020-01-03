@@ -86,6 +86,8 @@ class Message {
         this.completed;
         /** @type{?Object<string,Segment>} */
         this.segments;
+        /** @type{?number} */
+        this.spread;
     }
 }
 

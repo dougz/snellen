@@ -34,6 +34,7 @@ class H2020_Dispatcher {
             "post_erratum": goog.bind(this.post_erratum, this),
             "pennies": goog.bind(this.pennies, this),
             "close_hunt": goog.bind(this.close_hunt, this),
+            "preload": goog.bind(this.preload, this),
         }
     }
 
@@ -52,6 +53,19 @@ class H2020_Dispatcher {
     /** @param{Message} msg */
     dispatch(msg) {
         this.methods[msg.method](msg);
+    }
+
+    /** @param{Message} msg */
+    preload(msg) {
+        var delay = Math.random() * msg.spread * 1000;
+        setTimeout(
+            function() {
+                if (!msg.maps) return;
+                for (const url of msg.maps) {
+                    var img = new Image();
+                    img.src = url;
+                }
+            }, delay);
     }
 
     /** @param{Message} msg */
@@ -856,6 +870,10 @@ class H2020_ToastManager {
 
 class H2020_MapDraw {
     constructor() {
+        if (typeof event_hash === 'undefined') {
+            return;
+        }
+
         /** @type{Element} */
         this.map_el = goog.dom.getElement("map");
         /** @type{Element} */
