@@ -71,7 +71,8 @@
 
   <p>At times in the hunt, you might get a notification that hints are
   available for a certain puzzle. To take a hint,
-  <a href="/guest_services">visit Guest Services</a>
+    {% if park_open %}<a href="/guest_services">{% end %}visit Guest
+      Services{% if park_open %}</a>{% end %}
   and click on the appropriate puzzle. Fill out the form, telling us
   what you’ve tried (e.g. “I jumped off the ferris wheel. Was that
   correct?”) and one of our Guest Services staff will respond

@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css?family=Londrina+Solid:400&display=block');
+
 #nonnav {
     min-height: calc(100vh - 44px - 240px);
     background: url(@@STATIC:mainmap/land_inside_trees.png@@) bottom repeat-x,
@@ -13,6 +15,13 @@
 
 #overcontent {
     display: none;
+}
+
+h1#pagetitle {
+    font-family: 'Londrina Solid', 'Merriweather Sans', sans-serif;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
 }
 
 @media print {
