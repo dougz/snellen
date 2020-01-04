@@ -32,7 +32,8 @@ if true; then
         -c "$HUNT2020_BASE/snellen/external/closure-compiler.jar" \
         -f '--compilation_level' -f 'ADVANCED_OPTIMIZATIONS' \
         -f '--externs' -f "$HUNT2020_BASE/snellen/src/common-externs.js" \
-        -f '--externs' -f "$HUNT2020_BASE/snellen/src/admin-externs.js"
+        -f '--externs' -f "$HUNT2020_BASE/snellen/src/admin-externs.js" \
+        -f '--define' -f 'goog.DEBUG=false'
 
     "$HUNT2020_BASE/snellen/external/closure/bin/calcdeps.py" \
         -i "$HUNT2020_BASE/snellen/src/visit.js" \
@@ -41,7 +42,8 @@ if true; then
         -o compiled \
         -c "$HUNT2020_BASE/snellen/external/closure-compiler.jar" \
         -f '--compilation_level' -f 'ADVANCED_OPTIMIZATIONS' \
-        -f '--externs' -f "$HUNT2020_BASE/snellen/src/visit-externs.js"
+        -f '--externs' -f "$HUNT2020_BASE/snellen/src/visit-externs.js" \
+        -f '--define' -f 'goog.DEBUG=false'
 fi
 
 for i in event login default notopen; do

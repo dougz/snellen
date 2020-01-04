@@ -1083,84 +1083,52 @@ tr.submit-gray .submit-state { color: #666 }
     font-style: italic;
 }
 
-.ListPuzzlesPage table {
+table.listtable  {
     border-collapse: collapse;
     font-family: 'Open Sans', 'Merriweather Sans', sans-serif;
 }
-.ListPuzzlesPage td, .ListPuzzlesPage th {
-    padding: 4px;
+.listtable td, .listtable th {
+    padding: 2px;
 }
 
-.ListPuzzlesPage th {
+.listtable th {
     background-color: #bfc0dc;
     color: #fff;
     text-align: center;
     cursor: pointer;
     padding-left: 30px;
 }
-.ListPuzzlesPage th.sortup { padding-left: 0; }
-.ListPuzzlesPage th.sortdown { padding-left: 0; }
-.ListPuzzlesPage th.sortup::before {
+.listtable th.sortup { padding-left: 0; }
+.listtable th.sortdown { padding-left: 0; }
+.listtable th.sortup::before {
     display: inline-block;
     width: 30px;
     content: "\a0\25b2";
 }
-.ListPuzzlesPage th.sortdown::before {
+.listtable th.sortdown::before {
     display: inline-block;
     width: 30px;
     content: "\a0\25bc";
 }
 
-.ListPuzzlesPage .r { text-align: right; }
-.ListPuzzlesPage .c { text-align: center; }
-.ListPuzzlesPage .h {
+.listtable .z { color: #999; }
+.listtable .lp { padding-left: 16px; }
+.listtable .r { text-align: right; }
+.listtable .c { text-align: center; }
+.listtable .h {
     background-color: #eee;
 }
 
-.ListPuzzlesPage .manual {
+.listtable .manual {
     color: red;
     font-weight: bold;
 }
 
-.ListTeamsPage table {
-    border-collapse: collapse;
-    font-family: 'Open Sans', 'Merriweather Sans', sans-serif;
-}
-.ListTeamsPage td, .ListTeamsPage th {
-    padding: 4px;
-}
-
-.ListTeamsPage th {
-    background-color: #bfc0dc;
-    color: #fff;
-    text-align: center;
-    cursor: pointer;
-    padding-left: 30px;
-}
-.ListTeamsPage .limit {
+.listtable .limit {
     max-width: 300px;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-}
-
-.ListTeamsPage th.sortup { padding-left: 0; }
-.ListTeamsPage th.sortdown { padding-left: 0; }
-.ListTeamsPage th.sortup::before {
-    display: inline-block;
-    width: 30px;
-    content: "\a0\25b2";
-}
-.ListTeamsPage th.sortdown::before {
-    display: inline-block;
-    width: 30px;
-    content: "\a0\25bc";
-}
-
-.ListTeamsPage .r { text-align: right; }
-.ListTeamsPage .c { text-align: center; }
-.ListTeamsPage .h {
-    background-color: #eee;
 }
 
 .LandsPage table {

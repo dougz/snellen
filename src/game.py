@@ -607,6 +607,10 @@ class Team(login.LoginUser):
     self.pennies_earned = []
     self.pennies_collected = []
 
+    self.last_hour = collections.deque()
+    self.last_submit = 0
+    self.last_solve = 0
+
     self.cached_bb_data = None
     self.cached_mapdata = {}
     self.cached_open_hints_data = None
@@ -617,13 +621,45 @@ class Team(login.LoginUser):
     self.admin_url = f"/admin/team/{username}"
     self.admin_html = f'<a href="{self.admin_url}">{html.escape(self.name)}</a>'
 
+  def trim_last_hour(self, now):
+    if not self.last_hour: return False
+
+    changed = False
+    when = now - 3600
+    while self.last_hour and self.last_hour[0][0] < when:
+      self.last_hour.popleft()
+      changed = True
+    return changed
+
+  @classmethod
+  async def realtime_trim_last_hour(cls):
+    while True:
+      await asyncio.sleep(20.0)
+      now = time.time()
+      for team in Team.all_teams():
+        if team.trim_last_hour(now):
+          team.invalidate()
+
   def get_admin_data(self):
     if self.cached_admin_data: return self.cached_admin_data
+
+    self.trim_last_hour(time.time())
+    d = {}
+    for _, k in self.last_hour:
+      d[k] = d.get(k, 0) + 1
 
     out = {"url": self.admin_url,
            "name": self.name,
            "name_sort": self.name_sort,
            "score": self.score,
+           "pennies": [len(self.pennies_earned) + len(self.pennies_collected),
+                       len(self.pennies_collected),
+                       len(self.pennies_earned)],
+           "submits_hr": d.get("submit", 0),
+           "solves_hr": d.get("solve", 0),
+           "beam": len(self.open_puzzles),
+           "last_submit": self.last_submit,
+           "last_solve": self.last_solve,
            }
 
     self.cached_admin_data = out
@@ -1068,6 +1104,10 @@ class Team(login.LoginUser):
       print(f"puzzle {shortname} max pending for {self.username}")
       return
 
+    self.last_hour.append((now, "submit"))
+    self.last_submit = now
+    self.cached_admin_data = None
+
     sub = Submission(now, submit_id, self, puzzle, answer)
     if not sub.answer: return ""
     if not ps.puzzle.allow_duplicates:
@@ -1244,6 +1284,8 @@ class Team(login.LoginUser):
       self.open_puzzles.remove(ps)
 
       self.activity_log.add(now, f"{puzzle.html} solved.")
+      self.last_hour.append((now, "solve"))
+      self.last_solve = now
 
       if ps.hint_request_outstanding():
         ps.hints.append(HintMessage(ps, now, None, None, special="solved"))
@@ -1375,6 +1417,7 @@ class Team(login.LoginUser):
     self.activity_log.add(when, f"Collected the <b>{p.name}</b> penny.")
     self.admin_log.add(when, f"Collected the <b>{p.name}</b> penny.")
     self.send_messages([{"method": "pennies"}])
+    self.invalidate()
     if not save_state.REPLAYING:
       asyncio.create_task(self.flush_messages())
 
@@ -1440,6 +1483,7 @@ class Team(login.LoginUser):
 
   def invalidate(self, puzzle=None, flush=True):
     self.cached_bb_data = None
+    self.cached_admin_data = None
     if puzzle: puzzle.cached_admin_data = None
     login.AdminUser.notify_update(self, puzzle, flush=flush)
 

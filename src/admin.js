@@ -1494,12 +1494,15 @@ class A2020_ListPuzzlesPage {
     }
 
     update() {
-        console.log("requesting update");
         goog.net.XhrIo.send("/admin/js/puzzles", Common_invoke_with_json(this, this.render));
     }
 
     number(n) {
-        return n ? ("" + n) : "";
+        if (n) {
+            return goog.dom.createDom("TD", "r", ""+n);
+        } else {
+            return goog.dom.createDom("TD", "r z", "-");
+        }
     }
 
     /** param{Array<ListPuzzleData>} data */
@@ -1528,14 +1531,14 @@ class A2020_ListPuzzlesPage {
             tr.appendChild(goog.dom.createDom("TD", "c", sp));
             tr.appendChild(goog.dom.createDom("TD", null,
                                               goog.dom.createDom("A", {href: row.url}, row.title)));
-            tr.appendChild(goog.dom.createDom("TD", "r", this.number(row.open_count)));
-            tr.appendChild(goog.dom.createDom("TD", "r", this.number(row.submitted_count)));
-            tr.appendChild(goog.dom.createDom("TD", "r", this.number(row.incorrect_count)));
-            tr.appendChild(goog.dom.createDom("TD", "r", this.number(row.solved_count)));
-            tr.appendChild(goog.dom.createDom("TD", "r",
+            tr.appendChild(this.number(row.open_count));
+            tr.appendChild(this.number(row.submitted_count));
+            tr.appendChild(this.number(row.incorrect_count));
+            tr.appendChild(this.number(row.solved_count));
+            tr.appendChild(goog.dom.createDom("TD", row.median_solve ? "r" : "r z",
                                               row.median_solve ?
-                                              admin2020.time_formatter.duration(row.median_solve) : ""));
-            tr.appendChild(goog.dom.createDom("TD", "r", this.number(row.unsolved_count)));
+                                              admin2020.time_formatter.duration(row.median_solve) : "-"));
+            tr.appendChild(this.number(row.unsolved_count));
             tr.appendChild(goog.dom.createDom("TD", row.hint_time_auto ? "r" : "r manual",
                                               admin2020.time_formatter.duration(row.hint_time)));
             this.plbody.appendChild(tr);
@@ -1561,6 +1564,19 @@ class A2020_ListTeamsPage {
             }
         };
         this.comparators["score"] = function(a, b) { return a.score - b.score; };
+        this.comparators["pennies"] = function(a, b) {
+            if (a.pennies[0] != b.pennies[0]) {
+                return a.pennies[0] - b.pennies[0];
+            } else {
+                return a.pennies[1] - b.pennies[1];
+            }
+        };
+        this.comparators["beam"] = function(a, b) { return a.beam - b.beam; };
+        this.comparators["submits"] = function(a, b) { return a.submits_hr - b.submits_hr; };
+        this.comparators["solves"] = function(a, b) { return a.solves_hr - b.solves_hr; };
+        this.comparators["lastsubmit"] = function(a, b) { return a.last_submit - b.last_submit; };
+        this.comparators["lastsolve"] = function(a, b) { return a.last_solve - b.last_solve; };
+
 
         for (var k in this.comparators) {
             var el = goog.dom.getElement("tlsort_" + k);
@@ -1569,7 +1585,7 @@ class A2020_ListTeamsPage {
         }
         this.sort_key = null;
         this.sort_reverse = false;
-        this.change_sort("order", null);
+        this.change_sort("name", null);
 
         this.last_response = null;
 
@@ -1616,12 +1632,23 @@ class A2020_ListTeamsPage {
     }
 
     number(n) {
-        return n ? ("" + n) : "";
+        if (n) {
+            return goog.dom.createDom("TD", "r", ""+n);
+        } else {
+            return goog.dom.createDom("TD", "r z", "-");
+        }
+    }
+
+    timestamp(n) {
+        if (n) {
+            return goog.dom.createDom("TD", "r lp", admin2020.time_formatter.format(n));
+        } else {
+            return goog.dom.createDom("TD", "r z", "-");
+        }
     }
 
     /** param{Array<ListTeamData>} data */
     render(data) {
-        console.log(data);
         this.tlbody.innerHTML = "";
 
         this.last_response = data;
@@ -1639,7 +1666,18 @@ class A2020_ListTeamsPage {
 
             tr.appendChild(goog.dom.createDom("TD", "limit",
                                               goog.dom.createDom("A", {href: row.url}, row.name)));
-            tr.appendChild(goog.dom.createDom("TD", "r", this.number(row.score)));
+            tr.appendChild(this.number(row.score));
+            if (row.pennies[2] == 0) {
+                tr.appendChild(this.number(row.pennies[1]));
+            } else {
+                var text = "(" + row.pennies[2] + ") " + row.pennies[1];
+                tr.appendChild(goog.dom.createDom("TD", "r", text));
+            }
+            tr.appendChild(this.number(row.beam));
+            tr.appendChild(this.number(row.submits_hr));
+            tr.appendChild(this.number(row.solves_hr));
+            tr.appendChild(this.timestamp(row.last_submit));
+            tr.appendChild(this.timestamp(row.last_solve));
             this.tlbody.appendChild(tr);
         }
 

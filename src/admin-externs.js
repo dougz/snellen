@@ -350,6 +350,31 @@ class ListPuzzleData {
     }
 }
 
+class ListTeamData {
+    constructor() {
+        /** @type{string} */
+        this.url;
+        /** @type{string} */
+        this.name;
+        /** @type{string} */
+        this.name_sort;
+        /** @type{number} */
+        this.score;
+        /** @type{Array<number>} */
+        this.pennies;
+        /** @type{number} */
+        this.submits_hr;
+        /** @type{number} */
+        this.solves_hr;
+        /** @type{number} */
+        this.beam;
+        /** @type{number} */
+        this.last_submit;
+        /** @type{number} */
+        this.last_solve;
+    }
+}
+
 class LandResponse {
     constructor() {
         /** @type{boolean} */
