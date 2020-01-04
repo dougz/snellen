@@ -1162,3 +1162,6 @@ table.listtable  {
 
 .LandsPage .failure { color: red; }
 .LandsPage .success { color: green; }
+
+
+.adminnote { background-color: #ff0; }

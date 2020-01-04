@@ -1269,26 +1269,38 @@ a#ppicon3 {
     font-weight: bold;
 }
 
+.AboutTheParkPage h2 {
+    clear: both;
+    margin-top: 2em;
+}
+
 .AboutTheParkPage div {
     clear: both;
     margin-top: 20px;
 }
 .AboutTheParkPage img {
     height: 160px;
-    margin-bottom: 20px;
+    margin-bottom: 8px;
 }
 
 .AboutTheParkPage #loonies {
     display: flex;
-    justify-content: space-between;
+    justify-content: space-around;
     align-items: flex-start;
 }
 
-.loony {
+.AboutTheParkPage #videolist {
+    margin-bottom: 32px;
+}
+
+div.loony {
+    width: 240px;
     text-align: center;
 }
+
 .loony p {
     font-weight: bold;
+    margin: 0;
 }
 
 .AboutTheParkPage h2.c {

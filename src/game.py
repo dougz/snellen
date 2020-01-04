@@ -402,7 +402,7 @@ class Submission:
     else:
       if answer in self.puzzle.answers:
         self.state = self.CORRECT
-        self.extra_response = None
+        self.extra_response = self.puzzle.responses.get(answer)
 
       elif answer in self.puzzle.responses:
         response = self.puzzle.responses[answer]
@@ -739,7 +739,7 @@ class Team(login.LoginUser):
 
   @save_state
   def add_admin_note(self, now, user_fullname, text):
-    self.admin_log.add(now, f"<b>{user_fullname}</b> noted: {text}")
+    self.admin_log.add(now, f"<span class=\"adminnote\"><b>{user_fullname}</b> noted: {text}</span>")
     self.invalidate()
 
   def get_all_puzzles_data(self):
@@ -1211,7 +1211,7 @@ class Team(login.LoginUser):
       heapq.heappush(self.GLOBAL_FASTPASS_QUEUE,
                      (now+expire-300, self.username, self, ("5 minutes", now+expire)))
     text = "Received a PennyPass."
-    self.activity_log.add(now, text)
+    if not silent: self.activity_log.add(now, text)
     self.admin_log.add(now, text)
     if not silent and not save_state.REPLAYING:
       self.send_messages([{"method": "receive_fastpass", "fastpass": self.get_fastpass_data()}])
