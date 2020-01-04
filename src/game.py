@@ -862,7 +862,7 @@ class Team(login.LoginUser):
           d["solved"] = True
           d["answer"] = ", ".join(sorted(ps.puzzle.display_answers[a] for a in ps.answers_found))
 
-      items.append((("@",), d))
+      items.append((("@@",), d))
 
     # Add statue
     work = False
