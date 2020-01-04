@@ -963,6 +963,10 @@ class Team(login.LoginUser):
       for i, p in enumerate(land.base_min_puzzles):
         if self.puzzle_state[p].state != PuzzleState.CLOSED:
           need_base = max(i, need_base)
+      if land.shortname == "safari":
+        # safari: opening tiger puzzle forces full map
+        if self.puzzle_state[land.meta_puzzle].state != PuzzleState.CLOSED:
+          need_base = 3
       base_img = land.base_img[need_base]
       base_size = land.base_size[need_base]
 
