@@ -19,10 +19,27 @@
 
 h1#pagetitle {
     font-family: 'Londrina Solid', 'Merriweather Sans', sans-serif;
+    font-size: 360%;
     font-weight: 400;
     letter-spacing: 0.04em;
     text-transform: uppercase;
 }
+
+h2, h3 {
+    font-family: 'Londrina Solid', 'Merriweather Sans', sans-serif;
+    letter-spacing: 0.02em;
+    font-weight: normal;
+    font-weight: 400;
+}
+
+h2 {
+    font-size: 28px;
+}
+
+h3 {
+    font-size: 20px;
+}
+
 
 @media print {
     #content { border: none; padding: none; box-shadow: none; }

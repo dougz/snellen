@@ -48,7 +48,7 @@
   <div id="errata"></div>
 
   {% for i, e in enumerate(events) %}
-  <h3 class=eventtitle>{{e.title}} <span class=eventcomplete id="event{{i}}">{{"Completed" if completed[i] else ""}}</span></h3>
+  <h2 class=eventtitle>{{e.title}} <span class=eventcomplete id="event{{i}}">{{"Completed" if completed[i] else ""}}</span></h2>
   <p class=eventtime>{{e.location}} &bull; {{ e.time if e.time else e.team_time[team] }}</p>
   <p class=eventtext>{% raw e.text %}</p>
   {% end %}

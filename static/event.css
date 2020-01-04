@@ -1087,6 +1087,7 @@ video#parkopening {
 .eventtime {
     float: right;
     font-style: italic;
+    margin-top: 28px;
 }
 
 .eventtext {
@@ -1096,7 +1097,6 @@ video#parkopening {
 .eventcomplete {
     margin-left: 20px;
     text-transform: uppercase;
-    font-weight: bold;
     color: red;
 }
 
