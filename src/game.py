@@ -1142,7 +1142,7 @@ class Team(login.LoginUser):
     while True:
       now = time.time()
       while gfq and now >= gfq[0][0]:
-        _, team, action = heapq.heappop(gfq)
+        _, _, team, action = heapq.heappop(gfq)
         if action is None:
           while team.fastpasses_available and now >= team.fastpasses_available[0]:
             team.apply_fastpass(None)
@@ -1160,20 +1160,20 @@ class Team(login.LoginUser):
     self.admin_log.add(now, f"Bestowed a PennyPass by <b>{sender.fullname}</b>.")
     self.receive_fastpass(now, expire)
 
-  def receive_fastpass(self, now, expire):
+  def receive_fastpass(self, now, expire, silent=False):
     self.fastpasses_available.append(now + expire)
     self.fastpasses_available.sort()
-    heapq.heappush(self.GLOBAL_FASTPASS_QUEUE, (now+expire, self, None))
+    heapq.heappush(self.GLOBAL_FASTPASS_QUEUE, (now+expire, self.username, self, None))
     if expire > 60:
       heapq.heappush(self.GLOBAL_FASTPASS_QUEUE,
-                     (now+expire-60, self, ("1 minute", now+expire)))
+                     (now+expire-60, self.username, self, ("1 minute", now+expire)))
     if expire > 300:
       heapq.heappush(self.GLOBAL_FASTPASS_QUEUE,
-                     (now+expire-300, self, ("5 minutes", now+expire)))
+                     (now+expire-300, self.username, self, ("5 minutes", now+expire)))
     text = "Received a PennyPass."
     self.activity_log.add(now, text)
     self.admin_log.add(now, text)
-    if not save_state.REPLAYING:
+    if not silent and not save_state.REPLAYING:
       self.send_messages([{"method": "receive_fastpass", "fastpass": self.get_fastpass_data()}])
       asyncio.create_task(self.flush_messages())
     self.dirty_header = True
@@ -2582,6 +2582,7 @@ class Global:
     self.event_hash = hashlib.md5(str(now).encode("ascii")).hexdigest()[:8]
     print(f"starting event at {now} hash is {self.event_hash}")
     for team in Team.BY_USERNAME.values():
+      team.receive_fastpass(now, CONSTANTS["pennypass_expiration"] * CONSTANTS["time_scale"], silent=True)
       team.compute_puzzle_beam(self.event_start_time)
       team.open_puzzle(Event.PUZZLE, now, None)
       team.invalidate(flush=False)
