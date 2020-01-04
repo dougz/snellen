@@ -783,6 +783,7 @@ class H2020_ToastManager {
     }
 
     add_toast(message, timeout, audio, color="blue", click_to="") {
+        console.log("add toast");
         this.serial += 1;
         var tt = goog.dom.createDom("DIV");
         tt.innerHTML = message;

@@ -5,10 +5,15 @@
 
 {% block content %}
 
-<ul>
-  {% for t in teams.values() %}
-  <li>{{t.username}}: <a href="/admin/team/{{t.username}}">{{t.name}}</a></li>
-  {% end %}
-</ul>
+<table id="tltable">
+  <thead>
+    <tr class="h">
+      <th id="tlsort_name">name</th>
+      <th id="tlsort_score">score</th>
+    </tr>
+  </thead>
+  <tbody id="tlbody">
+  </tbody>
+</table>
 
 {% end %}

@@ -564,6 +564,9 @@ class Team(login.LoginUser):
     self.username = username
     self.password_hash = info["pwhash"].encode("ascii")
     self.name = info["name"]
+    self.name_sort = util.make_sortkey(self.name)
+    if not self.name_sort:
+      self.name_sort = util.make_sortkey(username)
     self.size = info["size"]
     self.remote_only = info["remote_only"]
     self.attrs = info.get("attrs", {})
@@ -609,9 +612,22 @@ class Team(login.LoginUser):
     self.cached_open_hints_data = None
     self.cached_errata_data = None
     self.cached_jukebox_data = None
+    self.cached_admin_data = None
 
     self.admin_url = f"/admin/team/{username}"
     self.admin_html = f'<a href="{self.admin_url}">{html.escape(self.name)}</a>'
+
+  def get_admin_data(self):
+    if self.cached_admin_data: return self.cached_admin_data
+
+    out = {"url": self.admin_url,
+           "name": self.name,
+           "name_sort": self.name_sort,
+           "score": self.score,
+           }
+
+    self.cached_admin_data = out
+    return out
 
   def post_init(self):
     # Create a PuzzleState object for all puzzles that exist.

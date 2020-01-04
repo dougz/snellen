@@ -86,9 +86,13 @@ class ErrataDataHandler(util.AdminHandler):
 class ListTeamsPage(util.AdminPageHandler):
   @login.required("admin")
   def get(self):
-    self.render("admin_list_teams.html",
-                teams=game.Team.BY_USERNAME)
+    self.render("admin_list_teams.html")
 
+class ListTeamsDataHandler(util.AdminHandler):
+  @login.required("admin")
+  def get(self):
+    x = [t.get_admin_data() for t in game.Team.all_teams()]
+    self.return_json(x)
 
 class TeamPage(util.AdminPageHandler):
   @login.required("admin")
@@ -818,6 +822,7 @@ def GetHandlers():
     (r"/admin/js/bbteam(/[a-z0-9_]+)?$", BigBoardTeamDataHandler),
     (r"/admin/js/errata$", ErrataDataHandler),
     (r"/admin/js/puzzles", ListPuzzlesDataHandler),
+    (r"/admin/js/teams", ListTeamsDataHandler),
     ]
   return handlers
 

@@ -4,7 +4,7 @@
 
 body {
     background: url(@@STATIC:mainmap/land_clouds.png@@) top repeat-x,
-		url(@@STATIC:mainmap/land_tree.png@@) bottom repeat-x,
+		url(@@STATIC:mainmap/land_outside_trees.png@@) bottom repeat-x,
 		#c3dffb;
     font-family: 'Merriweather Sans', sans-serif;
     margin: 0;

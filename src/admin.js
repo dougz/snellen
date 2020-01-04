@@ -1191,7 +1191,7 @@ window.onload = function() {
         admin2020.team_puzzle_page = new A2020_TeamPuzzlePage();
     }
     if (page_class == "ListTeamsPage") {
-        admin2020.team_list_page = new A2020_TeamListPage();
+        admin2020.team_list_page = new A2020_ListTeamsPage();
     }
     if (page_class == "ListPuzzlesPage") {
         admin2020.puzzle_list_page = new A2020_ListPuzzlesPage();
@@ -1529,5 +1529,107 @@ class A2020_ListPuzzlesPage {
         }
 
         twemoji.parse(this.plbody);
+    }
+}
+
+class A2020_ListTeamsPage {
+    constructor() {
+        /** @type{Element} */
+        this.tlbody = goog.dom.getElement("tlbody");
+
+        this.comparators = {}
+        this.comparators["name"] = function(a, b) {
+            if (a.name_sort < b.name_sort) {
+                return -1;
+            } else if (a.name_sort > b.name_sort) {
+                return 1;
+            } else {
+                return 0;
+            }
+        };
+        this.comparators["score"] = function(a, b) { return a.score - b.score; };
+
+        for (var k in this.comparators) {
+            var el = goog.dom.getElement("tlsort_" + k);
+            goog.events.listen(el, goog.events.EventType.CLICK,
+                               goog.bind(this.change_sort, this, k));
+        }
+        this.sort_key = null;
+        this.sort_reverse = false;
+        this.change_sort("order", null);
+
+        this.last_response = null;
+
+        this.update();
+    }
+
+    change_sort(newsort, e) {
+        if (this.sort_key == newsort) {
+            this.sort_reverse = !this.sort_reverse;
+            if (this.sort_reverse) {
+                goog.dom.classlist.add(goog.dom.getElement("tlsort_" + newsort), "sortup");
+                goog.dom.classlist.remove(goog.dom.getElement("tlsort_" + newsort), "sortdown");
+            } else {
+                goog.dom.classlist.add(goog.dom.getElement("tlsort_" + newsort), "sortdown");
+                goog.dom.classlist.remove(goog.dom.getElement("tlsort_" + newsort), "sortup");
+            }
+        } else {
+            this.sort_key = newsort;
+            this.sort_reverse = false;
+            for (var k in this.comparators) {
+                if (k == newsort) {
+                    if (this.sort_reverse) {
+                        goog.dom.classlist.add(goog.dom.getElement("tlsort_" + k), "sortup");
+                    } else {
+                        goog.dom.classlist.add(goog.dom.getElement("tlsort_" + k), "sortdown");
+                    }
+                } else {
+                    goog.dom.classlist.remove(goog.dom.getElement("tlsort_" + k), "sortup");
+                    goog.dom.classlist.remove(goog.dom.getElement("tlsort_" + k), "sortdown");
+                }
+            }
+        }
+
+        if (e) {
+            e.target.blur();
+        }
+        if (this.last_response) {
+            this.render(this.last_response);
+        }
+    }
+
+    update() {
+        goog.net.XhrIo.send("/admin/js/teams", Common_invoke_with_json(this, this.render));
+    }
+
+    number(n) {
+        return n ? ("" + n) : "";
+    }
+
+    /** param{Array<ListTeamData>} data */
+    render(data) {
+        console.log(data);
+        this.tlbody.innerHTML = "";
+
+        this.last_response = data;
+
+        data.sort(this.comparators[this.sort_key]);
+        if (this.sort_reverse) {
+            data.reverse();
+        }
+
+        var i = 0;
+        for (const row of data) {
+            i += 1;
+
+            var tr = goog.dom.createDom("TR", (i%3==0) ? "h" : null);
+
+            tr.appendChild(goog.dom.createDom("TD", "limit",
+                                              goog.dom.createDom("A", {href: row.url}, row.name)));
+            tr.appendChild(goog.dom.createDom("TD", "r", this.number(row.score)));
+            this.tlbody.appendChild(tr);
+        }
+
+        twemoji.parse(this.tlbody);
     }
 }
