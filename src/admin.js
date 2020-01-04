@@ -7,9 +7,23 @@ goog.require("goog.json.Serializer");
 
 class A2020_Dispatcher {
     constructor() {
+        /** @type{boolean} */
+        this.dirty_lists = false;
+
         this.methods = {
             "task_queue": goog.bind(this.task_queue, this),
             "update": goog.bind(this.update, this),
+        }
+    }
+
+    pre_dispatch() {
+        this.dirty_lists = false;
+    }
+
+    post_dispatch() {
+        if (this.dirty_lists) {
+            if (admin2020.puzzle_list_page) admin2020.puzzle_list_page.update();
+            if (admin2020.team_list_page) admin2020.team_list_page.update();
         }
     }
 
@@ -47,9 +61,7 @@ class A2020_Dispatcher {
         if (admin2020.errata_page) {
             admin2020.errata_page.update();
         }
-        if (admin2020.puzzle_list_page) {
-            admin2020.puzzle_list_page.update();
-        }
+        this.dirty_lists = true;
     }
 }
 
@@ -1482,6 +1494,7 @@ class A2020_ListPuzzlesPage {
     }
 
     update() {
+        console.log("requesting update");
         goog.net.XhrIo.send("/admin/js/puzzles", Common_invoke_with_json(this, this.render));
     }
 

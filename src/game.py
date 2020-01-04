@@ -1220,8 +1220,10 @@ class Team(login.LoginUser):
       if opened_list is not None: opened_list.append(puzzle)
       self.open_puzzles.add(ps)
       puzzle.open_teams.add(self)
+      puzzle.cached_admin_data = None
       self.cached_all_puzzles_data = None
       self.cached_errata_data = None
+      self.cached_admin_data = None
       if puzzle.land.land_order < 1000:
         self.dirty_lands.add(puzzle.land.shortname)
         self.cached_mapdata.pop(puzzle.land, None)
@@ -1264,6 +1266,7 @@ class Team(login.LoginUser):
       self.cached_all_puzzles_data = None
       self.cached_jukebox_data = None
       self.cached_open_hints_data = None
+      self.cached_admin_data = None
       if puzzle.meta:
         current_map = Land.BY_SHORTNAME["mainmap"]
         self.cached_mapdata.pop(current_map, None)
