@@ -4,13 +4,14 @@ import argparse
 import asyncio
 import copy
 import json
+import math
 import pprint
 import random
 import re
 import resource
 import time
+import unicodedata
 
-import tornado.gen
 import tornado.ioloop
 import tornado.httpclient
 
@@ -20,147 +21,199 @@ bruins central codex conduction constructs control corvus dalton death
 donner dootdoot dragoncakehat ducksoup dynamite etphone exercise exit
 fellowship fevers fighters fish flower frumious galactic gnus
 hedgehogs hunches hunters immoral janedoe knock ladder lastplace
-leftout lexhunt lexingtons love malls manateem mathcampers mathletes
+lexhunt lexingtons love malls manateem mathcampers mathletes
 metaphysical mindthegap mystere n3xt nair neuromology neverever nope
 offinthelab omnom palindrome palmford plain planetix pluto praxis
 providenc puzzkill puzzledom quiz reptilian resistance rhinos rofls
 secrets sg shortz shrug singles slack slalom sloan snowman sorrymom
 squad stooth team teammate teapots tng tried turquoise twtw unclear
 unclear unseen uplate vaguely wafflehaus waslater whitelotus wizards
-wpi wranglers wwe""".split()
+wpi wranglers wwe leftout""".split()
 
-stats = {}
+ADMIN = """fakedougz""".split()
+
+stats = {"page_loads": [], "start_times": {}}
+
 LAUNCH = asyncio.Event()
 
-async def show_stats(options):
-  last = None
-  while True:
-    if last != stats:
-      last = copy.copy(stats)
-      print(f"{time.time()}: {last}")
-    await asyncio.sleep(1.0)
-
-    if not LAUNCH.is_set() and last.get("LOGIN", 0) == options.teams * options.browsers * options.tabs:
-      print("launching!")
-      LAUNCH.set()
+def canonicalize_answer(text):
+  text = unicodedata.normalize("NFD", text.upper())
+  out = []
+  for k in text:
+    cat = unicodedata.category(k)
+    # Letters, "other symbols", or specific characters needed for complex emojis
+    if cat == "So" or cat[0] == "L" or k == u"\u200D" or k == u"\uFE0F":
+      out.append(k)
+  return "".join(out)
 
 
-async def main(options):
-  soft, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
-  resource.setrlimit(resource.RLIMIT_NOFILE, (hard, hard))
+class Simulation:
+  def __init__(self, options):
+    self.options = options
 
-  client = tornado.httpclient.AsyncHTTPClient.configure(
-    "tornado.curl_httpclient.CurlAsyncHTTPClient", max_clients=10000)
-  client = tornado.httpclient.AsyncHTTPClient()
+    soft, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
+    resource.setrlimit(resource.RLIMIT_NOFILE, (hard, hard))
 
-  teams = tornado.gen.multi([simulate_team(client, username, "aoeu", options) for username in TEAMS[:options.teams]])
+    tornado.httpclient.AsyncHTTPClient.configure(
+      "tornado.curl_httpclient.CurlAsyncHTTPClient", max_clients=10000)
+    self.client = tornado.httpclient.AsyncHTTPClient()
 
-  await asyncio.gather(teams, show_stats(options))
+    self.logins = asyncio.Semaphore(value=2)
+
+  async def go(self):
+    tasks = []
+    for username in TEAMS[:self.options.teams]:
+      for i in range(self.options.browsers):
+        t = SimTeam(self, username, "snth", self.options.tabs)
+        tasks.append(t.go())
+
+    expected = self.options.teams * self.options.browsers * self.options.tabs
+    tasks.append(self.show_stats(expected))
+    await asyncio.gather(*tasks)
+
+  async def show_stats(self, expected):
+    while len(stats["page_loads"]) < expected:
+      pprint.pprint(stats["start_times"])
+      await asyncio.sleep(1.0)
+
+    print(stats["page_loads"])
+    print(len(stats["page_loads"]), expected)
+
+    with open("/tmp/times.txt", "w") as f:
+      for x in stats["page_loads"]:
+        f.write(f"{x}\n")
 
 
-async def simulate_team(client, username, password, options):
-  print(f"starting {username}")
-  browsers = tornado.gen.multi([simulate_browser(f"{username}_{i}", client, username, password, i * .025, options) for i in range(options.browsers)])
-  await browsers
+class SimBrowser:
+  def __init__(self, sim, username, password):
+    self.sim = sim
+    self.username = username
+    self.password = password
 
-async def simulate_browser(my_id, client, username, password, delay, options):
-  await asyncio.sleep(delay)
+  async def login(self):
+    async with self.sim.logins:
+      #print(f"--- {self.username} logging in ---")
+      req = tornado.httpclient.HTTPRequest(
+        f"{self.sim.options.base_url}/login_submit",
+        method="POST",
+        connect_timeout=5.0,
+        request_timeout=10.0,
+        body=f"username={self.username}&password={self.password}",
+        follow_redirects=False)
 
-  print(f"--- {my_id} logging in ---")
-  # Fetch the home page so we're issued a session cookie.
+      try:
+        response = await self.sim.client.fetch(req)
+        raise RuntimeError()
+      except tornado.httpclient.HTTPClientError as e:
+        assert e.code == 302
+        self.cookie = e.response.headers["Set-Cookie"].split(";")[0]
 
-  req = tornado.httpclient.HTTPRequest(
-    "http://snellen/",
-    follow_redirects=False)
+        #print(f"--- {self.username} logged in ---")
 
-  try:
-    response = await client.fetch(req)
-    assert False
-  except tornado.httpclient.HTTPClientError as e:
-    assert e.code == 302
-    cookie = e.response.headers["Set-Cookie"].split(";")[0]
-
-  # Submit the login page.
-
-  req = tornado.httpclient.HTTPRequest(
-    "http://snellen/login_submit",
-    method="POST",
-    body=f"username={username}&password={password}",
-    follow_redirects=False,
-    headers={"Cookie": cookie})
-
-  try:
-    response = await client.fetch(req)
-    assert False
-  except tornado.httpclient.HTTPClientError as e:
-    assert e.code == 302
-
-    print(f"--- {my_id} logged in ---")
-
-  tabs = tornado.gen.multi([simulate_tab(my_id, i, cookie, client) for i in range(options.tabs)])
-  await tabs
-
-async def simulate_tab(my_id, tab_num, cookie, client):
-  #print(f"--- {my_id}.{tab_num} starting {cookie} ---")
-
-  stats["LOGIN"] = stats.get("LOGIN", 0) + 1
-  await LAUNCH.wait()
-
-  await asyncio.sleep(tab_num * 1.0)
-
-  # Now we can fetch the home page to get assigned a waiter_id.
-
-  req = tornado.httpclient.HTTPRequest(
-    "http://snellen/",
-    connect_timeout=5.0,
-    request_timeout=10.0,
-    follow_redirects=False,
-    headers={"Cookie": cookie})
-
-  #print(f"--- {my_id}.{tab_num} fetching ---")
-  try:
-    response = await client.fetch(req)
-  except tornado.httpclient.HTTPClientError as e:
-    print(f"--- {my_id}.{tab_num} failed: {e} ---")
-    return
-
-  #print(f"--- {my_id}.{tab_num} fetched ---")
-
-  m = re.search(rb"(?:wid|waiter_id) = (\d+)", response.body)
-  wid = int(m.group(1))
-
-  print(f"--- {my_id}.{tab_num} wid {wid} ---")
-
-  serial = 0
-  stats[serial] = stats.get(serial, 0) + 1
-  while True:
-    #print(f"--- {my_id}.{tab_num} waiting (wid {wid}) ---")
+  async def get(self, url, timeout=10):
     req = tornado.httpclient.HTTPRequest(
-      f"http://snellen/wait/{wid}/{serial}",
+      f"{self.sim.options.base_url}{url}",
+      connect_timeout=timeout,
+      request_timeout=timeout,
       follow_redirects=False,
-      headers={"Cookie": cookie},
-      request_timeout=600.0)
-
-    old_serial = serial
+      headers={"Cookie": self.cookie})
 
     try:
-      response = await client.fetch(req)
+      response = await self.sim.client.fetch(req)
+      return response.body
     except tornado.httpclient.HTTPClientError as e:
       print(e)
-      continue
+      return None
 
-    #print(f"--- {my_id}.{tab_num} response ---")
-    d = json.loads(response.body)
-    for ser, msg in d:
-      serial = max(serial, ser)
-      #pprint.pprint(msg)
+  async def post(self, url, data):
+      req = tornado.httpclient.HTTPRequest(
+        f"{self.sim.options.base_url}{url}",
+        method="POST",
+        body=data,
+        connect_timeout=5.0,
+        request_timeout=10.0,
+        follow_redirects=False,
+        headers={"Cookie": self.cookie})
 
-    stats[old_serial] -= 1
-    if not stats[old_serial]: del stats[old_serial]
-    stats[serial] = stats.get(serial, 0) + 1
+      try:
+        response = await self.sim.client.fetch(req)
+      except tornado.httpclient.HTTPClientError as e:
+        raise RuntimeError()
 
-    # random delay before waiting again, same as client.js
-    await asyncio.sleep(random.random() * .250)
+      if response.code == 200:
+        return response.body
+      elif response.code == 204 or response_code == 409:
+        return None
+      else:
+        raise RuntimeError()
+
+
+class SimTeam(SimBrowser):
+  def __init__(self, sim, username, password, tabs):
+    super().__init__(sim, username, password)
+    self.tabs = tabs
+
+  async def do_action(self, **d):
+    await self.post("/action", json.dumps(d))
+
+  async def go(self):
+    print(f"starting {self.username}")
+    await self.login()
+
+    tasks = [self.one_tab() for i in range(self.tabs)]
+    await asyncio.gather(*tasks)
+
+  async def one_tab(self):
+    wid, serial = await self.load_page("/")
+    start_time = await self.wait_for_launch(wid, serial)
+    if start_time:
+      wid, serial = await self.load_page("/")
+      now = time.time()
+      delay = now - start_time
+      stats["page_loads"].append(int(delay*1000))
+
+  async def load_page(self, url):
+    result = await self.get("/")
+    result = result.decode("utf-8")
+
+    m = re.search(r"var wid = (\d+);", result)
+    assert m
+    wid = int(m.group(1))
+
+    m = re.search(r"var received_serial = (\d+);", result)
+    assert m
+    serial = int(m.group(1))
+
+    return wid, serial
+
+  async def wait_for_launch(self, wid, serial):
+    delay = 10.0
+    start_time = None
+    known_times = stats["start_times"]
+    known_times[start_time] = known_times.get(start_time, 0) + 1
+    while True:
+      #print(f"waiting ({int(delay)})...")
+      r = await self.get(f"/wait/{wid}/{serial}/{int(delay)}", timeout=delay+5)
+      if r is None:
+        print("error")
+        return
+
+      j = json.loads(r.decode("utf-8"))
+      if not j:
+        delay = min(300, delay*1.5)
+        continue
+
+      delay = 10.0
+      for ser, msg in j:
+        serial = max(serial, ser)
+        #print(msg)
+        if msg["method"] == "update_start":
+          known_times[start_time] = known_times.get(start_time, 0) - 1
+          if known_times[start_time] == 0:
+            del known_times[start_time]
+          start_time = msg["new_start"]
+          known_times[start_time] = known_times.get(start_time, 0) + 1
+        if msg["method"] == "to_page": return start_time
 
 
 if __name__ == "__main__":
@@ -168,10 +221,13 @@ if __name__ == "__main__":
   parser.add_argument("-t", "--teams", type=int, default=1)
   parser.add_argument("-b", "--browsers", type=int, default=1)
   parser.add_argument("-i", "--tabs", type=int, default=1)
+  parser.add_argument("-u", "--base_url", default="http://snellen.fun")
   options = parser.parse_args()
 
+  sim = Simulation(options)
+
   async def go():
-    await main(options)
+    await sim.go()
 
   ioloop = tornado.ioloop.IOLoop.current()
   ioloop.run_sync(go)
