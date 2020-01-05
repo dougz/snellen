@@ -1217,10 +1217,10 @@ window.onload = function() {
     if (page_class == "LandsPage") {
         admin2020.lands_page = new A2020_LandsPage();
     }
+    if (page_class == "PuzzleContentPage") {
+        if (typeof puzzle_init !== 'undefined' && puzzle_init) puzzle_init();
+    }
 }
-
-
-
 
 class A2020_FixPuzzlePage {
     constructor() {

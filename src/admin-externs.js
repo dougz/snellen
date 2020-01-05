@@ -3,6 +3,9 @@ var puzzle_id;
 /** @type{?string} */
 var team_username;
 
+/** @type{?function()} */
+var puzzle_init;
+
 /** @type{?Array<Array<string>>} */
 var puzzle_list;
 /** @type{?Array<Array<string>>} */

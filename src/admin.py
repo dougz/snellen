@@ -153,6 +153,10 @@ class PuzzleContentPage(util.AdminPageHandler):
 
     errata = [{"when": util.format_timestamp(e.when, with_ref=False), "text": e.text} for e in puzzle.errata]
 
+    # Log this browser out of any team account it's signed into, so
+    # the puzzle doesn't act as that team (eg, for scrum puzzles).
+    self.clear_cookie(login.Session.PLAYER_COOKIE_NAME)
+
     self.render("admin_puzzle_frame.html", supertitle=supertitle,
                 head=head, body=body, errata=errata)
 
