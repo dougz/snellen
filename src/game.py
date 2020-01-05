@@ -606,6 +606,7 @@ class Team(login.LoginUser):
 
     self.pennies_earned = []
     self.pennies_collected = []
+    self.coin_found = None
 
     self.last_hour = collections.deque()
     self.last_submit = 0
@@ -1449,6 +1450,8 @@ class Team(login.LoginUser):
 
   def complete_machine_interaction(self, task, when):
     print("completed machine interaction")
+    self.coin_found = when
+    self.invalidate()
 
   @save_state
   def concierge_update(self, now, submit_id, result):
@@ -1597,14 +1600,15 @@ class Team(login.LoginUser):
 
       land = MiscLand.get()
       lx = [x["left"] for x in self.bb_label_info() if x["symbol"] == land.symbol][0]
-      for (p, big, ny, r) in zip(land.all_puzzles, (False, True, True), (0, 1, 3), (5, 9, 12)):
+      for (p, cy, r) in zip(land.all_puzzles, (7, 29.5, 59.5), (5, 9, 12)):
         ps = self.puzzle_state[p]
         st = state_from_ps(ps)
-        cy = ny*15 + 7
-        if big:
-          out.append(f'<circle cx="{lx+14.5}" cy="{cy+7.5}" r="{r}" class="bb-{st} bbp-{p.bbid}"/>')
-        else:
-          out.append(f'<circle cx="{lx+14.5}" cy="{cy}" r="{r}" class="bb-{st} bbp-{p.bbid}"/>')
+        out.append(f'<circle cx="{lx+14.5}" cy="{cy}" r="{r}" class="bb-{st} bbp-{p.bbid}"/>')
+
+      if self.coin_found:
+        out.append(f'<g transform="translate({lx+14.5} {cy}) scale(1 -1)">'
+                   '<path d="M0 11L6.47 -8.9L-10.46 3.4L10.46 3.4L-6.47 -8.9z" fill="yellow"/>'
+                   f'</g>')
       lx += 30
 
       out.insert(0, f'<svg xmlns="http://www.w3.org/2000/svg" width="{lx}" height="74" viewBox="0 0 {lx} 74">')

@@ -731,7 +731,10 @@ class VisitPage(util.AdminPageHandler):
     if not mode:
       self.render("admin_visit.html", mode="select", js="", team_data="null")
     else:
-      looking_for = f"-{mode}-visit"
+      if mode == "gizmo":
+        looking_for = f"-final-machine"
+      else:
+        looking_for = f"-{mode}-visit"
       teams = {}
       ordered = []
       for t in game.Global.STATE.task_queue.tasks.values():
@@ -802,7 +805,7 @@ def GetHandlers():
     (r"/admin/lands$", LandsPage),
     (r"/admin/users$", AdminUsersPage),
     (r"/admin/server$", AdminServerPage),
-    (r"/admin/visit(?:/(penny|loony))?$", VisitPage),
+    (r"/admin/visit(?:/(penny|loony|gizmo))?$", VisitPage),
     (r"/admin/errata$", ErrataPage),
 
     (r"/admin/action$", ActionHandler),
