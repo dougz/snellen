@@ -1413,6 +1413,11 @@ class A2020_LandsPage {
         for (const text of data.messages) {
             result.appendChild(goog.dom.createDom("LI", null, text));
         }
+        if (data.success) {
+            result.appendChild(goog.dom.createDom(
+                "LI", null, goog.dom.createDom(
+                    "B", null, "Refresh page to see updated values.")));
+        }
     }
 }
 

@@ -12,7 +12,7 @@
     <tr>
       <th>Land</th>
       <th>Open score</th>
-      <th>Open time</th>
+      <th colspan=2>Open time</th>
       <th>Initial puzzles</th>
       <th>Teams open</th>
     </tr>
@@ -25,6 +25,7 @@
       <td>{{land.title}}</td>
       <td class="r p">{{land.open_at_score}}</td>
       <td class="r p">{{format_duration(land.open_at_time)}}</td>
+      <td class="r p">{{format_timestamp((launch or expected_launch) + land.open_at_time, with_ref=False)}}</td>
       <td class="r p">{{land.initial_puzzles}}</td>
       <td class="r">{{len(land.open_teams)}}</td>
       {% else %}
@@ -32,6 +33,7 @@
       <td>{{land.title}}</td>
       <td class="r"><input type="text" id="score_{{ol}}" value="{{land.open_at_score}}"></td>
       <td class="r"><input type="text" id="time_{{ol}}" value="{{format_duration(land.open_at_time)}}"></td>
+      <td class="r p">{{format_timestamp((launch or expected_launch) + land.open_at_time, with_ref=False)}}</td>
       <td class="r"><input type="text" id="count_{{ol}}" value="{{land.initial_puzzles}}"></td>
       {% end %}
     </tr>

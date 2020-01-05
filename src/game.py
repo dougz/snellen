@@ -1940,7 +1940,8 @@ class Land:
     self.guess_max = cfg.get("guess_max", CONSTANTS["default_guess_max"])
     self.open_at_score, self.open_at_time = cfg.get("open_at", (None, None))
     self.time_unlocked = False
-    if self.open_at_time: self.open_at_time *= CONSTANTS["time_scale"]
+    if self.open_at_time:
+      self.open_at_time = int(self.open_at_time * CONSTANTS["time_scale"])
     if "assignments" in cfg:
       self.initial_puzzles = cfg["initial_puzzles"]
 
@@ -2548,9 +2549,10 @@ class Global:
       land.open_at_time = times[i]
       land.initial_puzzles = counts[i]
 
-    for team in Team.all_teams():
-      team.compute_puzzle_beam(now)
-      team.invalidate()
+    if self.event_start_time:
+      for team in Team.all_teams():
+        team.compute_puzzle_beam(now)
+        team.invalidate()
 
   @save_state
   def post_erratum(self, now, shortname, text, sender):
