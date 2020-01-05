@@ -14,7 +14,7 @@ body {
     position: absolute;
     left: 0;
     top: 41px;
-    animation: scudding linear 200s forwards infinite;
+    animation: linear 240s forwards infinite scudding;
 }
 
 #openwait {
