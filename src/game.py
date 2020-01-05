@@ -652,6 +652,7 @@ class Team(login.LoginUser):
     out = {"url": self.admin_url,
            "name": self.name,
            "name_sort": self.name_sort,
+           "remote": self.remote_only,
            "score": self.score,
            "pennies": [len(self.pennies_earned) + len(self.pennies_collected),
                        len(self.pennies_collected),

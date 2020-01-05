@@ -361,6 +361,8 @@ class ListTeamData {
         this.name;
         /** @type{string} */
         this.name_sort;
+        /** @type{boolean} */
+        this.remote;
         /** @type{number} */
         this.score;
         /** @type{Array<number>} */

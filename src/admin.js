@@ -1676,8 +1676,13 @@ class A2020_ListTeamsPage {
 
             var tr = goog.dom.createDom("TR", (i%3==0) ? "h" : null);
 
-            tr.appendChild(goog.dom.createDom("TD", "limit",
-                                              goog.dom.createDom("A", {href: row.url}, row.name)));
+            var td = goog.dom.createDom("TD", "limit",
+                                        goog.dom.createDom("A", {href: row.url}, row.name))
+            tr.appendChild(td);
+            if (row.remote) {
+                td.appendChild(goog.dom.createDom("SPAN", "remote", "R"));
+            }
+
             tr.appendChild(this.number(row.score));
             if (row.pennies[2] == 0) {
                 tr.appendChild(this.number(row.pennies[1]));
