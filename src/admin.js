@@ -1315,6 +1315,12 @@ class A2020_HomePage {
             function() { A2020_DoAction({action: "bestow_fastpass"},
                                         Common_expect_204); });
 
+        this.pennypass_remote = new Common_enabler(
+            "hppassremoteenable", "hppassremotebestow",
+            function() { A2020_DoAction({action: "bestow_fastpass",
+                                         remote_only: true},
+                                        Common_expect_204); });
+
         this.openlands_all = new Common_enabler(
             "hplandenable", "hplandopen",
             function() { A2020_DoAction({action: "open_all_lands"},

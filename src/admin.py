@@ -457,12 +457,16 @@ class ActionHandler(util.AdminHandler):
     username = self.args.get("team_username", None)
     duration = CONSTANTS["pennypass_expiration"] * CONSTANTS["time_scale"]
     if username is None:
-      # User must have CONTROL_EVENT to give all teams a pass.
+      # User must have CONTROL_EVENT to give all (or all remote) teams
+      # a pass.
       if not self.user.has_role(login.AdminRoles.CONTROL_EVENT):
         self.set_status(http.client.UNAUTHORIZED.value)
         return
 
+      remote = self.args.get("remote_only", False)
+
       for team in game.Team.all_teams():
+        if not team.remote_only and remote: continue
         team.bestow_fastpass(duration, self.user.username)
     else:
       team = self.get_team(username)
