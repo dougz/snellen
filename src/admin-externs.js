@@ -372,6 +372,8 @@ class ListTeamData {
         this.last_submit;
         /** @type{number} */
         this.last_solve;
+        /** @type{number} */
+        this.fastpass;
     }
 }
 

@@ -1572,6 +1572,7 @@ class A2020_ListTeamsPage {
             }
         };
         this.comparators["beam"] = function(a, b) { return a.beam - b.beam; };
+        this.comparators["fastpass"] = function(a, b) { return a.fastpass - b.fastpass; };
         this.comparators["submits"] = function(a, b) { return a.submits_hr - b.submits_hr; };
         this.comparators["solves"] = function(a, b) { return a.solves_hr - b.solves_hr; };
         this.comparators["lastsubmit"] = function(a, b) { return a.last_submit - b.last_submit; };
@@ -1674,6 +1675,7 @@ class A2020_ListTeamsPage {
                 tr.appendChild(goog.dom.createDom("TD", "r", text));
             }
             tr.appendChild(this.number(row.beam));
+            tr.appendChild(this.number(row.fastpass));
             tr.appendChild(this.number(row.submits_hr));
             tr.appendChild(this.number(row.solves_hr));
             tr.appendChild(this.timestamp(row.last_submit));

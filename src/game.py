@@ -660,6 +660,7 @@ class Team(login.LoginUser):
            "beam": len(self.open_puzzles),
            "last_submit": self.last_submit,
            "last_solve": self.last_solve,
+           "fastpass": len(self.fastpasses_available),
            }
 
     self.cached_admin_data = out
