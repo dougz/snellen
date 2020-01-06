@@ -266,7 +266,6 @@ class LoginSubmit(tornado.web.RequestHandler):
       print(f"Missing host header")
       domain = "pennypark.fun"
     domain = domain.split(":")[0]
-    print(f"domain is {domain}")
 
     if username: username = username.lower()
 

@@ -817,9 +817,9 @@ class Team(login.LoginUser):
     mainmap = Land.BY_SHORTNAME["mainmap"]
 
     if mainmap in self.cached_mapdata:
-      print(f" mapdata cache hit: {self.username} mainmap")
+      #print(f" mapdata cache hit: {self.username} mainmap")
       return self.cached_mapdata[mainmap]
-    print(f"mapdata cache miss: {self.username} mainmap")
+    #print(f"mapdata cache miss: {self.username} mainmap")
 
     items = []
 
@@ -2701,13 +2701,11 @@ class Global:
     initial_lands = [land for land in Land.ordered_lands if land.open_at_score == 0]
     print(f"Initial lands: {initial_lands}")
 
-    count = 0
     for t in Team.all_teams():
       if t.force_all_lands_open: continue
       if t.force_all_puzzles_open: continue
       map_data = t.get_mainmap_data(forced_lands=initial_lands)
-      count += 1
-    print(f"Precomputed initial map for {count} teams.")
+      break
 
     map_data = json.loads(map_data)
     urls = [map_data["base_url"]]
