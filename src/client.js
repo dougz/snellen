@@ -396,6 +396,8 @@ class H2020_EmojiPicker {
             text = text.replace(goog.dom.getOuterHtml(children[i]), children[i].alt);
           }
         }
+        var doc = new DOMParser().parseFromString(text, "text/html");
+        text = doc.documentElement.textContent;
         this.input.value = this.sanitize_input(text, this.max_input_length());
     }
 
