@@ -671,6 +671,11 @@ class A2020_ServerPage {
         /** @type{Element} */
         this.proxy_waits = goog.dom.getElement("stproxies");
 
+        this.flusher = new Common_enabler(
+            "srvflushenable", "srvflush",
+            function(e) { A2020_DoAction({action: "flush_template_cache"},
+                                         Common_expect_204); });
+
         this.update();
 
         setInterval(goog.bind(this.update, this), 5000);

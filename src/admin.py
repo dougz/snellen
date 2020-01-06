@@ -28,10 +28,6 @@ class AdminHomePage(util.AdminPageHandler):
       d = datetime.datetime.fromtimestamp(st.expected_start_time)
       args["expected_start_time_text"] = d.ctime()
 
-    # print(self._template_loaders)
-    # for v in self._template_loaders.values():
-    #   v.reset()
-
     self.render("admin_home.html", **args)
 
 
@@ -456,6 +452,14 @@ class ActionHandler(util.AdminHandler):
     else:
       # Unknown (or no) "action" field.
       self.set_status(http.client.BAD_REQUEST.value)
+
+  async def ACTION_flush_template_cache(self):
+    if not self.user.has_role(login.AdminRoles.CONTROL_EVENT):
+      self.set_status(http.client.UNAUTHORIZED.value)
+      return
+    for v in self._template_loaders.values():
+      v.reset()
+    self.set_status(http.client.NO_CONTENT.value)
 
   async def ACTION_bestow_fastpass(self):
     username = self.args.get("team_username", None)
