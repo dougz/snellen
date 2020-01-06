@@ -145,6 +145,8 @@ class Puzzle:
           elif not a:
             errors.append(f"Author can't be an empty string.")
 
+    return
+
     self.responses = {}
     if "response" in y or "responses" in y:
       responses = self.get_plural(y, "response", errors)
@@ -343,16 +345,25 @@ def main():
   puzzle_dir = os.path.join(options.output_dir, "puzzles")
   os.makedirs(puzzle_dir, exist_ok=True)
 
+  out = []
+
   for zipfn in options.input_files:
     with open(zipfn, "rb") as f:
       zip_data = f.read()
       try:
         p = Puzzle(zip_data, options, filename=os.path.basename(zipfn))
-        p.save(puzzle_dir)
+        out.append([p.shortname, p.title] + p.authors)
+        #p.save(puzzle_dir)
       except PuzzleErrors as e:
         print(f"{zipfn} had {len(e.errors)} error(s):")
         for i, err in enumerate(e.errors):
           print(f"{i+1}: {err}")
+
+  with open("/tmp/authors.csv", "w") as f:
+    import csv
+    writer = csv.writer(f)
+    for row in out:
+      writer.writerow(row)
 
 
 if __name__ == "__main__":

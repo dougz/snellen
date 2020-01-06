@@ -28,6 +28,10 @@ class AdminHomePage(util.AdminPageHandler):
       d = datetime.datetime.fromtimestamp(st.expected_start_time)
       args["expected_start_time_text"] = d.ctime()
 
+    # print(self._template_loaders)
+    # for v in self._template_loaders.values():
+    #   v.reset()
+
     self.render("admin_home.html", **args)
 
 
