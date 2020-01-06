@@ -65,6 +65,16 @@ async def main_server(options):
   game.Global.set_submit_log_filename(
     os.path.join(options.event_dir, "submit_log.csv"))
 
+  with open(os.path.join(os.getenv("HUNT2020_BASE"), "snellen/static/emoji.json")) as f:
+    emoji = json.load(f)
+    allowed = set()
+    for _, g in emoji:
+      for e in g:
+        for k in e[1]:
+          allowed.add(k)
+    allowed = frozenset(allowed)
+    game.Puzzle.EXTRA_ALLOWED_CHARS = allowed
+
   print("Load map config...")
   with open(os.path.join(options.event_dir, "map_config.json")) as f:
     cfg = json.load(f)

@@ -2415,14 +2415,16 @@ class Puzzle:
       out.append(d)
     return out
 
-  @staticmethod
-  def canonicalize_answer(text):
+  EXTRA_ALLOWED_CHARS = None
+
+  @classmethod
+  def canonicalize_answer(cls, text):
     text = unicodedata.normalize("NFD", text.upper())
     out = []
     for k in text:
       cat = unicodedata.category(k)
       # Letters, "other symbols", or specific characters needed for complex emojis
-      if cat == "So" or cat[0] == "L" or k == u"\u200D" or k == u"\uFE0F":
+      if cat == "So" or cat[0] == "L" or k in cls.EXTRA_ALLOWED_CHARS:
         out.append(k)
     return "".join(out)
 
