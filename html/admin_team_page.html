@@ -13,7 +13,7 @@
   <tr><th>team</th><td class=h1>{{team.name}}</td></tr>
   <tr><th>username</th><td class=mono>{{team.username}}</td></tr>
   <tr><th></th><td><a target="_blank" href="/admin/become/{{team.username}}">become this team</a></td></tr>
-  <tr><th>location</th><td>{{team.attrs.get("location", "Unknown")}}
+  <tr><th>location</th><td><span id=tploc></span>
       {% if team.remote_only %}<span class=remote>Remote Only</span>{% end %}
   </td></tr>
   <tr><th>phone</th><td id=tpphone></td></tr>

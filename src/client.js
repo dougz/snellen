@@ -1280,6 +1280,8 @@ class H2020_GuestServices {
 
         /** @type{Element} */
         this.newphone = goog.dom.getElement("newphone");
+        /** @type{Element} */
+        this.newloc = goog.dom.getElement("newloc");
 
         if (hunt_closed) {
             this.close_hunt();
@@ -1287,6 +1289,8 @@ class H2020_GuestServices {
 
         goog.events.listen(goog.dom.getElement("newphonesubmit"), goog.events.EventType.CLICK,
                            goog.bind(this.update_phone, this));
+        goog.events.listen(goog.dom.getElement("newlocsubmit"), goog.events.EventType.CLICK,
+                           goog.bind(this.update_location, this));
 
         if (window.performance.navigation.type == 2) {
             this.update_hints_open();
@@ -1309,6 +1313,17 @@ class H2020_GuestServices {
 
     phone_updated() {
         goog.dom.getElement("newphonesaved").style.display = "inline";
+    }
+
+    update_location() {
+        var value = this.newloc.value;
+        if (value == "") return;
+        H2020_DoAction({action: "update_location", location: value},
+                       Common_invoke_with_json(this, this.location_updated));
+    }
+
+    location_updated() {
+        goog.dom.getElement("newlocsaved").style.display = "inline";
     }
 
     update_hints_open() {

@@ -758,6 +758,10 @@ span.solved img.emoji {
     white-space: nowrap;
 }
 
+.entry400 {
+    width: 400px;
+}
+
 .entrysubmit {
     margin: 8px 8px 8px 0;
     border-radius: 0;
@@ -1264,6 +1268,12 @@ a#ppicon3 {
 }
 
 #newphonesaved {
+    display: none;
+    color: green;
+    font-weight: bold;
+}
+
+#newlocsaved {
     display: none;
     color: green;
     font-weight: bold;

@@ -716,6 +716,8 @@ class A2020_TeamPage {
         this.tpscore = goog.dom.getElement("tpscore");
         /** @type{Element} */
         this.tpphone = goog.dom.getElement("tpphone");
+        /** @type{Element} */
+        this.tploc = goog.dom.getElement("tploc");
 
         this.pennypass = new Common_enabler(
             "tppassenable", "tppassbestow",
@@ -816,6 +818,7 @@ class A2020_TeamPage {
         this.tpsvg.innerHTML = data.svg;
         this.tpscore.innerHTML = "" + data.score;
         this.tpphone.innerHTML = data.phone;
+        this.tploc.innerHTML = data.location;
 
         twemoji.parse(goog.dom.getElement("admincontent"));
 

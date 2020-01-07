@@ -295,6 +295,14 @@ class ActionHandler(util.AdminHandler):
     self.team.update_phone(new_phone)
     self.set_status(http.client.NO_CONTENT.value)
 
+  async def ACTION_update_location(self):
+    new_location = self.args.get("location", "").strip()
+    if not new_location:
+      self.set_status(http.client.BAD_REQUEST.value)
+      return
+    self.team.update_location(new_location)
+    self.set_status(http.client.NO_CONTENT.value)
+
   async def ACTION_apply_pennypass(self):
     land_name = self.args.get("land", "")
     if self.team.apply_fastpass(land_name):

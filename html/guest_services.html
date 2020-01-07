@@ -66,9 +66,14 @@
   {% end %}
 
   <div class="entry">
-    <input type="text" id="newphone" class="entryentry" size=30 value="{{team.attrs.get("phone", "")}}">
+    <input type="text" id="newphone" class="entryentry entry400" size=200 value="{{team.attrs.get("phone", "")}}">
     <button id="newphonesubmit" class="entrysubmit">Update contact phone</button>
     <span id="newphonesaved">Contact phone updated.</span>
+  </div>
+  <div class="entry">
+    <input type="text" id="newloc" class="entryentry entry400" size=200 value="{{team.attrs.get("location", "")}}">
+    <button id="newlocsubmit" class="entrysubmit">Update team HQ location</button>
+    <span id="newlocsaved">Team HQ location updated.</span>
   </div>
 
   <p>If you need to contact Hunt HQ for any other non-emergency

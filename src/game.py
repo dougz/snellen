@@ -719,11 +719,22 @@ class Team(login.LoginUser):
 
   @save_state
   def update_phone(self, now, new_phone):
+    if self.attrs["phone"] == new_phone: return
     self.admin_log.add(
       now, (f"Changed contact phone from "
             f"<b>{html.escape(self.attrs.get('phone', '(unknown)'))}</b> to "
             f"<b>{html.escape(new_phone)}</b>."))
     self.attrs["phone"] = new_phone
+    self.invalidate()
+
+  @save_state
+  def update_location(self, now, new_location):
+    if self.attrs["location"] == new_location: return
+    self.admin_log.add(
+      now, (f"Changed team HQ location from "
+            f"<b>{html.escape(self.attrs.get('location', '(unknown)'))}</b> to "
+            f"<b>{html.escape(new_location)}</b>."))
+    self.attrs["location"] = new_location
     self.invalidate()
 
   def get_errata_data(self):

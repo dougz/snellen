@@ -139,6 +139,8 @@ class TeamPageData {
         this.score;
         /** @type{string} */
         this.phone;
+        /** @type{string} */
+        this.location;
     }
 }
 
