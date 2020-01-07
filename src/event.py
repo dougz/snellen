@@ -113,7 +113,8 @@ class CurrentHeaderDataHandler(util.TeamHandler):
 class AboutTheParkPage(util.TeamPageHandler):
   @login.required("team", require_start=False)
   def get(self):
-    self.render("about_the_park.html", static_content=self.static_content)
+    self.render("about_the_park.html", static_content=self.static_content,
+                videos=VIDEOS[:self.team.videos])
 
 class RulesPage(util.TeamPageHandler):
   @login.required("team", require_start=False)
@@ -123,11 +124,7 @@ class RulesPage(util.TeamPageHandler):
 class VideosDataHandler(util.TeamHandler):
   @login.required("team", require_start=False)
   def get(self):
-    urls = []
-    for i in range(1, self.team.videos+1):
-      urls.append({"video": OPTIONS.static_content.get(f"video{i}.mp4"),
-                   "poster": OPTIONS.static_content.get(f"poster{i}.png")})
-    self.return_json(urls)
+    self.return_json(VIDEOS[:self.team.videos])
 
 class EventsPage(util.TeamPageHandler):
   @login.required("team", require_start=False)

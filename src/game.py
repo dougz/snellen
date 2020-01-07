@@ -1347,7 +1347,7 @@ class Team(login.LoginUser):
           f"<a href=\"/about_the_park#history\"><img class=videothumb src=\"{thumb}\"></a>")
         self.send_messages([
           {"method": "video",
-           "video_url": OPTIONS.static_content.get(f"video{self.videos}.mp4"),
+           "video_url": VIDEOS[self.videos],
            "thumb": thumb,
           }])
 

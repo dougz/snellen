@@ -17,9 +17,9 @@
     Park. Here is a promotional video from 1993 showing this magical
     moment.</p>
 
-  <video id="parkopening" controls preload="none">
-    <source src="{{static_content['opening.mp4']}}">
-  </video>
+  <div>
+    <iframe width="560" height="315" src="https://www.youtube.com/embed/VfLRJ2hgoxk" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+  </div>
 
   <div><img src="{{static_content['judy.png']}}" style="float: right;">
     <h3>Judy Miller<br>Founder of Penny Park</h3>
@@ -79,7 +79,11 @@
   owners.  Be on the lookout for more updates as we continue this
   process!</p>
 
-  <div id="videolist"></div>
-  <div id="overcontent"></div>
+  <div id="videolist">
+    {% for i, u in enumerate(videos) %}
+    <h3>Video {{i+1}}</h3>
+    <iframe width="560" height="315" src="{{u}}?rel=0" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    {% end %}
+  </div>
 </div>
 {% end %}

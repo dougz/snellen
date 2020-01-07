@@ -1783,11 +1783,12 @@ class H2020_Videos {
         for (var i = 0; i < data.length; ++i) {
             var el = goog.dom.createDom("H3", null, "Video " + (i+1));
             this.video_div.appendChild(el);
-            el = goog.dom.createDom("VIDEO", {className: "storyvideo",
-                                                controls: true,
-                                                preload: "none",
-                                                poster: data[i].poster},
-              goog.dom.createDom("SOURCE", {src: data[i].video}));
+            el = goog.dom.createDom("IFRAME", {width: 560,
+                                               height: 315,
+                                               src: data[i] + "?rel=0",
+                                               frameborder: 0,
+                                               allow: "accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture",
+                                               allowfullscreen: true});
             this.video_div.appendChild(el);
         }
     }

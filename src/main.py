@@ -83,6 +83,9 @@ async def main_server(options):
   game.CONSTANTS = c
   admin.CONSTANTS = c
 
+  game.VIDEOS = cfg["videos"]
+  event.VIDEOS = cfg["videos"]
+
   static_content = {}
   for key, v in cfg["static"].items():
     if isinstance(v, str):

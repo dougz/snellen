@@ -196,24 +196,24 @@ def convert_static_files(out, options, lands):
                      ("logo-nav.png", f"{base}/snellen/static/logo-nav.png"),
                      ("emoji.json", f"{base}/snellen/static/emoji.json"),
                      ("opening.mp4", f"{base}/media/opening.mp4"),
-                     ("video1.mp4", f"{base}/media/video1.mp4"),
-                     ("video2.mp4", f"{base}/media/video2.mp4"),
-                     ("video3.mp4", f"{base}/media/video3.mp4"),
-                     ("video4.mp4", f"{base}/media/video4.mp4"),
-                     ("video5.mp4", f"{base}/media/video5.mp4"),
-                     ("video6.mp4", f"{base}/media/video6.mp4"),
+                     # ("video1.mp4", f"{base}/media/video1.mp4"),
+                     # ("video2.mp4", f"{base}/media/video2.mp4"),
+                     # ("video3.mp4", f"{base}/media/video3.mp4"),
+                     # ("video4.mp4", f"{base}/media/video4.mp4"),
+                     # ("video5.mp4", f"{base}/media/video5.mp4"),
+                     # ("video6.mp4", f"{base}/media/video6.mp4"),
                      ("thumb1.png", f"{base}/media/thumb1.png"),
                      ("thumb2.png", f"{base}/media/thumb2.png"),
                      ("thumb3.png", f"{base}/media/thumb3.png"),
                      ("thumb4.png", f"{base}/media/thumb4.png"),
                      ("thumb5.png", f"{base}/media/thumb5.png"),
                      ("thumb6.png", f"{base}/media/thumb6.png"),
-                     ("poster1.png", f"{base}/media/poster1.png"),
-                     ("poster2.png", f"{base}/media/poster2.png"),
-                     ("poster3.png", f"{base}/media/poster3.png"),
-                     ("poster4.png", f"{base}/media/poster4.png"),
-                     ("poster5.png", f"{base}/media/poster5.png"),
-                     ("poster6.png", f"{base}/media/poster6.png"),
+                     # ("poster1.png", f"{base}/media/poster1.png"),
+                     # ("poster2.png", f"{base}/media/poster2.png"),
+                     # ("poster3.png", f"{base}/media/poster3.png"),
+                     # ("poster4.png", f"{base}/media/poster4.png"),
+                     # ("poster5.png", f"{base}/media/poster5.png"),
+                     # ("poster6.png", f"{base}/media/poster6.png"),
                      ("admin_fav_green/favicon-32x32.png",
                       f"{base}/snellen/static/admin_fav_green/favicon-32x32.png"),
                      ("admin_fav_green/favicon-16x16.png",
@@ -283,7 +283,7 @@ def main():
     y = yaml.safe_load(f)
 
   for land in y.keys():
-    if land in ("events", "workshop", "runaround", "constants"): continue
+    if land in ("events", "workshop", "runaround", "constants", "videos"): continue
     print(f"Loading assets/{land}/land.yaml...")
     with open(os.path.join(options.input_dir, "assets", land, "land.yaml")) as f:
       y[land].update(yaml.safe_load(f))
@@ -294,7 +294,7 @@ def main():
 
   output["maps"] = {}
   for shortname, d in y.items():
-    if shortname in ("events", "workshop", "runaround", "constants"): continue
+    if shortname in ("events", "workshop", "runaround", "constants", "videos"): continue
     output["maps"][shortname] = convert_map(shortname, d, options)
 
   output["static"] = {}
@@ -306,6 +306,7 @@ def main():
   output["workshop"] = y.get("workshop", {})
   output["runaround"] = y.get("runaround", {})
   output["constants"] = y.get("constants", {})
+  output["videos"] = y.get("videos", [])
 
   with open(output_file, "w") as f:
     json.dump(output, f, sort_keys=True, indent=2)
