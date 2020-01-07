@@ -774,18 +774,14 @@ class VisitPage(util.AdminPageHandler):
 class ConciergeHandler(util.AdminHandler):
   @login.required("admin")
   async def get(self):
-    print("starting handler")
     username = self.get_argument('u', None)
     submit_id = self.get_argument('s', None)
     result = self.get_argument('result', None)
     team = game.Team.get_by_username(username)
     if not team: return self.not_found()
 
-    print(f"team is {team}")
     if result not in ("no_answer", "wrong_number", "complete", "correct"):
       return self.not_found()
-
-    print(f"result is {result}")
 
     try:
       submit_id = int(submit_id)

@@ -1266,6 +1266,8 @@ class Team(login.LoginUser):
       ps.open_time = now
       if opened_list is not None: opened_list.append(puzzle)
       self.open_puzzles.add(ps)
+      Global.STATE.log_submit(now, self.username, puzzle.shortname,
+                              "", "", "open")
       puzzle.open_teams.add(self)
       puzzle.cached_admin_data = None
       self.cached_all_puzzles_data = None
@@ -1289,6 +1291,8 @@ class Team(login.LoginUser):
       self.dirty_header = True
       self.last_score_change = now
       self.open_puzzles.remove(ps)
+      Global.STATE.log_submit(now, self.username, puzzle.shortname,
+                              "", "", "solved")
 
       self.activity_log.add(now, f"{puzzle.html} solved.")
       self.last_hour.append((now, "solve"))
@@ -1468,7 +1472,6 @@ class Team(login.LoginUser):
           sub = s
           break
     if not sub: return None
-    print(f"sub is {sub}")
 
     if result == "no_answer":
       sub.state = "no answer"
