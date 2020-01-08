@@ -153,7 +153,7 @@ def convert_static_files(out, options, lands):
 
   to_convert = []
 
-  for land in list(lands) + ["runaround"]:
+  for land in list(lands) + ["runaround", "workshop"]:
     land_dir = os.path.join(options.input_assets, land)
     for fn in os.listdir(land_dir):
       if fn.startswith("land_") and fn.endswith(".png"):

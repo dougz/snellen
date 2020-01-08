@@ -246,7 +246,7 @@ class PuzzleState:
     for sub in after:
       sub.check_time = None
       self.submissions.append(sub)
-      sub.check_or_queue(now)
+      sub.check_or_queue(now, log=False)
 
   def requeue_pending(self, now):
     self.requeue(self.remove_pending(), now)
@@ -342,11 +342,14 @@ class Submission:
   def __lt__(self, other):
     return self.submit_id < other.submit_id
 
-  def check_or_queue(self, now):
+  def check_or_queue(self, now, log=True):
     self.check_time = self.compute_check_time()
     if self.check_time <= self.sent_time:
       self.check_answer(self.sent_time)
     else:
+      if log:
+        Global.STATE.log_submit(now, self.team.username, self.puzzle.shortname,
+                                self.raw_answer, self.answer, "queued")
       heapq.heappush(self.GLOBAL_SUBMIT_QUEUE, (self.check_time, self))
       self.team.invalidate(self.puzzle)
 
@@ -1151,6 +1154,8 @@ class Team(login.LoginUser):
 
     for i, sub in enumerate(state.submissions):
       if sub.submit_id == submit_id and sub.state == sub.PENDING:
+        Global.STATE.log_submit(now, self.username, puzzle.shortname,
+                                sub.raw_answer, sub.answer, "canceled")
         sub.state = sub.CANCELLED
         state.submissions.pop(i)
         state.requeue_pending(now)
@@ -2874,7 +2879,7 @@ class Workshop:
     p.oncall = ""
     p.puzzletron_id = -1
     p.authors = ["Left Out"]
-    p.style = "default.css"
+    p.style = "workshop/land.css"
     p.solve_audio = OPTIONS.static_content.get("reveal.mp3")
     p.solve_extra = {"url": OPTIONS.static_content.get("reveal_under.png"),
                      "video_url": OPTIONS.static_content.get("reveal_over.png"),
