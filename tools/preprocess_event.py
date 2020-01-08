@@ -153,7 +153,7 @@ def convert_static_files(out, options, lands):
 
   to_convert = []
 
-  for land in lands:
+  for land in list(lands) + ["runaround"]:
     land_dir = os.path.join(options.input_assets, land)
     for fn in os.listdir(land_dir):
       if fn.startswith("land_") and fn.endswith(".png"):
@@ -165,7 +165,6 @@ def convert_static_files(out, options, lands):
         to_convert.append((os.path.join(land, xfn), fn))
 
   to_convert.extend([
-    ("runaround.css", os.path.join(options.input_assets, "runaround.css")),
     ("end_solve.mp3", os.path.join(options.input_assets, "end_solve.mp3")),
     ("events_solve.mp3", os.path.join(options.input_assets, "events_solve.mp3")),
     ("reveal.mp3", os.path.join(options.input_assets, "reveal.mp3")),

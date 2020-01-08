@@ -1839,9 +1839,13 @@ class Team(login.LoginUser):
           (keepers_solved >= 5 or self.force_all_puzzles_open)):
         self.open_puzzle(meta, now, opened)
 
+    if self.force_all_puzzles_open and self.puzzle_state[Workshop.PUZZLE].state == PuzzleState.CLOSED:
+      self.open_puzzle(Workshop.PUZZLE, now, None)
+
     if self.puzzle_state[Runaround.PUZZLE].state == PuzzleState.CLOSED:
       for p in Runaround.REQUIRED_PUZZLES:
-        if self.puzzle_state[p].state != PuzzleState.SOLVED:
+        if (not self.force_all_puzzles_open and
+            self.puzzle_state[p].state != PuzzleState.SOLVED):
           break
       else:
         # Open the runaround!
@@ -2929,7 +2933,7 @@ class Runaround:
     p.oncall = ""
     p.puzzletron_id = -1
     p.authors = ["Left Out"]
-    p.style = "runaround.css"
+    p.style = "runaround/land.css"
     p.solve_audio = OPTIONS.static_content.get("end_solve.mp3")
 
     p.title = "Heart of the Park"
