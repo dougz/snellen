@@ -43,15 +43,69 @@
 
 
 {% block content %}
-<div id="content">
+<div id="content" class="{{page_class}}">
   <h1 id="pagetitle">Events</h1>
   <div id="errata"></div>
 
-  {% for i, e in enumerate(events) %}
-  <h2 class=eventtitle>{{e.title}} <span class=eventcomplete id="event{{i}}">{{"Completed" if completed[i] else ""}}</span></h2>
-  <p class=eventtime>{{e.location}} &bull; {{ e.time if e.time else e.team_time[team] }}</p>
-  <p class=eventtext>{% raw e.text %}</p>
-  {% end %}
+  <h2 class=eventtitle>The Midway <span class=eventcomplete id="event0">{{"Completed" if completed[0] else ""}}</span></h2>
+  <p class=eventtime>Sala de Puerto Rico &bull; Open 5pm&ndash;9pm Friday</p>
+  <p class=eventtext>
+    Visit the Midway! Send exactly two players who love carnival food
+    and games. Please plan to arrive anytime between 5pm and 6pm; if you
+    really love the Midway, you’re welcome to stay as long as it’s
+    open, or send other teammates back to play!
+  </p>
+
+  <h2 class=eventtitle>Character Breakfast <span class=eventcomplete id="event1">{{"Completed" if completed[1] else ""}}</span></h2>
+  <p class=eventtime>Lobdell &bull; {{"11am Saturday" if events[1].team_time[team] == "late" else "9am Saturday"}}</p>
+  <p class=eventtext>
+    Do you enjoy gluten, eggs, dairy and making a mess? Then you are
+    invited to attend the Character Breakfast! Send exactly two players
+    to your reserved seating. <i>Safety note: please do not send
+    players who have had a contagious illness in the last 3 days.</i>
+  </p>
+
+  <h2 class=eventtitle>Build-a-Wand Workshop <span class=eventcomplete id="event2">{{"Completed" if completed[2] else ""}}</span></h2>
+  <p class=eventtime>Twenty Chimneys &bull; 1pm Saturday</p>
+  <p class=eventtext>
+    Come along for your chance to build your very own magic wand and
+    bring it home with you! You’ll have many styles and resources to
+    choose from, but finding a combination that’s worth it might be a
+    challenge. Send exactly two players who are ready to haggle.
+  </p>
+
+  <h2 class=eventtitle>Robot Parade <span class=eventcomplete id="event3">{{"Completed" if completed[3] else ""}}</span></h2>
+  <p class=eventtime>Infinite Corridor and Lobby 7 &bull; 4pm Saturday</p>
+  <p class=eventtext>
+    A few lucky park guests will make robot costumes and march in this
+    fun parade down the Infinite Corridor. Come cheer them on and
+    enjoy their robot antics! The parade is best viewed from Lobby 7,
+    but is visible from parts of the Infinite Corridor as
+    well. <i>Safety note: viewers should not sit or block public
+    walkways, please stand along the walls only.</i>
+  </p>
+
+  <h2 class=eventtitle>Fireworks Show <span class=eventcomplete id="event4">{{"Completed" if completed[4] else ""}}</span></h2>
+  <p class=eventtime>Outside, between 56 and 66 &bull; 7pm Saturday</p>
+  <p class=eventtext>
+    Our silent fireworks display goes great with pop music that you
+    provide! And best of all, you don’t have to go outside if it’s too
+    cold. You can also stand at windows in the halls connecting
+    building 56 and 66 to view this nighttime spectacle! Attending
+    every event in Penny Park is something special, so don’t miss
+    out! <i>Safety note: viewers should not sit or block public
+    walkways, please stand along the walls only.</i>
+  </p>
+
+  <hr>
+
+  <h2 class=eventtitle>Pay It Forward</h2>
+  <p class=eventtime>Before 9pm Saturday</p>
+  <p class=eventtext>
+    Help Penny Park give back to the local community! On Friday or
+    Saturday, anyone can participate in the Pay It Forward Scavenger
+    Hunt. Check The Tech for your first clue.
+  </p>
 
 </div>
 

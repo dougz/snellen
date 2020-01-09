@@ -2771,13 +2771,9 @@ class Event:
 
   def __init__(self, shortname, d):
     self.shortname = shortname
-    self.title = d["title"]
-    self.time = d["time"]
-    self.location = d["location"]
     self.display_answer = d["answer"]
     self.answer = Puzzle.canonicalize_answer(self.display_answer)
     self.order = d["order"]
-    self.text = d["text"]
 
     self.ALL_EVENTS.append(self)
 
@@ -2822,18 +2818,25 @@ class Event:
     land.all_puzzles.append(p)
     p.post_init(land, None)
 
-    e = [e for e in cls.ALL_EVENTS if e.time == "__special__"][0]
+    e = cls.ALL_EVENTS[1]  # Character Breakfast
     e.team_time = {}
 
-    teams_by_size = [((t.size, id(t)), t) for t in Team.all_teams()]
+    teams_by_size = []
+    for t in Team.all_teams():
+      if t.remote_only:
+        e.team_time[t] = "late"
+      else:
+        teams_by_size.append(((t.size, id(t)), t))
     teams_by_size.sort()
     half = (len(teams_by_size)+1) // 2
     for i, (_, t) in enumerate(teams_by_size):
       if i < half:
-        e.team_time[t] = "11am Saturday"
+        e.team_time[t] = "late"
       else:
-        e.team_time[t] = "9am Saturday"
-    e.time = None
+        e.team_time[t] = "early"
+
+    for k, v in e.team_time.items():
+      print(k, k.size, v)
 
 class Workshop:
   ALL_PENNIES = {}

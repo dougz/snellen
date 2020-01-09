@@ -1105,6 +1105,10 @@ video#parkopening {
     color: red;
 }
 
+.EventsPage hr {
+    margin: 48px 40px 20px 40px;
+}
+
 #navpass {
     display: none;
 }
