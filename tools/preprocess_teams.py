@@ -60,6 +60,7 @@ def main():
 
     # Password nonempty
     assert d["password"], f"{username} missing password"
+    d["password"] = "snth" # XXX
     od["pwhash"] = make_hash(d.pop("password"))
 
     od["remote_only"] = d.pop("remote_only", False)

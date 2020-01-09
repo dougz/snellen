@@ -16,20 +16,6 @@ import tornado.ioloop
 import tornado.httpclient
 
 
-TEAMS = """acorns amateur area51 astro awesome bah band bees biggame blazers
-bruins central codex conduction constructs control corvus dalton death
-donner dootdoot dragoncakehat ducksoup dynamite etphone exercise exit
-fellowship fevers fighters fish flower frumious galactic gnus
-hedgehogs hunches hunters immoral janedoe knock ladder lastplace
-lexhunt lexingtons love malls manateem mathcampers mathletes
-metaphysical mindthegap mystere n3xt nair neuromology neverever nope
-offinthelab omnom palindrome palmford plain planetix pluto praxis
-providenc puzzkill puzzledom quiz reptilian resistance rhinos rofls
-secrets sg shortz shrug singles slack slalom sloan snowman sorrymom
-squad stooth team teammate teapots tng tried turquoise twtw unclear
-unclear unseen uplate vaguely wafflehaus waslater whitelotus wizards
-wpi wranglers wwe leftout""".split()
-
 ADMIN = """fakedougz""".split()
 
 stats = {"page_loads": [], "start_times": {}}
@@ -61,8 +47,12 @@ class Simulation:
     self.logins = asyncio.Semaphore(value=2)
 
   async def go(self):
+    admin = SimAdmin(self, ADMIN[0], "snth")
+    teams = await admin.get_teams()
+    print(teams)
+
     tasks = []
-    for username in TEAMS[:self.options.teams]:
+    for username in teams[:self.options.teams]:
       for i in range(self.options.browsers):
         t = SimTeam(self, username, "snth", self.options.tabs)
         tasks.append(t.go())
@@ -214,6 +204,20 @@ class SimTeam(SimBrowser):
           start_time = msg["new_start"]
           known_times[start_time] = known_times.get(start_time, 0) + 1
         if msg["method"] == "to_page": return start_time
+
+
+class SimAdmin(SimBrowser):
+  def __init__(self, sim, username, password):
+    super().__init__(sim, username, password)
+
+  async def do_action(self, **d):
+    await self.post("/admin/action", json.dumps(d))
+
+  async def get_teams(self):
+    await self.login()
+
+    j = json.loads(await self.get("/admin/js/teams"))
+    return [d["url"].split("/")[-1] for d in j if "allopen" not in d["url"]]
 
 
 if __name__ == "__main__":

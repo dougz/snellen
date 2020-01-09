@@ -3,6 +3,7 @@
 import argparse
 import asyncio
 import copy
+import hashlib
 import json
 import math
 import pprint
@@ -15,20 +16,6 @@ import unicodedata
 import tornado.ioloop
 import tornado.httpclient
 
-
-TEAMS = """acorns amateur area51 astro awesome bah band bees biggame blazers
-bruins central codex conduction constructs control corvus dalton death
-donner dootdoot dragoncakehat ducksoup dynamite etphone exercise exit
-fellowship fevers fighters fish flower frumious galactic gnus
-hedgehogs hunches hunters immoral janedoe knock ladder lastplace
-lexhunt lexingtons love malls manateem mathcampers mathletes
-metaphysical mindthegap mystere n3xt nair neuromology neverever nope
-offinthelab omnom palindrome palmford plain planetix pluto praxis
-providenc puzzkill puzzledom quiz reptilian resistance rhinos rofls
-secrets sg shortz shrug singles slack slalom sloan snowman sorrymom
-squad stooth team teammate teapots tng tried turquoise twtw unclear
-unclear unseen uplate vaguely wafflehaus waslater whitelotus wizards
-wpi wranglers wwe leftout""".split()
 
 ADMIN = """fakedougz""".split()
 
@@ -60,11 +47,14 @@ class Simulation:
     self.logins = asyncio.Semaphore(value=2)
 
   async def go(self):
-    teams = [SimTeam(self, username, "snth") for username in TEAMS[:self.options.teams]]
+    admin = SimAdmin(self, ADMIN[0], "snth")
+    teams = await admin.get_teams()
+    print(teams)
+
+    teams = [SimTeam(self, username, "snth") for username in teams[:self.options.teams]]
     tasks = [t.go() for t in teams]
 
     if self.options.admin:
-      admin = SimAdmin(self, ADMIN[0], "snth")
       tasks.append(admin.go())
 
     #tasks.append(self.show_stats())
@@ -156,12 +146,13 @@ class SimTeam(SimBrowser):
     print(f"starting {self.username}")
     await self.login()
 
-    print(f"{self.username} logged in")
+    arb = int(hashlib.md5(self.username.encode("utf-8")).hexdigest()[:8], 16) / float(0xffffffff)
     if self.sim.options.slow:
-      minutes_per_solve = random.random() * 30 + 15
+      minutes_per_solve = arb * 30 + 15
       solves_per_minute = 1.0 / minutes_per_solve
     else:
-      solves_per_minute = random.random() * 7 + 3
+      solves_per_minute = arb * 7 + 3
+    print(f"{self.username} solves per minute: {solves_per_minute:.3f}")
 
     while True:
       delay = -math.log(1.0 - random.random()) / solves_per_minute * 60
@@ -229,6 +220,12 @@ class SimAdmin(SimBrowser):
 
   async def do_action(self, **d):
     await self.post("/admin/action", json.dumps(d))
+
+  async def get_teams(self):
+    await self.login()
+
+    j = json.loads(await self.get("/admin/js/teams"))
+    return [d["url"].split("/")[-1] for d in j if "allopen" not in d["url"]]
 
   async def go(self):
     print(f"starting {self.username}")
