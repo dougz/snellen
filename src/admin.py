@@ -843,8 +843,3 @@ def GetHandlers():
     (r"/admin/js/teams", ListTeamsDataHandler),
     ]
   return handlers
-
-
-
-
-

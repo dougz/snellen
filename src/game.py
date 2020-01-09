@@ -428,19 +428,19 @@ class Submission:
           if self.team.remote_only:
             self.extra_response = response.get(
               "remote_reply", response.get("reply", "Request sent."))
-            t = response.get(
-              "remote_task", response.get("task", "Unknown task."))
+            t = response.get("remote_task", response.get("task"))
             u = response.get("remote_task_url", response.get("task_url"))
             k = respones.get("remote_task_type", response.get("task_type", "phone"))
           else:
             self.extra_response = response.get("reply", "Request sent.")
-            t = response.get("task", "Unknown task.")
+            t = response.get("task")
             u = response.get("task_url")
             k = response.get("task_type", "phone")
           if k not in ("phone", "visit"):
             k = "phone"
-          Global.STATE.add_task(now, self.team.username, answer.lower(),
-                                t, u, None, k)
+          if t:
+            Global.STATE.add_task(now, self.team.username, answer.lower(),
+                                  t, u, None, k)
         elif response is None:
           # incorrect but "honest guess"
           self.state = self.INCORRECT
