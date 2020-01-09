@@ -297,8 +297,8 @@ class A2020_TaskQueue {
         var el = goog.dom.getElement("tqfilters");
         el.innerHTML = "";
 
-        var kinds = ["hint", "visit", "penny", "puzzle"];
-        var emoji = ["1f9ae", "2708", "1f7e4", "1f9e9"];
+        var kinds = ["hint", "visit", "penny", "phone"];
+        var emoji = ["1f9ae", "2708", "1f7e4", "260e"];
         this.filter = {};
 
         var saved = [];
@@ -1101,7 +1101,7 @@ class A2020_BigBoard {
             "<img src=\"" + eurl + "1f9ae.png\"> " + bk["hint"][0] + "/" + bk["hint"][1] + " &nbsp; " +
             "<img src=\"" + eurl + "2708.png\"> " + bk["visit"][0] + "/" + bk["visit"][1] + " &nbsp; " +
             "<img src=\"" + eurl + "1f7e4.png\"> " + bk["penny"][0] + "/" + bk["penny"][1] + " &nbsp; " +
-            "<img src=\"" + eurl + "1f9e9.png\"> " + bk["puzzle"][0] + "/" + bk["puzzle"][1];
+            "<img src=\"" + eurl + "260e.png\"> " + bk["phone"][0] + "/" + bk["phone"][1];
     }
 }
 

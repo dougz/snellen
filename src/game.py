@@ -159,7 +159,7 @@ class TaskQueue:
     if self.cached_json is not None: return self.cached_json
 
     summary = {}
-    for k in ("hint", "puzzle", "visit", "penny"):
+    for k in ("hint", "phone", "visit", "penny"):
       summary[k] = [0, 0]
 
     q = []
@@ -431,13 +431,16 @@ class Submission:
             t = response.get(
               "remote_task", response.get("task", "Unknown task."))
             u = response.get("remote_task_url", response.get("task_url"))
+            k = respones.get("remote_task_type", response.get("task_type", "phone"))
           else:
             self.extra_response = response.get("reply", "Request sent.")
             t = response.get("task", "Unknown task.")
             u = response.get("task_url")
-
+            k = response.get("task_type", "phone")
+          if k not in ("phone", "visit"):
+            k = "phone"
           Global.STATE.add_task(now, self.team.username, answer.lower(),
-                                t, u, None, "puzzle")
+                                t, u, None, k)
         elif response is None:
           # incorrect but "honest guess"
           self.state = self.INCORRECT
@@ -2184,7 +2187,7 @@ class Puzzle:
     url = ("https://mitmh-2019-leftout-cg.netlify.com/callbacks/callbacks.html?" +
            urllib.parse.urlencode(d))
     Global.STATE.add_task(now, sub.team.username, f"concierge-callback-{sub.submit_id}",
-                          "Concierge callback", url, None, "puzzle")
+                          "Concierge callback", url, None, "phone")
 
   def __hash__(self):
     return id(self)
