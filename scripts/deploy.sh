@@ -43,10 +43,10 @@ PUZZLE_SERVERS=(badart tugofwar tunnel_of_love hat_venn_dor masked_images sand_w
     base="${base}/snellen"
     install -m 0755 -d "${base}"
 
-    for d in src tools html misc; do
+    for d in src tools html misc static; do
 	install -m 0755 -d "${base}/${d}"
     done
-    for i in src/*.py tools/*.py html/*.html misc/upload-credentials.json; do
+    for i in src/*.py tools/*.py html/*.html misc/upload-credentials.json static/emoji.json; do
 	install -m 0644 $i "${base}/${i}"
     done
     for i in src/main.py tools/preview.py; do
