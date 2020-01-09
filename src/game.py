@@ -594,6 +594,7 @@ class Team(login.LoginUser):
 
     self.force_all_lands_open = self.attrs.get("all_lands_open", False)
     self.force_all_puzzles_open = self.attrs.get("all_puzzles_open", False)
+    self.puzzles_thrown_open = False
 
     self.message_mu = asyncio.Lock()
     self.message_serial = 1
@@ -1761,8 +1762,8 @@ class Team(login.LoginUser):
 
   @save_state
   def open_all_puzzles(self, now):
-    if not self.force_all_puzzles_open:
-      self.force_all_puzzles_open = True
+    if not self.puzzles_thrown_open:
+      self.puzzles_thrown_open = True
       self.compute_puzzle_beam(now)
       self.invalidate()
 
@@ -1773,13 +1774,15 @@ class Team(login.LoginUser):
 
     min_score_to_go = None
 
+    regular_puzzles_open = self.force_all_puzzles_open or self.puzzles_thrown_open
+
     since_start = now - Global.STATE.event_start_time
     for land in Land.ordered_lands:
       if not land.puzzles: continue
 
       open_count = self.fastpasses_used.get(land, 0)
 
-      if self.force_all_puzzles_open:
+      if regular_puzzles_open:
         open_count = 1000
       else:
         if (self.force_all_lands_open or
@@ -1797,7 +1800,7 @@ class Team(login.LoginUser):
 
       stop_after = 1000
       skip12 = False
-      if not self.force_all_puzzles_open and land.shortname == "cascade":
+      if not regular_puzzles_open and land.shortname == "cascade":
         skip12 = True
         if self.puzzle_state[land.first_submeta].state == PuzzleState.SOLVED:
           self.open_puzzle(land.second_submeta, now, opened)
@@ -1821,7 +1824,7 @@ class Team(login.LoginUser):
             open_count -= 1
 
     safari = Land.BY_SHORTNAME.get("safari", None)
-    if safari and (safari in self.open_lands or self.force_all_puzzles_open):
+    if safari and (safari in self.open_lands or regular_puzzles_open):
       answers = set()
       keepers_solved = 0
       for p in safari.puzzles:
@@ -1831,7 +1834,7 @@ class Team(login.LoginUser):
         if kps.state == PuzzleState.SOLVED:
           keepers_solved += 1
         elif kps.state == PuzzleState.CLOSED:
-          if self.force_all_puzzles_open:
+          if regular_puzzles_open:
             self.open_puzzle(kp, now, opened)
           else:
             count = sum(1 for a in kp.keeper_answers if a in answers)
@@ -1841,7 +1844,7 @@ class Team(login.LoginUser):
               self.open_puzzle(kp, now, opened)
       meta = Puzzle.get_by_shortname("safari_adventure")
       if (meta and self.puzzle_state[meta].state == PuzzleState.CLOSED and
-          (keepers_solved >= 5 or self.force_all_puzzles_open)):
+          (keepers_solved >= 5 or regular_puzzles_open)):
         self.open_puzzle(meta, now, opened)
 
     if self.force_all_puzzles_open and self.puzzle_state[Workshop.PUZZLE].state == PuzzleState.CLOSED:
