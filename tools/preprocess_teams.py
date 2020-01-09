@@ -37,7 +37,7 @@ def main():
     username = username.lower()
     if "alt" in d:
       d["alt"] = d["alt"].lower()
-    assert re.match(r"^[a-z][a-z0-9]*$", username)
+    assert re.match(r"^[a-z0-9_]+$", username)
 
     # No duplicate usernames
     assert username not in out
