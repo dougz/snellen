@@ -144,7 +144,11 @@ chmod 0755 "${root}/usr/local/sbin/start_hunt" "${root}/usr/local/sbin/STOP_hunt
 ##
 
 install -m 0755 -d "${root}/etc/haproxy"
-install -m 0755 "snellen/sys/haproxy.cfg" "${root}/etc/haproxy/haproxy-hunt2020.cfg"
+"snellen/tools/asset_urls.py" "${EVENT}/puzzles" snellen/sys/haproxy.cfg "${t}/haproxy.cfg" || {
+    echo "Asset substitution in haproxy config failed."
+    exit 1
+}
+install -m 0755 "${t}/haproxy.cfg" "${root}/etc/haproxy/haproxy-hunt2020.cfg"
 
 ##
 ## nginx config

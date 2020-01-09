@@ -14,6 +14,7 @@ CONTENT_TYPES = {
 
   ".wav": "audio/wav",
   ".mp3": "audio/mpeg",
+  ".ooo": "audio/mpeg",
   ".m4a": "audio/m4a",
 
   ".mp4": "video/mp4",
