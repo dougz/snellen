@@ -550,6 +550,10 @@ class H2020_SubmitPanel {
         /** @type{Element} */
         this.errata = goog.dom.getElement("errata");
 
+        // How many errata were shown when the page was first loaded?
+        /** @type{number} */
+        this.errata_count = -1;
+
         this.build();
     }
 
@@ -677,16 +681,28 @@ class H2020_SubmitPanel {
         }
 
         if (response.errata) {
+            if (this.errata_count < 0) {
+                this.errata_count = response.errata.length;
+            }
+
             if (goog.DEBUG) {
                 console.log(response);
             }
             this.errata.style.display = "block";
             this.errata.innerHTML = "";
             for (const e of response.errata) {
-                var p = goog.dom.createElement("P");
+                var p = goog.dom.createDom("P");
                 p.innerHTML = "<b>Erratum posted " + hunt2020.time_formatter.format(e.when) + ":</b> " + e.text;
                 this.errata.appendChild(p);
             }
+            if (response.errata.length > this.errata_count) {
+                var p = goog.dom.createDom(
+                    "P", "warn",
+                    "Reload this page to make sure you have the latest version of the puzzle.");
+                this.errata.appendChild(p);
+            }
+        } else {
+            this.errata_count = 0;
         }
     }
 
