@@ -2794,7 +2794,14 @@ class Event:
     p.url = "/events"
     p.answers = {e.answer for e in cls.ALL_EVENTS}
     p.display_answers = dict((e.answer, e.display_answer) for e in cls.ALL_EVENTS)
-    p.responses = {}
+    p.responses = {
+      "IT'S A WONDERFUL LIFE": None,
+      "FIREWORK": None,
+      "NO OWN HAVE TIME SHOW MAKE O": None,
+      "KNOWN HALFTIME SHOW MAKO": None,
+      "INDEX": None,
+      "INDEX NAMES THEN SHIFT": None,
+      }
     p.html_body = None
     p.html_head = None
     p.for_ops_url = ""
