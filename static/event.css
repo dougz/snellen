@@ -1109,6 +1109,10 @@ video#parkopening {
     margin: 48px 40px 20px 40px;
 }
 
+.SponsorPage hr {
+    margin: 48px 60px;
+}
+
 #navpass {
     display: none;
 }
