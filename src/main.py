@@ -134,7 +134,7 @@ async def main_server(options):
     dump_info(options.dump_info);
 
   save_state.open(os.path.join(options.event_dir, "state.log"))
-  save_state.replay(advance_time=game.Submission.process_submit_queue)
+  replay_count = save_state.replay(advance_time=game.Submission.process_submit_queue)
 
   if not login.AdminUser.BY_USERNAME:
     with open(os.path.join(options.event_dir, "admins.json")) as f:
@@ -154,11 +154,16 @@ async def main_server(options):
   # of replay time.
   asyncio.create_task(game.Global.STATE.task_queue.purge(20))
 
-  if options.start_event:
+  if options.start_event and not game.Global.STATE.event_start_time:
     game.Global.STATE.start_event(False)
 
   for team in game.Team.BY_USERNAME.values():
     team.discard_messages()
+    team.message_serial = (replay_count * 1000000) + 1
+  login.AdminUser.message_serial = (replay_count * 1000000) + 1
+
+  login.Session.set_session_log(
+    os.path.join(options.event_dir, "session.log"))
 
   game.Global.STATE.task_queue.build()
 

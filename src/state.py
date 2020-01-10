@@ -67,12 +67,16 @@ class SaverClass:
   @classmethod
   def replay(cls, advance_time=None):
     start = time.time()
+    replay_count = 0
     count = 1
     skipped = set()
     cls.REPLAYING = True
     try:
       cls.log.seek(0, 0)
       for line in cls.log:
+        if line.startswith("#"):
+          replay_count += 1
+          continue
         record = json.loads(line)
         saver_id, name, now, args, kwargs = record
         if advance_time:
@@ -105,10 +109,14 @@ class SaverClass:
     finally:
       cls.REPLAYING = False
 
+    cls.log.write("# replay\n")
+
     if skipped:
       print("Replay skipped references to: " + ", ".join(skipped))
     dur = int((time.time() - start) * 1000)
-    print(f"Replayed {count} log items in {dur} ms.")
+    print(f"Replayed {count} log items in {dur} ms.  {replay_count} previous replays.")
+
+    return replay_count
 
 
 save_state = SaverClass()

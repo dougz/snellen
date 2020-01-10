@@ -129,20 +129,22 @@ class Session:
   ADMIN_COOKIE_NAME = "ADMINSESSION"
   PLAYER_COOKIE_NAME = "SESSION"
 
+  session_log = None
+
   VARZ = {
     }
 
-  def __init__(self, cookie_name, *caps):
+  def __init__(self, cookie_name, *caps, key=None):
     self.cookie_name = cookie_name
-    self.key = base64.urlsafe_b64encode(os.urandom(18))
+    if key:
+      self.key = key
+    else:
+      self.key = base64.urlsafe_b64encode(os.urandom(18))
     self.BY_KEY[self.key] = self
     self.user = None
     self.team = None
     self.capabilities = set(caps)
     self.expires = int(time.time()) + self.SESSION_TIMEOUT
-
-    self.next_msg_serial = 1
-    self.msg_cv = asyncio.Condition()
 
   def set_cookie(self, req, domain):
     req.set_secure_cookie(self.cookie_name, self.key, domain=domain)
@@ -150,7 +152,9 @@ class Session:
   @classmethod
   def from_request(cls, req, cookie_name):
     key = req.get_secure_cookie(cookie_name)
-    if not key: return None
+    if not key:
+      print("secure cookie didn't decode")
+      return None
     return cls.BY_KEY.get(key)
 
   @classmethod
@@ -166,6 +170,51 @@ class Session:
       session = cls.BY_KEY.pop(key, None)
       if session:
         if session.team: session.team.detach_session(session)
+
+  @classmethod
+  def set_session_log(cls, fn):
+    cls.session_log = open(fn, "a+")
+    cls.session_log.seek(0, 0)
+
+    now = time.time()
+    count = 0
+    for line in cls.session_log:
+      j = json.loads(line)
+      if j["x"] < now: continue
+
+      u = None
+      if "u" in j:
+        u = AdminUser.get_by_username(j["u"])
+        if not u: continue
+
+      t = None
+      if "t" in j:
+        t = game.Team.get_by_username(j["t"])
+        if not t: continue
+
+      s = Session(j["n"], *j.get("c", ()), key=j["k"].encode("ascii"))
+      if u:
+        s.user = u
+        s.capabilities = u.roles
+
+      if t:
+        s.team = t
+        s.capabilities = {"team"}
+        t.attach_session(s)
+
+      count += 1
+
+    print(f"Reloaded {count} sessions.")
+
+  def save(self):
+    if not self.session_log: return
+    d = {"n": self.cookie_name,
+         "k": self.key.decode("ascii"),
+         "x": self.expires}
+    if self.user: d["u"] = self.user.username
+    if self.team: d["t"] = self.team.username
+    print(d)
+    self.session_log.write(json.dumps(d)+"\n")
 
 
 # A decorator that can be applied to a request handler's get() or
@@ -282,8 +331,8 @@ class LoginSubmit(tornado.web.RequestHandler):
 
         session.team = team
         session.capabilities = {"team"}
-        session.was_admin = False
         team.attach_session(session)
+        session.save()
         self.set_header("Cache-Control", "no-store")
         self.redirect(target or "/")
         return
@@ -297,7 +346,7 @@ class LoginSubmit(tornado.web.RequestHandler):
 
           session.user = user
           session.capabilities = user.roles
-          session.was_admin = True
+          session.save()
           self.set_header("Cache-Control", "no-store")
           self.redirect(target or "/admin")
           return

@@ -129,28 +129,30 @@ class Client:
     self.session_cache = {}
 
   async def start(self):
-    #tornado.httpclient.AsyncHTTPClient.configure(
-    #"tornado.curl_httpclient.CurlAsyncHTTPClient", max_clients=10000)
     self.client = tornado.httpclient.AsyncHTTPClient()
-
-    app = tornado.web.Application(
-      [(r"/(admin)?wait/(\d+)/(\d+)(?:/(\d+))?", WaitHandler, {"proxy_client": self})],
-      cookie_secret=self.options.cookie_secret)
-
-    self.server = tornado.httpserver.HTTPServer(app)
-    socket = tornado.netutil.bind_sockets(self.options.base_port + self.wpid + 1, address="localhost")
-    self.server.add_sockets(socket)
-
-    print(f"proxy waiter #{self.wpid} listening")
     await self.fetch()
 
   async def fetch(self):
     # Give main server time to start up.
     await asyncio.sleep(1.0)
+    listening = False
 
     snapshot = {}
     while True:
       msgs = await self.get_messages(snapshot)
+
+      if not listening:
+        app = tornado.web.Application(
+          [(r"/(admin)?wait/(\d+)/(\d+)(?:/(\d+))?", WaitHandler, {"proxy_client": self})],
+          cookie_secret=self.options.cookie_secret)
+
+        self.server = tornado.httpserver.HTTPServer(app)
+        socket = tornado.netutil.bind_sockets(self.options.base_port + self.wpid + 1, address="localhost")
+        self.server.add_sockets(socket)
+
+        print(f"proxy waiter #{self.wpid} listening")
+        listening = True
+
       snapshot = copy.copy(ProxyTeam.team_stats())
       for team, items in msgs:
         if team == "__EXIT":

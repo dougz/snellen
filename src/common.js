@@ -187,7 +187,7 @@ class Common_Waiter {
                 this.serial = /** @type{number} */ (msgs[i][0]);
                 var msg = /** @type{Object} */ (msgs[i][1]);
                 if (goog.DEBUG) {
-                    console.log("dispatching", msg);
+                    console.log("dispatching", this.serial, msg);
                 }
                 this.dispatcher.dispatch(msg);
             }
