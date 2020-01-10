@@ -278,6 +278,8 @@ class BBTeamData {
         this.name;
         /** @type{string} */
         this.username;
+        /** @type{?string} */
+        this.remote;
         /** @type{string} */
         this.svg;
         /** @type{?Element} */

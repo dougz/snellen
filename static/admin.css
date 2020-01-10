@@ -774,6 +774,8 @@ p.note {
     text-align: right;
 }
 
+.bb-score img { margin-right: -3px; }
+
 #bbscorehead {
     font-family: 'Merriweather Sans', sans-serif;
     font-weight: bold;
@@ -1089,6 +1091,16 @@ table.listtable  {
 }
 .listtable td, .listtable th {
     padding: 2px;
+}
+
+.listtable .local {
+    display: inline-block;
+    width: 24px;
+}
+
+.listtable img {
+    margin-right: 8px;
+    margin-bottom: -2px;
 }
 
 .listtable th {

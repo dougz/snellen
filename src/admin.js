@@ -1020,6 +1020,10 @@ class A2020_BigBoard {
             var d = this.team_data[username];
 
             var score = goog.dom.createDom("DIV", "bb-score", "" + d.score);
+            if (d.remote) {
+                score.appendChild(goog.dom.createDom("BR"));
+                score.appendChild(goog.dom.createDom("IMG", {src: d.remote}));
+            }
             var name = goog.dom.createDom("DIV", "bb-name", team_list[i][1]);
             var svg = goog.dom.createDom("DIV", "bb-svg");
             svg.innerHTML = d.svg;
@@ -1684,12 +1688,15 @@ class A2020_ListTeamsPage {
 
             var tr = goog.dom.createDom("TR", (i%3==0) ? "h" : null);
 
-            var td = goog.dom.createDom("TD", "limit",
-                                        goog.dom.createDom("A", {href: row.url}, row.name))
-            tr.appendChild(td);
+            var el;
             if (row.remote) {
-                td.appendChild(goog.dom.createDom("SPAN", "remote", "R"));
+                el = goog.dom.createDom("IMG", {src: row.remote});
+            } else {
+                el = goog.dom.createDom("SPAN", "local");
             }
+            var td = goog.dom.createDom("TD", "limit",
+                                        goog.dom.createDom("A", {href: row.url}, el, row.name))
+            tr.appendChild(td);
 
             tr.appendChild(this.number(row.score));
             if (row.pennies[2] == 0) {

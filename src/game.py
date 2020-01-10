@@ -659,7 +659,7 @@ class Team(login.LoginUser):
     out = {"url": self.admin_url,
            "name": self.name,
            "name_sort": self.name_sort,
-           "remote": self.remote_only,
+           "remote": OPTIONS.static_content["remote16.png"] if self.remote_only else None,
            "score": self.score,
            "pennies": [len(self.pennies_earned) + len(self.pennies_collected),
                        len(self.pennies_collected),
@@ -1594,6 +1594,8 @@ class Team(login.LoginUser):
         "name": self.name,
         "username": self.username,
         }
+      if self.remote_only:
+        self.cached_bb_data["remote"] = OPTIONS.static_content["remote16.png"]
 
       out = ['<g fill="none" stroke-width="3">']
       lx = 0
