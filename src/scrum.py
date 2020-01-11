@@ -2,6 +2,7 @@ import asyncio
 import collections
 import http.client
 import json
+import math
 import random
 import time
 import tornado.web
@@ -243,3 +244,11 @@ class WaitHandler(tornado.web.RequestHandler):
       if i > 0: self.write(b",")
       self.write(f"[{ser},{obj}]".encode("utf-8"))
     self.write(b"]")
+
+
+def default_min_players(options, size):
+  if options.min_players is not None:
+    return options.min_players
+
+  if size <= 0: return 2
+  return 1+int(math.sqrt(size))
