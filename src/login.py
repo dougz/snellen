@@ -152,9 +152,7 @@ class Session:
   @classmethod
   def from_request(cls, req, cookie_name):
     key = req.get_secure_cookie(cookie_name)
-    if not key:
-      print("secure cookie didn't decode")
-      return None
+    if not key: return None
     return cls.BY_KEY.get(key)
 
   @classmethod
@@ -213,7 +211,6 @@ class Session:
          "x": self.expires}
     if self.user: d["u"] = self.user.username
     if self.team: d["t"] = self.team.username
-    print(d)
     self.session_log.write(json.dumps(d)+"\n")
 
 

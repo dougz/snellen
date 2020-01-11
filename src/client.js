@@ -109,7 +109,7 @@ class H2020_Dispatcher {
         }
         if (msg.notify) {
             hunt2020.toast_manager.add_toast(
-                "Hunt HQ has replied to your hint request on <b>" +
+                "Guest Services has replied to your hint request on <b>" +
                     msg.title + "</b>.", 6000, null, "salmon",
                 "/guest_services?p=" + msg.puzzle_id);
             if (puzzle_id == msg.puzzle_id) {

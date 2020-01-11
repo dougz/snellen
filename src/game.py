@@ -272,7 +272,7 @@ class PuzzleState:
     for hm in self.hints:
       if hm.special == "ack": continue
       d = {"when": hm.when, "text": hm.text,
-           "sender": "Hunt HQ" if hm.sender else self.team.name}
+           "sender": "Guest Services" if hm.sender else self.team.name}
       if hm.special: d["special"] = hm.special
       out.append(d)
 
@@ -1348,7 +1348,7 @@ class Team(login.LoginUser):
 
       if self.score >= CONSTANTS["outer_lands_score"] and self.outer_lands_state == "closed":
         if self.remote_only:
-          self.complete_penny_visit(now)
+          self.complete_penny_visit(None, now)
         else:
           Global.STATE.add_task(now, self.username, f"penny-visit",
                                 "Penny character visit", None,
@@ -1382,8 +1382,7 @@ class Team(login.LoginUser):
         if earned:
           if self.remote_only:
             if self.puzzle_state[Workshop.PUZZLE].state == PuzzleState.CLOSED:
-              self.admin_log.add(now, f"Skipped Loonie Toonie visit for remote-only team.")
-              self.open_puzzle(Workshop.PUZZLE, now, None)
+              self.complete_loony_visit(None, now)
           else:
             if self.puzzle_state[Workshop.PUZZLE].state == PuzzleState.CLOSED:
               # No LT visit yet: "expect a visit soon"
@@ -1453,7 +1452,10 @@ class Team(login.LoginUser):
       asyncio.create_task(self.flush_messages())
 
   def complete_loony_visit(self, task, when):
-    self.admin_log.add(when, f"Completed the Loonie Toonie visit.")
+    if self.remote_only:
+      self.admin_log.add(when, f"Skipped Loonie Toonie visit for remote-only team.")
+    else:
+      self.admin_log.add(when, f"Completed the Loonie Toonie visit.")
     self.open_puzzle(Workshop.PUZZLE, when, None)
     self.cached_all_puzzles_data = None
     self.dirty_lands.add("mainmap")
@@ -1746,7 +1748,7 @@ class Team(login.LoginUser):
       team_message["title"] = puzzle.title
 
       puzzle.puzzle_log.add(now, f"<b>{sender.fullname}</b> replied to hint request from {ps.admin_html_team}.")
-      self.activity_log.add(now, f"Hunt HQ replied to hint request on {puzzle.html}.")
+      self.activity_log.add(now, f"Guest Services replied to hint request on {puzzle.html}.")
       self.admin_log.add(now, f"<b>{sender.fullname}</b> replied to hint request on {ps.admin_html_puzzle}.")
 
     if prev != self.current_hint_puzzlestate:
@@ -2254,7 +2256,7 @@ class Puzzle:
                       "Deliver popcorn"],
           "WILDGUESS": None
           }
-        self.html_body = f"<p>Submit <b>POPCORN</b> when you're ready for a visit from Hunt HQ.</p>"
+        self.html_body = f"<p>Submit <b>POPCORN</b> when you're ready for a visit from Guest Services.</p>"
       else:
         self.answers = {tag}
         self.display_answers = {tag: tag}

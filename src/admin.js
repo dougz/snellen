@@ -1056,6 +1056,10 @@ class A2020_BigBoard {
 
         var score = el.firstChild;
         score.innerHTML = "" + data.score;
+        if (data.remote) {
+            score.appendChild(goog.dom.createDom("BR"));
+            score.appendChild(goog.dom.createDom("IMG", {src: data.remote}));
+        }
 
         var svg = score.nextSibling.nextSibling;
         svg.innerHTML = data.svg;
