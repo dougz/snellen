@@ -721,12 +721,7 @@ class H2020_SubmitPanel {
                 if (code == 409) {
                     var text = e.target.getResponseText();
                     text = twemoji.parse(text);
-                    if (text) {
-                        hunt2020.toast_manager.add_toast("You've already submitted <b>" + text + "</b>.",
-                                                         5000, null, "salmon");
-                    } else {
-                        hunt2020.toast_manager.add_toast("Invalid submission.", 5000, null, "salmon");
-                    }
+                    hunt2020.toast_manager.add_toast(text, 5000, null, "salmon");
                 } else if (code != 204) {
                     if (goog.DEBUG) {
                         alert(e.target.getResponseText());

@@ -597,6 +597,7 @@ class Team(login.LoginUser):
 
     self.force_all_lands_open = self.attrs.get("all_lands_open", False)
     self.force_all_puzzles_open = self.attrs.get("all_puzzles_open", False)
+    self.no_submits = self.attrs.get("no_submit", False)
     self.puzzles_thrown_open = False
 
     self.message_mu = asyncio.Lock()

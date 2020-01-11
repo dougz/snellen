@@ -346,14 +346,21 @@ class ActionHandler(util.AdminHandler):
     self.set_status(http.client.NO_CONTENT.value)
 
   async def ACTION_submit(self):
+    if self.team.no_submits:
+      self.write("Submit not allowed for this team.")
+      self.set_status(http.client.CONFLICT.value)
+      return
     answer = self.args["answer"]
     shortname = self.args["puzzle_id"]
     puzzle = game.Puzzle.get_by_shortname(shortname)
     if not puzzle: return self.not_found()
     submit_id = self.team.get_submit_id()
     result = self.team.submit_answer(submit_id, shortname, answer)
-    if result is not None:
-      self.write(result)
+    if result == "":
+      self.write(f"Invalid submission.")
+      self.set_status(http.client.CONFLICT.value)
+    elif result is not None:
+      self.write(f"You've already submitted <b>{html.escape(result)}</b>.")
       self.set_status(http.client.CONFLICT.value)
     else:
       self.set_status(http.client.NO_CONTENT.value)
