@@ -15,6 +15,7 @@ import tornado.httpserver
 import tornado.netutil
 import tornado.template
 import tornado.web
+import tornado.log
 
 import admin
 import debug
@@ -60,7 +61,7 @@ def dump_info(fn):
 
 async def main_server(options):
   if options.debug:
-    game.Submission.PER_ANSWER_DELAY = 20
+    tornado.log.enable_pretty_logging()
 
   game.Global.set_submit_log_filename(
     os.path.join(options.event_dir, "submit_log.csv"))

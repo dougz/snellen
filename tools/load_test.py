@@ -158,12 +158,16 @@ class SimTeam(SimBrowser):
     start_time = await self.wait_for_launch(wid, serial)
     if start_time:
       wid, serial = await self.load_page("/")
-      now = time.time()
-      delay = now - start_time
-      stats["page_loads"].append(int(delay*1000))
+      if not serial:
+        stats["page_loads"].append("fail")
+      else:
+        now = time.time()
+        delay = now - start_time
+        stats["page_loads"].append(int(delay*1000))
 
   async def load_page(self, url):
     result = await self.get("/")
+    if not result: return None, None
     result = result.decode("utf-8")
 
     m = re.search(r"var wid = (\d+);", result)
@@ -181,7 +185,7 @@ class SimTeam(SimBrowser):
     start_time = None
     known_times = stats["start_times"]
     known_times[start_time] = known_times.get(start_time, 0) + 1
-    while True:
+    while start_time is None or time.time() < start_time + 15:
       #print(f"waiting ({int(delay)})...")
       r = await self.get(f"/wait/{wid}/{serial}/{int(delay)}", timeout=delay+5)
       if r is None:

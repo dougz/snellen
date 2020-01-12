@@ -280,6 +280,10 @@ class H2020_Dispatcher {
 
     /** @param{Message} msg */
     to_page(msg) {
+        var el = goog.dom.getElement("openwait");
+        if (el) {
+            el.innerHTML = "Loading&hellip;";
+        }
         window.location = msg.url;
     }
 

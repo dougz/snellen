@@ -626,6 +626,7 @@ class Team(login.LoginUser):
     self.cached_errata_data = None
     self.cached_jukebox_data = None
     self.cached_admin_data = None
+    self.cached_launch_page = None
 
     self.admin_url = f"/admin/team/{username}"
     self.admin_html = f'<a href="{self.admin_url}">{html.escape(self.name)}</a>'
@@ -2663,9 +2664,12 @@ class Global:
         now >= self.expected_start_time - self.PRELOAD_ADVANCE):
       msg = [{"method": "preload", "maps": self.preload_urls,
               "spread": self.PRELOAD_SPREAD}]
+      print("sending preloads")
       for t in Team.all_teams():
         t.send_messages(msg)
         await t.flush_messages()
+        await asyncio.sleep(0.1)
+      print("done sending preloads")
 
   @save_state
   def start_event(self, now, timed):
