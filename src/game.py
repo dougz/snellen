@@ -597,7 +597,7 @@ class Team(login.LoginUser):
 
     self.force_all_lands_open = self.attrs.get("all_lands_open", False)
     self.force_all_puzzles_open = self.attrs.get("all_puzzles_open", False)
-    self.no_submits = self.attrs.get("no_submit", False)
+    self.no_submit = self.attrs.get("no_submit", False)
     self.puzzles_thrown_open = False
 
     self.message_mu = asyncio.Lock()
@@ -1878,7 +1878,8 @@ class Team(login.LoginUser):
         if st.puzzle.land.land_order >= 1000: continue
         if st.puzzle.land not in self.open_lands:
           self.open_lands[st.puzzle.land] = now
-          st.puzzle.land.open_teams.add(self)
+          if not self.no_submit:
+            st.puzzle.land.open_teams.add(self)
           self.sorted_open_lands = [land for land in self.open_lands.keys() if land.land_order]
           self.sorted_open_lands.sort(key=lambda land: land.land_order)
           self.dirty_lands.add("mainmap")

@@ -349,8 +349,8 @@ class WaitHandler(tornado.web.RequestHandler):
                   self.MAX_WAIT_TIMEOUT)
     timeout = timeout * random.uniform(0.5, 1.0)
 
-    #with team.track_wait(key):
-    msgs = await team.await_new_messages(received_serial, timeout)
+    with team.track_wait(key):
+      msgs = await team.await_new_messages(received_serial, timeout)
 
     if False:
       if msgs:

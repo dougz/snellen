@@ -44,7 +44,7 @@ class Simulation:
       "tornado.curl_httpclient.CurlAsyncHTTPClient", max_clients=10000)
     self.client = tornado.httpclient.AsyncHTTPClient()
 
-    self.logins = asyncio.Semaphore(value=2)
+    self.logins = asyncio.Semaphore(value=4)
 
   async def go(self):
     admin = SimAdmin(self, ADMIN[0], "snth")
@@ -63,7 +63,7 @@ class Simulation:
 
   async def show_stats(self, expected):
     while len(stats["page_loads"]) < expected:
-      pprint.pprint(stats["start_times"])
+      print(stats["start_times"], len(stats["page_loads"]))
       await asyncio.sleep(1.0)
 
     print(stats["page_loads"])
@@ -100,7 +100,7 @@ class SimBrowser:
 
         #print(f"--- {self.username} logged in ---")
 
-  async def get(self, url, timeout=10):
+  async def get(self, url, timeout=10, headers=False):
     req = tornado.httpclient.HTTPRequest(
       f"{self.sim.options.base_url}{url}",
       connect_timeout=timeout,
@@ -110,10 +110,16 @@ class SimBrowser:
 
     try:
       response = await self.sim.client.fetch(req)
-      return response.body
+      if headers:
+        return response.body, response.headers
+      else:
+        return response.body
     except tornado.httpclient.HTTPClientError as e:
       print(e)
-      return None
+      if headers:
+        return None, None
+      else:
+        return None
 
   async def post(self, url, data):
       req = tornado.httpclient.HTTPRequest(
@@ -155,18 +161,18 @@ class SimTeam(SimBrowser):
 
   async def one_tab(self):
     wid, serial = await self.load_page("/")
-    start_time = await self.wait_for_launch(wid, serial)
+    start_time, wait_delay = await self.wait_for_launch(wid, serial)
     if start_time:
       wid, serial = await self.load_page("/")
       if not serial:
-        stats["page_loads"].append("fail")
+        stats["page_loads"].append((int(wait_delay)*1000, "fail"))
       else:
         now = time.time()
         delay = now - start_time
-        stats["page_loads"].append(int(delay*1000))
+        stats["page_loads"].append((int(wait_delay*1000), int(delay*1000)))
 
   async def load_page(self, url):
-    result = await self.get("/")
+    result = await self.get("/", timeout=45)
     if not result: return None, None
     result = result.decode("utf-8")
 
@@ -181,23 +187,26 @@ class SimTeam(SimBrowser):
     return wid, serial
 
   async def wait_for_launch(self, wid, serial):
-    delay = 10.0
+    delay = 90.0
     start_time = None
     known_times = stats["start_times"]
     known_times[start_time] = known_times.get(start_time, 0) + 1
     while start_time is None or time.time() < start_time + 15:
       #print(f"waiting ({int(delay)})...")
-      r = await self.get(f"/wait/{wid}/{serial}/{int(delay)}", timeout=delay+5)
+      r, h = await self.get(f"/wait/{wid}/{serial}/{int(delay)}", timeout=delay+5, headers=True)
       if r is None:
         print("error")
-        return
+        continue
+
+      if "STICKY" not in self.cookie:
+        self.cookie = self.cookie + "; " + h["Set-Cookie"].split(";")[0].strip()
 
       j = json.loads(r.decode("utf-8"))
       if not j:
         delay = min(300, delay*1.5)
         continue
 
-      delay = 10.0
+      delay = 90.0
       for ser, msg in j:
         serial = max(serial, ser)
         #print(msg)
@@ -207,7 +216,7 @@ class SimTeam(SimBrowser):
             del known_times[start_time]
           start_time = msg["new_start"]
           known_times[start_time] = known_times.get(start_time, 0) + 1
-        if msg["method"] == "to_page": return start_time
+        if msg["method"] == "to_page": return start_time, time.time()-start_time
 
 
 class SimAdmin(SimBrowser):

@@ -143,7 +143,7 @@ class Common_Waiter {
         this.saw_error = false;
 
         /** @type{number} */
-        this.respond_deadline = 10;
+        this.respond_deadline = 90;
 
         goog.events.listen(this.xhr, goog.net.EventType.COMPLETE,
                            goog.bind(this.waitcomplete, this));
@@ -200,7 +200,7 @@ class Common_Waiter {
                 this.respond_deadline = 300;
             }
         } else {
-            this.respond_deadline = 10;
+            this.respond_deadline = 90;
         }
 
         if (this.storage) {
