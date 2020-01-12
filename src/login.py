@@ -170,6 +170,16 @@ class Session:
         if session.team: session.team.detach_session(session)
 
   @classmethod
+  def get_all_sessions(cls):
+    out = []
+    for k, s in cls.BY_KEY.items():
+      if s.team:
+        out.append((k.decode("ascii"), s.expires, s.team.username, s.team.size))
+      elif s.user:
+        out.append((k.decode("ascii"), s.expires, "__ADMIN", 0))
+    return out
+
+  @classmethod
   def set_session_log(cls, fn):
     cls.session_log = open(fn, "a+")
     cls.session_log.seek(0, 0)

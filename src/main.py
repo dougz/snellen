@@ -182,6 +182,7 @@ async def main_server(options):
   loop.create_task(game.Puzzle.realtime_open_hints())
   loop.create_task(game.Team.realtime_expire_fastpasses())
   loop.create_task(game.Team.realtime_trim_last_hour())
+  loop.create_task(wait_proxy.Server.push_session_cache())
 
   print("Serving...")
   async with game.Global.STATE.stop_cv:

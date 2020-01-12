@@ -9,7 +9,7 @@ import yaml
 
 
 def make_hash(password):
-  return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("ascii")
+  return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt(4)).decode("ascii")
 
 
 def main():

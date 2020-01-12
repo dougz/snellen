@@ -52,6 +52,16 @@ class Server:
         p.cv.notify_all()
 
   @classmethod
+  async def push_session_cache(cls):
+    while True:
+      data = login.Session.get_all_sessions()
+      for p in cls.PROXIES:
+        async with p.cv:
+          p.q.append(("__SESSION", data))
+          p.cv.notify_all()
+      await asyncio.sleep(10)
+
+  @classmethod
   def new_waiter_id(cls):
     wid, cls.NEXT_WID = cls.NEXT_WID, cls.NEXT_WID+1
     return wid
@@ -158,6 +168,11 @@ class Client:
         if team == "__EXIT":
           print(f"proxy waiter #{self.wpid} exiting")
           return
+        elif team == "__SESSION":
+          for k, x, t, s in items:
+            if t == "__ADMIN": s = None
+            self.session_cache[k] = (t, x, s)
+          continue
         team = ProxyTeam.get_team(team)
         await team.send_messages(items)
 
@@ -194,14 +209,14 @@ class Client:
       except Exception as e:
         print(repr(e), e)
 
-  async def check_session(self, key, wid):
+  async def check_session(self, key):
     if not key: return
     if not self.ever_connected:
       print(f"proxy {self.wpid} never connected")
       return
 
     key = key.decode("ascii")
-    v = self.session_cache.get((key, wid))
+    v = self.session_cache.get(key)
     if v:
       team, expiration, size = v
       if team and expiration > time.time(): return team
@@ -219,7 +234,7 @@ class Client:
         expiration = d["expire"]
         expiration -= WaitHandler.MAX_WAIT_TIMEOUT
         size = d.get("size", None)
-        self.session_cache[(key, wid)] = (team, expiration, size)
+        self.session_cache[key] = (team, expiration, size)
         return team
     except tornado.httpclient.HTTPClientError as e:
       pass
@@ -257,7 +272,7 @@ class ProxyTeam:
 
     now = time.time()
     for m in msgs:
-      self.q.append((now, m))
+      self.q.append((now, m[0], f"[{m[0]},{m[1]}]".encode("utf-8")))
 
     async with self.cv:
       self.cv.notify_all()
@@ -268,12 +283,12 @@ class ProxyTeam:
 
   async def await_new_messages(self, received_serial, timeout):
     while True:
-      if self.q and self.q[-1][1][0] > received_serial:
+      if self.q and self.q[-1][1] > received_serial:
         # at least one message to send
         out = collections.deque()
-        for ts, (s, m) in reversed(self.q):
+        for ts, s, m in reversed(self.q):
           if s > received_serial:
-            out.appendleft((s,m))
+            out.appendleft(m)
         return out
 
       async with self.cv:
@@ -316,7 +331,7 @@ class WaitHandler(tornado.web.RequestHandler):
 
     self.set_header("Cache-Control", "no-store")
 
-    team = await self.proxy_client.check_session(key, wid)
+    team = await self.proxy_client.check_session(key)
     if not team:
       self.set_status(http.client.UNAUTHORIZED.value)
       return
@@ -332,10 +347,10 @@ class WaitHandler(tornado.web.RequestHandler):
 
     timeout = min(max(suggested_timeout, self.MIN_WAIT_TIMEOUT),
                   self.MAX_WAIT_TIMEOUT)
-    timeout = timeout * random.uniform(0.9, 1.0)
+    timeout = timeout * random.uniform(0.5, 1.0)
 
-    with team.track_wait(key):
-      msgs = await team.await_new_messages(received_serial, timeout)
+    #with team.track_wait(key):
+    msgs = await team.await_new_messages(received_serial, timeout)
 
     if False:
       if msgs:
@@ -345,7 +360,7 @@ class WaitHandler(tornado.web.RequestHandler):
 
     self.set_header("Content-Type", "application/json")
     self.write(b"[")
-    for i, (ser, obj) in enumerate(msgs):
+    for i, m in enumerate(msgs):
       if i > 0: self.write(b",")
-      self.write(f"[{ser},{obj}]".encode("utf-8"))
+      self.write(m)
     self.write(b"]")
