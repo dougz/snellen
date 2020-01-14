@@ -594,6 +594,7 @@ class Team(login.LoginUser):
     self.hints_open = set()
     self.current_hint_puzzlestate = None
     self.outer_lands_state = "closed"
+    self.runaround_pending = False
 
     self.force_all_lands_open = self.attrs.get("all_lands_open", False)
     self.force_all_puzzles_open = self.attrs.get("all_puzzles_open", False)
@@ -1342,7 +1343,7 @@ class Team(login.LoginUser):
       self.cached_jukebox_data = None
       self.cached_open_hints_data = None
       self.cached_admin_data = None
-      if puzzle.meta:
+      if puzzle.meta or puzzle is Workshop.PUZZLE:
         current_map = Land.BY_SHORTNAME["mainmap"]
         self.cached_mapdata.pop(current_map, None)
         self.dirty_lands.add("mainmap")
@@ -1474,6 +1475,16 @@ class Team(login.LoginUser):
     self.outer_lands_state = "open"
     self.compute_puzzle_beam(when)
     self.invalidate()
+    if not save_state.REPLAYING:
+      asyncio.create_task(self.flush_messages())
+
+  def open_runaround(self, task, when):
+    # Open the runaround!
+    self.open_puzzle(Runaround.PUZZLE, when, None)
+    self.invalidate(Runaround.PUZZLE)
+    self.cached_all_puzzles_data = None
+    self.dirty_lands.add("mainmap")
+    self.cached_mapdata.pop(Land.BY_SHORTNAME["mainmap"], None)
     if not save_state.REPLAYING:
       asyncio.create_task(self.flush_messages())
 
@@ -1859,18 +1870,19 @@ class Team(login.LoginUser):
     if self.force_all_puzzles_open and self.puzzle_state[Workshop.PUZZLE].state == PuzzleState.CLOSED:
       self.open_puzzle(Workshop.PUZZLE, now, None)
 
-    if self.puzzle_state[Runaround.PUZZLE].state == PuzzleState.CLOSED:
+    if self.puzzle_state[Runaround.PUZZLE].state == PuzzleState.CLOSED and not self.runaround_pending:
       for p in Runaround.REQUIRED_PUZZLES:
         if (not self.force_all_puzzles_open and
             self.puzzle_state[p].state != PuzzleState.SOLVED):
           break
       else:
-        # Open the runaround!
-        self.open_puzzle(Runaround.PUZZLE, now, opened)
-        self.invalidate(Runaround.PUZZLE)
-        self.cached_all_puzzles_data = None
-        self.dirty_lands.add("mainmap")
-        self.cached_mapdata.pop(Land.BY_SHORTNAME["mainmap"], None)
+        self.runaround_pending = True
+        if self.force_all_puzzles_open:
+          self.open_runaround(None, now)
+        else:
+          Global.STATE.add_task(now, self.username, f"start-runaround",
+                                f"Open runaround", None,
+                                self.open_runaround, "visit")
 
     lands_opened = set()
     for st in self.puzzle_state.values():
@@ -2909,8 +2921,8 @@ class Workshop:
     p.solve_audio = OPTIONS.static_content.get("reveal.mp3")
     p.solve_extra = {"url": OPTIONS.static_content.get("reveal_under.png"),
                      "video_url": OPTIONS.static_content.get("reveal_over.png"),
-                     "to_go": "/heart_of_the_park",
-                     "text": "<b>Workshop</b> was solved!"}
+                     #"to_go": "/heart_of_the_park",
+                     "text": "<b>Workshop</b> was solved!  Expect a message from Guest Services soon."}
 
     p.title = "Workshop"
     p.url = "/workshop"

@@ -216,7 +216,10 @@ class SimTeam(SimBrowser):
             del known_times[start_time]
           start_time = msg["new_start"]
           known_times[start_time] = known_times.get(start_time, 0) + 1
-        if msg["method"] == "to_page": return start_time, time.time()-start_time
+        if msg["method"] == "to_page":
+          wdelay = time.time() - start_time
+          await asyncio.sleep(3.0)
+          return start_time, wdelay
 
 
 class SimAdmin(SimBrowser):

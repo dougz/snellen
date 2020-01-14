@@ -273,7 +273,7 @@ class H2020_Dispatcher {
     update_start(msg) {
         var el = goog.dom.getElement("opencountdown");
         if (el) {
-            el.setAttribute("data-until", msg.new_start.toString());
+            el.setAttribute("data-until", (msg.new_start+3).toString());
             hunt2020.counter.reread();
         }
     }
@@ -284,7 +284,7 @@ class H2020_Dispatcher {
         if (el) {
             el.innerHTML = "Loading&hellip;";
         }
-        window.location = msg.url;
+        setTimeout(function() { window.location = msg.url; }, 3000);
     }
 
     /** @param{Message} msg */

@@ -355,7 +355,7 @@ class ActionHandler(util.AdminHandler):
     self.set_status(http.client.NO_CONTENT.value)
 
   async def ACTION_submit(self):
-    if self.team.no_submits:
+    if self.team.no_submit:
       self.write("Submit not allowed for this team.")
       self.set_status(http.client.CONFLICT.value)
       return
