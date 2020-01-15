@@ -1361,22 +1361,7 @@ class Team(login.LoginUser):
       if puzzle is Runaround.PUZZLE:
         extra_response.append(Runaround.solve_response)
 
-      new_videos = 0
-      for v, s in enumerate(CONSTANTS["videos_by_score"]):
-        if self.score >= s:
-          new_videos = max(new_videos, v+1)
-      if new_videos > self.videos:
-        self.videos = new_videos
-        thumb = OPTIONS.static_content.get(f"thumb{self.videos}.png")
-        self.activity_log.add(
-          now,
-          "A new Park History video is available!<br>"
-          f"<a href=\"/about_the_park#history\"><img class=videothumb src=\"{thumb}\"></a>")
-        self.send_messages([
-          {"method": "video",
-           "video_url": VIDEOS[self.videos],
-           "thumb": thumb,
-          }])
+      self.open_videos(now)
 
       # If this puzzle rewards you with a penny (land meta or events),
       # request a visit and/or record that you're owed a penny.
@@ -1428,6 +1413,20 @@ class Team(login.LoginUser):
 
       self.compute_puzzle_beam(now)
       if extra_response: return "<br>".join(extra_response)
+
+  def open_videos(self, when):
+    new_videos = 6 if self.coin_found else 0
+    for v, s in enumerate(CONSTANTS["videos_by_score"]):
+      if self.score >= s:
+        new_videos = max(new_videos, v+1)
+    if new_videos > self.videos:
+      self.videos = new_videos
+      thumb = OPTIONS.static_content.get(f"thumb{self.videos}.png")
+      self.activity_log.add(
+        when,
+        "A new Park History video is available!<br>"
+        f"<a href=\"/about_the_park#history\"><img class=videothumb src=\"{thumb}\"></a>")
+      self.send_messages([{"method": "video", "thumb": thumb}])
 
   # Return any pennies that are newly-earned.
   def earned_pennies(self):
@@ -1491,7 +1490,10 @@ class Team(login.LoginUser):
   def complete_machine_interaction(self, task, when):
     print("completed machine interaction")
     self.coin_found = when
+    self.open_videos(when)
     self.invalidate()
+    if not save_state.REPLAYING:
+      asyncio.create_task(self.flush_messages())
 
   @save_state
   def concierge_update(self, now, submit_id, result):
