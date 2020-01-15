@@ -1,0 +1,37 @@
+{% extends "puzzle.html" %}
+
+{% block topnav_extraright %}
+<a href="..">Back to puzzle</a>
+{% end %}
+
+{% block head %}
+<script>
+  var puzzle_init = null;
+</script>
+
+{% if puzzle.solution_head %}{% raw puzzle.solution_head %}{% elif puzzle.html_head %}{% raw puzzle.html_head %}{% end %}
+
+<script>
+  window.onload = puzzle_init;
+</script>
+{% end %}
+
+
+{% block content %}
+<a href="{{puzzle.land.url}}"><h1 id="landtitle">{{puzzle.land.title}}</h1></a>
+
+<div id="content">
+  <h2 id="puzzletitle"><div id=vspace></div>{% raw supertitle %}{{puzzle.title}}</h2>
+  <p class=solutionheader>{{authors}}<br>
+    Answer{% if len(puzzle.answers) > 1 %}s{% end %}: {{", ".join(puzzle.answers)}}
+    </p>
+
+  <div id="puzz">
+    {% if solution_url %}
+    {% raw puzzle.html_body %}
+    {% else %}
+    {% raw puzzle.solution_body %}
+    {% end %}
+  </div>
+</div>
+{% end %}
