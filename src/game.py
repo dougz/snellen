@@ -594,7 +594,6 @@ class Team(login.LoginUser):
     self.hints_open = set()
     self.current_hint_puzzlestate = None
     self.outer_lands_state = "closed"
-    self.runaround_pending = False
 
     self.force_all_lands_open = self.attrs.get("all_lands_open", False)
     self.force_all_puzzles_open = self.attrs.get("all_puzzles_open", False)
@@ -1872,19 +1871,13 @@ class Team(login.LoginUser):
     if self.force_all_puzzles_open and self.puzzle_state[Workshop.PUZZLE].state == PuzzleState.CLOSED:
       self.open_puzzle(Workshop.PUZZLE, now, None)
 
-    if self.puzzle_state[Runaround.PUZZLE].state == PuzzleState.CLOSED and not self.runaround_pending:
+    if self.puzzle_state[Runaround.PUZZLE].state == PuzzleState.CLOSED:
       for p in Runaround.REQUIRED_PUZZLES:
         if (not self.force_all_puzzles_open and
             self.puzzle_state[p].state != PuzzleState.SOLVED):
           break
       else:
-        self.runaround_pending = True
-        if self.force_all_puzzles_open:
-          self.open_runaround(None, now)
-        else:
-          Global.STATE.add_task(now, self.username, f"start-runaround",
-                                f"Open runaround", None,
-                                self.open_runaround, "visit")
+        self.open_runaround(None, now)
 
     lands_opened = set()
     for st in self.puzzle_state.values():
@@ -2923,8 +2916,8 @@ class Workshop:
     p.solve_audio = OPTIONS.static_content.get("reveal.mp3")
     p.solve_extra = {"url": OPTIONS.static_content.get("reveal_under.png"),
                      "video_url": OPTIONS.static_content.get("reveal_over.png"),
-                     #"to_go": "/heart_of_the_park",
-                     "text": "<b>Workshop</b> was solved!  Expect a message from Guest Services soon."}
+                     "to_go": "/heart_of_the_park",
+                     "text": "<b>Workshop</b> was solved!"}
 
     p.title = "Workshop"
     p.url = "/workshop"
