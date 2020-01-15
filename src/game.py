@@ -2693,7 +2693,7 @@ class Global:
     self.event_hash = hashlib.md5(str(now).encode("ascii")).hexdigest()[:8]
     print(f"starting event at {now} hash is {self.event_hash}")
     for team in Team.BY_USERNAME.values():
-      team.receive_fastpass(now, CONSTANTS["pennypass_expiration"] * CONSTANTS["time_scale"], silent=True)
+      #team.receive_fastpass(now, CONSTANTS["pennypass_expiration"] * CONSTANTS["time_scale"], silent=True)
       team.compute_puzzle_beam(self.event_start_time)
       team.open_puzzle(Event.PUZZLE, now, None)
       team.invalidate(flush=False)
