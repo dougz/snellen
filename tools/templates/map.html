@@ -1,0 +1,30 @@
+{% extends "static_base.html" %}
+
+{% block title %}{{config["title"]}}{% end %}
+
+{% block content %}
+<h1 id="landtitle">{{config["title"]}}</h1>
+<div id="content" class="map">
+
+  <div id="map" style="width: {{base.size[0]}}px; height: {{base.size[1]}}px">
+    <img src="map.png" class="base" usemap="#mapmap">
+    {% for t in texts %}
+    <div class="p" style="left: {{t.xywh[0]}}px; top: {{t.xywh[1]}}px; width: {{t.xywh[2]}}px; height: {{t.xywh[3]}}px">{{t.title}}</div>
+    {% end %}
+  </div>
+
+  <map id="mapmap" name="mapmap">
+    {% for a in areas %}
+    <area shape="poly" coords="{{a.poly}}" href="{{a.target}}">
+    {% end %}
+  </map>
+
+  <ul id="maplist">
+    {% for t in texts %}
+    <li><a href="{{t.target}}">{{t.title}}</li>
+    {% end %}
+  </ul>
+
+  <div id="overcontent"></div>
+</div>
+{% end %}
