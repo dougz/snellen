@@ -484,7 +484,12 @@ class Submission:
       fn = getattr(self.puzzle, "on_correct_answer", None)
       if fn: fn(now, self.team)
       if self.puzzle_state.answers_found == self.puzzle.answers:
-        self.extra_response = self.team.solve_puzzle(self.puzzle, now)
+        xr = self.team.solve_puzzle(self.puzzle, now)
+        if xr:
+          if self.extra_response:
+            self.extra_response += "<br>" + xr
+          else:
+            self.extra_response = xr
       else:
         self.team.dirty_lands.add(self.puzzle.land.shortname)
         self.team.cached_mapdata.pop(self.puzzle.land, None)
