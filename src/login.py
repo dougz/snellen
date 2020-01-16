@@ -222,6 +222,7 @@ class Session:
     if self.user: d["u"] = self.user.username
     if self.team: d["t"] = self.team.username
     self.session_log.write(json.dumps(d)+"\n")
+    self.session_log.flush()
 
 
 # A decorator that can be applied to a request handler's get() or
