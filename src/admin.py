@@ -141,7 +141,7 @@ class PuzzleContentPage(util.AdminPageHandler):
       print(f"no puzzle called {shortname}")
       return self.not_found()
 
-    if puzzle.icon.headerimage:
+    if puzzle.icon and puzzle.icon.headerimage:
       supertitle=f'<img src="{puzzle.icon.headerimage}"><br>'
     else:
       supertitle=""

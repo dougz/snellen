@@ -8,12 +8,12 @@
 <table class=info>
   <tr><th>title</th>
     <td class=h1>{{puzzle.title}}<br>
+      {% if puzzle.html_body %}
       <a class="content" target="_blank" href="/admin/show/puzzle/{{puzzle.shortname}}">&#x25b6;&#xfe0e; puzzle</a>
       <a class="content" target="_blank" href="/admin/show/solution/{{puzzle.shortname}}">&#x25b6;&#xfe0e; solution</a>
+      {% end %}
       {% if puzzle.for_ops_url %}
       <a class="content" target="_blank" href="{{puzzle.for_ops_url}}">&#x25b6;&#xfe0e; hunt ops</a>
-      {% else %}
-      <span>MISSING hunt ops info!</span>
       {% end %}
       {% if user.has_role("edit_puzzles") %}
       <a class="content" href="/admin/fix/{{puzzle.shortname}}">edit puzzle</a>
