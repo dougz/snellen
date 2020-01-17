@@ -3,6 +3,7 @@
 import argparse
 import asyncio
 import concurrent
+import contextlib
 import json
 import os
 import resource
@@ -183,11 +184,18 @@ async def main_server(options):
   loop.create_task(game.Team.realtime_expire_fastpasses())
   loop.create_task(game.Team.realtime_trim_last_hour())
   loop.create_task(wait_proxy.Server.push_session_cache())
+  loop.create_task(flush_stdout())
 
   print("Serving...")
   async with game.Global.STATE.stop_cv:
     while not game.Global.STATE.stopping:
       await game.Global.STATE.stop_cv.wait()
+
+
+async def flush_stdout():
+  while True:
+    sys.stdout.flush()
+    await asyncio.sleep(1.0)
 
 
 def wait_server(n, options):
@@ -207,6 +215,8 @@ def main():
                       help="Secret used to create session cookies.")
   parser.add_argument("-e", "--event_dir",
                       help="Path to event content.")
+  parser.add_argument("--log_file", default=None,
+                      help="Direct all prints to this file.")
 
   # debugging flags
   parser.add_argument("--start_event", action="store_true",
@@ -264,10 +274,18 @@ def main():
     proxy_pids.append(pid)
   signal.signal(signal.SIGINT, original_handler)
 
-  try:
-    asyncio.run(main_server(options), debug=options.debug)
-  except KeyboardInterrupt:
-    pass
+  def go():
+    try:
+      asyncio.run(main_server(options), debug=options.debug)
+    except KeyboardInterrupt:
+      pass
+
+  if options.log_file:
+    with open(options.log_file, "w") as f:
+      with contextlib.redirect_stdout(f):
+        go()
+  else:
+    go()
 
   save_state.close()
 

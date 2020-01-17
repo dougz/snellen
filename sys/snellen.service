@@ -8,7 +8,8 @@ WorkingDirectory=/sites/hunt2020/snellen
 ExecStart=/sites/hunt2020/snellen/src/main.py \
   --event_dir "${HUNT2020_BASE}/event" \
   --template_path "${HUNT2020_BASE}/snellen/html" \
-  --wait_proxies 5
+  --wait_proxies 5 \
+  --log_file /var/log/snellen-stdout.log
 
 [Install]
 WantedBy=hunt2020.target
