@@ -2816,17 +2816,21 @@ class Event:
     p.url = "/events"
     p.answers = {e.answer for e in cls.ALL_EVENTS}
     p.display_answers = dict((e.answer, e.display_answer) for e in cls.ALL_EVENTS)
+
+    # Responses must be canonicalized!
     p.responses = {
-      "IT'S A WONDERFUL LIFE": None,
+      "ITSAWONDERFULLIFE": None,
       "FIREWORK": None,
-      "NO OWN HAVE TIME SHOW MAKE O": None,
-      "KNOWN HALFTIME SHOW MAKO": None,
+      "NOOWNHAVETIMESHOWMAKEO": None,
+      "KNOWNHALFTIMESHOWMAKO": None,
       "INDEX": None,
-      "INDEX NAMES THEN SHIFT": None,
+      "INDEXNAMESTHENSHIFT": None,
+      "ALLYOUNEEDISLOVE": "Thank you for paying it forward! You don't need to enter a solution to the Pay It Forward Scavenger Hunt yet.",
+      "LOVE": "Thank you for paying it forward! You don't need to enter a solution to the Pay It Forward Scavenger Hunt yet.",
       }
     p.html_body = None
     p.html_head = None
-    p.for_ops_url = ""
+    p.for_ops_url = "https://docs.google.com/document/d/1TG86BThqdCB9UY2-zJvhn9kdsYZP73FzuHCaG5tnpbM"
     p.max_queued = CONSTANTS["default_max_queued"]
     p.meta = False
     p.submeta = False
@@ -2933,7 +2937,7 @@ class Workshop:
     p.responses = {}
     p.html_body = None
     p.html_head = None
-    p.for_ops_url = ""
+    p.for_ops_url = "https://docs.google.com/document/d/1MJYiHcA2_U5YdC9Nwah95sF5kx3bFYuaef6p-OJF310"
     p.max_queued = CONSTANTS["default_max_queued"]
     p.meta = False
     p.submeta = False

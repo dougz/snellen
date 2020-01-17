@@ -555,11 +555,11 @@ class ActionHandler(util.AdminHandler):
     if text:
       game.Global.STATE.post_erratum(puzzle.shortname, text, self.user.username)
       message += " Erratum posted."
-    for t in puzzle.open_teams:
-      t.cached_errata_data = None
-      t.send_messages([{"method": "history_change", "puzzle_id": puzzle.shortname},
-                       {"method": "post_erratum", "title": puzzle.title}])
-      await t.flush_messages()
+      for t in puzzle.open_teams:
+        t.cached_errata_data = None
+        t.send_messages([{"method": "history_change", "puzzle_id": puzzle.shortname},
+                         {"method": "post_erratum", "title": puzzle.title}])
+        await t.flush_messages()
     login.AdminUser.send_messages([{"method": "update", "puzzle_id": puzzle.shortname}])
     await login.AdminUser.flush_messages()
 
