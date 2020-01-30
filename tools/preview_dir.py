@@ -7,7 +7,7 @@ import os
 import requests
 import zipfile
 
-BASIC_AUTH = b"Basic " + base64.b64encode(b"leftout:left13r")
+BASIC_AUTH = b"Basic " + base64.b64encode(b"leftout:")
 
 def main():
   parser = argparse.ArgumentParser(
