@@ -29,12 +29,13 @@ LANDS = {
   "space": Land("Spaceopolis", "/land/space"),
   "hollow": Land("Wizard's Hollow", "/land/hollow"),
   "balloons": Land("Balloon Vendor", "/land/balloons"),
-  "bigtop": Land("Big Top Circus", "/land/bigtop"),
+  "bigtop": Land("Big Top Carnival", "/land/bigtop"),
   "yesterday": Land("YesterdayLand", "/land/yesterday"),
   "studios": Land("Creative Pictures Studios", "/land/studios"),
   "safari": Land("Safari Adventure", "/land/safari"),
-  "cascade": Land("Cascade Bay", "/land/safari"),
+  "cascade": Land("Cascade Bay", "/land/cascade"),
   "canyon": Land("Cactus Canyon", "/land/canyon"),
+  "events": Land("Events", "/events"),
   }
 
 
@@ -52,9 +53,15 @@ class Puzzle:
   def init_templates(cls, template_dir):
     cls.loader = tornado.template.Loader(template_dir)
     cls.T_puzzle = cls.loader.load("puzzle.html")
+    cls.T_eventpuzzle = cls.loader.load("event-puzzle.html")
     cls.T_solution = cls.loader.load("solution.html")
+    cls.T_eventsolution = cls.loader.load("event-solution.html")
 
-  def __init__(self, zip_data, land, options, puzzle_dir, authors_dict, filename=None):
+  def __init__(self, zip_data, land, options, puzzle_dir, authors_dict, filename=None,
+               extras={}):
+    if extras:
+      print(extras)
+
     self.prefix = common.hash_name(zip_data)
     z = zipfile.ZipFile(io.BytesIO(zip_data))
     self.zip_version = filename
@@ -205,8 +212,12 @@ class Puzzle:
 
     if errors: raise PuzzleErrors(errors)
 
-    out_dir = os.path.join(puzzle_dir, shortname)
-    out_url = f"/puzzle/{shortname}"
+    if land == "events":
+      out_dir = os.path.join(puzzle_dir, "../events", shortname)
+      out_url = f"/events/{shortname}"
+    else:
+      out_dir = os.path.join(puzzle_dir, shortname)
+      out_url = f"/puzzle/{shortname}"
     os.makedirs(os.path.join(out_dir, "solution"), exist_ok=True)
     self.copy_assets(z, out_dir, out_url, strip_shortname)
 
@@ -244,25 +255,31 @@ class Puzzle:
     if errors: raise PuzzleErrors(errors)
 
     self.land = LANDS[land]
+    if land == "events":
+      css = "/default.css"
+      Tp = self.T_eventpuzzle
+      Ts = self.T_eventsolution
+    else:
+      css = f"/land/{land}/land.css"
+      Tp = self.T_puzzle
+      Ts = self.T_solution
 
     with open(f"{out_dir}/solution/index.html", "wb") as f:
-      html = self.T_solution.generate(puzzle=self,
-                                      css=["/static.css",
-                                           f"/land/{land}/land.css"],
-                                      script="", json_data="",
-                                      solution_url="",
-                                      supertitle="",
-                                      authors=authors_text)
+      html = Ts.generate(puzzle=self,
+                         css=["/static.css", css],
+                         script="", json_data="",
+                         solution_url="",
+                         supertitle=extras.get("supertitle", ""),
+                         authors=authors_text)
       f.write(html)
 
     with open(f"{out_dir}/index.html", "wb") as f:
-      html = self.T_puzzle.generate(puzzle=self,
-                                    css=["/static.css",
-                                         f"/land/{land}/land.css"],
-                                    script="", json_data="",
-                                    solution_url="",
-                                    supertitle="",
-                                    authors="")
+      html = Tp.generate(puzzle=self,
+                         css=["/static.css", css],
+                         script="", json_data="",
+                         solution_url="",
+                         supertitle=extras.get("supertitle", ""),
+                         authors="")
       f.write(html)
 
 
@@ -375,6 +392,8 @@ def main():
       if not fn.endswith(".zip"): continue
       all_puzzles[fn.split(".", 1)[0]] = os.path.join(pd, fn)
 
+    extras = {}
+
     with open(options.config) as f:
       cfg = yaml.safe_load(f.read())
       for n, d in cfg.items():
@@ -387,15 +406,37 @@ def main():
           if p not in authors:
             missing_authors.append(p)
             continue
-          options.input_files.append(f"{n}:{all_puzzles[p]}")
+          fn = f"{n}:{all_puzzles[p]}"
+          options.input_files.append(fn)
+          if "headerimage" in dd:
+            h = dd["headerimage"]
+            extras[all_puzzles[p]] = {"supertitle": f'<img src="/land/space/{h}"><br>'}
+
+  responses = {}
 
   for zipfn in options.input_files:
     land, zipfn = zipfn.split(":", 1)
     with open(zipfn, "rb") as f:
       zip_data = f.read()
       try:
-        p = Puzzle(zip_data, land, options, puzzle_dir, authors, filename=os.path.basename(zipfn))
-        #p.save(puzzle_dir)
+        p = Puzzle(zip_data, land, options, puzzle_dir, authors, filename=os.path.basename(zipfn),
+                   extras=extras.get(zipfn, {}))
+        r = dict(((a, "Correct!") for a in p.answers))
+        a = p.answers[0]
+        for k, v in p.responses.items():
+          if k in r:
+            continue
+          elif v is None:
+            continue
+          elif v is True:
+            r[k] = f"Correct! (Acceptable alternative to {p.answers[0]}.)"
+          elif isinstance(v, str):
+            r[k] = v
+          elif isinstance(v, dict) and "reply" in v:
+            r[k] = v["reply"]
+          else:
+            print(k, v)
+        responses[p.shortname] = r
       except PuzzleErrors as e:
         print(f"{zipfn} had {len(e.errors)} error(s):")
         for i, err in enumerate(e.errors):
@@ -404,6 +445,8 @@ def main():
   if missing_authors:
     print(f"missing authors: {', '.join(missing_authors)}")
 
+  with open("all-responses.js", "w") as f:
+    json.dump(responses, f)
 
 if __name__ == "__main__":
   main()

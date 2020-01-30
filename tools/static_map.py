@@ -5,13 +5,21 @@ import os
 import sys
 import yaml
 from collections import namedtuple
+import string
 import tornado.template
 import zipfile
 
 from PIL import Image
 
+def make_sortkey(s):
+  s = [k for k in s.lower() if k in string.ascii_lowercase + " "]
+  s = "".join(s).split()
+  while len(s) > 1 and s[0] in ("the", "a", "an"):
+    s.pop(0)
+  return "".join(s)
+
 Area = namedtuple("Area", ["poly", "target"])
-Text = namedtuple("Text", ["title", "xywh", "target"])
+Text = namedtuple("Text", ["title", "xywh", "target", "sortkey"])
 
 parser = argparse.ArgumentParser(description="Make a static map.")
 parser.add_argument("--land")
@@ -19,6 +27,7 @@ parser.add_argument("--config")
 parser.add_argument("--base_image", default=None)
 parser.add_argument("--yaml_file", default=None)
 parser.add_argument("--puzzle_dir", default=None)
+parser.add_argument("--all_puzzles", default=None)
 
 options = parser.parse_args()
 
@@ -35,14 +44,23 @@ input_base = os.path.dirname(options.base_image)
 if options.yaml_file is None:
   options.yaml_file = f"bts_src/assets/{land}/land.yaml"
 css_file = f"bts_src/assets/{land}/land.css"
+
 if options.puzzle_dir is None:
   options.puzzle_dir = os.path.join(os.getenv("HUNT2020_BASE"), "bts_src/puzzles")
+if options.all_puzzles is None:
+  options.all_puzzles = os.path.join(os.getenv("HUNT2020_BASE"), "bts/all_puzzles.yaml")
 
 with open(options.config) as f:
   cfg = yaml.safe_load(f.read())[land]
 
 with open(options.yaml_file) as f:
   y = yaml.safe_load(f.read())
+
+try:
+  with open(options.all_puzzles) as f:
+    all_puzzles = yaml.safe_load(f.read())
+except FileNotFoundError:
+  all_puzzles = {}
 
 im = Image.open(options.base_image).convert("RGBA")
 
@@ -99,6 +117,8 @@ for n, d in y["icons"].items():
   im.paste(icon, tuple(i["pos"]), mask=icon)
 
   shortname = cfg["assignments"][n]["puzzle"]
+  meta = cfg["assignments"][n].get("meta")
+
   areas.append(Area(i["poly"], f"/puzzle/{shortname}"))
 
   t = get_puzzle_title(shortname)
@@ -106,16 +126,32 @@ for n, d in y["icons"].items():
   if len(offsets) == 2:
     offsets.append(0)
 
+  if meta:
+    sortkey = (0, make_sortkey(t))
+  elif n in cfg.get("additional_order", ()) or cfg["assignments"][n].get("submeta"):
+    sortkey = (1, make_sortkey(t))
+  else:
+    sortkey = (10, make_sortkey(t))
+
   x, y = i["pos"]
   w, h = i["size"]
   texts.append(Text(t, (x+offsets[0], y+offsets[1], w+offsets[2], h),
-                    f"/puzzle/{shortname}"))
+                    f"/puzzle/{shortname}", sortkey))
 
+texts.sort(key=lambda t: t.sortkey)
+
+ap = []
+all_puzzles[land] = ap
+for t in texts:
+  ap.append([t.title, t.target, t.sortkey[0]])
 
 im.save(os.path.join(basedir, "map.png"))
 
 with open(os.path.join(basedir, "index.html"), "wb") as f:
   f.write(map_template.generate(**td))
+
+with open(options.all_puzzles, "w") as f:
+  f.write(yaml.dump(all_puzzles))
 
 
 

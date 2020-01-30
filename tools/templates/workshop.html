@@ -1,0 +1,126 @@
+{% extends "static_base.html" %}
+
+{% block title %}Workshop{% end %}
+
+{% block topnav_extraright %}
+<div id="static-checker" style="visibility: hidden">
+  <input type="text" id="static-checker-guess">
+  <span id="static-checker-button"></span>
+</div>
+<a id="solution" href="solution/">Solution</a>
+{% end %}
+
+{% block head %}
+<script src="/static-checker.js"></script>
+{% end %}
+
+{% block content %}
+<div id="content">
+  <h1 id="pagetitle">Workshop</h1>
+  <div id="text">
+     <p>
+      After teams solved their first meta puzzle, they received a visit from two of the Loonie Toonies informing them that they now had access to the Tinkerer's Workshop and instructing them to send two team members to speak to the Tinkerer.</p>
+
+    <p>Upon arriving at the Tinkerer's Workshop, they had the opportunity to use our pressed penny machines (custom made by Ben de Bivort and Ofer Mazor!) to create a celebratory penny to commemorate their achievements. Inner lands generated one penny a piece; outer lands generated two.  Solving all the Events generated an additional penny. Each penny came attached to a card to commemorate the land that they celebrated.
+    </p>
+    <center>
+    <table>
+      <tr><td colspan="2" align=center><img src=tinkerer.jpg height=400></td></tr>
+      <tr><td colspan="2" align=center><i>The Tinkerer and his assistant</i></td></tr>
+      <tr align=center> <td><img src=penny_machines.jpg height=350></td>
+      <td><img src=penny_machine_closeup.jpg height=350></td></tr>
+      <tr align=center><td><i>A row of penny presses</i></td>
+        <td><i>Closeup view of the penny rollers</i></tr>
+      <tr align=center>
+        <td><img src=penny_pressing.jpg height=350></td>
+        <td><img src=penny.jpg height=350></td></tr>
+      <tr align=center> <td><i>Penny pressing in progress</i></td>
+      <td><i>A completed penny</i></td></tr>
+    </table>
+  </center>
+
+<p>You can find images of all the pennies and the accompanying text for each penny below:</p>
+
+    <h3>The Grand Castle</h3>
+    <p>Few know that Penny’s Castle was originally meant to be a temporary structure. But as the park grew, patrons relied on it to help them navigate the sprawling grounds. At the front of the castle, you can pretend to be someone else by dressing up as a royal guard or court jester!</p>
+
+    <center><img src=SVG/castle_penny.svg width=100></center>
+
+    <h3>Storybook Forest</h3>
+    <p>Storybook Forest is a great place to discover new stories. As the first world inside the main gates, patrons often head here immediately after landing in the park. Something amazing is guaranteed to happen here, and newspapers will often cover it!</p>
+
+    <center><img src=SVG/story_penny.svg width=100></center>
+
+  	<h3>Spaceopolis</h3>
+    <p>Commuting to work, driving in traffic—these things keep you tired all the time. Take a trip to the cosmos in Spaceopolis, where we believe rides should be exciting! Climb into our molded plastic PeoplePods and get ready for the journey of a lifetime.</p>
+
+  	<center><img src=SVG/space_penny.svg width=100></center>
+
+    <h3>Wizard's Hollow</h3>
+    <p>Zippy is one word that comes to mind when describing our quick-service Wizard's Hollow gift shop. Buy kits to perform tricks like the Disappearing Coin or The Ol’ Switcheroo. Or pick up some branded apparel: everyday wizards wear hoodies and caps, while a high-ranking one wears ornate robes.</p>
+
+    <center><img src=SVG/wizard_penny.svg width=100></center>
+
+    <h3>Balloon Vendor</h3>
+    <p>Congratulations on achieving your Harvard Ballooniversity diploma—you’ll need it to move forward in life. Now that you’ve been shaped and hardened by our rigorous curriculum, you’re ready to take on any challenge. Gather any supplies you need, like some notebooks and pencils, and head out into the world!</p>
+
+    <center><img src=SVG/balloon_penny.svg width=100></center>
+
+    <h3>YesterdayLand</h3>
+    <p>Good old-fashioned decorum is YesterdayLand’s secret way into guests’ hearts. Each park visitor receives a thank-you gift that includes a handwritten note on park letterhead. It’s really a very sweet package.</p>
+
+    <center><img src=SVG/yesterday_penny.svg width=100></center>
+
+    <h3>Big Top Carnival</h3>
+    <p>Come one, come all, because the Big Top has something for everyone: a ride that gives you an exciting experience, and one that gives you a relaxing experience! No matter what it's like outside, you can stay nice and dry in this one-of-a-kind circus tent. It's totally safe ... we haven't had a technical failure in over 20 years!</p>
+
+    <center><img src=SVG/bigtop_penny.svg width=100></center>
+
+    <h3>Creative Pictures Studios 1</h3>
+    <p>Coming attractions: The Wreck-It Ralph Arcade, where you can spend all your quarters. And The Director's Eye, where you can get a shot set up and then film it. But watch out for agents—one may get in your face with an overly aggressive pitch for a script!</p>
+
+    <center><img src=SVG/movie1_penny.svg width=100></center>
+
+    <h3>Creative Pictures Studios 2</h3>
+    <p>If you’re a prospective filmmaker, the Creative Pictures Institute is something that can help you with your aspirations. This new initiative within the studio welcomes students from every corner of the globe. Learn how to leave a lasting mark in the film world!
+</p>
+
+    <center><img src=SVG/movie2_penny.svg width=100></center>
+
+    <h3>Safari Adventure 1</h3>
+    <p>Now that Safari Adventure is open, it’s poised to make a splash in the animal tourism scene. You'll feel it in your heart as you ride among some of the most amazing animals on the planet. Guests who stay in the Safari Lodge can even hear the dramatic sounds of roars, howls, and bellows from the comfort of their rooms.</p>
+
+    <center><img src=SVG/safari1_penny.svg width=100></center>
+          <h3>Safari Adventure 2</h3>
+    <p>Safari Adventure isn’t just a zoo; it’s a full-fledged entertainment center. There's something to offer for all groups of people from kids to old-timers. You’ll find that closing time is the only reason to leave the area!</p>
+
+    <center><img src=SVG/safari2_penny.svg width=100></center>
+
+    <h3>Cascade Bay 1</h3>
+    <p>Whether you like things mild or wild, Cascade Bay Water Park is the best place to find a ride that suits your tastes. That's why it's always filled with squeals, shrieks, and screams! It’s the primary conduit for fun and entertainment!</p>
+
+  	<center><img src=SVG/cascade1_penny.svg width=100></center>
+
+  	<h3>Cascade Bay 2</h3>
+    <p>Catch some majestic air in the Soarin’ Splasher, the next ride to debut in Cascade Bay. With space for one passenger, each pod takes its rider 100 feet up ... then 150 feet down! Since each ride lasts just 5 seconds, the real feat is how much it runs each day.</p>
+
+  	<center><img src=SVG/cascade2_penny.svg width=100></center>
+
+    <h3>Cactus Canyon 1</h3>
+    <p>Cactus Canyon’s length at its widest point is a full 200 furlongs. The gold mine at its heart was once quite a lucrative enterprise! It was an astonishing turn when the mine ran dry; that's when it was turned into a theme park.</p>
+
+  	<center><img src=SVG/cactus1_penny.svg width=100></center>
+
+    <h3>Cactus Canyon 2</h3>
+    <p>Be sure to catch the High Noon Shootout and Aquatic Stunt show, filled with action and danger. Or visit the Ol' Gulch Tavern, where a brawl is staged each night. You can visit our vintage photo booth and get a picture of yourself working a quaint, old-timey job.</p>
+
+  	<center><img src=SVG/cactus2_penny.svg width=100></center>
+
+    <h3>Penny Park Special Events </h3>
+    <p>Park patrons love to eat the yummy food at our world-famous Character Breakfast. It's a great place to meet a costumed mascot, a member of the royal family, or other Penny Park characters. We have three goals: fun, fun, and FUN!</p>
+
+    <center><img src=SVG/events_penny.svg width=100></center>
+  </div>
+</div>
+{% end %}
+

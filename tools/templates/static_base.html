@@ -15,8 +15,20 @@
   <body>
     <div id="topnav">
       {% block topnav_startedleft %}
-      <a href="/"><img src="" style="margin-top: 4px;"></a>
-      <span id="landtags"></span>
+      <a href="/"><img src="/logo-nav.png" style="margin-top: 4px;"></a>
+      <span id="landtags">
+        <a class="landtag" href="/land/castle/" style="background-color:#9bbed5">GC</a>
+        <a class="landtag" href="/land/forest/" style="position: relative; background-color:#525138">SF</a>
+        <a class="landtag" href="/land/space/" style="background-color:#450069">Sp</a>
+        <a class="landtag" href="/land/hollow/" style="background-color:#867e89">WH</a>
+        <a class="landtag" href="/land/balloons/" style="background-color:#853157">BV</a>
+        <a class="landtag" href="/land/yesterday/" style="background-color:#1e9c9b">YL</a>
+        <a class="landtag" href="/land/bigtop/" style="background-color:#b44242">BT</a>
+        <a class="landtag" href="/land/studios/" style="background-color:#cd9b56">CP</a>
+        <a class="landtag" href="/land/safari/" style="background-color:#76893a">SA</a>
+        <a class="landtag" href="/land/cascade/" style="background-color:#2cd2db">CB</a>
+        <a class="landtag" href="/land/canyon/" style="background-color:#ee8222">CC</a>
+      </span>
       {% end %}
       {% block topnav_extraleft %}{% end %}
       <span class="spacer"></span>
@@ -35,7 +47,9 @@
           <a href="/events">Events</a>
           <a href="/sponsors">Sponsors</a>
           <a href="/health_and_safety">Health &amp; Safety</a>
-          <a href="/logout">Logout</a>
+          <hr>
+          <a href="/credits">Credits</a>
+          <a href="/statistics">Statistics</a>
         </div>
       </div>
       {% end %}

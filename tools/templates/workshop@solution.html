@@ -1,0 +1,252 @@
+{% extends "static_base.html" %}
+
+{% block title %}Workshop{% end %}
+
+{% block topnav_extraright %}
+<a href="..">Back to puzzle</a>
+{% end %}
+
+{% block content %}
+<div id="content">
+  <h1 id="pagetitle">Workshop</h1>
+  <div id="text">
+<p>
+  Each pressed penny has some little images with arrowhead-like triangles indicating direction.
+  Each image represents a word that, when paired with a new word, forms a compound word or phrase.
+  For example, an image of RAIN leads to RAIN COAT, and an image of a FISH leads to CAT
+  FISH. Each compound word is clued within one of the sentences in the blurb on the card
+  that accompanied that coin. Teams paired up these new words such that one word was a letter
+  deletion of the other, <i>e.g.</i>, COAT and CAT.
+</p>
+
+<style>
+  #pennydata td, #pennydata th { border-top: 1px solid gray; vertical-align: top; padding: 0.25em; }
+</style>
+
+  <table id=pennydata>
+    <tr>
+      <td style="text-align: center;"> Card Text with <b>Clues Bolded</b> <th> Compound <th> Compound <th> Compound
+    <tr>
+      <td>
+	<h3>The Grand Castle</h3>
+
+	<p>Few know that Penny’s Castle was originally meant to be a
+	  <b>temporary structure</b>.
+	  But as the park grew, patrons
+	  <b>relied on it to help them navigate</b>
+	  the sprawling grounds.
+	  At the front of the castle, you can
+	  <b>pretend to be someone else</b>
+	  by dressing up as a royal guard or court jester!</td>
+      <td> SAND CASTLE <td> STAR CHART <td> CATFISH
+   <tr>
+     <td>
+    <h3>Storybook Forest</h3>
+    <p>
+      Storybook Forest is <b>a great place to discover new stories</b>.
+      As the first world inside the main gates,
+      <b>patrons often head here immediately after landing</b>
+      in the park.
+      Something amazing is guaranteed to happen here and
+      <b>newspapers will often cover it</b>! </td>
+  <td> BOOK FAIR <td> BAGGAGE CLAIM <td> BIRD CAGE
+  <tr>
+  <td>
+    <h3>Spaceopolis</h3>
+    <p>
+      Commuting to work, driving in
+      traffic—<b>these things keep you tired all the time</b>.
+      Take a
+      <b>trip to the cosmos</b>
+      in Spaceopolis, where we believe rides should be exciting!
+      Climb into our
+      <b>molded plastic</b>
+      PeoplePods and get ready for the journey of a lifetime.</td>
+  <td> LUG NUTS <td> SPACE FLIGHT <td> CLAMSHELL
+    <tr>
+    <td>
+    <h3>Wizard's Hollow</h3>
+    <p><b>Zippy is one</b>
+      word that comes to mind when describing our quick-service Wizard's Hollow gift shop.
+      Buy kits to perform tricks like the Disappearing Coin or
+      <b>The Ol’ Switcheroo</b>.
+      Or pick up some branded apparel: everyday wizards wear hoodies and caps, while
+      <b>a high-ranking one wears ornate robes</b>. </td>
+  <td> PINHEAD <td> RICKROLL <td> ARCHANGEL
+  <tr>
+  <td>
+    <h3>Balloon Vendor</h3>
+    <p>Congratulations on achieving your Harvard Ballooniversity
+      diploma—<b>you’ll need it to move forward</b>
+      in life. Now that you’ve been
+      <b>shaped and hardened</b>
+      by our rigorous curriculum, you’re ready to take on any challenge.
+      Gather any supplies you need,
+      <b>like some notebooks</b>
+      and pencils, and head out into the world!</td>
+  <td> BICYCLE CHAIN <td> DIE CAST <td> SPIRAL BOUND
+    <tr>
+    <td>
+    <h3>YesterdayLand</h3>
+    <p>
+      Good old-fashioned decorum is YesterdayLand’s
+      <b>secret way</b>
+      into guests’ hearts.
+      Each park visitor receives a thank-you gift including a handwritten note on park
+      <b>letterhead</b>.
+      It’s really a very <b>sweet package</b>.</td>
+  <td> BACKDOOR <td> BOND PAPER <td> HONEY BEAR
+  <tr>
+  <td>
+    <h3>Big Top Carnival</h3>
+    <p>
+      Come one, come all, because the Big Top has something for everyone:
+      A ride that gives you an exciting experience, and
+      <b>one that gives you a relaxing experience</b>!
+      No matter what it's like outside,
+      <b>you can stay nice and dry in this</b>
+      one-of-a-kind circus tent. It's totally safe&hellip; we haven't had a
+      <b>technical failure</b> in over 20 years!</td>
+  <td> ARMCHAIR <td> RAIN COAT <td> COMPUTER CRASH
+  <tr>
+
+
+  <td>
+    <h3>Creative Pictures Studio 1</h3>
+    <p>
+      Coming attractions: The Wreck-It Ralph Arcade,
+      <b>where you can spend all your quarters</b>.
+      And The Director's Eye,
+      <b>where you can get a shot set up</b>
+      and then film it.
+      But watch out for agents—one may get in your face with
+      <b>an overly aggressive pitch</b>
+      for a script! </td>
+  <td> PAY PHONE <td> BARSTOOL <td> CHIN MUSIC
+  <tr>
+  <td>
+    <h3>Creative Pictures Studio 2</h3>
+    <p>
+      If you’re a prospective filmmaker, the Creative Pictures Institute is
+      <b>something that can help you with your aspirations</b>.
+      This new initiative within the studio welcomes students from every
+      <b>corner of the globe</b>.
+      Learn how to leave a
+      <b>lasting mark</b>
+      in the film world! </td>
+  <td> IRON LUNG <td> FAR EAST <td> SCAR TISSUE
+  <tr>
+   <td>
+    <h3>Safari Adventure 1</h3>
+    <p>
+      Now that Safari Adventure is open,
+      <b>it’s poised to make a splash in the animal tourism scene</b>.
+      <b>You'll feel it in your heart</b>
+      as you ride among some of the most amazing animals on the planet.
+      Guests who stay in the Safari Lodge can even hear the
+      <b>dramatic sounds</b>
+      of roars, howls, and bellows from the comfort of their rooms.</td>
+  <td> SEA LION <td> CHEST PAIN <td> RADIO PLAY
+  <tr>
+  <td>
+    <h3>Safari Adventure 2</h3>
+    <p>
+      Safari Adventure isn’t just a zoo; it’s a
+      <b>full-fledged entertainment center</b>.
+      There's something to offer for all
+      <b>groups of people from kids to old-timers</b>.
+      You’ll find that closing time is the only
+      <b>reason to leave the area</b>!</td>
+  <td> MAN CAVE <td> AGE BRACKETS <td> BOMB SCARE
+  <tr>
+  <td>
+    <h3>Cascade Bay 1</h3>
+    <p>
+      Whether you like things mild or wild, Cascade Bay Water Park is the best
+      <b>place to find a ride</b>
+      that suits your tastes. That's why
+      <b>it's always filled with squeals</b>,
+      shrieks, and screams! It’s the
+      <b>primary conduit</b> for fun and entertainment!</td>
+  <td> TAXI STAND <td> PIG FARM <td> WATER MAIN
+  <tr>
+  <td>
+    <h3>Cascade Bay 2</h3>
+    <p>
+      Catch
+      <b>some majestic air</b>
+      in the Soarin’ Splasher, the next ride to debut in Cascade Bay Water Park.
+      With
+      <b>space for one passenger</b>,
+      each pod takes its rider 100 feet up . . . then 150 feet down!
+      Since each ride lasts just 5 seconds, the real feat is
+      <b>how much it runs each day</b>.</td>
+  <td> WEDDING MARCH <td> BUCKET SEAT <td> PRICE TAG
+  <tr>
+
+      <td>
+    <h3>Cactus Canyon 1</h3>
+    <p>
+      Cactus Canyon’s
+      <b>length at its widest point</b>
+      is a full 20 acres.
+      The gold mine at its heart was once a
+      <b>quite lucrative enterprise</b>!
+      It was
+      <b>an astonishing turn</b>
+      when the mine ran dry;
+      that's when it was turned into a theme park. </td>
+  <td> WINGSPAN <td> CASH COW <td> CARTWHEEL
+  <tr>
+  <td>
+    <h3>Cactus Canyon 2</h3>
+
+    <p>
+      Be sure to catch the High Noon Shootout and
+      <b>Aquatic Stunt show</b>,
+      filled with action and danger.
+      Or visit the Ol' Gulch Tavern,
+      <b>where a brawl is staged</b>
+      each night.
+      You can visit our vintage photo booth and get a picture of yourself working
+      <b>a quaint, old-timey job</b>.</td>
+  <td> SWAN DIVE <td> FIGHT CLUB <td> BOOTBLACK
+  <tr>
+    <td>
+    <h3>Penny Park Special Events</h3>
+    <p>
+      Park patrons love to eat the yummy
+      <b>food at our world-famous Character Breakfast</b>.
+      It's a great place to meet a costumed mascot,
+      <b>a member of the royal family</b>,
+      or other Penny Park characters.
+      We have
+      <b>three goals</b>:
+      fun, fun, and FUN!</td>
+  <td> PANCAKE <td> HAT TRICK <td> CROWN PRINCE
+</table>
+
+
+<p>
+  Each image had a direction-triangle by it. A team could lay out their pressed pennies so
+  that paired images' triangles pointed at each other. The layout had the additional
+  constraint that, read from left to right, the extra-letter compound word's image is to the
+  left of the no-extra-letter compound word's image. For example, for the pair
+  PIG <b>F</b>ARM, ARM CHAIR, the pig is to the left of the chair.
+  For vertically-aligned images (that is, with no left-to-right orientation), that rule
+  applies reading from top to bottom. E.g., for the RAIN C<b>O</b>AT, CAT FISH pair, the
+  rain is above the fish.
+
+<center>
+<p>
+  <a href="assembled.jpg"><img src="assembled.jpg" alt="[completed layout]" style="max-width: 50%;"></a>
+</center>
+
+<p>
+When the pennies are laid out in a grid, and the added/deleted letters are placed between
+the compound words they’re derived from, those letters form the message FOR THIS CENT I
+MINT ALL VALUE.
+  </div>
+</div>
+{% end %}
+

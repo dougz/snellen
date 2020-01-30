@@ -1,0 +1,21 @@
+# only lowercase, number, _ (no spaces)
+shortname: heart_of_the_park
+
+# Display version of title. No HTML <tags>
+title: Heart of the Park
+
+#  Who to call in emergency. Make sure you're in roster!
+oncall: jan.chong@gmail.com
+authors: [Todd Etter, Linda Holman, Benjamin L de Bivort, Mike Springer, James E Griffith, David Tytell]
+
+# in http://ptron.../puzzle.php?pid=2 , the 2
+puzzletron_id: 2222
+
+
+# (For Safari-round multi-answer puzzles, could be more than one)
+answers:
+ - FINGERPAINTS
+
+for_ops_url: https://docs.google.com/document/d/1HWKcHBb_m2X_Fst4esqRdVBuMyi1MVyRDKkkhCI5O58/edit
+
+

@@ -1,0 +1,89 @@
+{% extends "static_base.html" %}
+
+{% block title %}About the Park{% end %}
+
+
+{% block content %}
+<div id="content" class="AboutTheParkPage">
+  <h1 id="pagetitle">About the Park</h1>
+  <p class="disclaimer">This is not a puzzle.</p>
+
+  <p>Founded in 1992, Penny Park has delighted countless visitors for
+  almost three decades.  Whether you're a thrill-seeking kid or simply
+  young at heart, at Penny Park we guarantee you'll have a glorious
+    day!</p>
+
+  <p>A highlight of everyone’s day is the celebratory opening of Penny
+    Park. Here is a promotional video from 1993 showing this magical
+    moment.</p>
+
+  <div>
+    <iframe width="640" height="360" src="https://www.youtube.com/embed/VfLRJ2hgoxk" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+  </div>
+
+  <div><img src="{{static_content['judy.png']}}" style="float: right;">
+    <h3>Judy Miller<br>Founder of Penny Park</h3>
+    <p>A long-time lover of theme parks, Judy designed and built this
+      magical place in 1992, naming it after her granddaughter
+      Penny.</p>
+  </div>
+
+  <div><img src="{{static_content['penny.png']}}" style="float: right;">
+    <h3>Penny Miller<br>Owner & Manager of Penny Park</h3>
+    <p>For the last several years, Penny has run the show at the park.
+      She is thrilled to be continuing the family tradition of bringing
+      joy and wonder to people of all ages!</p>
+  </div>
+
+  <h2 class="c">The Loonie Toonies</h2>
+
+  <p>A Penny Park tradition, the Loonie Toonies are the lovable mascots of
+  the park and can often be seen strolling around the grounds.  If you
+  see one, feel free to say hi!</p>
+
+  <div id="loonies">
+    <div class="loony">
+      <img src="{{static_content['jeon_paisa.png']}}">
+      <p>King Jeon & Queen Paisa</p>
+    </div>
+    <div class="loony">
+      <img src="{{static_content['kobo.png']}}">
+      <p>Kobo the Big Bad Wolf</p>
+    </div>
+    <div class="loony">
+      <img src="{{static_content['centime.png']}}">
+      <p>Centime the Flapper</p>
+    </div>
+  </div>
+  <div id="loonies">
+    <div class="loony">
+      <img src="{{static_content['kopek.png']}}">
+      <p>Kopek the Clown</p>
+    </div>
+    <div class="loony">
+      <img src="{{static_content['luma.png']}}">
+      <p>Luma the Astronaut</p>
+    </div>
+    <div class="loony">
+      <img src="{{static_content['dirham.png']}}">
+      <p>Dirham the Wizard</p>
+    </div>
+
+  </div>
+
+  <a name="history">
+  <h2 class="c" id="history">Park History</h2>
+
+  <p>Our historians have recently discovered (and are in the process
+  of digitizing) old videos showing the history of Penny Park and its
+  owners.  Be on the lookout for more updates as we continue this
+  process!</p>
+
+  <div id="videolist">
+    {% for i, u in enumerate(videos) %}
+    <h3>Video {{i+1}}</h3>
+    <iframe width="854" height="470" src="{{u}}?rel=0" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    {% end %}
+  </div>
+</div>
+{% end %}

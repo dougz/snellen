@@ -1,0 +1,37 @@
+{% extends "static_base.html" %}
+
+{% block title %}Statistics{% end %}
+
+
+{% block content %}
+<div id="content">
+  <h1 id="pagetitle">Statistics</h1>
+  <p class="disclaimer">This is not a puzzle.</p>
+
+  <a href="/assets/progress.png"><img src="/assets/progress-small.png" style="display: block; margin-left: auto; margin-right: auto;"></a>
+
+  <h2>Solve data</h2>
+
+  <p>Here is a <a href="submit_log.csv">CSV file of all submissions</a> during the hunt.  The "result" column indicates what event this is recording:
+    <ul>
+      <li><b>open</b> is when the puzzle was unlocked for this team.  (The "input" and "canonical" fields will be empty.)</li>
+      <li><b>incorrect</b> is when an incorrect answer was submitted.</li>
+      <li><b>correct</b> means a correct answer for the puzzle was submitted.</li>
+      <li><b>requested</b> means the submission triggered some reaction on the server (eg, a delivery or phone call from Guest Services)</li>
+      <li><b>solved</b> means the puzzle was solved.  Note that for Safari Adventure puzzles with multiple answers, the puzzle only becomes "solved" once <i>all</i> the answers have been submitted.</li>
+
+      <li><b>queued</b> means the submission ran up against the
+      anti-spamming limits and was delayed.  Every queued submission
+      should be followed by a later <b>canceled</b> record (if the
+      team canceled the guess before the timer ran out), or
+      a <b>correct</b>, <b>incorrect</b>, or <b>requested</b> record,
+      if the submission was actually checked.  The time of checking is
+      what counts as the final submission time.</li>
+
+      <li><b>canceled</b> means the submission was queued and canceled
+        by the team before it was checked.</li>
+    </ul>
+
+
+</div>
+{% end %}

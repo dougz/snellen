@@ -21,10 +21,11 @@
 
 
 {% block content %}
-<a href="{{puzzle.land.url}}"><h1 id="landtitle">{{puzzle.land.title}}</h1></a>
 
 <div id="content">
-  <h2 id="puzzletitle"><div id=vspace></div>{% raw supertitle %}{{puzzle.title}}</h2>
+
+  <h2 id="puzzletitle"><div id=vspace></div>{% raw supertitle %}<a href="../..">Events:</a> {{puzzle.title}}</h2>
+
   <p class=solutionheader>{{authors}}<br>
     Answer{% if len(puzzle.answers) > 1 %}s{% end %}: {{", ".join(puzzle.answers)}}
     </p>

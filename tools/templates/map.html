@@ -20,8 +20,12 @@
   </map>
 
   <ul id="maplist">
+    {% set lk = None %}
     {% for t in texts %}
-    <li><a href="{{t.target}}">{{t.title}}</li>
+    {% if t.sortkey[0] != 3 %}
+    <li{% if lk is not None and t.sortkey[0] != lk %} class="spacebefore"{% end %}><a href="{{t.target}}">{{t.title}}</li>
+    {% set lk = t.sortkey[0] %}
+    {% end %}
     {% end %}
   </ul>
 

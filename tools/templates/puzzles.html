@@ -1,0 +1,41 @@
+{% extends "static_base.html" %}
+
+{% block title %}List of Puzzles{% end %}
+
+{% block content %}
+<div id="content">
+  <h1 id="pagetitle">List of Puzzles</h1>
+  <p class="disclaimer">This is not a puzzle.</p>
+
+  <ul id="loplist">
+    <li><a href="/">Penny Park</a>
+      <ul>
+        <li class="spacebefore"><a href="/events">Events</a>
+          <ul>
+            <li><a href="/events/midway">The Midway</a></li>
+            <li><a href="/events/character_breakfast">Supporting Character Breakfast</a></li>
+            <li><a href="/events/build_a_wand">Build-a-Wand Workshop</a></li>
+            <li><a href="/events/robot_parade">Infinite Robot Parade</a></li>
+            <li><a href="/events/fireworks">Fireworks Show</a></li>
+          </ul>
+        </li>
+        <li class="spacebefore"><a href="/workshop">Workshop</a></li>
+        <li><a href="/heart_of_the_park">Heart of the Park</a></li>
+      </ul>
+    </li>
+
+    {% for land in "castle forest space hollow balloons yesterday bigtop studios safari cascade canyon".split() %}
+    <li><a href="/land/{{land}}">{{landnames[land]}}</a>
+      <ul>
+        {% set lk = None %}
+        {% for t in all_puzzles[land] %}
+        <li{% if lk is None or t[2] != lk %} class="spacebefore"{% end %}><a href="{{t[1]}}">{{t[0]}}</a></li>
+        {% set lk = t[2] %}
+        {% end %}
+      </ul>
+    </li>
+    {% end %}
+  </ul>
+
+</div>
+{% end %}

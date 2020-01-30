@@ -5,13 +5,21 @@ import os
 import sys
 import yaml
 from collections import namedtuple
+import string
 import tornado.template
 import zipfile
 
 from PIL import Image
 
+def make_sortkey(s):
+  s = [k for k in s.lower() if k in string.ascii_lowercase + " "]
+  s = "".join(s).split()
+  while len(s) > 1 and s[0] in ("the", "a", "an"):
+    s.pop(0)
+  return "".join(s)
+
 Area = namedtuple("Area", ["poly", "target"])
-Text = namedtuple("Text", ["title", "xywh", "target"])
+Text = namedtuple("Text", ["title", "xywh", "target", "sortkey"])
 
 parser = argparse.ArgumentParser(description="Make a static mainmap.")
 parser.add_argument("--config")
@@ -63,28 +71,46 @@ for n, d in y["icons"].items():
   i = d.get("image")
   if not i: continue
 
+  if n == "statue_open":
+    url = "/heart_of_the_park"
+  elif n == "workshop":
+    url = "/workshop"
+  elif n == "events":
+    url = "/events"
+  else:
+    url = f"/land/{n}"
+
   icon = Image.open(os.path.join(input_base, f"image_{n}.png")).convert("RGBA")
   im.paste(icon, tuple(i["pos"]), mask=icon)
 
-  areas.append(Area(i["poly"], f"/land/{n}"))
+  areas.append(Area(i["poly"], url))
 
   if n == "events":
     t = "Events"
+    sortkey = (3,)
   elif n == "workshop":
     t = "Workshop"
+    sortkey = (1,)
   elif n == "statue_open":
     t = "Heart of the Park"
+    sortkey = (0,)
   else:
     t = allcfg[n]["title"]
+    sortkey = (2, make_sortkey(t))
   offsets = cfg.get("offsets", {}).get(n, (0,0,0))
   if len(offsets) == 2:
     offsets.append(0)
 
   x, y = i["pos"]
   w, h = i["size"]
-  texts.append(Text(t, (x+offsets[0], y+offsets[1], w+offsets[2], h),
-                    f"/land/{n}"))
 
+  texts.append(Text(t, (x+offsets[0], y+offsets[1], w+offsets[2], h),
+                    url, sortkey))
+
+texts.sort(key=lambda t: t.sortkey)
+
+logo = Image.open(f"bts_src/assets/mainmap/cloud5.png").convert("RGBA")
+im.paste(logo, (0,0), mask=logo)
 
 im.save(os.path.join(basedir, "map.png"))
 

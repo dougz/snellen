@@ -1,0 +1,84 @@
+{% extends "static_base.html" %}
+
+{% block title %}Sponsors{% end %}
+
+{% block head %}
+<style>
+  li { margin-top: 8px; }
+  h3 { margin-block-end: calc(1em - 8px); }
+</style>
+{% end %}
+
+
+{% block content %}
+<div id="content">
+  <h1 id="pagetitle">Sponsors</h1>
+  <p class="disclaimer">This is not a puzzle.</p>
+
+  <p>Left Out and Puzzle Club would like to thank our sponsors and
+  partners for their support:</p>
+
+  <h2>Massachusetts Institute of Technology</h2>
+  <ul>
+    <li>MIT Large Events Fund</li>
+    <li>Association of Student Activities</li>
+    <li>Student Activities Office</li>
+    <li>Campus Activities Complex</li>
+    <li>Events and Information Center</li>
+    <li>ChemE Department, Physics Department, MIT Global Language Department (for use of their departmental classrooms)</li>
+    <li>Environment, Health & Safety Office</li>
+    <li>Campus Police</li>
+    <li>Office of Emergency Management and Business Continuity</li>
+    <li>MIT Medical</li>
+    <li>MIT-IS&T</li>
+    <li>MIT A/V Services</li>
+    <li>MIT Student Cable</li>
+    <li>MIT Facilities</li>
+  </ul>
+
+  <hr>
+
+  <div class="sponsor">
+    <img src="{{static_content['thinkfun.png']}}">
+    <p>For over 30 years, ThinkFun Inc. has been dedicated to creating games that spark curiosity, cultivate confidence, and nurture life-long learners. Its games encourage interest in Science, Technology, Engineering, and Math (STEM), while generating excitement for a world of learning through play. Innovation, creativity, value, and fun are the four elements that comprise the development of every game. Ignite the mind, and change the world for each player.</p>
+  </div>
+
+  <div class="sponsor">
+    <img src="{{static_content['gr8ergood.png']}}">
+    <p>Gr8er Good Games is on a mission to improve human connections through playful experiences such as scavenger hunts, murder mysteries, and escape games. We design bespoke birthday games, interesting brand activation events and corporate team-building activities for groups from 1 to 1000. We also recently launched our innovative remote team-building game, for distributed teams to connect and play together. Examples of games we've created:
+      <ul>
+        <li>A 7-course dinner escape game where teams must solve puzzles to unlock each course</li>
+        <li>A custom bollywood-style murder mystery with augmented reality and secret actors</li>
+        <li>A birthday scavenger hunt where the birthday person received a text message that their birthday present has been stolen and they must go to this store to ask for a clue and follow the puzzles to find the present</li>
+        <li>An escape game for remote teams, where each player is shipped a package of materials, puzzles, and locked pouches, and must work together on videochat to solve the clues.</li>
+      </ul>
+    </p>
+  </div>
+
+  <div class="sponsor">
+    <img src="{{static_content['cluekeeper.png']}}">
+    <p>ClueKeeper is a platform for creating and playing location-based clue hunts with features that include a wide variety of game structures, augmented reality by Zappar, and GPS-based location awareness. &nbsp;It is used in the annual DASH Puzzle Hunt as well as in self-guided hunts all over the world that you can play anytime.</p>
+  </div>
+
+  <div class="sponsor">
+    <img src="{{static_content['janestreet.png']}}">
+    <p>Jane Street is a quantitative trading firm that uses innovative technology, a scientific approach, and a deep understanding of markets to guide our business. We are a global liquidity provider and market maker, operating around the clock and around the globe, out of offices in New York, London, Hong Kong and Amsterdam. The markets change rapidly, and we need to change faster still. Every day, we come to work with new problems to solve, new systems to build and new theories to test.</p>
+  </div>
+
+  <div class="sponsor">
+    <img src="{{static_content['grandmaster.png']}}">
+    <p>Grandmaster Puzzles publishes elegant, hand-crafted logic
+    puzzles from some of the world's best puzzle constructors. A
+    Grandmaster Puzzle might stand out for its visual appearance
+    &mdash; amazing you as an apparent work of art doubles as a
+    puzzle. A Grandmaster Puzzle might stand out for its solving steps
+    &mdash; with a unique, logical path that makes you think you are
+    reading the constructor's mind as you unravel each new
+    layer. Above all, a Grandmaster Puzzle will stand out from the
+    other logic puzzles out there, treating your mind to countless
+    delights.</p>
+  </div>
+
+</div>
+
+{% end %}
